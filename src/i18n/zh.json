@@ -1,0 +1,7 @@
+{
+  "app.title": "skincare",
+  "app.tagline": "以成分为依据推荐护肤、头皮和头发产品，每一项评分都说明原因。",
+  "home.dataSummary": "已收录 {products} 个产品、{ingredients} 个成分（已核对 {verified} 个）。",
+  "home.wip": "v0.1 开发中：页面尚未完成。",
+  "lang.switch": "English"
+}

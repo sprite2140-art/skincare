@@ -1,0 +1,13 @@
+// 网页端数据入口：构建时直接导入 data/ 下的 CSV（单一数据源，不复制）。
+// 测试和脚本在 Node 里用 fs 读取同样的文件，不经过这里。
+
+import ingredientsCsv from '../../data/ingredients.csv?raw';
+import productsCsv from '../../data/products.csv?raw';
+import citiesCsv from '../../data/cities.csv?raw';
+import { parseCities, parseIngredients, parseProducts } from './parse';
+import { buildIngredientIndex } from './ingredientIndex';
+
+export const ingredients = parseIngredients(ingredientsCsv);
+export const products = parseProducts(productsCsv);
+export const cities = parseCities(citiesCsv);
+export const ingredientIndex = buildIngredientIndex(ingredients);

@@ -1,0 +1,7 @@
+{
+  "app.title": "skincare",
+  "app.tagline": "Ingredient-based recommendations for skin, scalp and hair products, with every score explained.",
+  "home.dataSummary": "{products} products and {ingredients} ingredients ({verified} verified).",
+  "home.wip": "v0.1 in development: pages are not ready yet.",
+  "lang.switch": "中文"
+}
