@@ -4,7 +4,8 @@ import { buildIngredientIndex } from '../data/ingredientIndex';
 import { validateData } from '../data/validate';
 import type { City, Ingredient, Product } from '../data/types';
 import { concernWeights, rankProducts, scoreProduct, weightedTotal, type ScoringProfile } from './score';
-import { budgetOptionLabel, currencyForCountry } from './price';
+import { currencyForCountry } from './price';
+import { budgetOptions, computeBudgetCaps, formatMoney, percentile } from './budget';
 
 const real = loadDataFromDisk();
 
@@ -15,7 +16,7 @@ const baseProfile: ScoringProfile = {
   specialStatus: 'none',
   avoidIngredients: [],
   avoidTags: [],
-  budgetUsd: null,
+  budget: 'none',
   washFrequency: null,
   city: null,
   inUseProducts: [],
@@ -26,7 +27,7 @@ const profile = (p: Partial<ScoringProfile>): ScoringProfile => ({ ...baseProfil
 
 describe('data/ 示例数据', () => {
   const index = buildIngredientIndex(real.ingredients);
-  const data = { index, exchangeRates: real.exchangeRates };
+  const data = { index, exchangeRates: real.exchangeRates, budgetCaps: {} };
   const sample = real.products.find((p) => p.productId === 'SH-US-000')!;
 
   it('CSV 能正确解析', () => {
@@ -104,7 +105,7 @@ const fixtureIngredients: Ingredient[] = [
   { ...fake('Test Draft Active', { category: 'active', targets: ['dandruff'], evidenceLevel: 'A' }), reviewStatus: 'draft' },
 ];
 const index = buildIngredientIndex(fixtureIngredients);
-const data = { index, exchangeRates: real.exchangeRates };
+const data = { index, exchangeRates: real.exchangeRates, budgetCaps: {} };
 
 const sample = real.products.find((p) => p.productId === 'SH-US-000')!;
 // 默认用免洗型品类，刺激风险不减半；需要冲洗型时显式传 category: 'shampoo'
@@ -306,49 +307,73 @@ describe('硬性过滤', () => {
   });
 });
 
-describe('单件预算上限（USD）', () => {
-  const item = (price: number, currency = 'USD') => product(`P-${price}-${currency}`, ['Aqua'], { price, currency });
-  const rate = (c: string) => real.exchangeRates.find((x) => x.currency === c)!.perUsd;
+describe('预算（按品类三分位，USD）', () => {
+  const item = (id: string, price: number, currency = 'USD', category = 'shampoo') =>
+    product(id, ['Aqua'], { category, price, currency });
+  // 洗发水 USD 价格 10 / 20 / 30 / 40：33% 分位 = 19.9，67% 分位 = 30.1
+  const catalog = [item('A', 10), item('B', 20), item('C', 30), item('D', 40)];
+  const caps = computeBudgetCaps(catalog, real.exchangeRates);
+  const withCaps = { ...data, budgetCaps: caps };
 
-  it('上限含等于：≤ 12 保留 12，排除 12.01', () => {
-    expect(scoreProduct(item(12), profile({ budgetUsd: 12 }), data).excluded).toBe(false);
-    const r = scoreProduct(item(12.01), profile({ budgetUsd: 12 }), data);
-    expect(r.exclusions.map((e) => e.code)).toEqual(['over_budget']);
-    expect(r.exclusions[0].text.zh).toBe('价格 12.01 USD，超出你的单件预算上限（12 USD）');
-    expect(scoreProduct(item(30), profile({ budgetUsd: 30 }), data).excluded).toBe(false);
-    expect(scoreProduct(item(30.01), profile({ budgetUsd: 30 }), data).excluded).toBe(true);
-    expect(scoreProduct(item(999), profile({ budgetUsd: null }), data).excluded).toBe(false);
+  it('分位数用线性插值', () => {
+    expect(percentile([10, 20, 30, 40], 0.33)).toBeCloseTo(19.9, 10);
+    expect(percentile([10, 20, 30, 40], 0.67)).toBeCloseTo(30.1, 10);
+    expect(percentile([5], 0.67)).toBe(5);
   });
 
-  it('其他币种按 H.10 汇率换算成 USD 比较，价格仍保留当地货币', () => {
-    // 3000 JPY ÷ 158.34 ≈ 18.95 USD
-    const jp = scoreProduct(item(3000, 'JPY'), profile({ budgetUsd: 12 }), data);
-    expect(jp.price.amount).toBe(3000);
-    expect(jp.price.currency).toBe('JPY');
-    expect(jp.price.usd).toBeCloseTo(3000 / 158.34, 6);
-    expect(jp.excluded).toBe(true);
-    expect(jp.exclusions[0].text.zh).toBe('价格 3000 JPY（约 18.95 USD），超出你的单件预算上限（12 USD）');
-    expect(scoreProduct(item(3000, 'JPY'), profile({ budgetUsd: 30 }), data).excluded).toBe(false);
-    // 80 CNY ÷ 6.692 ≈ 11.95 USD，在 12 以内
-    expect(scoreProduct(item(80, 'CNY'), profile({ budgetUsd: 12 }), data).excluded).toBe(false);
-    expect(rate('KRW')).toBe(1342.13);
+  it('按品类计算界线，其他币种先换算成 USD', () => {
+    expect(caps.shampoo).toEqual({ p33: expect.closeTo(19.9, 10), p67: expect.closeTo(30.1, 10), sampleSize: 4 });
+    // 1583.40 JPY = 10 USD，与 10 USD 同价
+    const mixed = computeBudgetCaps([item('J', 1583.4, 'JPY'), item('B', 20), item('C', 30), item('D', 40)], real.exchangeRates);
+    expect(mixed.shampoo!.p33).toBeCloseTo(19.9, 6);
+    // 不同品类分开算；有价格的产品少于 3 个时不提供档位
+    const other = computeBudgetCaps([...catalog, item('X', 5, 'USD', 'conditioner')], real.exchangeRates);
+    expect(other.conditioner).toBeUndefined();
+    // 没有价格或币种不在汇率表的产品不参与计算
+    expect(computeBudgetCaps([...catalog, item('E', 999, 'EUR')], real.exchangeRates).shampoo!.sampleSize).toBe(4);
   });
 
-  it('汇率表没有的币种、价格未知：不排除，只提示', () => {
-    for (const p of [item(999, 'EUR'), product('C2', ['Aqua'], { price: null })]) {
-      const r = scoreProduct(p, profile({ budgetUsd: 12 }), data);
+  it('第一档 / 第二档排除超过上限的产品，上限含等于；不限不排除', () => {
+    const ok = (p: Product, budget: 'p33' | 'p67' | 'none') => !scoreProduct(p, profile({ budget }), withCaps).excluded;
+    expect(ok(item('A', 10), 'p33')).toBe(true);
+    expect(ok(item('B', 20), 'p33')).toBe(false);
+    expect(ok(item('B', 20), 'p67')).toBe(true);
+    expect(ok(item('E', 30.1), 'p67')).toBe(true);
+    expect(ok(item('D', 40), 'p67')).toBe(false);
+    expect(ok(item('D', 40), 'none')).toBe(true);
+    const r = scoreProduct(item('B', 20), profile({ budget: 'p33' }), withCaps);
+    expect(r.exclusions[0].text.zh).toBe('价格 20 USD，超出你选的预算上限（约 19.90 USD）');
+    const jp = scoreProduct(item('J', 4000, 'JPY'), profile({ budget: 'p33' }), withCaps);
+    expect(jp.price).toEqual({ amount: 4000, currency: 'JPY', usd: expect.closeTo(4000 / 158.34, 6) });
+    expect(jp.exclusions[0].text.zh).toBe('价格 4000 JPY（约 25.26 USD），超出你选的预算上限（约 19.90 USD）');
+  });
+
+  it('品类没有档位、价格未知、汇率表没有该币种：不排除，只提示', () => {
+    const cases = [
+      item('C1', 999, 'USD', 'conditioner'),
+      product('C2', ['Aqua'], { category: 'shampoo', price: null }),
+      item('C3', 999, 'EUR'),
+    ];
+    for (const p of cases) {
+      const r = scoreProduct(p, profile({ budget: 'p33' }), withCaps);
       expect(r.excluded).toBe(false);
       expect(r.notices.some((n) => n.code === 'budget_unchecked')).toBe(true);
     }
   });
 
-  it('预算选项按当地货币显示', () => {
+  it('问卷选项显示算出的上限，换算成用户当地货币', () => {
     const rates = real.exchangeRates;
-    expect(budgetOptionLabel(12, 'USD', rates).zh).toBe('≤ 12 USD');
-    expect(budgetOptionLabel(12, 'JPY', rates).zh).toBe('≤ 约 1,900 JPY');
-    expect(budgetOptionLabel(30, 'CNY', rates).zh).toBe('≤ 约 201 CNY');
-    expect(budgetOptionLabel(12, 'KRW', rates).en).toBe('≤ about 16,100 KRW');
-    expect(budgetOptionLabel(null, 'JPY', rates).zh).toBe('不限');
+    const labels = (currency: string) => budgetOptions(caps.shampoo, currency, rates).map((o) => o.label.zh);
+    expect(labels('USD')).toEqual(['≤ $20', '≤ $30', '不限']);
+    // 19.9 × 6.692 ≈ 133，30.1 × 6.692 ≈ 201
+    expect(labels('CNY')).toEqual(['≤ ¥133', '≤ ¥201', '不限']);
+    expect(labels('JPY')).toEqual(['≤ ¥3,200', '≤ ¥4,800', '不限']);
+    expect(labels('EUR')).toEqual(['≤ $20', '≤ $30', '不限']);
+    expect(budgetOptions(undefined, 'CNY', rates).map((o) => o.choice)).toEqual(['none']);
+    expect(budgetOptions(caps.shampoo, 'CNY', rates).map((o) => o.choice)).toEqual(['p33', 'p67', 'none']);
+    expect(formatMoney(1650, 'JPY', false)).toBe('¥1,650');
+    expect(formatMoney(12.5, 'USD', false)).toBe('$12.5');
+    expect(formatMoney(1650, 'JPY')).toBe('¥1,700');
     expect(currencyForCountry('JP')).toBe('JPY');
     expect(currencyForCountry('FR')).toBe('USD');
   });

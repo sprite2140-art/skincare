@@ -41,7 +41,7 @@ export function parseConflicts(value: string | undefined): Conflict[] {
   });
 }
 
-function parsePrice(value: string | undefined): number | null {
+function parseNumber(value: string | undefined): number | null {
   if (!value) return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
@@ -82,11 +82,13 @@ export function parseProducts(text: string): Product[] {
     channels: splitList(r.channels),
     inclusionBasis: r.inclusion_basis ?? '',
     inciList: splitList(r.inci_list),
-    price: parsePrice(r.price),
+    inciListOriginal: r.inci_list_original ?? '',
+    price: parseNumber(r.price),
     currency: r.currency ?? '',
+    sizeMl: parseNumber(r.size_ml),
     availableInCn: (r.available_in_cn || 'unknown') as CnAvailability,
     transparency: r.transparency as Transparency,
-    sourceUrl: r.source_url ?? '',
+    sourceUrls: splitList(r.source_url),
     reviewedOn: r.reviewed_on ?? '',
   }));
 }

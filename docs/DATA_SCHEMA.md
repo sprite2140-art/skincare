@@ -52,11 +52,13 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |
 | inclusion_basis | 入库依据（榜单/奖项） | |
-| inci_list | 完整成分表，按包装顺序，分号分隔 | |
-| price / currency | 当地价格和货币代码，按销售地区存当地价格；currency 必须在 exchange_rates.csv 中 | 12 / USD |
+| inci_list | 完整成分表，**英文 INCI 名**，按包装顺序，分号分隔。打分用这一列；与成分库匹配时不区分大小写（`AQUA` 与 `Aqua` 视为同一成分） | Aqua;Glycerin;Piroctone Olamine |
+| inci_list_original | 包装原文成分表（中文、日文、韩文等），原样保存，只用于展示和核对，不参与打分 | 水、甘油、吡罗克酮乙醇胺盐 |
+| price / currency | 当地价格和货币代码，按销售地区存当地价格；price 必须为正数，currency 必须在 exchange_rates.csv 中 | 12 / USD |
+| size_ml | 规格（毫升），正数，可留空 | 400 |
 | available_in_cn | yes / cross_border / unknown | |
 | transparency | high / medium / low | |
-| source_url | 成分表来源 | |
+| source_url | 成分表来源链接，可有多个，用分号分隔 | https://a.example;https://b.example |
 | reviewed_on | 核对日期 | |
 
 category 取值：
@@ -75,6 +77,16 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 | 无默认值，必须逐个填写 | makeup_remover, exfoliator |
 
 卸妆和去角质的填法：卸妆油、卸妆膏、磨砂膏、含酸洁面填 rinse_off；卸妆水、酸类爽肤水和精华填 leave_on。
+
+### 预算档位（自动计算，不用手填）
+
+预算题按品类分别提供三个选项，界线由产品库价格自动算出：
+
+1. 取该品类所有有价格的产品，用 exchange_rates.csv 把价格统一换算成 USD。
+2. 第一档上限 = 这些价格的 33% 分位数，第二档上限 = 67% 分位数，第三档 = 不限。分位数用线性插值（与 Excel 的 PERCENTILE.INC 相同）。
+3. 有价格的产品少于 3 个的品类，暂不提供预算档位，只有"不限"。
+4. 问卷选项显示算出的具体上限，并换算成用户所在地货币，例如"≤ ¥80 / ≤ ¥200 / 不限"（约数取整：1000 以上取整到百位，其余取整到个位）；筛选时用 USD 精确值比较，等于上限的产品保留。
+5. 每次产品数据或汇率更新后，界线在构建时自动重新计算；用户档案保存的是"第几档"，不是金额，所以不用重填。`npm run validate-data` 会打印当前各品类的界线。
 
 ## exchange_rates.csv（固定汇率表）
 

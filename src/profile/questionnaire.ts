@@ -1,7 +1,7 @@
 // 问卷答案 → 打分输入。问卷见 docs/PRODUCT.md "问卷设计"。
 
-import type { City, Product, RiskTag, Target } from '../data/types';
-import type { BudgetCapUsd } from '../scoring/config';
+import type { Category, City, Product, RiskTag, Target } from '../data/types';
+import type { BudgetChoice } from '../scoring/budget';
 import type { Text } from '../scoring/labels';
 import type { ScoringProfile, SpecialStatus, WashFrequency } from '../scoring/score';
 
@@ -9,8 +9,8 @@ export type AvoidOption = 'fragrance' | 'alcohol' | 'essential_oil';
 
 export interface BaseAnswers {
   cityKey: string | null; // "城市, 国家"，对应 cities.csv
-  /** 单件预算上限（USD）：12 / 30 / null（不限） */
-  budgetUsd: BudgetCapUsd;
+  /** 各品类的预算档位，未选的品类视为不限 */
+  budgets: Partial<Record<Category, BudgetChoice>>;
   specialStatus: SpecialStatus;
   avoid: AvoidOption[];
   avoidIngredients: string[];
@@ -120,6 +120,7 @@ export function cityKey(c: City): string {
 export function toScalpScoringProfile(
   base: BaseAnswers,
   scalp: ScalpAnswers,
+  category: Category,
   cities: City[],
   inUseProducts: Product[],
 ): ScoringProfile {
@@ -132,7 +133,7 @@ export function toScalpScoringProfile(
     // 用户填写的想避开的成分 / 成分类型在打分中走硬性过滤，直接排除
     avoidIngredients: base.avoidIngredients,
     avoidTags: base.avoid as RiskTag[],
-    budgetUsd: base.budgetUsd,
+    budget: base.budgets[category] ?? 'none',
     washFrequency: scalp.washFrequency,
     city: cities.find((c) => cityKey(c) === base.cityKey) ?? null,
     inUseProducts,

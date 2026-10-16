@@ -39,9 +39,14 @@ export function validateData(
   // ingredients.csv
   const F_ING = 'ingredients.csv';
   const seenNames = new Map<string, string>();
+  const seenPrimary = new Set<string>();
   for (const ing of ingredients) {
     const key = ing.inciName || '(缺 inci_name)';
     if (!ing.inciName) err(F_ING, key, 'inci_name 为空');
+    // inci_name 是主键：同名（忽略大小写）的第二行会被索引忽略，必须报错
+    const primary = normalizeName(ing.inciName);
+    if (seenPrimary.has(primary)) err(F_ING, key, 'inci_name 重复（忽略大小写）');
+    seenPrimary.add(primary);
     oneOf(F_ING, key, 'category', ing.category, INGREDIENT_CATEGORIES);
     oneOf(F_ING, key, 'review_status', ing.reviewStatus, REVIEW_STATUSES);
     if (ing.evidenceLevel !== null) oneOf(F_ING, key, 'evidence_level', ing.evidenceLevel, EVIDENCE_LEVELS);
@@ -52,7 +57,8 @@ export function validateData(
     for (const name of [ing.inciName, ...ing.aliases]) {
       const n = normalizeName(name);
       const owner = seenNames.get(n);
-      if (owner && owner !== ing.inciName) err(F_ING, key, `名称 "${name}" 与成分 "${owner}" 重复`);
+      // 主名重复已在上面报过，这里只报别名与其他成分冲突
+      if (owner && normalizeName(owner) !== primary) err(F_ING, key, `名称 "${name}" 与成分 "${owner}" 重复`);
       seenNames.set(n, ing.inciName);
     }
 
@@ -87,6 +93,9 @@ export function validateData(
     if (!r.source && r.currency !== 'USD') warn(F_FX, key, '缺少 source（汇率来源）');
   }
   if (!rateCurrencies.has('USD')) err(F_FX, 'USD', '缺少 USD');
+  // 所有币种必须是同一天的汇率
+  const dates = [...new Set(exchangeRates.map((r) => r.dataDate))];
+  if (dates.length > 1) err(F_FX, 'data_date', `各币种的 data_date 应相同，目前有：${dates.join(', ')}`);
 
   // products.csv
   const F_PRD = 'products.csv';
@@ -108,8 +117,13 @@ export function validateData(
     oneOf(F_PRD, key, 'transparency', p.transparency, TRANSPARENCY);
     if (p.inciList.length === 0) err(F_PRD, key, 'inci_list 为空');
     if (p.price === null) warn(F_PRD, key, 'price 为空或不是数字');
+    else if (p.price <= 0) err(F_PRD, key, `price 应为正数：${p.price}`);
     else if (!p.currency) err(F_PRD, key, '有 price 但缺 currency');
     else if (!rateCurrencies.has(p.currency)) err(F_PRD, key, `currency "${p.currency}" 不在 exchange_rates.csv`);
+    if (p.sizeMl !== null && !(p.sizeMl > 0)) err(F_PRD, key, `size_ml 应为正数：${p.sizeMl}`);
+    for (const url of p.sourceUrls) {
+      if (!/^https?:\/\//.test(url)) err(F_PRD, key, `source_url 中的 "${url}" 不是 http(s) 链接（多个链接用分号分隔）`);
+    }
     for (const name of p.inciList) {
       if (!index.get(name)) missing.set(name, (missing.get(name) ?? 0) + 1);
     }

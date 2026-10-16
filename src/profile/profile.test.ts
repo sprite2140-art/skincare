@@ -33,10 +33,13 @@ describe('头皮问卷映射', () => {
 
   it('头皮易痒视为敏感，不排序', () => {
     const base = newProfile('我', 'me').base;
-    const p = toScalpScoringProfile(base, { concerns: ['itch'], oilTiming: null, washFrequency: 'daily' }, [], []);
+    const p = toScalpScoringProfile(base, { concerns: ['itch'], oilTiming: null, washFrequency: 'daily' }, 'shampoo', [], []);
     expect(p.sensitive).toBe(true);
     expect(p.concernsRanked).toBe(false);
     expect(p.washFrequency).toBe('daily');
+    expect(p.budget).toBe('none');
+    const withBudget = toScalpScoringProfile({ ...base, budgets: { shampoo: 'p33' } }, { concerns: [], oilTiming: null, washFrequency: null }, 'shampoo', [], []);
+    expect(withBudget.budget).toBe('p33');
   });
 });
 

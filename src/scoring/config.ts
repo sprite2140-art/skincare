@@ -33,12 +33,7 @@ export const CHELATING_FUNCTION = 'chelating';
 /** 高 / 中 / 低 的分界 */
 export const LEVEL_THRESHOLDS = { high: 70, medium: 40 } as const;
 
-/**
- * 预算题"单件预算上限"的选项（USD）；另有"不限"（null）。
- * 产品的当地价格按 data/exchange_rates.csv 换算成 USD 后与上限比较（含等于）；向用户展示时换算成当地货币。
- */
-export const BUDGET_CAP_OPTIONS_USD = [12, 30] as const;
-export type BudgetCapUsd = (typeof BUDGET_CAP_OPTIONS_USD)[number] | null;
+/** 预算档位由产品价格的分位数自动计算，见 budget.ts */
 
 /** 冲洗型产品（usage_type = rinse_off）刺激风险扣分乘以此系数 */
 export const RINSE_OFF_MULTIPLIER = 0.5;

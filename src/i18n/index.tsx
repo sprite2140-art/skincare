@@ -5,7 +5,7 @@ import zh from './zh.json';
 import en from './en.json';
 
 export type Lang = 'zh' | 'en';
-type Key = keyof typeof zh;
+export type Key = keyof typeof zh;
 
 const dicts: Record<Lang, Record<Key, string>> = { zh, en };
 const LANG_KEY = 'skincare.lang';
@@ -24,6 +24,8 @@ interface I18n {
   lang: Lang;
   setLang: (lang: Lang) => void;
   t: (key: Key, vars?: Record<string, string | number>) => string;
+  /** 取打分结果等 {zh, en} 文本中当前语言的一份 */
+  tx: (text: { zh: string; en: string }) => string;
 }
 
 const I18nContext = createContext<I18n | null>(null);
@@ -43,7 +45,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       dicts[lang][key].replace(/\{(\w+)\}/g, (_, v: string) => String(vars?.[v] ?? `{${v}}`)),
     [lang],
   );
-  const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);
+  const tx = useCallback((text: { zh: string; en: string }) => text[lang], [lang]);
+  const value = useMemo(() => ({ lang, setLang, t, tx }), [lang, setLang, t, tx]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 

@@ -36,7 +36,7 @@ export function newProfile(name: string, id: string = randomId()): Profile {
   return {
     id,
     name,
-    base: { cityKey: null, budgetUsd: null, specialStatus: 'none', avoid: [], avoidIngredients: [] },
+    base: { cityKey: null, budgets: {}, specialStatus: 'none', avoid: [], avoidIngredients: [] },
     scalp: null,
     inUseProductIds: [],
     updatedAt: new Date().toISOString(),
@@ -53,7 +53,12 @@ function migrate(data: unknown): ProfileStore {
   if (!data || typeof data !== 'object') return emptyStore();
   const d = data as Partial<ProfileStore>;
   if (d.version === STORE_VERSION && Array.isArray(d.profiles)) {
-    return { version: STORE_VERSION, activeId: d.activeId ?? null, profiles: d.profiles };
+    // 补齐后来新增的字段，旧档案也能直接用
+    const profiles = d.profiles.map((p) => {
+      const blank = newProfile(p.name, p.id);
+      return { ...blank, ...p, base: { ...blank.base, ...p.base } };
+    });
+    return { version: STORE_VERSION, activeId: d.activeId ?? null, profiles };
   }
   // 未知版本：不猜测，返回空档案，避免读坏数据
   return emptyStore();

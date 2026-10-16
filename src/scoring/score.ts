@@ -10,15 +10,18 @@ import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import {
   CHELATING_FUNCTION, ENVIRONMENT_SCORES, EVIDENCE_SCORES, IRRITANT_DEDUCTION, IRRITANT_TAGS,
   LEVEL_THRESHOLDS, RANKED_CONCERN_WEIGHTS, RINSE_OFF_MULTIPLIER, SENSITIVE_MULTIPLIER,
-  STRONG_CLEANSER_DEDUCTION, WEIGHTS, type BudgetCapUsd, type DimensionKey,
+  STRONG_CLEANSER_DEDUCTION, WEIGHTS, type DimensionKey,
 } from './config';
 import { RISK_TAG_LABELS, TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
 import { priceInfo, withinBudget, type PriceInfo } from './price';
+import { capFor, type BudgetCapsByCategory, type BudgetChoice } from './budget';
 
 /** 打分用到的数据 */
 export interface ScoringData {
   index: IngredientIndex;
   exchangeRates: ExchangeRate[];
+  /** 各品类预算档位界线，由 computeBudgetCaps() 从产品库计算 */
+  budgetCaps: BudgetCapsByCategory;
 }
 
 export type SpecialStatus = 'none' | 'pregnant' | 'trying' | 'breastfeeding' | 'rx';
@@ -36,8 +39,8 @@ export interface ScoringProfile {
   avoidIngredients: string[];
   /** 想避开的成分类型，如 fragrance */
   avoidTags: RiskTag[];
-  /** 单件预算上限（USD），null 为不限 */
-  budgetUsd: BudgetCapUsd;
+  /** 该品类的预算档位：第一档 / 第二档 / 不限 */
+  budget: BudgetChoice;
   washFrequency: WashFrequency | null;
   city: City | null;
   inUseProducts: Product[];
@@ -150,6 +153,7 @@ const unverifiedSuffix = (unverified: boolean): Text =>
 
 function hardFilters(
   product: Product, items: Resolved[], profile: ScoringProfile, index: IngredientIndex, price: PriceInfo,
+  capUsd: number | null,
 ): Flag[] {
   const out: Flag[] = [];
 
@@ -208,7 +212,7 @@ function hardFilters(
   }
 
   // 单件预算上限：换算成 USD 比较
-  if (price.status === 'ok' && !withinBudget(price.usd, profile.budgetUsd)) {
+  if (price.status === 'ok' && capUsd !== null && !withinBudget(price.usd, capUsd)) {
     const local = `${product.price} ${product.currency}`;
     const usd = product.currency === 'USD' ? '' : `（约 ${price.usd.toFixed(2)} USD）`;
     const usdEn = product.currency === 'USD' ? '' : ` (about ${price.usd.toFixed(2)} USD)`;
@@ -216,8 +220,8 @@ function hardFilters(
       code: 'over_budget',
       unverified: false,
       text: {
-        zh: `价格 ${local}${usd}，超出你的单件预算上限（${profile.budgetUsd} USD）`,
-        en: `Price ${local}${usdEn} is over your per-item budget (${profile.budgetUsd} USD)`,
+        zh: `价格 ${local}${usd}，超出你选的预算上限（约 ${capUsd.toFixed(2)} USD）`,
+        en: `Price ${local}${usdEn} is over your budget limit (about ${capUsd.toFixed(2)} USD)`,
       },
     });
   }
@@ -444,7 +448,9 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   const unknownIngredients = items.filter((r) => !r.ingredient).map((r) => r.raw);
   const unverifiedIngredients = items.filter((r) => r.ingredient && !isVerified(r)).map((r) => r.raw);
 
-  const exclusions = hardFilters(product, items, profile, index, price);
+  const caps = data.budgetCaps[product.category];
+  const capUsd = capFor(profile.budget, caps);
+  const exclusions = hardFilters(product, items, profile, index, price, capUsd);
   const conflicts = checkConflicts(items, profile, index);
   for (const c of conflicts.filter((c) => c.severity === 'severe')) {
     exclusions.push({ code: 'severe_conflict', unverified: c.unverified, text: c.text });
@@ -469,12 +475,13 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       text: { zh: `有 ${missing} 个成分暂无数据，未参与打分`, en: `${missing} ingredient(s) have no data yet and were not scored` },
     });
   }
-  if (profile.budgetUsd !== null && price.status !== 'ok') {
-    const why: Record<Exclude<PriceInfo['status'], 'ok'>, Text> = {
+  if (profile.budget !== 'none' && (price.status !== 'ok' || !caps)) {
+    const why: Record<Exclude<PriceInfo['status'], 'ok'> | 'no_caps', Text> = {
       no_price: { zh: '价格未知', en: 'Price unknown' },
       no_rate: { zh: `汇率表中没有 ${product.currency}`, en: `No exchange rate for ${product.currency}` },
+      no_caps: { zh: '该品类有价格的产品太少，还没有预算档位', en: 'Too few priced products in this category to set budget ranges' },
     };
-    const w = why[price.status];
+    const w = why[price.status === 'ok' ? 'no_caps' : price.status];
     notices.push({
       code: 'budget_unchecked',
       unverified: false,
