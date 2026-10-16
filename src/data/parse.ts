@@ -4,7 +4,7 @@ import Papa from 'papaparse';
 import type {
   City, CnAvailability, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
-  WaterHardness, Zone,
+  UsageType, WaterHardness, Zone,
 } from './types';
 
 export type Row = Record<string, string>;
@@ -76,6 +76,7 @@ export function parseProducts(text: string): Product[] {
     nameZh: r.name_zh ?? '',
     zone: r.zone as Zone,
     category: r.category ?? '',
+    usageType: (r.usage_type || null) as UsageType | null,
     region: r.region as Region,
     formulaNote: r.formula_note ?? '',
     channels: splitList(r.channels),
@@ -93,8 +94,8 @@ export function parseProducts(text: string): Product[] {
 export function parseExchangeRates(text: string): ExchangeRate[] {
   return parseCsv(text).map((r) => ({
     currency: r.currency ?? '',
-    usdPerUnit: Number(r.usd_per_unit),
-    asOf: r.as_of ?? '',
+    perUsd: Number(r.per_usd),
+    dataDate: r.data_date ?? '',
     source: r.source ?? '',
   }));
 }

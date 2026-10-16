@@ -80,6 +80,8 @@ export interface Product {
   nameZh: string;
   zone: Zone;
   category: string;
+  /** 产品表填写的使用方式；为空时用品类默认值，见 usageTypeOf() */
+  usageType: UsageType | null;
   region: Region;
   formulaNote: string;
   channels: string[];
@@ -95,10 +97,41 @@ export interface Product {
 
 export interface ExchangeRate {
   currency: string;
-  /** 1 单位该货币 = 多少 USD */
-  usdPerUnit: number;
-  asOf: string;
+  /** 1 USD 兑多少该货币（与美联储 H.10 的报价方式一致） */
+  perUsd: number;
+  /** 汇率对应的数据日期 */
+  dataDate: string;
   source: string;
+}
+
+export const USAGE_TYPES = ['rinse_off', 'leave_on'] as const;
+export type UsageType = (typeof USAGE_TYPES)[number];
+
+/**
+ * 各品类的默认使用方式。卸妆和去角质没有统一默认值，必须按单个产品填写：
+ * 卸妆油、卸妆膏、磨砂膏、含酸洁面为 rinse_off；卸妆水、酸类爽肤水和精华为 leave_on。
+ */
+export const CATEGORY_DEFAULT_USAGE: Record<Category, UsageType | null> = {
+  makeup_remover: null,
+  cleanser: 'rinse_off',
+  toner: 'leave_on',
+  serum: 'leave_on',
+  moisturizer: 'leave_on',
+  sunscreen: 'leave_on',
+  exfoliator: null,
+  shampoo: 'rinse_off',
+  scalp_care: 'leave_on',
+  conditioner: 'rinse_off',
+  hair_mask: 'rinse_off',
+  hair_oil: 'leave_on',
+  body_wash: 'rinse_off',
+  body_lotion: 'leave_on',
+  body_scrub: 'rinse_off',
+};
+
+/** 产品实际的使用方式：产品填写的值优先，否则用品类默认值；都没有时为 null */
+export function usageTypeOf(product: Pick<Product, 'category' | 'usageType'>): UsageType | null {
+  return product.usageType ?? CATEGORY_DEFAULT_USAGE[product.category as Category] ?? null;
 }
 
 export interface City {

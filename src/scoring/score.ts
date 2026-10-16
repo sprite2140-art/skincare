@@ -4,13 +4,13 @@
 // - 打分（四个维度）只用 review_status = verified 的成分。
 // - 安全相关（硬性过滤、孕期提示、搭配冲突）也看 draft 成分，宁可多提示，结果里标注"未核对"。
 
-import type { Category, City, ExchangeRate, Ingredient, Product, RiskTag, Target } from '../data/types';
+import { usageTypeOf } from '../data/types';
+import type { City, ExchangeRate, Ingredient, Product, RiskTag, Target } from '../data/types';
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import {
   CHELATING_FUNCTION, ENVIRONMENT_SCORES, EVIDENCE_SCORES, IRRITANT_DEDUCTION, IRRITANT_TAGS,
-  LEVEL_THRESHOLDS, RANKED_CONCERN_WEIGHTS, RINSE_OFF_CATEGORIES, RINSE_OFF_MULTIPLIER,
-  SENSITIVE_MULTIPLIER, STRONG_CLEANSER_DEDUCTION, WEIGHTS, type BudgetTier, type DimensionKey,
-  type PriceTier,
+  LEVEL_THRESHOLDS, RANKED_CONCERN_WEIGHTS, RINSE_OFF_MULTIPLIER, SENSITIVE_MULTIPLIER,
+  STRONG_CLEANSER_DEDUCTION, WEIGHTS, type BudgetCapUsd, type DimensionKey,
 } from './config';
 import { RISK_TAG_LABELS, TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
 import { priceInfo, withinBudget, type PriceInfo } from './price';
@@ -36,7 +36,8 @@ export interface ScoringProfile {
   avoidIngredients: string[];
   /** 想避开的成分类型，如 fragrance */
   avoidTags: RiskTag[];
-  budget: BudgetTier;
+  /** 单件预算上限（USD），null 为不限 */
+  budgetUsd: BudgetCapUsd;
   washFrequency: WashFrequency | null;
   city: City | null;
   inUseProducts: Product[];
@@ -81,8 +82,8 @@ export interface ProductScore {
   unknownIngredients: string[];
   /** 在成分库但未核对的成分 */
   unverifiedIngredients: string[];
-  /** 展示用当地货币；usd 和 tier 用于归档 */
-  price: { amount: number | null; currency: string; usd: number | null; tier: PriceTier | null };
+  /** 展示用当地价格；usd 用于预算比较 */
+  price: { amount: number | null; currency: string; usd: number | null };
   transparency: Product['transparency'];
 }
 
@@ -126,12 +127,6 @@ export function concernWeights(concerns: Target[], ranked: boolean): Map<Target,
 
 // ---------- 硬性过滤 ----------
 
-export const TIER_LABELS: Record<PriceTier, Text> = {
-  economy: { zh: '经济', en: 'Budget' },
-  mid: { zh: '中档', en: 'Mid-range' },
-  premium: { zh: '高端', en: 'Premium' },
-};
-
 const PREGNANCY_STATUSES: SpecialStatus[] = ['pregnant', 'trying', 'breastfeeding'];
 const STATUS_LABELS: Record<SpecialStatus, Text> = {
   none: { zh: '', en: '' },
@@ -153,7 +148,9 @@ function withTag(items: Resolved[], tag: RiskTag) {
 const unverifiedSuffix = (unverified: boolean): Text =>
   unverified ? { zh: '（成分数据未核对）', en: ' (ingredient data not yet verified)' } : { zh: '', en: '' };
 
-function hardFilters(items: Resolved[], profile: ScoringProfile, index: IngredientIndex, price: PriceInfo): Flag[] {
+function hardFilters(
+  product: Product, items: Resolved[], profile: ScoringProfile, index: IngredientIndex, price: PriceInfo,
+): Flag[] {
   const out: Flag[] = [];
 
   // 特殊状态
@@ -210,14 +207,18 @@ function hardFilters(items: Resolved[], profile: ScoringProfile, index: Ingredie
     });
   }
 
-  // 预算：按 USD 价格档比较，档位高于用户所选预算则排除
-  if (price.status === 'ok' && !withinBudget(price.tier, profile.budget)) {
-    const t = TIER_LABELS[price.tier];
-    const b = TIER_LABELS[profile.budget as PriceTier];
+  // 单件预算上限：换算成 USD 比较
+  if (price.status === 'ok' && !withinBudget(price.usd, profile.budgetUsd)) {
+    const local = `${product.price} ${product.currency}`;
+    const usd = product.currency === 'USD' ? '' : `（约 ${price.usd.toFixed(2)} USD）`;
+    const usdEn = product.currency === 'USD' ? '' : ` (about ${price.usd.toFixed(2)} USD)`;
     out.push({
       code: 'over_budget',
       unverified: false,
-      text: { zh: `属于${t.zh}价位，超出你的预算（${b.zh}）`, en: `${t.en} price range, over your budget (${b.en})` },
+      text: {
+        zh: `价格 ${local}${usd}，超出你的单件预算上限（${profile.budgetUsd} USD）`,
+        en: `Price ${local}${usdEn} is over your per-item budget (${profile.budgetUsd} USD)`,
+      },
     });
   }
 
@@ -353,9 +354,10 @@ function scoreEvidence(matches: Map<Target, Ingredient[]>, weights: Map<Target, 
 function scoreIrritation(
   verified: (Resolved & { ingredient: Ingredient })[],
   profile: ScoringProfile,
-  category: string,
+  product: Product,
 ): Dimension {
-  const rinseOff = RINSE_OFF_CATEGORIES.includes(category as Category);
+  // 使用方式未知时按免洗处理（不减半），偏保守
+  const rinseOff = usageTypeOf(product) === 'rinse_off';
   const mult = (profile.sensitive ? SENSITIVE_MULTIPLIER : 1) * (rinseOff ? RINSE_OFF_MULTIPLIER : 1);
   let deduction = 0;
   const found: Text[] = [];
@@ -442,7 +444,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   const unknownIngredients = items.filter((r) => !r.ingredient).map((r) => r.raw);
   const unverifiedIngredients = items.filter((r) => r.ingredient && !isVerified(r)).map((r) => r.raw);
 
-  const exclusions = hardFilters(items, profile, index, price);
+  const exclusions = hardFilters(product, items, profile, index, price);
   const conflicts = checkConflicts(items, profile, index);
   for (const c of conflicts.filter((c) => c.severity === 'severe')) {
     exclusions.push({ code: 'severe_conflict', unverified: c.unverified, text: c.text });
@@ -467,11 +469,10 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       text: { zh: `有 ${missing} 个成分暂无数据，未参与打分`, en: `${missing} ingredient(s) have no data yet and were not scored` },
     });
   }
-  if (profile.budget !== 'unlimited' && price.status !== 'ok') {
+  if (profile.budgetUsd !== null && price.status !== 'ok') {
     const why: Record<Exclude<PriceInfo['status'], 'ok'>, Text> = {
       no_price: { zh: '价格未知', en: 'Price unknown' },
       no_rate: { zh: `汇率表中没有 ${product.currency}`, en: `No exchange rate for ${product.currency}` },
-      no_tiers: { zh: '该品类暂未设定价格档', en: 'No price ranges set for this category yet' },
     };
     const w = why[price.status];
     notices.push({
@@ -495,7 +496,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     const need = scoreNeed(verified, weights);
     dimensions = {
       need: need.dim,
-      irritation: scoreIrritation(verified, profile, product.category),
+      irritation: scoreIrritation(verified, profile, product),
       evidence: scoreEvidence(need.matches, weights),
       environment: scoreEnvironment(verified, profile.city),
     };
@@ -511,7 +512,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     conflicts,
     unknownIngredients,
     unverifiedIngredients,
-    price: { amount: product.price, currency: product.currency, usd: price.usd, tier: price.tier },
+    price: { amount: product.price, currency: product.currency, usd: price.usd },
     transparency: product.transparency,
   };
 }

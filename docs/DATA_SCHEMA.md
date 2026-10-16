@@ -47,6 +47,7 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | name_en / name_zh | 产品名 | |
 | zone | face / scalp / hair / body | scalp |
 | category | 品类编号（取值见下） | shampoo |
+| usage_type | 使用方式：rinse_off（冲洗型）/ leave_on（免洗型）。留空则用品类默认值；卸妆、去角质必须填写 | |
 | region | US / JP / KR / CN | US |
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |
@@ -65,18 +66,30 @@ category 取值：
 - 头发：conditioner（护发素）, hair_mask（发膜）, hair_oil（护发油）
 - 身体：body_wash（沐浴露）, body_lotion（身体乳）, body_scrub（身体去角质）
 
-冲洗型品类（刺激风险扣分减半）：cleanser, shampoo, conditioner, hair_mask, body_wash, body_scrub。卸妆和去角质有免洗型产品，暂按免洗处理。
+usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个别产品与默认不同时，在该产品行填写 usage_type 覆盖：
+
+| 默认值 | 品类 |
+|---|---|
+| rinse_off | cleanser, shampoo, conditioner, hair_mask, body_wash, body_scrub |
+| leave_on | toner, serum, moisturizer, sunscreen, scalp_care, hair_oil, body_lotion |
+| 无默认值，必须逐个填写 | makeup_remover, exfoliator |
+
+卸妆和去角质的填法：卸妆油、卸妆膏、磨砂膏、含酸洁面填 rinse_off；卸妆水、酸类爽肤水和精华填 leave_on。
 
 ## exchange_rates.csv（固定汇率表）
 
-用于把当地价格换算成 USD 后归入价格档；给用户展示时仍用当地货币。随数据一起更新。
+用于把产品的当地价格换算成 USD，与用户的单件预算上限比较；给用户展示预算选项时再换算成当地货币。
+
+汇率采用美联储 H.10 官方汇率（https://www.federalreserve.gov/releases/h10/current/ ），按 H.10 的报价方式记录"1 USD 兑多少该货币"。**每次更新产品数据（尤其是价格）时，同步更新汇率表**：取最新一期 H.10，所有币种用同一个数据日期，并更新 data_date。
 
 | 字段 | 含义 | 示例 |
 |---|---|---|
-| currency | 货币代码（3 位大写） | JPY |
-| usd_per_unit | 1 单位该货币等于多少 USD | 0.0067 |
-| as_of | 汇率日期（YYYY-MM-DD） | 2026-10-16 |
-| source | 汇率来源链接 | |
+| currency | 货币代码（3 位大写）；必须有 USD 一行，per_usd 为 1 | JPY |
+| per_usd | 1 USD 兑多少该货币 | 158.3400 |
+| data_date | 数据日期，即汇率对应的日期（不是 H.10 的发布日期），YYYY-MM-DD | 2026-10-09 |
+| source | 来源链接 | https://www.federalreserve.gov/releases/h10/current/ |
+
+当前数据：2026 年 10 月 13 日发布的 H.10 中 10 月 9 日的汇率。
 
 ## cities.csv（城市环境）
 

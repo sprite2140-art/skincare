@@ -1,5 +1,5 @@
-currency,usd_per_unit,as_of,source
-USD,1,2026-10-16,
-JPY,0.0067,2026-10-16,
-KRW,0.00073,2026-10-16,
-CNY,0.14,2026-10-16,
+currency,per_usd,data_date,source
+USD,1,2026-10-09,
+CNY,6.6920,2026-10-09,https://www.federalreserve.gov/releases/h10/current/
+JPY,158.3400,2026-10-09,https://www.federalreserve.gov/releases/h10/current/
+KRW,1342.1300,2026-10-09,https://www.federalreserve.gov/releases/h10/current/

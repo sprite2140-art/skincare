@@ -1,6 +1,6 @@
 // 打分参数。全部是初始假设（见 docs/PRODUCT.md "打分算法"），朋友试用后调整。
 
-import type { Category, EvidenceLevel, RiskTag } from '../data/types';
+import type { EvidenceLevel, RiskTag } from '../data/types';
 
 export const WEIGHTS = {
   need: 0.5,
@@ -33,19 +33,12 @@ export const CHELATING_FUNCTION = 'chelating';
 /** 高 / 中 / 低 的分界 */
 export const LEVEL_THRESHOLDS = { high: 70, medium: 40 } as const;
 
-export type BudgetTier = 'economy' | 'mid' | 'premium' | 'unlimited';
-export type PriceTier = Exclude<BudgetTier, 'unlimited'>;
-
 /**
- * 各品类的价格档（USD）。经济 < economyBelow；中档 economyBelow–midUpTo（含两端）；高端 > midUpTo。
- * 其他币种的价格先按 data/exchange_rates.csv 换算成 USD 再归档；展示仍用当地货币。
- * 用户选的预算档是上限：选"中档"排除高端产品，不排除经济产品。高端没有上限，因此选"高端"等同于"不限"。
- * 表里没有的品类不做预算筛选，只给提示。
+ * 预算题"单件预算上限"的选项（USD）；另有"不限"（null）。
+ * 产品的当地价格按 data/exchange_rates.csv 换算成 USD 后与上限比较（含等于）；向用户展示时换算成当地货币。
  */
-export const PRICE_TIERS_USD: Partial<Record<Category, { economyBelow: number; midUpTo: number }>> = {
-  shampoo: { economyBelow: 12, midUpTo: 30 },
-};
+export const BUDGET_CAP_OPTIONS_USD = [12, 30] as const;
+export type BudgetCapUsd = (typeof BUDGET_CAP_OPTIONS_USD)[number] | null;
 
-/** 冲洗型品类：刺激风险扣分减半。卸妆、去角质因产品形态不一（有免洗型），暂按免洗处理 */
-export const RINSE_OFF_CATEGORIES: Category[] = ['cleanser', 'shampoo', 'conditioner', 'hair_mask', 'body_wash', 'body_scrub'];
+/** 冲洗型产品（usage_type = rinse_off）刺激风险扣分乘以此系数 */
 export const RINSE_OFF_MULTIPLIER = 0.5;

@@ -2,10 +2,10 @@
 
 import { buildIngredientIndex, normalizeName } from './ingredientIndex';
 import {
-  CATEGORIES, CN_AVAILABILITY, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
-  REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, WATER_HARDNESS, ZONES,
+  CATEGORIES, CATEGORY_DEFAULT_USAGE, CN_AVAILABILITY, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
+  REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
 } from './types';
-import type { City, ExchangeRate, Ingredient, Product } from './types';
+import type { Category, City, ExchangeRate, Ingredient, Product } from './types';
 
 export interface Issue {
   level: 'error' | 'warning';
@@ -81,8 +81,9 @@ export function validateData(
     if (!/^[A-Z]{3}$/.test(r.currency)) err(F_FX, key, 'currency 应为 3 位大写货币代码，如 USD');
     if (rateCurrencies.has(r.currency)) err(F_FX, key, 'currency 重复');
     rateCurrencies.add(r.currency);
-    if (!(Number.isFinite(r.usdPerUnit) && r.usdPerUnit > 0)) err(F_FX, key, 'usd_per_unit 应为正数');
-    if (!DATE_RE.test(r.asOf)) err(F_FX, key, `as_of 应为 YYYY-MM-DD：${r.asOf}`);
+    if (!(Number.isFinite(r.perUsd) && r.perUsd > 0)) err(F_FX, key, 'per_usd 应为正数');
+    if (r.currency === 'USD' && r.perUsd !== 1) err(F_FX, key, 'USD 的 per_usd 必须为 1');
+    if (!DATE_RE.test(r.dataDate)) err(F_FX, key, `data_date 应为 YYYY-MM-DD：${r.dataDate}`);
     if (!r.source && r.currency !== 'USD') warn(F_FX, key, '缺少 source（汇率来源）');
   }
   if (!rateCurrencies.has('USD')) err(F_FX, 'USD', '缺少 USD');
@@ -98,6 +99,10 @@ export function validateData(
     seenIds.add(p.productId);
     oneOf(F_PRD, key, 'zone', p.zone, ZONES);
     oneOf(F_PRD, key, 'category', p.category, CATEGORIES);
+    if (p.usageType !== null) oneOf(F_PRD, key, 'usage_type', p.usageType, USAGE_TYPES);
+    else if ((CATEGORIES as readonly string[]).includes(p.category) && CATEGORY_DEFAULT_USAGE[p.category as Category] === null) {
+      err(F_PRD, key, `品类 ${p.category} 没有默认使用方式，usage_type 必须填写 rinse_off 或 leave_on`);
+    }
     oneOf(F_PRD, key, 'region', p.region, REGIONS);
     oneOf(F_PRD, key, 'available_in_cn', p.availableInCn, CN_AVAILABILITY);
     oneOf(F_PRD, key, 'transparency', p.transparency, TRANSPARENCY);

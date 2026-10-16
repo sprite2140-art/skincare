@@ -9,7 +9,7 @@ A free, open-source tool that recommends skincare, scalp and hair products based
 - `data/ingredients.csv` 成分知识库
 - `data/products.csv` 产品库（一行 = 一个产品在一个销售地区的配方）
 - `data/cities.csv` 城市环境数据（水硬度等不常变化的属性）
-- `data/exchange_rates.csv` 固定汇率表（价格换算 USD 归档用）
+- `data/exchange_rates.csv` 固定汇率表（美联储 H.10，价格换算 USD 用）
 - `docs/DATA_SCHEMA.md` 数据格式说明
 - `docs/SCORING.md` 打分规则说明
 - `docs/DEPLOY.md` 部署说明（Cloudflare Pages，含 PR 预览）

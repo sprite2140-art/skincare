@@ -4,6 +4,7 @@ import { buildIngredientIndex } from '../data/ingredientIndex';
 import { validateData } from '../data/validate';
 import type { City, Ingredient, Product } from '../data/types';
 import { concernWeights, rankProducts, scoreProduct, weightedTotal, type ScoringProfile } from './score';
+import { budgetOptionLabel, currencyForCountry } from './price';
 
 const real = loadDataFromDisk();
 
@@ -14,7 +15,7 @@ const baseProfile: ScoringProfile = {
   specialStatus: 'none',
   avoidIngredients: [],
   avoidTags: [],
-  budget: 'unlimited',
+  budgetUsd: null,
   washFrequency: null,
   city: null,
   inUseProducts: [],
@@ -305,43 +306,89 @@ describe('硬性过滤', () => {
   });
 });
 
-describe('预算（按品类价格档，USD）', () => {
-  const shampoo = (price: number, currency = 'USD') => product(`SH-${price}-${currency}`, ['Aqua'], { category: 'shampoo', price, currency });
+describe('单件预算上限（USD）', () => {
+  const item = (price: number, currency = 'USD') => product(`P-${price}-${currency}`, ['Aqua'], { price, currency });
+  const rate = (c: string) => real.exchangeRates.find((x) => x.currency === c)!.perUsd;
 
-  it('洗发水价格档：经济 < 12，中档 12–30，高端 > 30', () => {
-    expect(scoreProduct(shampoo(11.99), profile({}), data).price.tier).toBe('economy');
-    expect(scoreProduct(shampoo(12), profile({}), data).price.tier).toBe('mid');
-    expect(scoreProduct(shampoo(30), profile({}), data).price.tier).toBe('mid');
-    expect(scoreProduct(shampoo(30.01), profile({}), data).price.tier).toBe('premium');
+  it('上限含等于：≤ 12 保留 12，排除 12.01', () => {
+    expect(scoreProduct(item(12), profile({ budgetUsd: 12 }), data).excluded).toBe(false);
+    const r = scoreProduct(item(12.01), profile({ budgetUsd: 12 }), data);
+    expect(r.exclusions.map((e) => e.code)).toEqual(['over_budget']);
+    expect(r.exclusions[0].text.zh).toBe('价格 12.01 USD，超出你的单件预算上限（12 USD）');
+    expect(scoreProduct(item(30), profile({ budgetUsd: 30 }), data).excluded).toBe(false);
+    expect(scoreProduct(item(30.01), profile({ budgetUsd: 30 }), data).excluded).toBe(true);
+    expect(scoreProduct(item(999), profile({ budgetUsd: null }), data).excluded).toBe(false);
   });
 
-  it('预算档是上限：高于所选档排除，低于所选档保留', () => {
-    const r = scoreProduct(shampoo(40), profile({ budget: 'mid' }), data);
-    expect(r.exclusions[0].code).toBe('over_budget');
-    expect(r.exclusions[0].text.zh).toBe('属于高端价位，超出你的预算（中档）');
-    expect(scoreProduct(shampoo(40), profile({ budget: 'premium' }), data).excluded).toBe(false);
-    expect(scoreProduct(shampoo(8), profile({ budget: 'mid' }), data).excluded).toBe(false);
-    expect(scoreProduct(shampoo(20), profile({ budget: 'economy' }), data).excluded).toBe(true);
-  });
-
-  it('其他币种按汇率表换算成 USD 归档，展示仍用当地货币', () => {
-    const jp = scoreProduct(shampoo(3000, 'JPY'), profile({ budget: 'economy' }), data);
-    const rate = real.exchangeRates.find((x) => x.currency === 'JPY')!.usdPerUnit;
-    expect(jp.price).toEqual({ amount: 3000, currency: 'JPY', usd: 3000 * rate, tier: 'mid' });
+  it('其他币种按 H.10 汇率换算成 USD 比较，价格仍保留当地货币', () => {
+    // 3000 JPY ÷ 158.34 ≈ 18.95 USD
+    const jp = scoreProduct(item(3000, 'JPY'), profile({ budgetUsd: 12 }), data);
+    expect(jp.price.amount).toBe(3000);
+    expect(jp.price.currency).toBe('JPY');
+    expect(jp.price.usd).toBeCloseTo(3000 / 158.34, 6);
     expect(jp.excluded).toBe(true);
+    expect(jp.exclusions[0].text.zh).toBe('价格 3000 JPY（约 18.95 USD），超出你的单件预算上限（12 USD）');
+    expect(scoreProduct(item(3000, 'JPY'), profile({ budgetUsd: 30 }), data).excluded).toBe(false);
+    // 80 CNY ÷ 6.692 ≈ 11.95 USD，在 12 以内
+    expect(scoreProduct(item(80, 'CNY'), profile({ budgetUsd: 12 }), data).excluded).toBe(false);
+    expect(rate('KRW')).toBe(1342.13);
   });
 
-  it('汇率表没有的币种、没有价格档的品类、价格未知：不排除，只提示', () => {
-    const cases = [
-      shampoo(999, 'EUR'),
-      product('C1', ['Aqua'], { category: 'conditioner', price: 999, currency: 'USD' }),
-      product('C2', ['Aqua'], { category: 'shampoo', price: null }),
-    ];
-    for (const p of cases) {
-      const r = scoreProduct(p, profile({ budget: 'economy' }), data);
+  it('汇率表没有的币种、价格未知：不排除，只提示', () => {
+    for (const p of [item(999, 'EUR'), product('C2', ['Aqua'], { price: null })]) {
+      const r = scoreProduct(p, profile({ budgetUsd: 12 }), data);
       expect(r.excluded).toBe(false);
       expect(r.notices.some((n) => n.code === 'budget_unchecked')).toBe(true);
     }
+  });
+
+  it('预算选项按当地货币显示', () => {
+    const rates = real.exchangeRates;
+    expect(budgetOptionLabel(12, 'USD', rates).zh).toBe('≤ 12 USD');
+    expect(budgetOptionLabel(12, 'JPY', rates).zh).toBe('≤ 约 1,900 JPY');
+    expect(budgetOptionLabel(30, 'CNY', rates).zh).toBe('≤ 约 201 CNY');
+    expect(budgetOptionLabel(12, 'KRW', rates).en).toBe('≤ about 16,100 KRW');
+    expect(budgetOptionLabel(null, 'JPY', rates).zh).toBe('不限');
+    expect(currencyForCountry('JP')).toBe('JPY');
+    expect(currencyForCountry('FR')).toBe('USD');
+  });
+});
+
+describe('使用方式 usage_type', () => {
+  const irritation = (p: Product) => scoreProduct(p, profile({}), data).dimensions.irritation.score;
+
+  it('按品类默认值：洗发水、洁面为冲洗型，精华、面霜、护发油为免洗型', () => {
+    for (const category of ['shampoo', 'cleanser']) {
+      expect(irritation(product(category, ['Parfum'], { category }))).toBe(93);
+    }
+    for (const category of ['serum', 'moisturizer', 'hair_oil']) {
+      expect(irritation(product(category, ['Parfum'], { category }))).toBe(85);
+    }
+  });
+
+  it('产品填写的值覆盖品类默认值', () => {
+    expect(irritation(product('SH-LEAVE', ['Parfum'], { category: 'shampoo', usageType: 'leave_on' }))).toBe(85);
+    expect(irritation(product('SERUM-RINSE', ['Parfum'], { category: 'serum', usageType: 'rinse_off' }))).toBe(93);
+  });
+
+  it('卸妆、去角质按单个产品填写', () => {
+    expect(irritation(product('OIL', ['Parfum'], { category: 'makeup_remover', usageType: 'rinse_off' }))).toBe(93);
+    expect(irritation(product('MICELLAR', ['Parfum'], { category: 'makeup_remover', usageType: 'leave_on' }))).toBe(85);
+    expect(irritation(product('SCRUB', ['Parfum'], { category: 'exfoliator', usageType: 'rinse_off' }))).toBe(93);
+    expect(irritation(product('ACID-TONER', ['Parfum'], { category: 'exfoliator', usageType: 'leave_on' }))).toBe(85);
+    // 未填写时按免洗处理（不减半）
+    expect(irritation(product('UNSET', ['Parfum'], { category: 'exfoliator' }))).toBe(85);
+  });
+
+  it('数据校验：卸妆、去角质未填 usage_type 报错，取值非法报错', () => {
+    const msgs = (p: Product) =>
+      validateData(real.ingredients, [p], real.cities, real.exchangeRates).filter((i) => i.level === 'error').map((i) => i.message);
+    expect(msgs({ ...sample, category: 'exfoliator', usageType: null })).toEqual([
+      expect.stringContaining('品类 exfoliator 没有默认使用方式'),
+    ]);
+    expect(msgs({ ...sample, category: 'makeup_remover', usageType: 'rinse_off' })).toEqual([]);
+    expect(msgs({ ...sample, usageType: 'wash' as Product['usageType'] })).toEqual([expect.stringContaining('usage_type 取值 "wash"')]);
+    expect(msgs({ ...sample, usageType: null })).toEqual([]);
   });
 });
 

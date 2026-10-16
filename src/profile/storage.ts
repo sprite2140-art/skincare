@@ -36,7 +36,7 @@ export function newProfile(name: string, id: string = randomId()): Profile {
   return {
     id,
     name,
-    base: { cityKey: null, budget: 'unlimited', specialStatus: 'none', avoid: [], avoidIngredients: [] },
+    base: { cityKey: null, budgetUsd: null, specialStatus: 'none', avoid: [], avoidIngredients: [] },
     scalp: null,
     inUseProductIds: [],
     updatedAt: new Date().toISOString(),
