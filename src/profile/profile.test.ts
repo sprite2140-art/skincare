@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { scalpTargets, toScalpScoringProfile } from './questionnaire';
+import { hairTargets, scalpMedicalAlerts, scalpTargets, toScalpScoringProfile } from './questionnaire';
 import {
   STORAGE_KEY, activeProfile, emptyStore, loadStore, newProfile, removeProfile, saveStore, upsertProfile,
   type KeyValueStorage,
@@ -11,10 +11,24 @@ const memory = (): KeyValueStorage & { data: Map<string, string> } => {
 };
 
 describe('头皮问卷映射', () => {
-  it('多选困扰映射到 targets，发红暂无对应，当天变油 → scalp_oil', () => {
+  it('多选困扰映射到 targets，发红 → scalp_redness，当天变油 → scalp_oil', () => {
     expect(scalpTargets({ concerns: ['dandruff', 'itch', 'redness'], oilTiming: 'same_day', washFrequency: null }))
-      .toEqual(['dandruff', 'scalp_itch', 'scalp_oil']);
+      .toEqual(['dandruff', 'scalp_itch', 'scalp_redness', 'scalp_oil']);
     expect(scalpTargets({ concerns: [], oilTiming: 'three_plus_days', washFrequency: null })).toEqual([]);
+  });
+
+  it('头皮屑"伴红斑、反复不好"触发就医提示', () => {
+    const alerts = scalpMedicalAlerts({ concerns: ['dandruff'], dandruffType: 'red_recurring', oilTiming: null, washFrequency: null });
+    expect(alerts.map((a) => a.code)).toEqual(['dandruff_red_recurring']);
+    expect(alerts[0].text.zh).toContain('皮肤科医生');
+    expect(scalpMedicalAlerts({ concerns: ['dandruff'], dandruffType: 'dry_fine', oilTiming: null, washFrequency: null })).toEqual([]);
+    // 没选头皮屑时这道追问不生效
+    expect(scalpMedicalAlerts({ concerns: [], dandruffType: 'red_recurring', oilTiming: null, washFrequency: null })).toEqual([]);
+  });
+
+  it('短期大量或成片脱发触发就医提示', () => {
+    const alerts = scalpMedicalAlerts({ concerns: ['hair_loss'], hairLossLevel: 'sudden_or_patchy', oilTiming: null, washFrequency: null });
+    expect(alerts.map((a) => a.code)).toEqual(['hair_loss_sudden']);
   });
 
   it('头皮易痒视为敏感，不排序', () => {
@@ -23,6 +37,14 @@ describe('头皮问卷映射', () => {
     expect(p.sensitive).toBe(true);
     expect(p.concernsRanked).toBe(false);
     expect(p.washFrequency).toBe('daily');
+  });
+});
+
+describe('头发问卷映射', () => {
+  it('打结 → tangling，褪色 → color_fade，染烫漂热工具 → damage', () => {
+    expect(hairTargets({ concerns: ['tangling', 'color_fade', 'split_ends'], treatments: ['dye'] }))
+      .toEqual(['tangling', 'color_fade', 'damage']);
+    expect(hairTargets({ concerns: ['flat', 'frizz'], treatments: ['none'] })).toEqual(['flat_hair', 'frizz']);
   });
 });
 

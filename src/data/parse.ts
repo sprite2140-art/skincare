@@ -2,7 +2,7 @@
 
 import Papa from 'papaparse';
 import type {
-  City, CnAvailability, Conflict, ConflictSeverity, EvidenceLevel, Ingredient,
+  City, CnAvailability, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
   WaterHardness, Zone,
 } from './types';
@@ -10,7 +10,7 @@ import type {
 export type Row = Record<string, string>;
 
 export function parseCsv(text: string): Row[] {
-  const result = Papa.parse<Row>(text.replace(/^﻿/, ''), {
+  const result = Papa.parse<Row>(text.replace(/^\uFEFF/, ''), {
     header: true,
     skipEmptyLines: 'greedy',
     transformHeader: (h) => h.trim(),
@@ -87,6 +87,15 @@ export function parseProducts(text: string): Product[] {
     transparency: r.transparency as Transparency,
     sourceUrl: r.source_url ?? '',
     reviewedOn: r.reviewed_on ?? '',
+  }));
+}
+
+export function parseExchangeRates(text: string): ExchangeRate[] {
+  return parseCsv(text).map((r) => ({
+    currency: r.currency ?? '',
+    usdPerUnit: Number(r.usd_per_unit),
+    asOf: r.as_of ?? '',
+    source: r.source ?? '',
   }));
 }
 

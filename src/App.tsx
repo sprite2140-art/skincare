@@ -1,4 +1,4 @@
-import { HashRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { useI18n } from './i18n';
 import { ingredients, products } from './data/load';
 
@@ -17,7 +17,7 @@ function Home() {
 export default function App() {
   const { t, lang, setLang } = useI18n();
   return (
-    <HashRouter>
+    <BrowserRouter>
       <header>
         <h1>{t('app.title')}</h1>
         <button type="button" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}>
@@ -27,6 +27,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
       </Routes>
-    </HashRouter>
+    </BrowserRouter>
   );
 }

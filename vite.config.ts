@@ -4,8 +4,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  // 相对路径，方便部署到 GitHub Pages 等静态托管的子路径
-  base: './',
+  // Cloudflare Pages 部署在域名根路径（含 PR 预览地址）
+  base: '/',
   test: {
     environment: 'node',
   },

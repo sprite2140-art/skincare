@@ -4,10 +4,12 @@
 import ingredientsCsv from '../../data/ingredients.csv?raw';
 import productsCsv from '../../data/products.csv?raw';
 import citiesCsv from '../../data/cities.csv?raw';
-import { parseCities, parseIngredients, parseProducts } from './parse';
+import exchangeRatesCsv from '../../data/exchange_rates.csv?raw';
+import { parseCities, parseExchangeRates, parseIngredients, parseProducts } from './parse';
 import { buildIngredientIndex } from './ingredientIndex';
 
 export const ingredients = parseIngredients(ingredientsCsv);
 export const products = parseProducts(productsCsv);
 export const cities = parseCities(citiesCsv);
+export const exchangeRates = parseExchangeRates(exchangeRatesCsv);
 export const ingredientIndex = buildIngredientIndex(ingredients);

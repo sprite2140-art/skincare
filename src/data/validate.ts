@@ -2,10 +2,10 @@
 
 import { buildIngredientIndex, normalizeName } from './ingredientIndex';
 import {
-  CN_AVAILABILITY, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
+  CATEGORIES, CN_AVAILABILITY, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
   REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, WATER_HARDNESS, ZONES,
 } from './types';
-import type { City, Ingredient, Product } from './types';
+import type { City, ExchangeRate, Ingredient, Product } from './types';
 
 export interface Issue {
   level: 'error' | 'warning';
@@ -20,6 +20,7 @@ export function validateData(
   ingredients: Ingredient[],
   products: Product[],
   cities: City[],
+  exchangeRates: ExchangeRate[],
 ): Issue[] {
   const issues: Issue[] = [];
   const err = (file: string, key: string, message: string) =>
@@ -72,6 +73,20 @@ export function validateData(
     }
   }
 
+  // exchange_rates.csv
+  const F_FX = 'exchange_rates.csv';
+  const rateCurrencies = new Set<string>();
+  for (const r of exchangeRates) {
+    const key = r.currency || '(缺 currency)';
+    if (!/^[A-Z]{3}$/.test(r.currency)) err(F_FX, key, 'currency 应为 3 位大写货币代码，如 USD');
+    if (rateCurrencies.has(r.currency)) err(F_FX, key, 'currency 重复');
+    rateCurrencies.add(r.currency);
+    if (!(Number.isFinite(r.usdPerUnit) && r.usdPerUnit > 0)) err(F_FX, key, 'usd_per_unit 应为正数');
+    if (!DATE_RE.test(r.asOf)) err(F_FX, key, `as_of 应为 YYYY-MM-DD：${r.asOf}`);
+    if (!r.source && r.currency !== 'USD') warn(F_FX, key, '缺少 source（汇率来源）');
+  }
+  if (!rateCurrencies.has('USD')) err(F_FX, 'USD', '缺少 USD');
+
   // products.csv
   const F_PRD = 'products.csv';
   const seenIds = new Set<string>();
@@ -82,12 +97,14 @@ export function validateData(
     if (seenIds.has(p.productId)) err(F_PRD, key, 'product_id 重复');
     seenIds.add(p.productId);
     oneOf(F_PRD, key, 'zone', p.zone, ZONES);
+    oneOf(F_PRD, key, 'category', p.category, CATEGORIES);
     oneOf(F_PRD, key, 'region', p.region, REGIONS);
     oneOf(F_PRD, key, 'available_in_cn', p.availableInCn, CN_AVAILABILITY);
     oneOf(F_PRD, key, 'transparency', p.transparency, TRANSPARENCY);
     if (p.inciList.length === 0) err(F_PRD, key, 'inci_list 为空');
     if (p.price === null) warn(F_PRD, key, 'price 为空或不是数字');
     else if (!p.currency) err(F_PRD, key, '有 price 但缺 currency');
+    else if (!rateCurrencies.has(p.currency)) err(F_PRD, key, `currency "${p.currency}" 不在 exchange_rates.csv`);
     for (const name of p.inciList) {
       if (!index.get(name)) missing.set(name, (missing.get(name) ?? 0) + 1);
     }

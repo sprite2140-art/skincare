@@ -13,6 +13,22 @@
 
 ## 记录
 
+### 2026-10-16（Claude Code：落实作者对 4 个待定问题的决定）
+- 完成：
+  1. **预算**：价格档按品类设定，以 USD 为准（`src/scoring/config.ts` 的 `PRICE_TIERS_USD`）。洗发水：经济 < 12、中档 12–30（含两端）、高端 > 30。产品存当地价格，按新增的 `data/exchange_rates.csv` 固定汇率换算成 USD 后归档，展示仍用当地货币。数据校验会检查产品的币种是否在汇率表中。删除了原先按币种分别设定的占位价格线。
+  2. **刺激风险**：致敏成分继续计入。冲洗型品类（cleanser、shampoo、conditioner、hair_mask、body_wash、body_scrub）扣分减半，可以和敏感用户加倍叠加。确认"想避开的成分 / 成分类型"都走硬性过滤直接排除，并补了测试。
+  3. **新增 targets**：scalp_redness、tangling、color_fade，已同步到 DATA_SCHEMA.md 和问卷映射。新增头发问卷映射。新增就医提示：头皮屑"伴红斑、反复不好"；另按 PRODUCT.md 问卷，掉发"短期大量或成片脱落"也触发。
+  4. **部署**：改为 Cloudflare Pages（Git 集成），步骤写在新文档 `docs/DEPLOY.md`，含 PR 预览。新增 `.node-version`（22）。路由从 HashRouter 改为 BrowserRouter（正常网址，便于分享链接），Vite 的 base 改为 `/`。
+  - 新增品类编号列表（DATA_SCHEMA.md），products.csv 的 category 按此校验。
+  - 测试 45 个，全部通过；类型检查、数据校验、构建均通过。
+- 做到哪：打分逻辑已按作者决定更新；Cloudflare 项目还没创建，需作者在后台操作。
+- 下一步：同上一条（整理洗发水数据并核对、做问卷和结果页、平价替代、天气接口）。
+- 待作者：
+  - 按 `docs/DEPLOY.md` 在 Cloudflare 后台连接仓库，并开启 PR 预览。
+  - **核对汇率**：`data/exchange_rates.csv` 里 JPY、KRW、CNY 的数值是我填的近似值，没有来源，请核对后补上 source。
+  - 知悉：预算档是上限，高端没有上限，所以用户选"高端"等同于"不限"。如果希望"高端"有别的含义请告诉我。
+  - 卸妆、去角质有免洗型产品，暂按免洗处理（不减半）。如需按单个产品区分，可以在 products.csv 加一列。
+
 ### 2026-10-15（Claude Code：项目框架 + 打分逻辑）
 - 完成：
   - 文件从 `skincare/` 子目录移到仓库根目录。

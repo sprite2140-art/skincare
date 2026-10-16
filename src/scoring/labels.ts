@@ -18,10 +18,13 @@ export const TARGET_LABELS: Record<Target, Text> = {
   dandruff: { zh: '头皮屑', en: 'dandruff' },
   scalp_oil: { zh: '头皮油', en: 'oily scalp' },
   scalp_itch: { zh: '头皮痒', en: 'itchy scalp' },
+  scalp_redness: { zh: '头皮发红', en: 'scalp redness' },
   hair_loss: { zh: '掉发', en: 'hair loss' },
   damage: { zh: '受损', en: 'damage' },
   frizz: { zh: '干枯毛躁', en: 'frizz' },
   flat_hair: { zh: '扁塌', en: 'flat hair' },
+  tangling: { zh: '打结', en: 'tangling' },
+  color_fade: { zh: '褪色', en: 'color fading' },
 };
 
 export const RISK_TAG_LABELS: Record<RiskTag, Text> = {

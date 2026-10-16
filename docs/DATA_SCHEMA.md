@@ -23,7 +23,11 @@
 | review_status | draft / verified | draft |
 | reviewed_on | 核对日期 | |
 
-targets 取值：acne, oil, dryness, redness, pigmentation, aging, pores, dandruff, scalp_oil, scalp_itch, hair_loss, damage, frizz, flat_hair
+targets 取值：
+
+- 面部：acne, oil, dryness, redness, pigmentation, aging, pores
+- 头皮：dandruff, scalp_oil, scalp_itch, scalp_redness, hair_loss
+- 头发：damage, frizz, flat_hair, tangling, color_fade
 
 risk_tags 取值：fragrance, essential_oil, alcohol, strong_acid, sensitizer, strong_cleanser, pregnancy_caution, rx_caution
 
@@ -42,17 +46,37 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | brand | 品牌 | |
 | name_en / name_zh | 产品名 | |
 | zone | face / scalp / hair / body | scalp |
-| category | 品类 | shampoo |
+| category | 品类编号（取值见下） | shampoo |
 | region | US / JP / KR / CN | US |
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |
 | inclusion_basis | 入库依据（榜单/奖项） | |
 | inci_list | 完整成分表，按包装顺序，分号分隔 | |
-| price / currency | 价格 | 12 / USD |
+| price / currency | 当地价格和货币代码，按销售地区存当地价格；currency 必须在 exchange_rates.csv 中 | 12 / USD |
 | available_in_cn | yes / cross_border / unknown | |
 | transparency | high / medium / low | |
 | source_url | 成分表来源 | |
 | reviewed_on | 核对日期 | |
+
+category 取值：
+
+- 面部：makeup_remover（卸妆）, cleanser（洁面）, toner（化妆水）, serum（精华）, moisturizer（面霜）, sunscreen（防晒）, exfoliator（去角质）
+- 头皮：shampoo（洗发水）, scalp_care（头皮护理）
+- 头发：conditioner（护发素）, hair_mask（发膜）, hair_oil（护发油）
+- 身体：body_wash（沐浴露）, body_lotion（身体乳）, body_scrub（身体去角质）
+
+冲洗型品类（刺激风险扣分减半）：cleanser, shampoo, conditioner, hair_mask, body_wash, body_scrub。卸妆和去角质有免洗型产品，暂按免洗处理。
+
+## exchange_rates.csv（固定汇率表）
+
+用于把当地价格换算成 USD 后归入价格档；给用户展示时仍用当地货币。随数据一起更新。
+
+| 字段 | 含义 | 示例 |
+|---|---|---|
+| currency | 货币代码（3 位大写） | JPY |
+| usd_per_unit | 1 单位该货币等于多少 USD | 0.0067 |
+| as_of | 汇率日期（YYYY-MM-DD） | 2026-10-16 |
+| source | 汇率来源链接 | |
 
 ## cities.csv（城市环境）
 

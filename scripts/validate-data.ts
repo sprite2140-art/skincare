@@ -3,8 +3,8 @@
 import { loadDataFromDisk } from '../src/data/node';
 import { validateData } from '../src/data/validate';
 
-const { ingredients, products, cities } = loadDataFromDisk();
-const issues = validateData(ingredients, products, cities);
+const { ingredients, products, cities, exchangeRates } = loadDataFromDisk();
+const issues = validateData(ingredients, products, cities, exchangeRates);
 const errors = issues.filter((i) => i.level === 'error');
 const warnings = issues.filter((i) => i.level === 'warning');
 

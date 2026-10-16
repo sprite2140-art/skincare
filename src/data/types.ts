@@ -2,7 +2,8 @@
 
 export const TARGETS = [
   'acne', 'oil', 'dryness', 'redness', 'pigmentation', 'aging', 'pores',
-  'dandruff', 'scalp_oil', 'scalp_itch', 'hair_loss', 'damage', 'frizz', 'flat_hair',
+  'dandruff', 'scalp_oil', 'scalp_itch', 'scalp_redness', 'hair_loss',
+  'damage', 'frizz', 'flat_hair', 'tangling', 'color_fade',
 ] as const;
 export type Target = (typeof TARGETS)[number];
 
@@ -23,6 +24,15 @@ export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
 
 export const CONFLICT_SEVERITIES = ['mild', 'severe'] as const;
 export type ConflictSeverity = (typeof CONFLICT_SEVERITIES)[number];
+
+/** 品类编号（products.csv 的 category） */
+export const CATEGORIES = [
+  'makeup_remover', 'cleanser', 'toner', 'serum', 'moisturizer', 'sunscreen', 'exfoliator',
+  'shampoo', 'scalp_care',
+  'conditioner', 'hair_mask', 'hair_oil',
+  'body_wash', 'body_lotion', 'body_scrub',
+] as const;
+export type Category = (typeof CATEGORIES)[number];
 
 export const ZONES = ['face', 'scalp', 'hair', 'body'] as const;
 export type Zone = (typeof ZONES)[number];
@@ -81,6 +91,14 @@ export interface Product {
   transparency: Transparency;
   sourceUrl: string;
   reviewedOn: string;
+}
+
+export interface ExchangeRate {
+  currency: string;
+  /** 1 单位该货币 = 多少 USD */
+  usdPerUnit: number;
+  asOf: string;
+  source: string;
 }
 
 export interface City {
