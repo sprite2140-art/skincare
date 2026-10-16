@@ -1,6 +1,7 @@
 // 把 CSV 文本解析成有类型的对象。只做格式转换；取值是否合法由 validate.ts 检查。
 
 import Papa from 'papaparse';
+import { cleanInciName } from './ingredientIndex';
 import type {
   City, CnAvailability, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
@@ -68,8 +69,19 @@ export function parseIngredients(text: string): Ingredient[] {
   }));
 }
 
+/** 统一产品成分表写法，并记下带 [待核对] 标记的成分 */
+export function parseInciList(value: string | undefined): { names: string[]; unverified: string[] } {
+  const cleaned = splitList(value).map(cleanInciName).filter((c) => c.name.length > 0);
+  return {
+    names: cleaned.map((c) => c.name),
+    unverified: cleaned.filter((c) => c.nameUnverified).map((c) => c.name),
+  };
+}
+
 export function parseProducts(text: string): Product[] {
-  return parseCsv(text).map((r) => ({
+  return parseCsv(text).map((r) => {
+    const inci = parseInciList(r.inci_list);
+    return {
     productId: r.product_id ?? '',
     brand: r.brand ?? '',
     nameEn: r.name_en ?? '',
@@ -81,7 +93,8 @@ export function parseProducts(text: string): Product[] {
     formulaNote: r.formula_note ?? '',
     channels: splitList(r.channels),
     inclusionBasis: r.inclusion_basis ?? '',
-    inciList: splitList(r.inci_list),
+    inciList: inci.names,
+    inciNameUnverified: inci.unverified,
     inciListOriginal: r.inci_list_original ?? '',
     price: parseNumber(r.price),
     currency: r.currency ?? '',
@@ -90,7 +103,8 @@ export function parseProducts(text: string): Product[] {
     transparency: r.transparency as Transparency,
     sourceUrls: splitList(r.source_url),
     reviewedOn: r.reviewed_on ?? '',
-  }));
+    };
+  });
 }
 
 export function parseExchangeRates(text: string): ExchangeRate[] {

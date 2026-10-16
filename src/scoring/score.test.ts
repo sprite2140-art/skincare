@@ -3,7 +3,7 @@ import { loadDataFromDisk } from '../data/node';
 import { buildIngredientIndex } from '../data/ingredientIndex';
 import { validateData } from '../data/validate';
 import type { City, Ingredient, Product } from '../data/types';
-import { concernWeights, rankProducts, scoreProduct, weightedTotal, type ScoringProfile } from './score';
+import { concernWeights, ingredientStatuses, rankProducts, scoreProduct, weightedTotal, type ScoringProfile } from './score';
 import { currencyForCountry } from './price';
 import { budgetOptions, computeBudgetCaps, formatMoney, percentile } from './budget';
 
@@ -57,8 +57,8 @@ describe('data/ 示例数据', () => {
     expect(r.score).toBeNull();
     expect(Object.values(r.dimensions).every((d) => d.score === null)).toBe(true);
     // 区分"不在成分库"和"在库但未核对"
-    expect(r.unknownIngredients).toEqual(['Aqua', 'Sodium Laureth Sulfate']);
-    expect(r.unverifiedIngredients).toEqual(['Glycerin', 'Piroctone Olamine', 'Parfum']);
+    expect(r.unknownIngredients).toEqual(['Sodium Laureth Sulfate']);
+    expect(r.unverifiedIngredients).toEqual(['Aqua', 'Glycerin', 'Piroctone Olamine', 'Parfum']);
     expect(r.notices.find((n) => n.code === 'missing_data')?.text.zh).toBe('有 5 个成分暂无数据，未参与打分');
   });
 
@@ -162,6 +162,26 @@ describe('需求匹配', () => {
     const r = scoreProduct(p, profile({ concerns: ['dandruff'] }), data);
     expect(r.unknownIngredients).toEqual([]);
     expect(r.dimensions.need.score).toBe(100);
+  });
+});
+
+describe('成分名称统一与 [待核对]', () => {
+  it('括号俗名去掉后可匹配；[待核对] 的成分不参与打分，显示为暂无数据', () => {
+    const p = product('N1', ['Aqua (Water)', 'Piroctone Olamine'], { inciNameUnverified: ['Piroctone Olamine'] });
+    const r = scoreProduct(p, profile({ concerns: ['dandruff'] }), data);
+    // 吡罗克酮名称未核对，不计入需求匹配
+    expect(r.dimensions.need.score).toBe(0);
+    expect(r.nameUnverifiedIngredients).toEqual(['Piroctone Olamine']);
+    expect(r.unknownIngredients).toEqual([]);
+    expect(r.notices.find((n) => n.code === 'missing_data')?.text.zh).toBe('有 1 个成分暂无数据，未参与打分');
+    expect(ingredientStatuses(p, index).map((s) => s.status)).toEqual(['verified', 'name_unverified']);
+  });
+
+  it('名称未核对的成分仍参与安全检查，并标注未核对', () => {
+    const p = product('N2', ['Aqua', 'Test Pregnancy Caution'], { inciNameUnverified: ['Test Pregnancy Caution'] });
+    const r = scoreProduct(p, profile({ specialStatus: 'pregnant' }), data);
+    expect(r.excluded).toBe(true);
+    expect(r.exclusions[0]).toMatchObject({ code: 'special_status', unverified: true });
   });
 });
 

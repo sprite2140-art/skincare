@@ -103,5 +103,6 @@
   "ing.verified": "Verified",
   "ing.draft": "Not verified yet; not used in scoring",
   "ing.unknown": "No data yet",
-  "ing.close": "Close"
+  "ing.close": "Close",
+  "ing.name_unverified": "No data yet (ingredient name pending verification; not scored)"
 }

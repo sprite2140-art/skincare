@@ -9,21 +9,21 @@ import { scalpMedicalAlerts, toScalpScoringProfile, type ScalpAnswers } from '..
 import { newProfile } from '../profile/storage';
 import type { DimensionKey } from '../scoring/config';
 import { formatMoney } from '../scoring/budget';
-import { rankProducts, type Dimension, type ProductScore } from '../scoring/score';
+import { ingredientStatuses, rankProducts, type Dimension, type IngredientStatus, type ProductScore } from '../scoring/score';
 
 const EMPTY_SCALP: ScalpAnswers = { oilTiming: null, concerns: [], washFrequency: null };
 const DIMENSIONS: DimensionKey[] = ['need', 'irritation', 'evidence', 'environment'];
 
-function IngredientChip({ name }: { name: string }) {
+function IngredientChip({ name, status }: { name: string; status: IngredientStatus }) {
   const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
-  const ing = ingredientIndex.get(name);
-  const status = !ing ? 'unknown' : ing.reviewStatus === 'verified' ? 'verified' : 'draft';
+  // 名称未核对的成分显示为暂无数据，不展示可能对错的成分库信息
+  const ing = status === 'name_unverified' ? undefined : ingredientIndex.get(name);
   const display = ing && lang === 'zh' && ing.nameZh ? ing.nameZh : name;
   const explain = ing ? (lang === 'zh' ? ing.explainZh : ing.explainEn) : '';
   return (
     <span className="ing">
-      <button type="button" className={`ing-chip ${status}`} aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button type="button" className={`ing-chip ${status === 'name_unverified' ? 'unknown' : status}`} aria-expanded={open} onClick={() => setOpen(!open)}>
         {display}
       </button>
       {open && (
@@ -110,7 +110,9 @@ function ProductCard({ r }: { r: ProductScore }) {
 
       <details>
         <summary>{t('results.ingredients')}</summary>
-        <div className="ings">{p.inciList.map((n, i) => <IngredientChip key={`${n}-${i}`} name={n} />)}</div>
+        <div className="ings">
+          {ingredientStatuses(p, ingredientIndex).map((s, i) => <IngredientChip key={`${s.name}-${i}`} name={s.name} status={s.status} />)}
+        </div>
         {p.inciListOriginal && (
           <p className="small"><span className="muted">{t('results.original')}：</span>{p.inciListOriginal}</p>
         )}

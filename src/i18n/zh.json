@@ -103,5 +103,6 @@
   "ing.verified": "已核对",
   "ing.draft": "未核对，不参与打分",
   "ing.unknown": "暂无数据",
-  "ing.close": "关闭"
+  "ing.close": "关闭",
+  "ing.name_unverified": "暂无数据（成分名称待核对，不参与打分）"
 }

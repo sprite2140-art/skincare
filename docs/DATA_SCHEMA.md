@@ -8,7 +8,7 @@
 |---|---|---|
 | inci_name | INCI 英文名（主键） | Piroctone Olamine |
 | name_zh | 中文标准名 | 吡罗克酮乙醇胺盐 |
-| aliases | 别名，匹配产品成分表时使用（忽略大小写）。同义 INCI 名也写在这里，如 Aqua 的别名 Water | Octopirox |
+| aliases | 别名，匹配产品成分表时与 inci_name 一起查（忽略大小写和括号内俗名）。同一成分的不同写法都登记在这里，如 Aqua 的 Water、Sodium Lauroyl Methylalaninate 的 Sodium Lauroyl Methyl Alaninate | Octopirox |
 | category | active / risk / base | active |
 | functions | 功能（参考 CosIng，小写）。螯合剂写 `chelating`，环境适配会用到 | anti-dandruff;preservative |
 | targets | 针对的困扰（取值见下） | dandruff;scalp_itch |
@@ -52,7 +52,7 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |
 | inclusion_basis | 入库依据（榜单/奖项） | |
-| inci_list | 完整成分表，**英文 INCI 名**，按包装顺序，分号分隔。打分用这一列；与成分库匹配时不区分大小写（`AQUA` 与 `Aqua` 视为同一成分） | Aqua;Glycerin;Piroctone Olamine |
+| inci_list | 完整成分表，**英文 INCI 名**，按包装顺序，分号分隔。打分用这一列，解析时统一写法（见下方"成分名称统一"） | Aqua;Glycerin;Piroctone Olamine |
 | inci_list_original | 包装原文成分表（中文、日文、韩文等），原样保存，只用于展示和核对，不参与打分 | 水、甘油、吡罗克酮乙醇胺盐 |
 | price / currency | 当地价格和货币代码，按销售地区存当地价格；price 必须为正数，currency 必须在 exchange_rates.csv 中 | 12 / USD |
 | size_ml | 规格（毫升），正数，可留空 | 400 |
@@ -60,6 +60,16 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | transparency | high / medium / low | |
 | source_url | 成分表来源链接，可有多个，用分号分隔 | https://a.example;https://b.example |
 | reviewed_on | 核对日期 | |
+
+### 成分名称统一
+
+解析 inci_list 时，对每个成分名做统一处理，再去成分库匹配：
+
+1. **去掉括号内的俗名**：`Rosmarinus Officinalis (Rosemary) Leaf Extract` → `Rosmarinus Officinalis Leaf Extract`；`Aqua (Water)` → `Aqua`。半角、全角括号都处理。
+2. **`[待核对]` 标记**：整理数据时拿不准成分名是否写对，可以在名称后加 `[待核对]`（半角、全角方括号都可以）。解析时去掉这个标记，并把该成分记为"名称未核对"：不参与打分，结果页显示为"暂无数据"。安全检查（特殊状态、想避开的成分、搭配冲突）仍会看它，并标注"未核对"。
+3. **大小写、多余空格不影响匹配**：`AQUA` 与 `Aqua` 视为同一成分。
+4. **拼写不同的写法不会自动合并**（如 `Methylalaninate` 和 `Methyl Alaninate`），要在 ingredients.csv 对应成分的 aliases 里登记，匹配时会同时查主名和别名。
+5. **成分频率统计**（`npm run ingredient-frequency`，以及 `npm run validate-data` 里的"不在成分库"清单）按统一后的名称合并计算：在库的成分按成分库主名合并（包括别名），不在库的按统一后的名称合并；同一产品里重复出现只算一次。
 
 category 取值：
 

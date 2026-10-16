@@ -1,8 +1,8 @@
 // 打分逻辑：固定规则，不调用 AI。规则说明见 docs/SCORING.md。
 //
 // 两条数据原则：
-// - 打分（四个维度）只用 review_status = verified 的成分。
-// - 安全相关（硬性过滤、孕期提示、搭配冲突）也看 draft 成分，宁可多提示，结果里标注"未核对"。
+// - 打分（四个维度）只用 review_status = verified 的成分；产品成分表里带 [待核对] 标记的成分（名称未核对）也不参与打分。
+// - 安全相关（硬性过滤、孕期提示、搭配冲突）也看 draft 成分和名称未核对的成分，宁可多提示，结果里标注"未核对"。
 
 import { usageTypeOf } from '../data/types';
 import type { City, ExchangeRate, Ingredient, Product, RiskTag, Target } from '../data/types';
@@ -83,6 +83,8 @@ export interface ProductScore {
   conflicts: ConflictWarning[];
   /** 不在成分库的成分 */
   unknownIngredients: string[];
+  /** 名称未核对（成分表中带 [待核对] 标记）的成分 */
+  nameUnverifiedIngredients: string[];
   /** 在成分库但未核对的成分 */
   unverifiedIngredients: string[];
   /** 展示用当地价格；usd 用于预算比较 */
@@ -94,10 +96,12 @@ interface Resolved {
   raw: string;
   position: number;
   ingredient: Ingredient | null;
+  /** 成分表中带 [待核对] 标记 */
+  nameUnverified: boolean;
 }
 
 const isVerified = (r: Resolved): r is Resolved & { ingredient: Ingredient } =>
-  r.ingredient?.reviewStatus === 'verified';
+  !r.nameUnverified && r.ingredient?.reviewStatus === 'verified';
 const isKnown = (r: Resolved): r is Resolved & { ingredient: Ingredient } => r.ingredient !== null;
 
 export function levelOf(score: number | null): Level | null {
@@ -113,7 +117,23 @@ function dimension(key: DimensionKey, score: number | null, reason: Text): Dimen
 }
 
 function resolve(product: Product, index: IngredientIndex): Resolved[] {
-  return product.inciList.map((raw, i) => ({ raw, position: i + 1, ingredient: index.get(raw) ?? null }));
+  const flagged = new Set(product.inciNameUnverified);
+  return product.inciList.map((raw, i) => ({
+    raw,
+    position: i + 1,
+    ingredient: index.get(raw) ?? null,
+    nameUnverified: flagged.has(raw),
+  }));
+}
+
+export type IngredientStatus = 'verified' | 'draft' | 'unknown' | 'name_unverified';
+
+/** 结果页展示用：每个成分的数据状态。名称未核对的成分显示为暂无数据 */
+export function ingredientStatuses(product: Product, index: IngredientIndex): { name: string; status: IngredientStatus }[] {
+  return resolve(product, index).map((r) => ({
+    name: r.raw,
+    status: r.nameUnverified ? 'name_unverified' : !r.ingredient ? 'unknown' : isVerified(r) ? 'verified' : 'draft',
+  }));
 }
 
 export function concernWeights(concerns: Target[], ranked: boolean): Map<Target, number> {
@@ -144,7 +164,7 @@ function withTag(items: Resolved[], tag: RiskTag) {
   return {
     hits,
     names: joinNames(hits.map((r) => ingredientName(r.ingredient, r.raw))),
-    unverified: hits.some((r) => r.ingredient.reviewStatus !== 'verified'),
+    unverified: hits.some((r) => !isVerified(r)),
   };
 }
 
@@ -254,7 +274,7 @@ function checkConflicts(items: Resolved[], profile: ScoringProfile, index: Ingre
         const key = `${used.productId}|${a.ingredient.inciName}|${b.ingredient.inciName}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        const unverified = a.ingredient.reviewStatus !== 'verified' || b.ingredient.reviewStatus !== 'verified';
+        const unverified = !isVerified(a) || !isVerified(b);
         const an = ingredientName(a.ingredient, a.raw);
         const bn = ingredientName(b.ingredient, b.raw);
         const usedName = { zh: used.nameZh || used.nameEn, en: used.nameEn || used.nameZh };
@@ -445,8 +465,9 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   const items = resolve(product, index);
   const price = priceInfo(product, data.exchangeRates);
   const verified = items.filter(isVerified);
-  const unknownIngredients = items.filter((r) => !r.ingredient).map((r) => r.raw);
-  const unverifiedIngredients = items.filter((r) => r.ingredient && !isVerified(r)).map((r) => r.raw);
+  const nameUnverifiedIngredients = items.filter((r) => r.nameUnverified).map((r) => r.raw);
+  const unknownIngredients = items.filter((r) => !r.nameUnverified && !r.ingredient).map((r) => r.raw);
+  const unverifiedIngredients = items.filter((r) => !r.nameUnverified && r.ingredient && !isVerified(r)).map((r) => r.raw);
 
   const caps = data.budgetCaps[product.category];
   const capUsd = capFor(profile.budget, caps);
@@ -467,7 +488,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       text: { zh: `含${preg.names.zh}，孕期或哺乳期请注意${suf.zh}`, en: `Contains ${preg.names.en}; take care during pregnancy or breastfeeding${suf.en}` },
     });
   }
-  const missing = unknownIngredients.length + unverifiedIngredients.length;
+  const missing = unknownIngredients.length + unverifiedIngredients.length + nameUnverifiedIngredients.length;
   if (missing > 0) {
     notices.push({
       code: 'missing_data',
@@ -518,6 +539,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     notices,
     conflicts,
     unknownIngredients,
+    nameUnverifiedIngredients,
     unverifiedIngredients,
     price: { amount: product.price, currency: product.currency, usd: price.usd },
     transparency: product.transparency,

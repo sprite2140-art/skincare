@@ -86,8 +86,10 @@ export interface Product {
   formulaNote: string;
   channels: string[];
   inclusionBasis: string;
-  /** 英文 INCI 名，按包装顺序；打分用这一列 */
+  /** 英文 INCI 名，按包装顺序；解析时已统一写法（去掉括号俗名和 [待核对] 标记），打分用这一列 */
   inciList: string[];
+  /** inciList 中原文带 [待核对] 标记的成分（统一后的名称）：名称未核对，不参与打分 */
+  inciNameUnverified: string[];
   /** 包装原文成分表（如中文、日文、韩文），原样保存，仅供展示和核对 */
   inciListOriginal: string;
   price: number | null;

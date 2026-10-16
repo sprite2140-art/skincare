@@ -1,11 +1,39 @@
-// 按 INCI 名和别名查找成分。匹配忽略大小写、多余空格和全角/半角差异。
+// 按 INCI 名和别名查找成分。匹配忽略大小写、多余空格、全角/半角差异和括号内的俗名。
 
 import type { Ingredient } from './types';
 
-/** 名称规范化，仅用于匹配。Aqua / Water 这类同义名靠成分库的 aliases 字段对应 */
-export function normalizeName(name: string): string {
-  return name
+/** 待核对标记，半角或全角方括号均可，如 `Xxx [待核对]` */
+const UNVERIFIED_MARK = /[[【]\s*待核对\s*[\]】]/g;
+
+export interface CleanedName {
+  /** 统一后的名称：去掉括号内俗名和待核对标记，合并多余空格 */
+  name: string;
+  /** 原文带 [待核对] 标记：名称本身未核对，不参与打分 */
+  nameUnverified: boolean;
+}
+
+/**
+ * 统一产品成分表中的一个成分名，保留原有大小写以便展示：
+ * - 去掉括号内的俗名：`Rosmarinus Officinalis (Rosemary) Leaf Extract` → `Rosmarinus Officinalis Leaf Extract`
+ * - 去掉 `[待核对]` 标记，并记为名称未核对
+ * 拼写差异（如 Methylalaninate / Methyl Alaninate）不自动合并，靠成分库的 aliases 登记。
+ */
+export function cleanInciName(raw: string): CleanedName {
+  const nameUnverified = raw.normalize('NFKC').match(UNVERIFIED_MARK) !== null;
+  const name = raw
     .normalize('NFKC')
+    .replace(UNVERIFIED_MARK, ' ')
+    .replace(/\([^()]*\)/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/\s+([,/])/g, '$1')
+    .trim();
+  return { name, nameUnverified };
+}
+
+/** 名称规范化，仅用于匹配：在 cleanInciName 基础上忽略大小写和符号两侧空格。同义名靠成分库的 aliases 字段对应 */
+export function normalizeName(name: string): string {
+  return cleanInciName(name)
+    .name
     .toLowerCase()
     .replace(/\s+/g, ' ')
     .replace(/\s*([/,()-])\s*/g, '$1')

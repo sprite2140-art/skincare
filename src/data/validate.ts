@@ -1,6 +1,7 @@
 // 数据校验：error 表示格式错误（CI 失败），warning 表示需要补充的数据（不阻断）。
 
 import { buildIngredientIndex, normalizeName } from './ingredientIndex';
+import { ingredientFrequency } from './frequency';
 import {
   CATEGORIES, CATEGORY_DEFAULT_USAGE, CN_AVAILABILITY, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
   REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
@@ -100,7 +101,6 @@ export function validateData(
   // products.csv
   const F_PRD = 'products.csv';
   const seenIds = new Set<string>();
-  const missing = new Map<string, number>();
   for (const p of products) {
     const key = p.productId || '(缺 product_id)';
     if (!p.productId) err(F_PRD, key, 'product_id 为空');
@@ -124,13 +124,14 @@ export function validateData(
     for (const url of p.sourceUrls) {
       if (!/^https?:\/\//.test(url)) err(F_PRD, key, `source_url 中的 "${url}" 不是 http(s) 链接（多个链接用分号分隔）`);
     }
-    for (const name of p.inciList) {
-      if (!index.get(name)) missing.set(name, (missing.get(name) ?? 0) + 1);
-    }
   }
-  // 按出现次数排序，即"成分库扩充优先清单"
-  for (const [name, count] of [...missing].sort((a, b) => b[1] - a[1])) {
-    warn(F_PRD, name, `成分不在成分库（出现在 ${count} 个产品中）`);
+  // 按统一后的名称合并、按出现次数排序，即"成分库扩充优先清单"
+  for (const row of ingredientFrequency(products, index)) {
+    const spellings = row.spellings.length > 1 ? `；写法：${row.spellings.join(' / ')}` : '';
+    if (row.reviewStatus === null) warn(F_PRD, row.name, `成分不在成分库（出现在 ${row.productCount} 个产品中${spellings}）`);
+    if (row.nameUnverifiedCount > 0) {
+      warn(F_PRD, row.name, `名称带 [待核对] 标记，不参与打分（${row.nameUnverifiedCount} 个产品）`);
+    }
   }
 
   // cities.csv
