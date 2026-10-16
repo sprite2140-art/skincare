@@ -1,6 +1,24 @@
 city,country,water_hardness,source,review_status
 New York,US,unknown,,draft
 Los Angeles,US,unknown,,draft
+San Francisco,US,unknown,,draft
+San Jose,US,unknown,,draft
+Seattle,US,unknown,,draft
+Boston,US,unknown,,draft
+Chicago,US,unknown,,draft
+Houston,US,unknown,,draft
+Dallas,US,unknown,,draft
+Austin,US,unknown,,draft
+Philadelphia,US,unknown,,draft
+Washington,US,unknown,,draft
+Atlanta,US,unknown,,draft
+Miami,US,unknown,,draft
+Phoenix,US,unknown,,draft
+San Diego,US,unknown,,draft
+Las Vegas,US,unknown,,draft
+Denver,US,unknown,,draft
+Portland,US,unknown,,draft
+Irvine,US,unknown,,draft
 Tokyo,JP,unknown,,draft
 Osaka,JP,unknown,,draft
 Seoul,KR,unknown,,draft

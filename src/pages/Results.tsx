@@ -3,19 +3,19 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { budgetCaps, cities, exchangeRates, ingredientIndex, products } from '../data/load';
+import type { Region } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
-import { scalpMedicalAlerts, toScalpScoringProfile, type ScalpAnswers } from '../profile/questionnaire';
+import { cityKey, scalpMedicalAlerts, toScalpScoringProfile, type ScalpAnswers } from '../profile/questionnaire';
 import { newProfile } from '../profile/storage';
+import { formatMoney } from '../scoring/budget';
 import { TEST_MODE_DRAFT_SCORING, type DimensionKey } from '../scoring/config';
 import { filterByMarket, inMarket, marketForCity } from '../scoring/market';
-import { cityKey } from '../profile/questionnaire';
-import type { Region } from '../data/types';
-import { formatMoney } from '../scoring/budget';
 import { ingredientStatuses, rankProducts, type Dimension, type IngredientStatus, type ProductScore } from '../scoring/score';
 
 const EMPTY_SCALP: ScalpAnswers = { oilTiming: null, concerns: [], washFrequency: null };
 const DIMENSIONS: DimensionKey[] = ['need', 'irritation', 'evidence', 'environment'];
+const LEVEL_BARS = { high: 4, medium: 2, low: 1 } as const;
 
 function IngredientChip({ name, status }: { name: string; status: IngredientStatus }) {
   const { t, lang } = useI18n();
@@ -26,15 +26,20 @@ function IngredientChip({ name, status }: { name: string; status: IngredientStat
   const explain = ing ? (lang === 'zh' ? ing.explainZh : ing.explainEn) : '';
   return (
     <span className="ing">
-      <button type="button" className={`ing-chip ${status === 'name_unverified' ? 'unknown' : status}`} aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button
+        type="button"
+        className={`ing-chip ${status === 'name_unverified' ? 'unknown' : status}`}
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+      >
         {display}
       </button>
       {open && (
         <span className="ing-pop" role="dialog" aria-label={display}>
           <strong>{ing ? `${ing.inciName}${ing.nameZh ? ` / ${ing.nameZh}` : ''}` : name}</strong>
           {explain && <span>{explain}</span>}
-          <span className="muted small">{t(`ing.${status}` as Key)}</span>
-          <button type="button" className="link" onClick={() => setOpen(false)}>{t('ing.close')}</button>
+          <span className="muted">{t(`ing.${status}` as Key)}</span>
+          <button type="button" className="textbtn" onClick={() => setOpen(false)}>{t('ing.close')}</button>
         </span>
       )}
     </span>
@@ -45,56 +50,56 @@ function DimensionRow({ k, d }: { k: DimensionKey; d: Dimension }) {
   const { t, tx } = useI18n();
   // 刺激风险分数高表示风险低，换成更直观的说法
   const levelKey = d.level === null ? 'level.none' : k === 'irritation' ? `irritation.${d.level}` : `level.${d.level}`;
+  const bars = d.level ? LEVEL_BARS[d.level] : 0;
   return (
     <li className="dim">
-      <span className="dim-name">{t(`dim.${k}` as Key)}</span>
-      <span className={`level ${d.level ?? 'none'}`}>{t(levelKey as Key)}</span>
-      <span className="dim-reason">{tx(d.reason)}</span>
+      <div className="dim-row">
+        <span className="dim-name">{t(`dim.${k}` as Key)}</span>
+        <span className="meter" aria-hidden="true">
+          {[1, 2, 3, 4].map((i) => <i key={i} className={i <= bars ? 'on' : ''} />)}
+        </span>
+        <span className={`dim-level ${d.level ?? 'none'}`}>{t(levelKey as Key)}</span>
+      </div>
+      <p className="dim-reason">{tx(d.reason)}</p>
     </li>
   );
 }
 
-function ProductCard({ r, market }: { r: ProductScore; market: Region | null }) {
+function ProductCard({ r, market }: { r: ProductScore; market: Region }) {
   const { t, tx, lang } = useI18n();
   const p = r.product;
-  const otherRegion = market !== null && !inMarket(p, market);
+  const otherRegion = !inMarket(p, market);
   const name = lang === 'zh' ? p.nameZh || p.nameEn : p.nameEn || p.nameZh;
+  const otherNotices = r.notices.filter((n) => n.code !== 'test_data');
   return (
-    <article className={r.excluded ? 'card product excluded' : 'card product'}>
-      <header className="product-head">
+    <article className={r.excluded ? 'product excluded' : 'product'}>
+      <div className="product-top">
         <div>
-          <div className="muted small">{p.brand}</div>
-          <h3>{name}</h3>
-          <div className="tags">
-            <span className={otherRegion ? 'tag other' : 'tag'}>
-              {t('results.region')}: {p.region}{otherRegion ? ` · ${t('results.otherRegion')}` : ''}
-            </span>
-            {r.usesDraftData && <span className="tag test">{t('results.testData')}</span>}
+          <div className="brand">{p.brand}</div>
+          <h3 className="name">{name}</h3>
+          <div className="meta">
             {p.price !== null && (
-              <span className="tag">
-                {t('results.price')}: {formatMoney(p.price, p.currency, false)}
-                {p.sizeMl !== null ? ` / ${t('results.size', { n: p.sizeMl })}` : ''}
-              </span>
+              <span>{formatMoney(p.price, p.currency, false)}{p.sizeMl !== null ? ` · ${t('results.size', { n: p.sizeMl })}` : ''}</span>
             )}
-            <span className="tag">{t('results.transparency')}: {t(`transparency.${p.transparency}` as Key)}</span>
-            <span className="tag">{t('results.cn')}: {t(`cn.${p.availableInCn}` as Key)}</span>
+            <span>{t('results.region')} {p.region}{otherRegion ? ` · ${t('results.otherRegion')}` : ''}</span>
+            {r.usesDraftData && <span className="flag">{t('results.testData')}</span>}
           </div>
         </div>
         <div className="score">
           {r.score !== null ? (
             <>
-              <span className="score-num">{r.score}</span>
-              <span className="muted small">{t('results.score')}</span>
+              <div className="num">{r.score}</div>
+              <div className="of">{t('results.score')}</div>
             </>
           ) : (
-            <span className="muted">{t('results.noScore')}</span>
+            <div className="of">{t('results.noScore')}</div>
           )}
         </div>
-      </header>
+      </div>
 
       {r.exclusions.length > 0 && (
         <div className="flags bad">
-          <strong>{t('results.why')}</strong>
+          <span className="label">{t('results.why')}</span>
           <ul>{r.exclusions.map((f, i) => <li key={i}>{tx(f.text)}</li>)}</ul>
         </div>
       )}
@@ -103,26 +108,29 @@ function ProductCard({ r, market }: { r: ProductScore; market: Region | null }) 
 
       {r.conflicts.length > 0 && (
         <div className="flags">
-          <strong>{t('results.conflicts')}</strong>
+          <span className="label">{t('results.conflicts')}</span>
           <ul>{r.conflicts.map((c, i) => <li key={i}>{tx(c.text)}</li>)}</ul>
         </div>
       )}
 
-      {r.notices.length > 0 && (
-        <div className="flags">
-          <strong>{t('results.notices')}</strong>
-          <ul>{r.notices.map((f, i) => <li key={i}>{tx(f.text)}</li>)}</ul>
-        </div>
-      )}
-
-      <details>
-        <summary>{t('results.ingredients')}</summary>
-        <div className="ings">
-          {ingredientStatuses(p, ingredientIndex).map((s, i) => <IngredientChip key={`${s.name}-${i}`} name={s.name} status={s.status} />)}
-        </div>
-        {p.inciListOriginal && (
-          <p className="small"><span className="muted">{t('results.original')}：</span>{p.inciListOriginal}</p>
+      <details className="more">
+        <summary>{t('results.details')}</summary>
+        {otherNotices.length > 0 && (
+          <div className="flags">
+            <span className="label">{t('results.notices')}</span>
+            <ul>{otherNotices.map((f, i) => <li key={i}>{tx(f.text)}</li>)}</ul>
+          </div>
         )}
+        <div className="flags">
+          <span className="label">{t('results.ingredients')}</span>
+          <div className="ings">
+            {ingredientStatuses(p, ingredientIndex).map((s, i) => <IngredientChip key={`${s.name}-${i}`} name={s.name} status={s.status} />)}
+          </div>
+          {p.inciListOriginal && <p className="small muted" style={{ marginTop: 10 }}>{t('results.original')}：{p.inciListOriginal}</p>}
+        </div>
+        <p className="small muted" style={{ marginTop: 12 }}>
+          {t('results.transparency')}：{t(`transparency.${p.transparency}` as Key)} · {t('results.cn')}：{t(`cn.${p.availableInCn}` as Key)}
+        </p>
       </details>
     </article>
   );
@@ -135,7 +143,8 @@ export default function Results() {
   const scalp = p.scalp ?? EMPTY_SCALP;
 
   const [showOthers, setShowOthers] = useState(false);
-  const market = marketForCity(cities.find((c) => cityKey(c) === p.base.cityKey) ?? null);
+  const city = cities.find((c) => cityKey(c) === p.base.cityKey) ?? null;
+  const market = marketForCity(city);
   const shampoos = products.filter((x) => x.category === 'shampoo');
   const { shown: inScope, hiddenCount } = filterByMarket(shampoos, market, showOthers);
 
@@ -154,41 +163,49 @@ export default function Results() {
   const excluded = ranked.filter((r) => r.excluded);
 
   return (
-    <main>
-      <div className="row between">
-        <h2>{t('results.title')}</h2>
-        <Link to="/quiz">{t('results.editQuiz')}</Link>
+    <main className="shell">
+      <header className="results-head">
+        <div className="label">{t('results.kicker')}</div>
+        <h1 className="h1" style={{ marginTop: 8 }}>{t('results.title')}</h1>
+        <div className="chips">
+          <span className="tag">{city ? city.city : t('results.noCity')}</span>
+          <span className="tag">{t('results.marketTag', { market })}</span>
+          {profile && <span className="tag">{profile.name}</span>}
+          <Link className="tag" to="/quiz">{t('results.editQuiz')}</Link>
+        </div>
+      </header>
+
+      <div className="stack" style={{ marginTop: 16 }}>
+        {alerts.length > 0 && (
+          <div className="notice alert" role="alert">
+            <strong>{t('results.medical')}</strong>
+            {alerts.map((a) => <p key={a.code}>{tx(a.text)}</p>)}
+          </div>
+        )}
+        {TEST_MODE_DRAFT_SCORING && (
+          <div className="notice test">
+            <strong>{t('results.testData')}</strong>
+            {t('results.testBanner')}
+          </div>
+        )}
+        {!profile?.scalp && <p className="small muted">{t('results.noProfile')}</p>}
       </div>
 
-      {alerts.length > 0 && (
-        <div className="card alert" role="alert">
-          <strong>{t('results.medical')}</strong>
-          {alerts.map((a) => <p key={a.code}>{tx(a.text)}</p>)}
-        </div>
-      )}
-
-      {TEST_MODE_DRAFT_SCORING && (
-        <div className="card test-banner">
-          <strong>{t('results.testData')}</strong>
-          <p className="small">{t('results.testBanner')}</p>
-        </div>
-      )}
-
-      {!profile?.scalp && <p className="muted">{t('results.noProfile')}</p>}
-
-      {market && (
-        <label className="toggle">
-          <input type="checkbox" checked={showOthers} onChange={(e) => setShowOthers(e.target.checked)} />
+      <div className="toggle-row" style={{ marginTop: 16 }}>
+        <span>
           {t('results.showOthers', { n: hiddenCount })}
-          <span className="muted small">{t('results.marketHint', { market })}</span>
+          <br />
+          <span className="muted">{t('results.marketHint', { market })}</span>
+        </span>
+        <label className="switch">
+          <input type="checkbox" checked={showOthers} onChange={(e) => setShowOthers(e.target.checked)} aria-label={t('results.showOthers', { n: hiddenCount })} />
+          <span />
         </label>
-      )}
+      </div>
 
-      {ranked.length === 0 ? (
-        <p>{t('results.empty')}</p>
-      ) : (
-        <p className="muted">{t('results.count', { n: ranked.length, ok: shown.length })}</p>
-      )}
+      <p className="small muted" style={{ marginTop: 16 }}>
+        {ranked.length === 0 ? t('results.empty') : t('results.count', { n: ranked.length, ok: shown.length })}
+      </p>
 
       {shown.map((r) => <ProductCard key={r.product.productId} r={r} market={market} />)}
 

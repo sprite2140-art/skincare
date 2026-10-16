@@ -121,8 +121,9 @@ describe('按市场筛选', () => {
 
   it('默认市场取档案城市所在国家，只显示该市场的版本', () => {
     expect(marketForCity(cityIn('JP'))).toBe('JP');
-    expect(marketForCity(cityIn('FR'))).toBeNull();
-    expect(marketForCity(null)).toBeNull();
+    // 第一阶段默认美国市场
+    expect(marketForCity(cityIn('FR'))).toBe('US');
+    expect(marketForCity(null)).toBe('US');
     const us = filterByMarket(shampoos, 'US', false);
     expect(ids(us.shown).every((id) => id.startsWith('SH-US'))).toBe(true);
     expect(us.shown).toHaveLength(8);
