@@ -104,5 +104,10 @@
   "ing.draft": "未核对，不参与打分",
   "ing.unknown": "暂无数据",
   "ing.close": "关闭",
-  "ing.name_unverified": "暂无数据（成分名称待核对，不参与打分）"
+  "ing.name_unverified": "暂无数据（成分名称待核对，不参与打分）",
+  "results.testData": "测试数据，尚未核对",
+  "results.testBanner": "当前为开发测试模式：未经人工核对的成分数据也参与了打分，分数仅供测试，不代表最终推荐。",
+  "results.showOthers": "显示其他地区版本（{n} 个）",
+  "results.marketHint": "默认只显示 {market} 市场的版本，按档案中的城市判断",
+  "results.otherRegion": "其他地区版本"
 }

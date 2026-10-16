@@ -104,5 +104,10 @@
   "ing.draft": "Not verified yet; not used in scoring",
   "ing.unknown": "No data yet",
   "ing.close": "Close",
-  "ing.name_unverified": "No data yet (ingredient name pending verification; not scored)"
+  "ing.name_unverified": "No data yet (ingredient name pending verification; not scored)",
+  "results.testData": "Test data, not yet verified",
+  "results.testBanner": "Development test mode: unreviewed ingredient data is used in scoring. Scores are for testing only.",
+  "results.showOthers": "Show versions from other regions ({n})",
+  "results.marketHint": "By default only {market} versions are shown, based on the city in your profile",
+  "results.otherRegion": "Other region"
 }

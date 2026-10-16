@@ -1,2 +1,11 @@
 city,country,water_hardness,source,review_status
 New York,US,unknown,,draft
+Los Angeles,US,unknown,,draft
+Tokyo,JP,unknown,,draft
+Osaka,JP,unknown,,draft
+Seoul,KR,unknown,,draft
+Busan,KR,unknown,,draft
+Beijing,CN,unknown,,draft
+Shanghai,CN,unknown,,draft
+Guangzhou,CN,unknown,,draft
+Shenzhen,CN,unknown,,draft

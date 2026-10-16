@@ -1,7 +1,9 @@
 // 打分逻辑：固定规则，不调用 AI。规则说明见 docs/SCORING.md。
 //
 // 两条数据原则：
-// - 打分（四个维度）只用 review_status = verified 的成分；产品成分表里带 [待核对] 标记的成分（名称未核对）也不参与打分。
+// - 打分（四个维度）只用已核对的成分：review_status = verified，或基础成分（category = base，不需要人工核对）。
+//   产品成分表里带 [待核对] 标记的成分（名称未核对）不参与打分。
+//   测试模式（ScoringData.allowDraft）下，draft 的有效成分和风险成分也参与打分，结果标注"测试数据，尚未核对"。
 // - 安全相关（硬性过滤、孕期提示、搭配冲突）也看 draft 成分和名称未核对的成分，宁可多提示，结果里标注"未核对"。
 
 import { usageTypeOf } from '../data/types';
@@ -22,6 +24,8 @@ export interface ScoringData {
   exchangeRates: ExchangeRate[];
   /** 各品类预算档位界线，由 computeBudgetCaps() 从产品库计算 */
   budgetCaps: BudgetCapsByCategory;
+  /** 测试模式：允许 draft 成分参与打分。正式上线前必须关闭，见 config.ts 的 TEST_MODE_DRAFT_SCORING */
+  allowDraft?: boolean;
 }
 
 export type SpecialStatus = 'none' | 'pregnant' | 'trying' | 'breastfeeding' | 'rx';
@@ -85,8 +89,10 @@ export interface ProductScore {
   unknownIngredients: string[];
   /** 名称未核对（成分表中带 [待核对] 标记）的成分 */
   nameUnverifiedIngredients: string[];
-  /** 在成分库但未核对的成分 */
+  /** 在成分库但未核对的成分（基础成分不算） */
   unverifiedIngredients: string[];
+  /** 测试模式下，打分用到了未核对的成分 */
+  usesDraftData: boolean;
   /** 展示用当地价格；usd 用于预算比较 */
   price: { amount: number | null; currency: string; usd: number | null };
   transparency: Product['transparency'];
@@ -100,8 +106,9 @@ interface Resolved {
   nameUnverified: boolean;
 }
 
+/** 已核对：verified，或基础成分（不需要人工核对）；名称未核对的成分一律不算 */
 const isVerified = (r: Resolved): r is Resolved & { ingredient: Ingredient } =>
-  !r.nameUnverified && r.ingredient?.reviewStatus === 'verified';
+  !r.nameUnverified && (r.ingredient?.reviewStatus === 'verified' || r.ingredient?.category === 'base');
 const isKnown = (r: Resolved): r is Resolved & { ingredient: Ingredient } => r.ingredient !== null;
 
 export function levelOf(score: number | null): Level | null {
@@ -333,8 +340,8 @@ function scoreNeed(verified: (Resolved & { ingredient: Ingredient })[], weights:
       zh.push(`针对${label.zh}：含${names.zh}`);
       en.push(`for ${label.en}: contains ${names.en}`);
     } else {
-      zh.push(`针对${label.zh}：未找到已核对的有效成分`);
-      en.push(`for ${label.en}: no verified active ingredient found`);
+      zh.push(`针对${label.zh}：未找到有数据的有效成分`);
+      en.push(`for ${label.en}: no active ingredient with data found`);
     }
   }
   const enText = en.join('; ');
@@ -365,8 +372,8 @@ function scoreEvidence(matches: Map<Target, Ingredient[]>, weights: Map<Target, 
   }
   if (total === 0) {
     return dimension('evidence', null, {
-      zh: '没有针对你困扰的已核对成分，无法评估证据强度',
-      en: 'No verified ingredient targets your concerns, so evidence cannot be rated',
+      zh: '没有针对你困扰的有数据成分，无法评估证据强度',
+      en: 'No ingredient with data targets your concerns, so evidence cannot be rated',
     });
   }
   return dimension('evidence', sum / total, {
@@ -403,8 +410,8 @@ function scoreIrritation(
   const score = Math.max(0, 100 - deduction);
   if (found.length === 0) {
     return dimension('irritation', score, {
-      zh: '已核对成分中没有常见刺激成分',
-      en: 'No common irritants among verified ingredients',
+      zh: '有数据的成分中没有常见刺激成分',
+      en: 'No common irritants among ingredients with data',
     });
   }
   const list = joinNames(found);
@@ -464,7 +471,10 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   const { index } = data;
   const items = resolve(product, index);
   const price = priceInfo(product, data.exchangeRates);
-  const verified = items.filter(isVerified);
+  const usable = (r: Resolved): r is Resolved & { ingredient: Ingredient } =>
+    isVerified(r) || (!!data.allowDraft && !r.nameUnverified && r.ingredient !== null);
+  const verified = items.filter(usable);
+  const usesDraftData = verified.some((r) => !isVerified(r));
   const nameUnverifiedIngredients = items.filter((r) => r.nameUnverified).map((r) => r.raw);
   const unknownIngredients = items.filter((r) => !r.nameUnverified && !r.ingredient).map((r) => r.raw);
   const unverifiedIngredients = items.filter((r) => !r.nameUnverified && r.ingredient && !isVerified(r)).map((r) => r.raw);
@@ -488,7 +498,8 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       text: { zh: `含${preg.names.zh}，孕期或哺乳期请注意${suf.zh}`, en: `Contains ${preg.names.en}; take care during pregnancy or breastfeeding${suf.en}` },
     });
   }
-  const missing = unknownIngredients.length + unverifiedIngredients.length + nameUnverifiedIngredients.length;
+  // 测试模式下 draft 成分已参与打分，不算"暂无数据"
+  const missing = unknownIngredients.length + nameUnverifiedIngredients.length + (data.allowDraft ? 0 : unverifiedIngredients.length);
   if (missing > 0) {
     notices.push({
       code: 'missing_data',
@@ -496,22 +507,33 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       text: { zh: `有 ${missing} 个成分暂无数据，未参与打分`, en: `${missing} ingredient(s) have no data yet and were not scored` },
     });
   }
-  if (profile.budget !== 'none' && (price.status !== 'ok' || !caps)) {
-    const why: Record<Exclude<PriceInfo['status'], 'ok'> | 'no_caps', Text> = {
-      no_price: { zh: '价格未知', en: 'Price unknown' },
-      no_rate: { zh: `汇率表中没有 ${product.currency}`, en: `No exchange rate for ${product.currency}` },
-      no_caps: { zh: '该品类有价格的产品太少，还没有预算档位', en: 'Too few priced products in this category to set budget ranges' },
-    };
-    const w = why[price.status === 'ok' ? 'no_caps' : price.status];
+  if (usesDraftData) {
+    notices.push({
+      code: 'test_data',
+      unverified: true,
+      text: { zh: '测试数据，尚未核对：打分用到了未经人工核对的成分数据', en: 'Test data, not yet verified: scoring used ingredient data that has not been reviewed' },
+    });
+  }
+  if (profile.budget !== 'none' && price.status !== 'ok') {
+    // 价格未知或无法换算的产品不参与预算档位计算，也只在"不限"档出现
+    const why = price.status === 'no_price'
+      ? { zh: '价格未知', en: 'Price unknown' }
+      : { zh: `汇率表中没有 ${product.currency}`, en: `No exchange rate for ${product.currency}` };
+    exclusions.push({
+      code: 'price_unknown',
+      unverified: false,
+      text: { zh: `${why.zh}，只在预算选"不限"时显示`, en: `${why.en}; shown only when budget is "No limit"` },
+    });
+  } else if (profile.budget !== 'none' && !caps) {
     notices.push({
       code: 'budget_unchecked',
       unverified: false,
-      text: { zh: `${w.zh}，未做预算筛选`, en: `${w.en}; budget not checked` },
+      text: { zh: '该品类有价格的产品太少，还没有预算档位，未做预算筛选', en: 'Too few priced products in this category to set budget ranges; budget not checked' },
     });
   }
 
   const weights = concernWeights(profile.concerns, profile.concernsRanked);
-  const noData: Text = { zh: '没有已核对的成分数据，无法评分', en: 'No verified ingredient data, cannot score' };
+  const noData: Text = { zh: '没有可用的成分数据，无法评分', en: 'No usable ingredient data, cannot score' };
   let dimensions: Record<DimensionKey, Dimension>;
   if (verified.length === 0) {
     dimensions = {
@@ -541,6 +563,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     unknownIngredients,
     nameUnverifiedIngredients,
     unverifiedIngredients,
+    usesDraftData,
     price: { amount: product.price, currency: product.currency, usd: price.usd },
     transparency: product.transparency,
   };

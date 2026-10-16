@@ -37,3 +37,9 @@ export const LEVEL_THRESHOLDS = { high: 70, medium: 40 } as const;
 
 /** 冲洗型产品（usage_type = rinse_off）刺激风险扣分乘以此系数 */
 export const RINSE_OFF_MULTIPLIER = 0.5;
+
+/**
+ * 测试模式：允许 review_status = draft 的有效成分和风险成分参与打分，结果页标注"测试数据，尚未核对"。
+ * 仅用于开发测试阶段看推荐效果。**正式上线前必须改为 false。**
+ */
+export const TEST_MODE_DRAFT_SCORING = true;

@@ -6,6 +6,7 @@ import type { City, Ingredient, Product } from '../data/types';
 import { concernWeights, ingredientStatuses, rankProducts, scoreProduct, weightedTotal, type ScoringProfile } from './score';
 import { currencyForCountry } from './price';
 import { budgetOptions, computeBudgetCaps, formatMoney, percentile } from './budget';
+import { filterByMarket, inMarket, marketForCity } from './market';
 
 const real = loadDataFromDisk();
 
@@ -23,20 +24,23 @@ const baseProfile: ScoringProfile = {
 };
 const profile = (p: Partial<ScoringProfile>): ScoringProfile => ({ ...baseProfile, ...p });
 
-// ---------- 用 data/ 里的真实示例数据 ----------
+// ---------- 用 data/ 里的真实数据（18 个洗发水） ----------
 
-describe('data/ 示例数据', () => {
+describe('data/ 真实数据', () => {
   const index = buildIngredientIndex(real.ingredients);
-  const data = { index, exchangeRates: real.exchangeRates, budgetCaps: {} };
-  const sample = real.products.find((p) => p.productId === 'SH-US-000')!;
+  const budgetCaps = computeBudgetCaps(real.products, real.exchangeRates);
+  const strict = { index, exchangeRates: real.exchangeRates, budgetCaps };
+  const testMode = { ...strict, allowDraft: true };
+  const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
-  it('CSV 能正确解析', () => {
-    expect(sample).toBeDefined();
-    expect(sample.inciList).toEqual(['Aqua', 'Sodium Laureth Sulfate', 'Glycerin', 'Piroctone Olamine', 'Parfum']);
-    expect(sample.price).toBe(12);
-    const piroctone = index.get('octopirox');
-    expect(piroctone?.inciName).toBe('Piroctone Olamine');
-    expect(piroctone?.targets).toEqual(['dandruff', 'scalp_itch']);
+  it('CSV 能正确解析，名称已统一', () => {
+    expect(real.products).toHaveLength(18);
+    expect(byId('SH-US-001').inciList[0]).toBe('Pyrithione Zinc');
+    expect(byId('SH-US-005').inciList).toContain('Rosmarinus Officinalis Leaf Extract');
+    expect(byId('SH-JP-001').inciNameUnverified).toContain('Bis-Methoxypropylamido Isodocosane');
+    expect(byId('SH-CN-001').channels).toEqual(['天猫旗舰店']);
+    expect(byId('SH-CN-001').formulaNote).toContain('渠道备注：具体商品链接待核验');
+    expect(index.get('Glycine Max (Soybean) Oil')?.inciName).toBe('Glycine Soja Oil');
   });
 
   it('数据校验没有格式错误', () => {
@@ -44,7 +48,7 @@ describe('data/ 示例数据', () => {
   });
 
   it('数据校验能发现未知品类和汇率表缺少的币种', () => {
-    const bad = { ...sample, productId: 'BAD-1', category: 'shampooo', currency: 'EUR' };
+    const bad = { ...byId('SH-US-001'), productId: 'BAD-1', category: 'shampooo', currency: 'EUR' };
     const errors = validateData(real.ingredients, [bad], real.cities, real.exchangeRates).filter((i) => i.level === 'error');
     expect(errors.map((e) => e.message)).toEqual([
       expect.stringContaining('category 取值 "shampooo"'),
@@ -52,25 +56,88 @@ describe('data/ 示例数据', () => {
     ]);
   });
 
-  it('draft 成分不参与打分：示例产品无法评分', () => {
-    const r = scoreProduct(sample, profile({ concerns: ['dandruff'] }), data);
-    expect(r.score).toBeNull();
-    expect(Object.values(r.dimensions).every((d) => d.score === null)).toBe(true);
-    // 区分"不在成分库"和"在库但未核对"
-    expect(r.unknownIngredients).toEqual(['Sodium Laureth Sulfate']);
-    expect(r.unverifiedIngredients).toEqual(['Aqua', 'Glycerin', 'Piroctone Olamine', 'Parfum']);
-    expect(r.notices.find((n) => n.code === 'missing_data')?.text.zh).toBe('有 5 个成分暂无数据，未参与打分');
+  it('没有价格的产品不参与三分位计算', () => {
+    expect(budgetCaps.shampoo!.sampleSize).toBe(15);
+  });
+
+  it('关闭测试模式时，draft 有效成分不参与需求匹配；基础成分无需核对即可使用', () => {
+    const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), strict);
+    expect(r.dimensions.need.score).toBe(0);
+    expect(r.unverifiedIngredients).toContain('Pyrithione Zinc');
+    expect(r.unverifiedIngredients).not.toContain('Water'); // Aqua 是基础成分
+    expect(r.usesDraftData).toBe(false);
+    expect(r.notices.some((n) => n.code === 'test_data')).toBe(false);
+  });
+
+  it('测试模式下 draft 成分参与打分，并标注测试数据', () => {
+    const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), testMode);
+    expect(r.dimensions.need.score).toBe(100);
+    expect(r.dimensions.evidence.score).toBe(100); // 吡硫鎓锌 A 级
+    expect(r.usesDraftData).toBe(true);
+    expect(r.notices.find((n) => n.code === 'test_data')?.text.zh).toContain('测试数据，尚未核对');
+    // [待核对] 的成分即使在测试模式下也不参与打分
+    const jp = scoreProduct(byId('SH-JP-001'), profile({}), testMode);
+    expect(jp.nameUnverifiedIngredients).toEqual(['Bis-Methoxypropylamido Isodocosane', 'Gamma-Docosalactone', 'Sodium Dilauramidoglutamide Lysine']);
+  });
+
+  it('测试模式下按头皮屑排序，含去屑成分的产品都排在不含的前面', () => {
+    const ranked = rankProducts(real.products, 'shampoo', profile({ concerns: ['dandruff'] }), testMode);
+    const need = ranked.map((r) => r.dimensions.need.score);
+    expect(need).toEqual([...need].sort((a, b) => (b ?? 0) - (a ?? 0)));
+    const matched = ranked.filter((r) => r.dimensions.need.score === 100).map((r) => r.product.productId);
+    for (const id of ['SH-US-001', 'SH-KR-004', 'SH-CN-001', 'SH-CN-002', 'SH-KR-002']) expect(matched).toContain(id);
+    expect(ranked[0].product.productId).toBe('SH-US-001');
   });
 
   it('安全相关的过滤也看 draft 成分，并标注未核对', () => {
-    const r = scoreProduct(sample, profile({ avoidTags: ['fragrance'] }), data);
+    const r = scoreProduct(byId('SH-US-003'), profile({ avoidTags: ['fragrance'] }), strict);
     expect(r.excluded).toBe(true);
     expect(r.exclusions[0]).toMatchObject({ code: 'avoid_tag', unverified: true });
     expect(r.exclusions[0].text.zh).toContain('未核对');
+    // 吡硫鎓锌带孕期需注意标签
+    expect(scoreProduct(byId('SH-US-001'), profile({ specialStatus: 'pregnant' }), strict).exclusions[0].code).toBe('special_status');
+  });
+
+  it('没有价格的产品只在"不限"档出现', () => {
+    const kr = byId('SH-KR-003');
+    const r = scoreProduct(kr, profile({ budget: 'p67' }), strict);
+    expect(r.exclusions.map((e) => e.code)).toEqual(['price_unknown']);
+    expect(r.exclusions[0].text.zh).toBe('价格未知，只在预算选"不限"时显示');
+    expect(scoreProduct(kr, profile({ budget: 'none' }), strict).excluded).toBe(false);
   });
 });
 
-// ---------- 测试专用数据：以示例数据为基础，改为 verified；Test 开头的成分是虚构的 ----------
+describe('按市场筛选', () => {
+  const shampoos = real.products;
+  const ids = (ps: Product[]) => ps.map((p) => p.productId);
+  const cityIn = (country: string): City => ({ city: 'X', country, waterHardness: 'unknown', source: '', reviewStatus: 'draft' });
+
+  it('默认市场取档案城市所在国家，只显示该市场的版本', () => {
+    expect(marketForCity(cityIn('JP'))).toBe('JP');
+    expect(marketForCity(cityIn('FR'))).toBeNull();
+    expect(marketForCity(null)).toBeNull();
+    const us = filterByMarket(shampoos, 'US', false);
+    expect(ids(us.shown).every((id) => id.startsWith('SH-US'))).toBe(true);
+    expect(us.shown).toHaveLength(8);
+    expect(us.hiddenCount).toBe(10);
+    expect(filterByMarket(shampoos, 'JP', false).shown).toHaveLength(4);
+  });
+
+  it('打开"显示其他地区版本"后显示全部；没有市场时不筛选', () => {
+    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(18);
+    expect(filterByMarket(shampoos, null, false)).toEqual({ shown: shampoos, hiddenCount: 0 });
+  });
+
+  it('中国市场同时显示国内能买到的进口版本', () => {
+    const imported = { ...shampoos[0], productId: 'SH-US-IMPORT', availableInCn: 'cross_border' as const };
+    const notSold = { ...shampoos[0], productId: 'SH-US-NOT', availableInCn: 'unknown' as const };
+    const cn = filterByMarket([...shampoos, imported, notSold], 'CN', false);
+    expect(ids(cn.shown)).toEqual(['SH-CN-001', 'SH-CN-002', 'SH-US-IMPORT']);
+    expect(inMarket(imported, 'US')).toBe(true);
+  });
+});
+
+// ---------- 测试专用数据：部分成分取自成分库并改为 verified；Test 开头的成分是虚构的 ----------
 
 const verify = (ing: Ingredient, extra: Partial<Ingredient> = {}): Ingredient => ({
   ...ing,
@@ -107,7 +174,14 @@ const fixtureIngredients: Ingredient[] = [
 const index = buildIngredientIndex(fixtureIngredients);
 const data = { index, exchangeRates: real.exchangeRates, budgetCaps: {} };
 
-const sample = real.products.find((p) => p.productId === 'SH-US-000')!;
+// 测试用的虚构洗发水
+const sample: Product = {
+  productId: 'SH-T-000', brand: 'Test', nameEn: 'Test Shampoo', nameZh: '测试洗发水', zone: 'scalp', category: 'shampoo',
+  usageType: null, region: 'US', formulaNote: '', channels: [], inclusionBasis: '',
+  inciList: ['Aqua', 'Sodium Laureth Sulfate', 'Glycerin', 'Piroctone Olamine', 'Parfum'], inciNameUnverified: [],
+  inciListOriginal: '', price: 12, currency: 'USD', sizeMl: null, availableInCn: 'unknown', transparency: 'medium',
+  sourceUrls: [], reviewedOn: '',
+};
 // 默认用免洗型品类，刺激风险不减半；需要冲洗型时显式传 category: 'shampoo'
 const product = (id: string, inciList: string[], extra: Partial<Product> = {}): Product => ({
   ...sample, productId: id, nameZh: id, nameEn: id, category: 'scalp_care', inciList, ...extra,
@@ -128,7 +202,7 @@ describe('需求匹配', () => {
     const p = product('P1', ['Aqua', 'Test Oil Control']);
     const r = scoreProduct(p, profile({ concerns: ['dandruff', 'scalp_oil'] }), data);
     expect(r.dimensions.need.score).toBe(50);
-    expect(r.dimensions.need.reason.zh).toContain('针对头皮屑：未找到已核对的有效成分');
+    expect(r.dimensions.need.reason.zh).toContain('针对头皮屑：未找到有数据的有效成分');
   });
 
   it('排序困扰按 3/2/1 加权', () => {
@@ -368,16 +442,13 @@ describe('预算（按品类三分位，USD）', () => {
     expect(jp.exclusions[0].text.zh).toBe('价格 4000 JPY（约 25.26 USD），超出你选的预算上限（约 19.90 USD）');
   });
 
-  it('品类没有档位、价格未知、汇率表没有该币种：不排除，只提示', () => {
-    const cases = [
-      item('C1', 999, 'USD', 'conditioner'),
-      product('C2', ['Aqua'], { category: 'shampoo', price: null }),
-      item('C3', 999, 'EUR'),
-    ];
-    for (const p of cases) {
-      const r = scoreProduct(p, profile({ budget: 'p33' }), withCaps);
-      expect(r.excluded).toBe(false);
-      expect(r.notices.some((n) => n.code === 'budget_unchecked')).toBe(true);
+  it('品类没有档位：不排除，只提示；价格未知或汇率表没有该币种：只在"不限"档出现', () => {
+    const noCaps = scoreProduct(item('C1', 999, 'USD', 'conditioner'), profile({ budget: 'p33' }), withCaps);
+    expect(noCaps.excluded).toBe(false);
+    expect(noCaps.notices.some((n) => n.code === 'budget_unchecked')).toBe(true);
+    for (const p of [product('C2', ['Aqua'], { category: 'shampoo', price: null }), item('C3', 999, 'EUR')]) {
+      expect(scoreProduct(p, profile({ budget: 'p33' }), withCaps).exclusions.map((e) => e.code)).toEqual(['price_unknown']);
+      expect(scoreProduct(p, profile({ budget: 'none' }), withCaps).excluded).toBe(false);
     }
   });
 

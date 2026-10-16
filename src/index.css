@@ -111,3 +111,10 @@ details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
   background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 4px 16px rgb(0 0 0 / 0.12);
 }
 .excluded-list > summary { font-weight: 600; }
+.tag.other { border-style: dashed; }
+.tag.test, .test-banner strong { color: var(--mid); }
+.tag.test { border-color: var(--mid); }
+.card.test-banner { border-color: var(--mid); background: var(--warn-soft); padding: 10px 16px; }
+.card.test-banner p { margin: 4px 0 0; }
+.toggle { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 8px 0; }
+.toggle input { flex: 0 0 auto; min-height: 0; }

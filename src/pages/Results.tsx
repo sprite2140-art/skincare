@@ -7,7 +7,10 @@ import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import { scalpMedicalAlerts, toScalpScoringProfile, type ScalpAnswers } from '../profile/questionnaire';
 import { newProfile } from '../profile/storage';
-import type { DimensionKey } from '../scoring/config';
+import { TEST_MODE_DRAFT_SCORING, type DimensionKey } from '../scoring/config';
+import { filterByMarket, inMarket, marketForCity } from '../scoring/market';
+import { cityKey } from '../profile/questionnaire';
+import type { Region } from '../data/types';
 import { formatMoney } from '../scoring/budget';
 import { ingredientStatuses, rankProducts, type Dimension, type IngredientStatus, type ProductScore } from '../scoring/score';
 
@@ -51,9 +54,10 @@ function DimensionRow({ k, d }: { k: DimensionKey; d: Dimension }) {
   );
 }
 
-function ProductCard({ r }: { r: ProductScore }) {
+function ProductCard({ r, market }: { r: ProductScore; market: Region | null }) {
   const { t, tx, lang } = useI18n();
   const p = r.product;
+  const otherRegion = market !== null && !inMarket(p, market);
   const name = lang === 'zh' ? p.nameZh || p.nameEn : p.nameEn || p.nameZh;
   return (
     <article className={r.excluded ? 'card product excluded' : 'card product'}>
@@ -62,7 +66,10 @@ function ProductCard({ r }: { r: ProductScore }) {
           <div className="muted small">{p.brand}</div>
           <h3>{name}</h3>
           <div className="tags">
-            <span className="tag">{t('results.region')}: {p.region}{p.formulaNote ? `（${p.formulaNote}）` : ''}</span>
+            <span className={otherRegion ? 'tag other' : 'tag'}>
+              {t('results.region')}: {p.region}{otherRegion ? ` · ${t('results.otherRegion')}` : ''}
+            </span>
+            {r.usesDraftData && <span className="tag test">{t('results.testData')}</span>}
             {p.price !== null && (
               <span className="tag">
                 {t('results.price')}: {formatMoney(p.price, p.currency, false)}
@@ -127,10 +134,21 @@ export default function Results() {
   const p = profile ?? newProfile('');
   const scalp = p.scalp ?? EMPTY_SCALP;
 
+  const [showOthers, setShowOthers] = useState(false);
+  const market = marketForCity(cities.find((c) => cityKey(c) === p.base.cityKey) ?? null);
+  const shampoos = products.filter((x) => x.category === 'shampoo');
+  const { shown: inScope, hiddenCount } = filterByMarket(shampoos, market, showOthers);
+
   const ranked = useMemo(() => {
     const scoring = toScalpScoringProfile(p.base, scalp, 'shampoo', cities, []);
-    return rankProducts(products, 'shampoo', scoring, { index: ingredientIndex, exchangeRates, budgetCaps });
-  }, [p.base, scalp]);
+    return rankProducts(inScope, 'shampoo', scoring, {
+      index: ingredientIndex,
+      exchangeRates,
+      budgetCaps,
+      allowDraft: TEST_MODE_DRAFT_SCORING,
+    });
+    // inScope 只由 market 和 showOthers 决定
+  }, [p.base, scalp, market, showOthers]);
   const alerts = scalpMedicalAlerts(scalp);
   const shown = ranked.filter((r) => !r.excluded);
   const excluded = ranked.filter((r) => r.excluded);
@@ -149,7 +167,22 @@ export default function Results() {
         </div>
       )}
 
+      {TEST_MODE_DRAFT_SCORING && (
+        <div className="card test-banner">
+          <strong>{t('results.testData')}</strong>
+          <p className="small">{t('results.testBanner')}</p>
+        </div>
+      )}
+
       {!profile?.scalp && <p className="muted">{t('results.noProfile')}</p>}
+
+      {market && (
+        <label className="toggle">
+          <input type="checkbox" checked={showOthers} onChange={(e) => setShowOthers(e.target.checked)} />
+          {t('results.showOthers', { n: hiddenCount })}
+          <span className="muted small">{t('results.marketHint', { market })}</span>
+        </label>
+      )}
 
       {ranked.length === 0 ? (
         <p>{t('results.empty')}</p>
@@ -157,12 +190,12 @@ export default function Results() {
         <p className="muted">{t('results.count', { n: ranked.length, ok: shown.length })}</p>
       )}
 
-      {shown.map((r) => <ProductCard key={r.product.productId} r={r} />)}
+      {shown.map((r) => <ProductCard key={r.product.productId} r={r} market={market} />)}
 
       {excluded.length > 0 && (
         <details className="excluded-list">
           <summary>{t('results.excluded', { n: excluded.length })}</summary>
-          {excluded.map((r) => <ProductCard key={r.product.productId} r={r} />)}
+          {excluded.map((r) => <ProductCard key={r.product.productId} r={r} market={market} />)}
         </details>
       )}
     </main>
