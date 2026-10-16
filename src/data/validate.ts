@@ -120,6 +120,13 @@ export function validateData(
     else if (p.price <= 0) err(F_PRD, key, `price 应为正数：${p.price}`);
     else if (!p.currency) err(F_PRD, key, '有 price 但缺 currency');
     else if (!rateCurrencies.has(p.currency)) err(F_PRD, key, `currency "${p.currency}" 不在 exchange_rates.csv`);
+    // key_actives 中的每一项都必须出现在本产品的 inci_list 中（按统一写法和别名比较）
+    const canon = (n: string) => normalizeName(index.get(n)?.inciName ?? n);
+    const listed = new Set(p.inciList.map(canon));
+    for (const k of p.keyActives) {
+      if (!listed.has(canon(k))) err(F_PRD, key, `key_actives 中的 "${k}" 不在本产品的 inci_list 中`);
+      else if (index.get(k) && index.get(k)!.category !== 'active') warn(F_PRD, key, `key_actives 中的 "${k}" 在成分库中不是有效成分（category = ${index.get(k)!.category}）`);
+    }
     if (p.sizeMl !== null && !(p.sizeMl > 0)) err(F_PRD, key, `size_ml 应为正数：${p.sizeMl}`);
     for (const url of p.sourceUrls) {
       if (!/^https?:\/\//.test(url)) err(F_PRD, key, `source_url 中的 "${url}" 不是 http(s) 链接（多个链接用分号分隔）`);

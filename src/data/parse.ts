@@ -95,6 +95,7 @@ export function parseProducts(text: string): Product[] {
     inclusionBasis: r.inclusion_basis ?? '',
     inciList: inci.names,
     inciNameUnverified: inci.unverified,
+    keyActives: parseInciList(r.key_actives).names,
     inciListOriginal: r.inci_list_original ?? '',
     price: parseNumber(r.price),
     currency: r.currency ?? '',

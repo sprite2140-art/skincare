@@ -10,6 +10,9 @@ export const WEIGHTS = {
 } as const;
 export type DimensionKey = keyof typeof WEIGHTS;
 
+/** 需求匹配：成分表中有、但不是产品主打（key_actives）的有效成分，按此比例计分 */
+export const NON_KEY_ACTIVE_CREDIT = 0.3;
+
 /** 有排序的困扰（面部，最多 3 个）：第 1/2/3 位的权重；超出的按最后一位算 */
 export const RANKED_CONCERN_WEIGHTS = [3, 2, 1];
 

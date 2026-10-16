@@ -94,8 +94,15 @@ describe('data/ 真实数据', () => {
     expect(r.excluded).toBe(true);
     expect(r.exclusions[0]).toMatchObject({ code: 'avoid_tag', unverified: true });
     expect(r.exclusions[0].text.zh).toContain('未核对');
-    // 吡硫鎓锌带孕期需注意标签
-    expect(scoreProduct(byId('SH-US-001'), profile({ specialStatus: 'pregnant' }), strict).exclusions[0].code).toBe('special_status');
+    // 吡硫鎓锌带孕期需注意标签，排除和提示都说明这是谨慎处理及原因
+    const preg = scoreProduct(byId('SH-US-001'), profile({ specialStatus: 'pregnant' }), strict).exclusions[0];
+    expect(preg.code).toBe('special_status');
+    expect(preg.text.zh).toContain('为谨慎起见，怀孕期间不推荐');
+    expect(preg.text.zh).toContain('欧盟自 2022 年起以生殖毒性分类');
+    expect(preg.text.zh).toContain('美国目前仍批准其作为非处方（OTC）去屑成分');
+    const notice = scoreProduct(byId('SH-US-001'), profile({}), strict).notices.find((n) => n.code === 'pregnancy_notice')!;
+    expect(notice.text.zh).toContain('谨慎提示，不代表确定有害');
+    expect(notice.text.en).toContain('still approves it as an over-the-counter');
   });
 
   it('没有价格的产品只在"不限"档出现', () => {
@@ -178,7 +185,7 @@ const data = { index, exchangeRates: real.exchangeRates, budgetCaps: {} };
 const sample: Product = {
   productId: 'SH-T-000', brand: 'Test', nameEn: 'Test Shampoo', nameZh: '测试洗发水', zone: 'scalp', category: 'shampoo',
   usageType: null, region: 'US', formulaNote: '', channels: [], inclusionBasis: '',
-  inciList: ['Aqua', 'Sodium Laureth Sulfate', 'Glycerin', 'Piroctone Olamine', 'Parfum'], inciNameUnverified: [],
+  inciList: ['Aqua', 'Sodium Laureth Sulfate', 'Glycerin', 'Piroctone Olamine', 'Parfum'], inciNameUnverified: [], keyActives: [],
   inciListOriginal: '', price: 12, currency: 'USD', sizeMl: null, availableInCn: 'unknown', transparency: 'medium',
   sourceUrls: [], reviewedOn: '',
 };
@@ -236,6 +243,42 @@ describe('需求匹配', () => {
     const r = scoreProduct(p, profile({ concerns: ['dandruff'] }), data);
     expect(r.unknownIngredients).toEqual([]);
     expect(r.dimensions.need.score).toBe(100);
+  });
+});
+
+describe('主打有效成分 key_actives', () => {
+  it('主打成分覆盖的困扰按满分，只有非主打成分覆盖的按 30% 计', () => {
+    // 头皮屑由主打的吡罗克酮覆盖（满分），头皮油只由非主打的 Test Oil Control 覆盖（30%）
+    const p = product('K1', ['Aqua', 'Piroctone Olamine', 'Test Oil Control'], { keyActives: ['Piroctone Olamine'] });
+    const r = scoreProduct(p, profile({ concerns: ['dandruff', 'scalp_oil'] }), data);
+    expect(r.dimensions.need.score).toBe(65); // (1 + 0.3) / 2
+    expect(r.dimensions.need.reason.zh).toBe('针对头皮屑：含吡罗克酮乙醇胺盐（主打）；针对头皮油：含Test Oil Control（非主打，按 30% 计）');
+    expect(r.notices.some((n) => n.code === 'key_actives_missing')).toBe(false);
+  });
+
+  it('非主打的有效成分不再归零', () => {
+    const p = product('K2', ['Aqua', 'Piroctone Olamine'], { keyActives: ['Test Oil Control'] });
+    expect(scoreProduct(p, profile({ concerns: ['dandruff'] }), data).dimensions.need.score).toBe(30);
+  });
+
+  it('主打成分按别名和大小写匹配', () => {
+    const p = product('K3', ['Aqua', 'Piroctone Olamine'], { keyActives: ['OCTOPIROX'] });
+    expect(scoreProduct(p, profile({ concerns: ['dandruff'] }), data).dimensions.need.score).toBe(100);
+  });
+
+  it('还没填写主打成分时按满分计算，并提示', () => {
+    const r = scoreProduct(product('K4', ['Aqua', 'Piroctone Olamine']), profile({ concerns: ['dandruff'] }), data);
+    expect(r.dimensions.need.score).toBe(100);
+    expect(r.dimensions.need.reason.zh).toBe('针对头皮屑：含吡罗克酮乙醇胺盐');
+    expect(r.notices.some((n) => n.code === 'key_actives_missing')).toBe(true);
+  });
+
+  it('数据校验：key_actives 必须出现在本产品的成分表中', () => {
+    const base = real.products.find((x) => x.productId === 'SH-US-001')!;
+    const errs = (keyActives: string[]) =>
+      validateData(real.ingredients, [{ ...base, keyActives }], real.cities, real.exchangeRates).filter((i) => i.level === 'error').map((i) => i.message);
+    expect(errs(['Pyrithione Zinc', 'zinc pyrithione'])).toEqual([]);
+    expect(errs(['Ketoconazole'])).toEqual([expect.stringContaining('"Ketoconazole" 不在本产品的 inci_list 中')]);
   });
 });
 
@@ -381,7 +424,7 @@ describe('硬性过滤', () => {
 
   it('孕期提示对所有人被动显示', () => {
     const r = scoreProduct(preg, profile({}), data);
-    expect(r.notices.find((n) => n.code === 'pregnancy_notice')?.text.zh).toBe('含Test Pregnancy Caution，孕期或哺乳期请注意');
+    expect(r.notices.find((n) => n.code === 'pregnancy_notice')?.text.zh).toBe('含Test Pregnancy Caution，孕期或哺乳期请注意（谨慎提示，不代表确定有害）。');
   });
 
   it('处方药用 rx_caution 标签，不用孕期标签', () => {

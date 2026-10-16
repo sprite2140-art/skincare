@@ -90,6 +90,8 @@ export interface Product {
   inciList: string[];
   /** inciList 中原文带 [待核对] 标记的成分（统一后的名称）：名称未核对，不参与打分 */
   inciNameUnverified: string[];
+  /** 品牌宣称的主打有效成分（美国药品标签上的有效成分也算），写法同 inci_list；为空表示还没填写 */
+  keyActives: string[];
   /** 包装原文成分表（如中文、日文、韩文），原样保存，仅供展示和核对 */
   inciListOriginal: string;
   price: number | null;

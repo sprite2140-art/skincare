@@ -11,7 +11,7 @@ import type { City, ExchangeRate, Ingredient, Product, RiskTag, Target } from '.
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import {
   CHELATING_FUNCTION, ENVIRONMENT_SCORES, EVIDENCE_SCORES, IRRITANT_DEDUCTION, IRRITANT_TAGS,
-  LEVEL_THRESHOLDS, RANKED_CONCERN_WEIGHTS, RINSE_OFF_MULTIPLIER, SENSITIVE_MULTIPLIER,
+  LEVEL_THRESHOLDS, NON_KEY_ACTIVE_CREDIT, RANKED_CONCERN_WEIGHTS, RINSE_OFF_MULTIPLIER, SENSITIVE_MULTIPLIER,
   STRONG_CLEANSER_DEDUCTION, WEIGHTS, type DimensionKey,
 } from './config';
 import { RISK_TAG_LABELS, TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
@@ -175,6 +175,21 @@ function withTag(items: Resolved[], tag: RiskTag) {
   };
 }
 
+/** 孕期 / 处方药需注意成分的原因：取成分库里的通俗解释，让用户知道是谨慎处理 */
+function cautionReasons(hits: (Resolved & { ingredient: Ingredient })[]): Text {
+  const seen = new Set<string>();
+  const zh: string[] = [];
+  const en: string[] = [];
+  for (const r of hits) {
+    if (seen.has(r.ingredient.inciName)) continue;
+    seen.add(r.ingredient.inciName);
+    const n = ingredientName(r.ingredient, r.raw);
+    if (r.ingredient.explainZh) zh.push(`${n.zh}：${r.ingredient.explainZh}`);
+    if (r.ingredient.explainEn) en.push(`${n.en}: ${r.ingredient.explainEn}`);
+  }
+  return { zh: zh.join(''), en: en.length ? ` ${en.join(' ')}` : '' };
+}
+
 const unverifiedSuffix = (unverified: boolean): Text =>
   unverified ? { zh: '（成分数据未核对）', en: ' (ingredient data not yet verified)' } : { zh: '', en: '' };
 
@@ -193,12 +208,13 @@ function hardFilters(
     if (hits.length > 0) {
       const s = STATUS_LABELS[profile.specialStatus];
       const suf = unverifiedSuffix(unverified);
+      const why = cautionReasons(hits);
       out.push({
         code: 'special_status',
         unverified,
         text: {
-          zh: `含${names.zh}，${s.zh}期间不建议使用${suf.zh}`,
-          en: `Contains ${names.en}, not recommended during ${s.en}${suf.en}`,
+          zh: `含${names.zh}，为谨慎起见，${s.zh}期间不推荐${suf.zh}。${why.zh}`.trimEnd(),
+          en: `Contains ${names.en}; as a precaution, not recommended during ${s.en}${suf.en}.${why.en}`.trimEnd(),
         },
       });
     }
@@ -310,7 +326,17 @@ function checkConflicts(items: Resolved[], profile: ScoringProfile, index: Ingre
 
 // ---------- 四个维度（只用 verified 成分） ----------
 
-function scoreNeed(verified: (Resolved & { ingredient: Ingredient })[], weights: Map<Target, number>) {
+/**
+ * 需求匹配。keyActives 为产品主打有效成分的规范化名称集合：
+ * 主打成分覆盖的困扰按满分计，只有非主打成分覆盖的按 NON_KEY_ACTIVE_CREDIT 计。
+ * keyActives 为 null（产品还没填写主打成分）时，所有有效成分都按满分计。
+ */
+function scoreNeed(
+  verified: (Resolved & { ingredient: Ingredient })[],
+  weights: Map<Target, number>,
+  keyActives: Set<string> | null,
+) {
+  const isKey = (i: Ingredient) => keyActives === null || keyActives.has(normalizeName(i.inciName));
   const matches = new Map<Target, Ingredient[]>();
   for (const [target] of weights) {
     matches.set(
@@ -335,8 +361,17 @@ function scoreNeed(verified: (Resolved & { ingredient: Ingredient })[], weights:
     const label = TARGET_LABELS[target];
     const hit = matches.get(target)!;
     if (hit.length > 0) {
-      covered += w;
-      const names = joinNames(hit.map((i) => ingredientName(i, i.inciName)));
+      const hasKey = hit.some(isKey);
+      covered += w * (hasKey ? 1 : NON_KEY_ACTIVE_CREDIT);
+      const pct = Math.round(NON_KEY_ACTIVE_CREDIT * 100);
+      const label2 = (i: Ingredient): Text => {
+        const n = ingredientName(i, i.inciName);
+        if (keyActives === null) return n;
+        return isKey(i)
+          ? { zh: `${n.zh}（主打）`, en: `${n.en} (key active)` }
+          : { zh: `${n.zh}（非主打，按 ${pct}% 计）`, en: `${n.en} (not a key active, counted at ${pct}%)` };
+      };
+      const names = joinNames(hit.map(label2));
       zh.push(`针对${label.zh}：含${names.zh}`);
       en.push(`for ${label.en}: contains ${names.en}`);
     } else {
@@ -467,6 +502,12 @@ export function weightedTotal(dims: Record<DimensionKey, Dimension>): number | n
   return wSum === 0 ? null : Math.round(sum / wSum);
 }
 
+/** 产品主打有效成分的规范化名称（按成分库主名统一别名）；没填写时为 null */
+function keyActiveSet(product: Product, index: IngredientIndex): Set<string> | null {
+  if (product.keyActives.length === 0) return null;
+  return new Set(product.keyActives.map((n) => normalizeName(index.get(n)?.inciName ?? n)));
+}
+
 export function scoreProduct(product: Product, profile: ScoringProfile, data: ScoringData): ProductScore {
   const { index } = data;
   const items = resolve(product, index);
@@ -495,7 +536,10 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     notices.push({
       code: 'pregnancy_notice',
       unverified: preg.unverified,
-      text: { zh: `含${preg.names.zh}，孕期或哺乳期请注意${suf.zh}`, en: `Contains ${preg.names.en}; take care during pregnancy or breastfeeding${suf.en}` },
+      text: {
+        zh: `含${preg.names.zh}，孕期或哺乳期请注意（谨慎提示，不代表确定有害）${suf.zh}。${cautionReasons(preg.hits).zh}`.trimEnd(),
+        en: `Contains ${preg.names.en}; take care during pregnancy or breastfeeding (a precaution, not proof of harm)${suf.en}.${cautionReasons(preg.hits).en}`.trimEnd(),
+      },
     });
   }
   // 测试模式下 draft 成分已参与打分，不算"暂无数据"
@@ -505,6 +549,16 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       code: 'missing_data',
       unverified: false,
       text: { zh: `有 ${missing} 个成分暂无数据，未参与打分`, en: `${missing} ingredient(s) have no data yet and were not scored` },
+    });
+  }
+  if (product.keyActives.length === 0 && profile.concerns.length > 0) {
+    notices.push({
+      code: 'key_actives_missing',
+      unverified: false,
+      text: {
+        zh: '产品还没有填写主打有效成分，需求匹配暂按成分表中的有效成分满分计算',
+        en: 'Key actives not filled in yet; needs are matched using all listed active ingredients at full credit',
+      },
     });
   }
   if (usesDraftData) {
@@ -543,7 +597,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       environment: dimension('environment', null, noData),
     };
   } else {
-    const need = scoreNeed(verified, weights);
+    const need = scoreNeed(verified, weights, keyActiveSet(product, index));
     dimensions = {
       need: need.dim,
       irritation: scoreIrritation(verified, profile, product),

@@ -53,6 +53,7 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | channels | 入库渠道 | Ulta |
 | inclusion_basis | 入库依据（榜单/奖项） | |
 | inci_list | 完整成分表，**英文 INCI 名**，按包装顺序，分号分隔。打分用这一列，解析时统一写法（见下方"成分名称统一"） | Aqua;Glycerin;Piroctone Olamine |
+| key_actives | 品牌宣称的主打有效成分（美国药品标签上的 Active Ingredient 也算），写法同 inci_list，分号分隔；每一项都必须出现在本产品的 inci_list 中。打分时主打成分按满分计，成分表中有但不是主打的有效成分按 30% 计；留空表示还没填写，暂按全部满分计算并提示 | Pyrithione Zinc |
 | inci_list_original | 包装原文成分表（中文、日文、韩文等），原样保存，只用于展示和核对，不参与打分 | 水、甘油、吡罗克酮乙醇胺盐 |
 | price / currency | 当地价格和货币代码，按销售地区存当地价格；price 必须为正数，currency 必须在 exchange_rates.csv 中 | 12 / USD |
 | size_ml | 规格（毫升），正数，可留空 | 400 |

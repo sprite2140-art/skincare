@@ -26,6 +26,18 @@
 
 Cloudflare 后台的菜单名称可能会调整，以 Cloudflare Pages 官方文档为准。
 
+## 排查：预览页空白
+
+如果线上页面空白、页面源码里引用的是 `/src/main.tsx`，说明 Cloudflare 发布的是仓库源码，而不是构建产物。请检查项目 → 设置 → 构建：
+
+- 构建命令必须是 `npm run build`（不能为空）；
+- 构建输出目录必须是 `dist`（不能是 `/` 或留空）；
+- 根目录（Root directory）留空。
+
+改完后在 Cloudflare 后台对最新部署点"重试部署"，或推送一个新提交触发部署。正确部署后，页面源码里引用的应该是 `/assets/index-xxxx.js`。
+
+仓库里没有 wrangler.toml，也没有 `_redirects`、`_headers`、`_routes.json`，构建设置完全以 Cloudflare 后台为准。
+
 ## 说明
 
 - 站点部署在域名根路径，使用正常的网址路由，便于分享卡片带链接。没有 `404.html` 时，Cloudflare Pages 会把未知路径交给 `index.html` 处理（单页应用模式），刷新子页面不会 404。
