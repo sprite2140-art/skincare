@@ -8,10 +8,11 @@ import type { Category, Product, Region } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import {
-  EMPTY_HAIR, adviseCare, cityKey, moneyToUsd, scalpMedicalAlerts, toScoringProfile, type Answers, type ScalpAnswers,
+  EMPTY_HAIR, adviseCare, cityKey, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, toScoringProfile, type Answers, type ScalpAnswers,
 } from '../profile/questionnaire';
 import { newProfile } from '../profile/storage';
 import { formatMoney } from '../scoring/budget';
+import { TARGET_LABELS } from '../scoring/labels';
 import { TEST_MODE_DRAFT_SCORING, type DimensionKey } from '../scoring/config';
 import { filterByMarket, inMarket, marketForCity } from '../scoring/market';
 import { recommendReasons } from '../scoring/reasons';
@@ -178,13 +179,22 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
           <p className="small muted" style={{ marginTop: 6 }}>{t('results.basisNote')}</p>
           {p.keyActives.length > 0 && <p className="small" style={{ marginTop: 6 }}>{t('results.keyActives')}：{p.keyActives.join('；')}</p>}
           {!p.keyActivesDisclosed && <p className="small" style={{ marginTop: 6 }}>{t('results.keyActivesNone')}</p>}
+          {p.claimedBenefits.length > 0 && (
+            <p className="small" style={{ marginTop: 6 }}>
+              {t('results.positioning')}（{t(`claimSource.${p.claimSource ?? 'data_classification'}` as Key)}）：
+              {p.claimedBenefits.map((c) => tx(TARGET_LABELS[c])).join('、')}
+            </p>
+          )}
         </div>
         <div className="flags">
           <span className="label">{t('results.fragrance')}</span>
-          <p className="small" style={{ marginTop: 6 }}>
-            {t(`fragrance.${f.status}` as Key)}
-            {f.fragrance.length > 0 && `：${f.fragrance.join('、')}`}
-          </p>
+          <p className="small" style={{ marginTop: 6 }}>{t(`fragrance.${f.status}` as Key)}</p>
+          {f.allergens.length > 0 && <p className="small">{t('fragrance.allergens')}：{f.allergens.join('、')}</p>}
+          {f.cosingPerfuming.length > 0 && <p className="small">{t('fragrance.cosing')}：{f.cosingPerfuming.join('、')}</p>}
+          {(() => {
+            const other = f.fragrance.filter((x) => !f.allergens.includes(x) && !f.cosingPerfuming.includes(x));
+            return other.length > 0 && <p className="small">{t('fragrance.other')}：{other.join('、')}</p>;
+          })()}
           {f.essentialOils.length > 0 && <p className="small">{t('fragrance.oils')}：{f.essentialOils.join('、')}</p>}
           {f.unknownCount > 0 && <p className="small muted">{t('fragrance.unknown', { n: f.unknownCount })}</p>}
           <p className="small muted">{t('fragrance.disclaimer')}</p>
@@ -273,6 +283,7 @@ export default function Results() {
     [data, setCap],
   );
   const alerts = scalpMedicalAlerts(scalp);
+  const notes = scalpInfoNotes(scalp);
 
   const sorted = (list: ProductScore[]) =>
     sortBy === 'price'
@@ -401,6 +412,12 @@ export default function Results() {
           <div className="notice alert" role="alert">
             <strong>{t('results.medical')}</strong>
             {alerts.map((a) => <p key={a.code}>{tx(a.text)}</p>)}
+          </div>
+        )}
+        {notes.length > 0 && (
+          <div className="notice">
+            <strong>{t('results.notes')}</strong>
+            {notes.map((a) => <p key={a.code}>{tx(a.text)}</p>)}
           </div>
         )}
         {advice && (

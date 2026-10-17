@@ -2,9 +2,10 @@
 
 import { buildIngredientIndex, normalizeName } from './ingredientIndex';
 import { unmatchedKeyActives } from './keyActives';
+import { expandIngredients, type AllergenEntry, type CosingEntry } from './cosing';
 import { ingredientFrequency } from './frequency';
 import {
-  CATEGORIES, CATEGORY_DEFAULT_USAGE, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
+  CATEGORIES, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
   REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
 } from './types';
 import type { Category, City, ExchangeRate, Ingredient, Product } from './types';
@@ -23,6 +24,8 @@ export function validateData(
   products: Product[],
   cities: City[],
   exchangeRates: ExchangeRate[],
+  /** CosIng 批量导入的成分和欧盟香料致敏原清单；用于匹配产品成分，不做成分库的格式检查 */
+  extra: { cosing?: CosingEntry[]; allergens?: AllergenEntry[] } = {},
 ): Issue[] {
   const issues: Issue[] = [];
   const err = (file: string, key: string, message: string) =>
@@ -74,7 +77,8 @@ export function validateData(
     if (ing.reviewedOn && !DATE_RE.test(ing.reviewedOn)) err(F_ING, key, `reviewed_on 应为 YYYY-MM-DD：${ing.reviewedOn}`);
   }
 
-  const index = buildIngredientIndex(ingredients);
+  const index = buildIngredientIndex(expandIngredients(ingredients, extra.cosing ?? [], extra.allergens ?? []));
+  if (extra.cosing && extra.cosing.length === 0) warn('cosing_ingredients.csv', '-', '尚未导入 CosIng 数据（npm run import-cosing -- <文件>），只用成分库和致敏原清单匹配');
   for (const ing of ingredients) {
     for (const c of ing.conflictsWith) {
       if (!index.get(c.inci)) warn(F_ING, ing.inciName, `conflicts_with 中的 "${c.inci}" 不在成分库`);
@@ -125,6 +129,8 @@ export function validateData(
     const unmatched = unmatchedKeyActives(p, (n) => index.get(n));
     if (unmatched.length > 0) warn(F_PRD, key, `key_actives 中对应不上成分表的写法（只作为品牌宣称展示）：${unmatched.join(' / ')}`);
     for (const t of p.claimedBenefits) oneOf(F_PRD, key, 'claimed_benefits', t, TARGETS);
+    if (p.claimSource !== null) oneOf(F_PRD, key, 'claim_source', p.claimSource, CLAIM_SOURCES);
+    else if (p.claimedBenefits.length > 0) warn(F_PRD, key, 'claimed_benefits 没有填写 claim_source（brand_text / data_classification），按资料分类显示');
     for (const c of p.testedClaims) {
       oneOf(F_PRD, key, 'tested_claims 困扰', c.target, TARGETS);
       if (!/^https?:\/\//.test(c.url)) err(F_PRD, key, 'tested_claims 每一项都必须有测试来源链接');
@@ -148,7 +154,7 @@ export function validateData(
   // 按统一后的名称合并、按出现次数排序，即"成分库扩充优先清单"
   for (const row of ingredientFrequency(products, index)) {
     const spellings = row.spellings.length > 1 ? `；写法：${row.spellings.join(' / ')}` : '';
-    if (row.reviewStatus === null) warn(F_PRD, row.name, `成分不在成分库（出现在 ${row.productCount} 个产品中${spellings}）`);
+    if (row.reviewStatus === null) warn(F_PRD, row.name, `成分不在成分库，也不在 CosIng（出现在 ${row.productCount} 个产品中${spellings}）`);
     if (row.nameUnverifiedCount > 0) {
       warn(F_PRD, row.name, `名称带 [待核对] 标记，不参与打分（${row.nameUnverifiedCount} 个产品）`);
     }

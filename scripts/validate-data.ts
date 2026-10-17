@@ -4,8 +4,8 @@ import { loadDataFromDisk } from '../src/data/node';
 import { validateData } from '../src/data/validate';
 import { computeBudgetCaps } from '../src/scoring/budget';
 
-const { ingredients, products, cities, exchangeRates } = loadDataFromDisk();
-const issues = validateData(ingredients, products, cities, exchangeRates);
+const { ingredients, products, cities, exchangeRates, cosing, allergens } = loadDataFromDisk();
+const issues = validateData(ingredients, products, cities, exchangeRates, { cosing, allergens });
 const errors = issues.filter((i) => i.level === 'error');
 const warnings = issues.filter((i) => i.level === 'warning');
 
@@ -15,7 +15,7 @@ for (const i of [...errors, ...warnings]) {
 
 const verified = ingredients.filter((i) => i.reviewStatus === 'verified').length;
 console.log(
-  `\n成分 ${ingredients.length} 个（已核对 ${verified}），产品 ${products.length} 个，城市 ${cities.length} 个；` +
+  `\n成分库 ${ingredients.length} 个（已核对 ${verified}），CosIng ${cosing.length} 个，香料致敏原清单 ${allergens.length} 个，产品 ${products.length} 个，城市 ${cities.length} 个；` +
     `${errors.length} 个错误，${warnings.length} 个提示。`,
 );
 const caps = computeBudgetCaps(products, exchangeRates);

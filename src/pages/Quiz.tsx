@@ -8,11 +8,13 @@ import type { Category, City } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import {
-  EMPTY_HAIR, MAX_GOALS, cityKey, scopeCategories, type AvoidOption, type BaseAnswers, type BudgetMode, type CarePref,
-  type ConditionerStatus, type DandruffType, type HairAnswers, type HairCondition, type HairGoal, type HairLossLevel,
+  EMPTY_HAIR, MAX_GOALS, cityKey, scopeCategories, toneGoalAvailable,
+  type Discomfort, type DiscomfortFrequency, type HairLength, type HairLossAmount, type Redness, type StylingUse, type ThinningArea, type AvoidOption, type BaseAnswers, type BudgetMode, type CarePref,
+  type ConditionerStatus, type DandruffType, type HairAnswers, type HairCondition, type HairGoal,
   type HairTexture, type HairThickness, type Money, type PurchaseScope, type ScalpAnswers, type ScalpConcern, type ScalpOilTiming,
 } from '../profile/questionnaire';
 import { newProfile } from '../profile/storage';
+import { DandruffIllo, HairLossIllo } from './Illustrations';
 import { budgetOptions, type BudgetChoice } from '../scoring/budget';
 import { currencyForCountry } from '../scoring/price';
 import type { FragrancePref, WashFrequency } from '../scoring/score';
@@ -23,7 +25,8 @@ const EMPTY_SCALP: ScalpAnswers = {
 const AUTO_ADVANCE_MS = 220;
 
 type StepId =
-  | 'intro' | 'scope' | 'city' | 'oil' | 'concerns' | 'dandruff' | 'itch' | 'hairLoss' | 'wash'
+  | 'intro' | 'scope' | 'city' | 'oil' | 'concerns' | 'dandruff' | 'dandruffAmount' | 'itch' | 'discomfort' | 'redness'
+  | 'hairLength' | 'hairLossAmount' | 'thinning' | 'washStyling'
   | 'thickness' | 'texture' | 'conditions' | 'goals' | 'fragrance' | 'hasConditioner' | 'carePref' | 'budget' | 'avoid';
 
 function Single<T extends string>(props: { options: readonly T[]; value: T | null; label: (v: T) => string; sub?: (v: T) => string; onPick: (v: T) => void }) {
@@ -155,12 +158,14 @@ export default function Quiz() {
   const multiCategory = categories.length > 1;
 
   // 只买护发素时不问头皮
+  // 细问只在选了对应困扰时出现
   const scalpSteps: StepId[] = base.scope === 'conditioner' ? [] : [
     'oil', 'concerns',
-    ...(scalp.concerns.includes('dandruff') ? (['dandruff'] as StepId[]) : []),
+    ...(scalp.concerns.includes('dandruff') ? (['dandruff', 'dandruffAmount'] as StepId[]) : []),
     ...(scalp.concerns.includes('itch') ? (['itch'] as StepId[]) : []),
-    ...(scalp.concerns.includes('hair_loss') ? (['hairLoss'] as StepId[]) : []),
-    'wash',
+    'discomfort', 'redness',
+    ...(scalp.concerns.includes('hair_loss') ? (['hairLength', 'hairLossAmount', 'thinning'] as StepId[]) : []),
+    'washStyling',
   ];
   const steps: StepId[] = [
     'intro', 'scope', 'city', ...scalpSteps, 'thickness', 'texture', 'conditions', 'goals', 'fragrance',
@@ -176,12 +181,19 @@ export default function Quiz() {
     const cleanedScalp: ScalpAnswers = {
       ...scalp,
       dandruffType: scalp.concerns.includes('dandruff') ? scalp.dandruffType : null,
+      dandruffAmount: scalp.concerns.includes('dandruff') ? scalp.dandruffAmount : null,
       itchScore: scalp.concerns.includes('itch') ? scalp.itchScore : null,
+      discomfortFrequency: (scalp.discomfort ?? []).length > 0 ? scalp.discomfortFrequency : null,
+      hairLength: scalp.concerns.includes('hair_loss') ? scalp.hairLength : null,
+      hairLossAmount: scalp.concerns.includes('hair_loss') ? scalp.hairLossAmount : null,
+      thinning: scalp.concerns.includes('hair_loss') ? scalp.thinning : [],
       hairLossLevel: scalp.concerns.includes('hair_loss') ? scalp.hairLossLevel : null,
     };
+    // "去黄 / 去橙"只在选了染或烫漂时有效
+    const cleanedHair: HairAnswers = { ...hair, goals: toneGoalAvailable(hair) ? hair.goals : hair.goals.filter((g) => g !== 'tone') };
     // 只有一个品类时预算一定按单品
     const cleanedBase: BaseAnswers = { ...base, budgetMode: multiCategory ? base.budgetMode : 'item' };
-    save({ ...start, base: cleanedBase, scalp: cleanedScalp, hair });
+    save({ ...start, base: cleanedBase, scalp: cleanedScalp, hair: cleanedHair });
     navigate('/results');
   };
   const next = () => (stepIndex >= steps.length - 1 ? finish() : setStepIndex(stepIndex + 1));
@@ -293,7 +305,7 @@ export default function Quiz() {
         <>
           <h1 className="h1">{t('quiz.oilTiming')}</h1>
           <Single<ScalpOilTiming>
-            options={['same_day', 'one_two_days', 'three_plus_days']}
+            options={['same_day', 'next_day', 'three_four_days', 'five_plus_days']}
             value={scalp.oilTiming}
             label={(v) => t(`quiz.oil.${v}` as Key)}
             onPick={(v) => pickThenNext(() => setScalpField('oilTiming', v))}
@@ -307,7 +319,7 @@ export default function Quiz() {
           <h1 className="h1">{t('quiz.concerns')}</h1>
           <p className="hint">{t('quiz.multiHint')}</p>
           <Multi<ScalpConcern>
-            options={['dandruff', 'itch', 'redness', 'dry_tight', 'hair_loss']}
+            options={['dandruff', 'itch', 'dry_tight', 'hair_loss']}
             value={scalp.concerns}
             label={(v) => t(`quiz.concern.${v}` as Key)}
             onChange={(v) => setScalp((s) => ({ ...s, concerns: v, noConcerns: false }))}
@@ -323,10 +335,157 @@ export default function Quiz() {
         <>
           <h1 className="h1">{t('quiz.dandruffType')}</h1>
           <Single<DandruffType>
-            options={['dry_fine', 'oily_large', 'red_recurring']}
+            options={['dry_fine', 'oily_large', 'thick_scaly']}
             value={scalp.dandruffType ?? null}
             label={(v) => t(`quiz.dandruff.${v}` as Key)}
             onPick={(v) => pickThenNext(() => setScalpField('dandruffType', v))}
+          />
+        </>
+      );
+      break;
+    case 'dandruffAmount':
+      body = (
+        <>
+          <h1 className="h1">{t('quiz.dandruffAmount')}</h1>
+          <p className="hint">{t('quiz.illoHint')}</p>
+          <div className="illo-grid" role="radiogroup">
+            {([1, 2, 3, 4] as const).map((n) => (
+              <button
+                key={n}
+                type="button"
+                role="radio"
+                aria-checked={scalp.dandruffAmount === n}
+                className="illo-option"
+                onClick={() => pickThenNext(() => setScalpField('dandruffAmount', n))}
+              >
+                <DandruffIllo level={n} />
+                <span>{t(`quiz.dandruffAmount.${n}` as Key)}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      );
+      break;
+    case 'discomfort': {
+      const picked = (scalp.discomfort ?? []).length > 0;
+      body = (
+        <>
+          <h1 className="h1">{t('quiz.discomfort')}</h1>
+          <p className="hint">{t('quiz.multiHint')}</p>
+          <Multi<Discomfort>
+            options={['stinging', 'burning', 'tightness', 'tingling']}
+            value={scalp.discomfort ?? []}
+            label={(v) => t(`quiz.discomfort.${v}` as Key)}
+            onChange={(v) => setScalp((s) => ({ ...s, discomfort: v, discomfortNone: false }))}
+            noneLabel={t('quiz.discomfort.none')}
+            noneOn={!!scalp.discomfortNone}
+            onNone={() => setScalp((s) => ({ ...s, discomfort: [], discomfortNone: true, discomfortFrequency: null }))}
+          />
+          {picked && (
+            <section style={{ marginTop: 20 }}>
+              <div className="label">{t('quiz.discomfortFrequency')}</div>
+              <Single<DiscomfortFrequency>
+                options={['sometimes', 'often']}
+                value={scalp.discomfortFrequency ?? null}
+                label={(v) => t(`quiz.discomfortFrequency.${v}` as Key)}
+                onPick={(v) => setScalpField('discomfortFrequency', v)}
+              />
+            </section>
+          )}
+        </>
+      );
+      break;
+    }
+    case 'redness':
+      body = (
+        <>
+          <h1 className="h1">{t('quiz.redness')}</h1>
+          <Single<Redness>
+            options={['none', 'occasional', 'often', 'spreading']}
+            value={scalp.redness ?? null}
+            label={(v) => t(`quiz.redness.${v}` as Key)}
+            onPick={(v) => pickThenNext(() => setScalpField('redness', v))}
+          />
+        </>
+      );
+      break;
+    case 'hairLength':
+      body = (
+        <>
+          <h1 className="h1">{t('quiz.hairLength')}</h1>
+          <p className="hint">{t('quiz.hairLengthHint')}</p>
+          <Single<HairLength>
+            options={['short', 'shoulder', 'long']}
+            value={scalp.hairLength ?? null}
+            label={(v) => t(`quiz.hairLength.${v}` as Key)}
+            onPick={(v) => pickThenNext(() => setScalpField('hairLength', v))}
+          />
+        </>
+      );
+      break;
+    case 'hairLossAmount': {
+      const short = scalp.hairLength === 'short';
+      const levels = [1, 2, 3, 4, 5, 6] as const;
+      const sudden = (
+        <div className="options">
+          <button
+            type="button"
+            role="radio"
+            aria-checked={scalp.hairLossAmount === 'sudden'}
+            className="option"
+            onClick={() => pickThenNext(() => setScalpField('hairLossAmount', 'sudden'))}
+          >
+            <span className="mark" aria-hidden="true" />
+            <span className="opt-text">{t('quiz.hairLossAmount.sudden')}</span>
+          </button>
+        </div>
+      );
+      body = (
+        <>
+          <h1 className="h1">{t('quiz.hairLossAmount')}</h1>
+          <p className="hint">{short ? t('quiz.hairLossAmount.shortHint') : t('quiz.hairLossAmount.longHint')}</p>
+          {short ? (
+            <Single<`${(typeof levels)[number]}`>
+              options={levels.map((n) => `${n}` as const)}
+              value={typeof scalp.hairLossAmount === 'number' ? (`${scalp.hairLossAmount}` as `${(typeof levels)[number]}`) : null}
+              label={(v) => t(`quiz.hairLossAmount.short.${v}` as Key)}
+              onPick={(v) => pickThenNext(() => setScalpField('hairLossAmount', Number(v) as HairLossAmount))}
+            />
+          ) : (
+            <div className="illo-grid three" role="radiogroup">
+              {levels.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  role="radio"
+                  aria-checked={scalp.hairLossAmount === n}
+                  className="illo-option"
+                  onClick={() => pickThenNext(() => setScalpField('hairLossAmount', n))}
+                >
+                  <HairLossIllo level={n} />
+                  <span>{t(`quiz.hairLossAmount.long.${n}` as Key)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {sudden}
+        </>
+      );
+      break;
+    }
+    case 'thinning':
+      body = (
+        <>
+          <h1 className="h1">{t('quiz.thinning')}</h1>
+          <p className="hint">{t('quiz.multiHint')}</p>
+          <Multi<ThinningArea>
+            options={['part_widening', 'hairline', 'crown', 'diffuse', 'patches']}
+            value={scalp.thinning ?? []}
+            label={(v) => t(`quiz.thinning.${v}` as Key)}
+            onChange={(v) => setScalp((s) => ({ ...s, thinning: v, thinningNone: false }))}
+            noneLabel={t('quiz.thinning.none')}
+            noneOn={!!scalp.thinningNone}
+            onNone={() => setScalp((s) => ({ ...s, thinning: [], thinningNone: true }))}
           />
         </>
       );
@@ -354,29 +513,28 @@ export default function Quiz() {
         </>
       );
       break;
-    case 'hairLoss':
+    case 'washStyling':
       body = (
         <>
-          <h1 className="h1">{t('quiz.hairLoss')}</h1>
-          <Single<HairLossLevel>
-            options={['same_as_before', 'more_than_before', 'sudden_or_patchy']}
-            value={scalp.hairLossLevel ?? null}
-            label={(v) => t(`quiz.hairLoss.${v}` as Key)}
-            onPick={(v) => pickThenNext(() => setScalpField('hairLossLevel', v))}
-          />
-        </>
-      );
-      break;
-    case 'wash':
-      body = (
-        <>
-          <h1 className="h1">{t('quiz.wash')}</h1>
-          <Single<WashFrequency>
-            options={['daily', 'every_other_day', 'twice_weekly_or_less']}
-            value={scalp.washFrequency}
-            label={(v) => t(`quiz.wash.${v}` as Key)}
-            onPick={(v) => pickThenNext(() => setScalpField('washFrequency', v))}
-          />
+          <h1 className="h1">{t('quiz.washStyling')}</h1>
+          <section style={{ marginTop: 20 }}>
+            <div className="label">{t('quiz.wash')}</div>
+            <Single<WashFrequency>
+              options={['daily', 'every_other_day', 'twice_weekly_or_less']}
+              value={scalp.washFrequency}
+              label={(v) => t(`quiz.wash.${v}` as Key)}
+              onPick={(v) => setScalpField('washFrequency', v)}
+            />
+          </section>
+          <section style={{ marginTop: 24 }}>
+            <div className="label">{t('quiz.styling')}</div>
+            <Single<StylingUse>
+              options={['none', 'weekly_1_2', 'weekly_3_plus', 'daily']}
+              value={scalp.styling ?? null}
+              label={(v) => t(`quiz.styling.${v}` as Key)}
+              onPick={(v) => setScalpField('styling', v)}
+            />
+          </section>
         </>
       );
       break;
@@ -436,7 +594,10 @@ export default function Quiz() {
           <h1 className="h1">{t('quiz.goals')}</h1>
           <p className="hint">{t('quiz.goalsHint', { n: MAX_GOALS })}</p>
           <Multi<HairGoal>
-            options={['smooth', 'moisture', 'less_frizz', 'clean', 'volume', 'shine', 'curl', 'scent']}
+            options={[
+              'smooth', 'moisture', 'less_frizz', 'clean', 'volume', 'shine', 'curl',
+              ...(toneGoalAvailable(hair) ? (['tone'] as HairGoal[]) : []), 'scent',
+            ]}
             value={hair.goals}
             label={(v) => t(`quiz.goal.${v}` as Key)}
             onChange={(v) => setHairField('goals', v.slice(0, MAX_GOALS))}

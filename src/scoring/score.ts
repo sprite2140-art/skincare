@@ -55,6 +55,8 @@ export interface ScoringProfile {
   customBudgetUsd?: number | null;
   fragrancePref?: FragrancePref | null;
   washFrequency: WashFrequency | null;
+  /** 常用造型产品（每周 3 次以上）：每天洗头时也不因强清洁力表活扣分 */
+  frequentStyling?: boolean;
   city: City | null;
   inUseProducts: Product[];
 }
@@ -340,6 +342,13 @@ function checkConflicts(items: Resolved[], profile: ScoringProfile, index: Ingre
 
 // ---------- 四个维度（只用 verified 成分） ----------
 
+/** 产品定位的来源标注：品牌原文为"品牌宣称"，资料整理时的分类为"资料分类"（没写来源的按资料分类） */
+export function claimLabel(product: Pick<Product, 'claimSource'>): Text {
+  return product.claimSource === 'brand_text'
+    ? { zh: '品牌宣称', en: 'brand claim' }
+    : { zh: '资料分类', en: 'data classification' };
+}
+
 /** 一个困扰的匹配依据 */
 export type NeedBasis = 'tested' | 'claim' | 'key_active' | 'ingredient';
 
@@ -422,8 +431,9 @@ function scoreNeed(
       partsEn.push('product test available');
     }
     if (m.bases.includes('claim')) {
-      partsZh.push('品牌宣称');
-      partsEn.push('brand claim');
+      const c = claimLabel(product);
+      partsZh.push(c.zh);
+      partsEn.push(c.en);
     }
     if (m.keyIngredients.length > 0) {
       const n = joinNames(m.keyIngredients.map((i) => ingredientName(i, i.inciName)));
@@ -453,7 +463,7 @@ function scoreNeed(
   };
 }
 
-function scoreEvidence(needMatches: NeedMatch[]): Dimension {
+function scoreEvidence(needMatches: NeedMatch[], product: Product): Dimension {
   let total = 0;
   let sum = 0;
   const zh: string[] = [];
@@ -479,8 +489,9 @@ function scoreEvidence(needMatches: NeedMatch[]): Dimension {
     } else if (m.bases.includes('claim')) {
       score = CLAIM_ONLY_EVIDENCE_SCORE;
       const t = TARGET_LABELS[m.target];
-      zh.push(`${t.zh}只有品牌宣称`);
-      en.push(`brand claim only for ${t.en}`);
+      const c = claimLabel(product);
+      zh.push(`${t.zh}只有${c.zh}`);
+      en.push(`${c.en} only for ${t.en}`);
     }
     if (score === null) continue;
     total += m.weight;
@@ -510,7 +521,7 @@ function scoreIrritation(
   const found: Text[] = [];
 
   const tags: RiskTag[] = [...IRRITANT_TAGS];
-  if (profile.washFrequency === 'daily') tags.push('strong_cleanser');
+  if (profile.washFrequency === 'daily' && !profile.frequentStyling) tags.push('strong_cleanser');
   for (const tag of tags) {
     const hits = verified.filter((r) => r.ingredient.riskTags.includes(tag));
     if (hits.length === 0) continue;
@@ -679,7 +690,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     dimensions = {
       need: need.dim,
       irritation: scoreIrritation(verified, profile, product),
-      evidence: scoreEvidence(needMatches),
+      evidence: scoreEvidence(needMatches, product),
       environment: scoreEnvironment(verified, profile.city, !!data.allowDraft),
     };
   }
