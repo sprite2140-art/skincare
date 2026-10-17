@@ -177,6 +177,36 @@ describe('场景 5：无图片、无护发素数据、无符合条件商品', ()
   });
 });
 
+describe('产品定位的来源标注', () => {
+  const prof = toScoringProfile(answers({ hair: { goals: ['shine'] } }), 'shampoo', ctx);
+  const base = { ...real.products[1], productId: 'T-POS', inciList: ['Water', 'Glycerin'], inciNameUnverified: [], claimedBenefits: ['shine' as const] };
+
+  it('本轮数据的产品定位都来自资料整理时的分类，显示为"资料分类"，按 0.7 计分', () => {
+    expect(real.products.filter((p) => p.claimedBenefits.length > 0).every((p) => p.claimSource === 'data_classification')).toBe(true);
+    const r = scoreProduct({ ...base, claimSource: 'data_classification' }, prof, data);
+    expect(r.dimensions.need.score).toBe(70);
+    expect(r.dimensions.need.reason.zh).toBe('针对光泽：资料分类');
+    expect(r.dimensions.evidence.reason.zh).toBe('依据：光泽只有资料分类');
+    expect(recommendReasons(r, prof, false)[0].zh).toBe('产品定位针对光泽（依据：资料分类）');
+  });
+
+  it('品牌原文（brand_text）才显示为"品牌宣称"，计分相同', () => {
+    const r = scoreProduct({ ...base, claimSource: 'brand_text' }, prof, data);
+    expect(r.dimensions.need.score).toBe(70);
+    expect(recommendReasons(r, prof, false)[0].zh).toBe('产品定位针对光泽（依据：品牌宣称）');
+  });
+
+  it('"日常清洁"对应清爽洁净；"去黄 / 去橙"对应新的期望效果', () => {
+    const byId = (id: string) => real.products.find((p) => p.productId === id)!;
+    expect(byId('SH-US-027').claimedBenefits).toEqual(['clarifying']);
+    expect(byId('SH-US-020').claimedBenefits).toContain('tone_correction');
+    expect(byId('SH-US-035').claimedBenefits).toContain('tone_correction');
+    const tone = toScoringProfile(answers({ hair: { conditions: ['colored'], goals: ['tone'] } }), 'shampoo', ctx);
+    const r = scoreProduct(byId('SH-US-035'), tone, data);
+    expect(r.needMatches.find((m) => m.target === 'tone_correction')).toMatchObject({ credit: 0.7, bases: ['claim'] });
+  });
+});
+
 describe('效果依据', () => {
   const withClaims = (claims: Partial<Product>) => ({ ...real.products[1], productId: 'T-CLAIM', inciList: ['Water', 'Glycerin'], inciNameUnverified: [], ...claims });
   const prof = toScoringProfile(answers({ hair: { goals: ['shine'] } }), 'shampoo', ctx);

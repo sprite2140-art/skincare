@@ -3,7 +3,7 @@
 import Papa from 'papaparse';
 import { cleanInciName } from './ingredientIndex';
 import type {
-  Award, City, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
+  Award, City, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
   UsageType, WaterHardness, Zone,
 } from './types';
@@ -113,6 +113,7 @@ export function parseProducts(text: string): Product[] {
     inclusionBasis: r.inclusion_basis ?? '',
     awards: parseAwards(r.awards),
     claimedBenefits: splitList(r.claimed_benefits) as Target[],
+    claimSource: (r.claim_source || null) as ClaimSource | null,
     testedClaims: parseTestedClaims(r.tested_claims),
     fragranceFreeClaim: (r.fragrance_free_claim || 'unknown') as FragranceFreeClaim,
     inciList: inci.names,

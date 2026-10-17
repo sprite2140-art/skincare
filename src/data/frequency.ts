@@ -3,7 +3,7 @@
 // 已在成分库的成分按成分库主名合并，不在库的按统一后的名称合并。
 
 import { normalizeName, type IngredientIndex } from './ingredientIndex';
-import type { Product, ReviewStatus } from './types';
+import type { Ingredient, Product, ReviewStatus } from './types';
 
 export interface FrequencyRow {
   /** 成分库主名；不在库时为最先出现的统一后写法 */
@@ -14,6 +14,8 @@ export interface FrequencyRow {
   spellings: string[];
   /** 成分库中的核对状态；不在库为 null */
   reviewStatus: ReviewStatus | null;
+  /** 条目来源：成分库 / CosIng / 致敏原清单；不在任何来源为 null */
+  origin: Ingredient['origin'] | null;
   /** 有多少个产品中这个成分带 [待核对] 标记 */
   nameUnverifiedCount: number;
 }
@@ -28,7 +30,7 @@ export function ingredientFrequency(products: Product[], index: IngredientIndex)
       const key = ing ? `lib:${normalizeName(ing.inciName)}` : `raw:${normalizeName(name)}`;
       let row = rows.get(key);
       if (!row) {
-        row = { name: ing?.inciName ?? name, productCount: 0, spellings: [], reviewStatus: ing?.reviewStatus ?? null, nameUnverifiedCount: 0 };
+        row = { name: ing?.inciName ?? name, productCount: 0, spellings: [], reviewStatus: ing?.reviewStatus ?? null, origin: ing ? ing.origin ?? 'library' : null, nameUnverifiedCount: 0 };
         rows.set(key, row);
       }
       if (!row.spellings.includes(name)) row.spellings.push(name);

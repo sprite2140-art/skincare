@@ -28,7 +28,7 @@ targets 取值：
 - 面部：acne, oil, dryness, redness, pigmentation, aging, pores
 - 头皮：dandruff, scalp_oil, scalp_itch, scalp_redness, hair_loss
 - 头发：damage, frizz, flat_hair, tangling, color_fade
-- 头皮状态与发丝效果：dry_scalp（头皮干）, sensitive_scalp（敏感头皮）, clarifying（清洁残留）, shine（光泽）, curl_definition（卷度）。目前主要来自品牌宣称（products.csv 的 claimed_benefits）；clarifying 也按成分功能辅助匹配（functions 含 chelating 的成分）
+- 头皮状态与发丝效果：dry_scalp（头皮干）, sensitive_scalp（敏感头皮）, clarifying（清洁残留）, shine（光泽）, curl_definition（卷度）, tone_correction（去黄 / 去橙）。目前主要来自品牌宣称（products.csv 的 claimed_benefits）；clarifying 也按成分功能辅助匹配（functions 含 chelating 的成分）
 
 risk_tags 取值：fragrance, essential_oil, alcohol, strong_acid, sensitizer, strong_cleanser, pregnancy_caution, rx_caution
 
@@ -54,7 +54,8 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | channels | 入库渠道 | Ulta |
 | inclusion_basis | 入库依据（榜单/奖项），原文 | |
 | awards | 榜单与奖项，结果页显示为标签。每项格式 `来源\|年份\|名称\|链接`，多项用分号分隔；来源和 4 位年份必填 | Allure Best of Beauty\|2025\|敏感肌洗护组合获奖\|https://… |
-| claimed_benefits | 品牌宣称（产品定位）针对的困扰或效果，取 targets 的值，分号分隔。只写产品页明确宣称的，不从成分推断 | dandruff;sensitive_scalp |
+| claimed_benefits | 产品定位针对的困扰或效果，取 targets 的值，分号分隔。不从成分推断 | dandruff;sensitive_scalp |
+| claim_source | claimed_benefits 的来源：brand_text（产品页的品牌原文）/ data_classification（资料整理时的分类）。页面分别显示"品牌宣称"和"资料分类"，都按产品定位 0.7 计分。本轮 47 款美国产品来自资料中的"需求"字段，是整理时的分类，全部填 data_classification；"日常清洁"对应 clarifying，"去黄 / 去橙"对应 tone_correction | data_classification |
 | tested_claims | 可靠的成品测试（第三方或公开方法），每项格式 `困扰\|测试说明\|年份\|链接`，链接必填。目前没有数据 | |
 | fragrance_free_claim | 产品是否明确标注 fragrance-free：yes / no / unknown。留空视为 unknown | unknown |
 | inci_list | 完整成分表，**英文 INCI 名**，按包装顺序，分号分隔。打分用这一列，解析时统一写法（见下方"成分名称统一"） | Aqua;Glycerin;Piroctone Olamine |
@@ -117,6 +118,13 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 5. 没有价格（或币种不在汇率表）的产品不参与分位数计算；用户选了第一档或第二档时不显示它们，只在"不限"档出现。
 6. 问卷也可以自填上限（单品），或在洗护搭配时"按整套"自填总预算；金额按用户所在地货币保存，比较时换算成 USD。没有符合条件的商品时页面明确提示，不自动放宽条件。
 7. 每次产品数据或汇率更新后，界线在构建时自动重新计算；用户档案保存的是"第几档"，不是金额，所以不用重填。`npm run validate-data` 会打印当前各品类的界线。
+
+## cosing_ingredients.csv 与 eu_fragrance_allergens.csv（欧盟成分基础分类）
+
+- **cosing_ingredients.csv**：欧盟 CosIng "Ingredients & Fragrance Inventory" 的转换结果，列为 inci_name、functions（登记功能，小写，分号分隔）、cas_no、cosing_ref、update_date。不要手改：从 CosIng 下载导出 CSV 后运行 `npm run import-cosing -- <文件>` 重新生成（脚本会自动找表头，逗号或分号分隔都可以）。目前为空，等待导入。
+- **eu_fragrance_allergens.csv**：欧盟需标注的香料致敏原清单（inci_name、list、source）。目前收录法规 1223/2009 附录 III 的 26 种；2023/1545 号法规新增的条目待按法规原文补充。
+- **合并规则**（`src/data/cosing.ts` 的 expandIngredients）：成分库 ingredients.csv 优先；成分库没有的成分用 CosIng 补充，来源标记为 CosIng、review_status 为 draft。登记功能含 perfuming 的识别为加香成分（category = risk，risk_tags = fragrance）；其他为基础分类（category = base，没有 targets）。在致敏原清单上的成分都标注为欧盟致敏原；成分库和 CosIng 都没有的致敏原按清单补条目。打分仍按现有规则区分已核对和未核对。
+- **网页只打包用到的部分**：CosIng 全表有数万行，构建时只保留产品成分表中出现的成分（vite.config.ts 的 cosing-used 插件）；测试和脚本读取完整文件。
 
 ## exchange_rates.csv（固定汇率表）
 

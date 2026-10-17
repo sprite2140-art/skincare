@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  EMPTY_HAIR, adviseCare, hairTargets, isSensitiveScalp, moneyToUsd, scalpMedicalAlerts, scalpTargets, scopeCategories, toScoringProfile,
+  EMPTY_HAIR, adviseCare, hairTargets, isSensitiveScalp, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, scalpTargets, scopeCategories,
+  migrateScalp, toScoringProfile, toneGoalAvailable,
   type Answers, type BaseAnswers, type HairAnswers, type ScalpAnswers,
 } from './questionnaire';
 import {
@@ -49,9 +50,79 @@ describe('头皮问卷映射', () => {
     expect(scalpMedicalAlerts({ ...noScalp, itchScore: 9 })).toEqual([]);
   });
 
-  it('短期大量或成片脱发触发就医提示', () => {
-    const alerts = scalpMedicalAlerts({ ...noScalp, concerns: ['hair_loss'], hairLossLevel: 'sudden_or_patchy' });
-    expect(alerts.map((a) => a.code)).toEqual(['hair_loss_sudden']);
+  it('掉发很多、突然大量掉发、成片秃斑触发就医提示（选了掉发才生效）', () => {
+    const hl = { ...noScalp, concerns: ['hair_loss' as const] };
+    expect(scalpMedicalAlerts({ ...hl, hairLossAmount: 6 }).map((x) => x.code)).toEqual(['hair_loss_heavy']);
+    expect(scalpMedicalAlerts({ ...hl, hairLossAmount: 'sudden' }).map((x) => x.code)).toEqual(['hair_loss_heavy']);
+    expect(scalpMedicalAlerts({ ...hl, hairLossAmount: 5 })).toEqual([]);
+    expect(scalpMedicalAlerts({ ...hl, thinning: ['patches'] }).map((x) => x.code)).toEqual(['hair_loss_patches']);
+    expect(scalpMedicalAlerts({ ...noScalp, hairLossAmount: 6, thinning: ['patches'] })).toEqual([]);
+    // 旧档案的追问答案在还没回答新题时仍然有效；回答了新的掉发量后以新答案为准
+    expect(scalpMedicalAlerts({ ...hl, hairLossLevel: 'sudden_or_patchy' }).map((x) => x.code)).toEqual(['hair_loss_heavy']);
+    expect(scalpMedicalAlerts({ ...hl, hairLossLevel: 'sudden_or_patchy', hairLossAmount: 2 })).toEqual([]);
+  });
+
+  it('头皮发红：经常发红 + 用后经常不适、经常发红 + 油腻偏黄大片、经常发红 + 头皮屑第 4 级、伴渗液或蔓延', () => {
+    expect(scalpMedicalAlerts({ ...noScalp, redness: 'spreading' }).map((x) => x.code)).toEqual(['redness_spreading']);
+    expect(scalpMedicalAlerts({ ...noScalp, redness: 'often', discomfort: ['burning'], discomfortFrequency: 'often' }).map((x) => x.code))
+      .toEqual(['discomfort_red']);
+    expect(scalpMedicalAlerts({ ...noScalp, redness: 'often', discomfort: ['burning'], discomfortFrequency: 'sometimes' })).toEqual([]);
+    expect(scalpMedicalAlerts({ ...noScalp, redness: 'occasional', discomfort: ['burning'], discomfortFrequency: 'often' })).toEqual([]);
+    const d = { ...noScalp, concerns: ['dandruff' as const], redness: 'often' as const };
+    expect(scalpMedicalAlerts({ ...d, dandruffType: 'oily_large' }).map((x) => x.code)).toEqual(['dandruff_oily_red']);
+    expect(scalpMedicalAlerts({ ...d, dandruffType: 'dry_fine', dandruffAmount: 4 }).map((x) => x.code)).toEqual(['dandruff_heavy_red']);
+    expect(scalpMedicalAlerts({ ...d, redness: 'occasional', dandruffType: 'oily_large', dandruffAmount: 4 })).toEqual([]);
+    expect(scalpMedicalAlerts({ ...noScalp, concerns: ['dandruff'], dandruffType: 'thick_scaly' }).map((x) => x.code)).toEqual(['dandruff_thick']);
+  });
+
+  it('所有就医提示统一措辞"建议找皮肤科医生看看"，不出现具体病名', () => {
+    const all = scalpMedicalAlerts({
+      ...noScalp, concerns: ['dandruff', 'itch', 'hair_loss'], dandruffType: 'oily_large', dandruffAmount: 4, itchScore: 9,
+      redness: 'often', discomfort: ['stinging'], discomfortFrequency: 'often', hairLossAmount: 'sudden', thinning: ['patches'],
+    });
+    expect(all).toHaveLength(6);
+    for (const x of [...all, ...scalpMedicalAlerts({ ...noScalp, concerns: ['dandruff'], dandruffType: 'red_recurring' })]) {
+      expect(x.text.zh.endsWith('建议找皮肤科医生看看。')).toBe(true);
+      expect(x.text.zh).not.toMatch(/皮炎|银屑病|斑秃|脱发症|真菌/);
+      expect(x.text.en).not.toMatch(/dermatitis|psoriasis|alopecia/i);
+    }
+  });
+
+  it('头顶、发际线或整体变稀给出说明（不是就医提示）', () => {
+    expect(scalpInfoNotes({ ...noScalp, concerns: ['hair_loss'], thinning: ['crown'] }).map((x) => x.code)).toEqual(['thinning_pattern']);
+    expect(scalpInfoNotes({ ...noScalp, concerns: ['hair_loss'], thinning: ['patches'] })).toEqual([]);
+  });
+
+  it('出油时间：当天、第二天 → 头皮油；5 天以上 → 头皮干；旧选项仍可读取', () => {
+    expect(scalpTargets({ ...noScalp, oilTiming: 'next_day' })).toEqual(['scalp_oil']);
+    expect(scalpTargets({ ...noScalp, oilTiming: 'three_four_days' })).toEqual([]);
+    expect(scalpTargets({ ...noScalp, oilTiming: 'five_plus_days' })).toEqual(['dry_scalp']);
+    expect(scalpTargets({ ...noScalp, oilTiming: 'one_two_days' })).toEqual([]);
+  });
+
+  it('敏感头皮：用后有不适、经常发红；严重程度不加权', () => {
+    expect(isSensitiveScalp({ ...noScalp, discomfort: ['tightness'], discomfortFrequency: 'sometimes' })).toBe(true);
+    expect(isSensitiveScalp({ ...noScalp, redness: 'often' })).toBe(true);
+    expect(isSensitiveScalp({ ...noScalp, redness: 'occasional' })).toBe(false);
+    expect(scalpTargets({ ...noScalp, redness: 'occasional' })).toEqual(['scalp_redness']);
+    const p = toScoringProfile(answers({ scalp: { concerns: ['dandruff'], dandruffAmount: 4, redness: 'often' } }), 'shampoo', ctx);
+    expect(p.targetWeights).toEqual({ dandruff: 2, scalp_redness: 2, sensitive_scalp: 2 });
+  });
+
+  it('旧档案的"发红"困扰：迁移到新的发红题；回答新题后以新答案为准', () => {
+    const old = { ...noScalp, concerns: ['dandruff' as const, 'redness' as const] };
+    expect(migrateScalp(old)).toMatchObject({ concerns: ['dandruff'], redness: 'occasional' });
+    expect(scalpTargets({ ...old, redness: 'none' })).toEqual(['dandruff']);
+    expect(scalpTargets(old)).toEqual(['dandruff', 'scalp_redness']);
+  });
+
+  it('油腻偏黄大片 → 同时针对头皮油', () => {
+    expect(scalpTargets({ ...noScalp, concerns: ['dandruff'], dandruffType: 'oily_large' })).toEqual(['dandruff', 'scalp_oil']);
+  });
+
+  it('常用造型产品（每周 3 次以上）传入打分', () => {
+    expect(toScoringProfile(answers({ scalp: { washFrequency: 'daily', styling: 'weekly_3_plus' } }), 'shampoo', ctx).frequentStyling).toBe(true);
+    expect(toScoringProfile(answers({ scalp: { washFrequency: 'daily', styling: 'weekly_1_2' } }), 'shampoo', ctx).frequentStyling).toBe(false);
   });
 });
 
@@ -60,6 +131,13 @@ describe('头发问卷映射', () => {
     expect(hairTargets({ ...EMPTY_HAIR, conditions: ['tangling', 'colored', 'breakage'] })).toEqual(['tangling', 'color_fade', 'damage']);
     expect(hairTargets({ ...EMPTY_HAIR, goals: ['smooth', 'scent'] })).toEqual(['frizz', 'tangling']);
     expect(hairTargets({ ...EMPTY_HAIR, goals: ['volume', 'shine', 'curl', 'clean'] })).toEqual(['flat_hair', 'shine', 'curl_definition']);
+  });
+
+  it('"去黄 / 去橙"只在选了染或烫漂时出现并生效', () => {
+    expect(toneGoalAvailable({ conditions: ['dry'] })).toBe(false);
+    expect(toneGoalAvailable({ conditions: ['permed_bleached'] })).toBe(true);
+    expect(hairTargets({ ...EMPTY_HAIR, conditions: ['colored'], goals: ['tone'] })).toEqual(['color_fade', 'damage', 'tone_correction']);
+    expect(hairTargets({ ...EMPTY_HAIR, goals: ['tone'] })).toEqual([]);
   });
 });
 

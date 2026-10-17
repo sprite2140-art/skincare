@@ -73,10 +73,10 @@ describe('data/ 真实数据', () => {
     expect(budgetCaps.shampoo!.sampleSize).toBe(54);
   });
 
-  it('关闭测试模式时，draft 有效成分不参与需求匹配（只剩品牌宣称）；基础成分无需核对即可使用', () => {
+  it('关闭测试模式时，draft 有效成分不参与需求匹配（只剩资料分类的产品定位）；基础成分无需核对即可使用', () => {
     const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), strict);
     expect(r.dimensions.need.score).toBe(70);
-    expect(r.dimensions.need.reason.zh).toBe('针对头皮屑：品牌宣称');
+    expect(r.dimensions.need.reason.zh).toBe('针对头皮屑：资料分类');
     expect(r.dimensions.evidence.score).toBe(30);
     expect(r.unverifiedIngredients).toContain('Pyrithione Zinc');
     expect(r.unverifiedIngredients).not.toContain('Water'); // Aqua 是基础成分
@@ -204,7 +204,7 @@ const data = { index, exchangeRates: real.exchangeRates, budgetCaps: {} };
 const sample: Product = {
   productId: 'SH-T-000', brand: 'Test', nameEn: 'Test Shampoo', nameZh: '测试洗发水', zone: 'scalp', category: 'shampoo',
   usageType: null, region: 'US', formulaNote: '', channels: [], inclusionBasis: '',
-  awards: [], claimedBenefits: [], testedClaims: [], fragranceFreeClaim: 'unknown',
+  awards: [], claimedBenefits: [], claimSource: null, testedClaims: [], fragranceFreeClaim: 'unknown',
   inciList: ['Aqua', 'Sodium Laureth Sulfate', 'Glycerin', 'Piroctone Olamine', 'Parfum'], inciNameUnverified: [], keyActives: [],
   keyActivesDisclosed: true,
   inciListOriginal: '', price: 12, currency: 'USD', sizeMl: null, availableInCn: 'unknown', transparency: 'medium',
@@ -374,6 +374,8 @@ describe('刺激风险', () => {
     const daily = scoreProduct(p, profile({ washFrequency: 'daily' }), data);
     expect(daily.dimensions.irritation.score).toBe(85);
     expect(daily.dimensions.irritation.reason.zh).toContain('你每天洗头');
+    // 常用造型产品（每周 3 次以上）且每天洗头：不因强清洁力扣分
+    expect(scoreProduct(p, profile({ washFrequency: 'daily', frequentStyling: true }), data).dimensions.irritation.score).toBe(100);
   });
 
   it('冲洗型产品（洗发水）扣分减半，敏感用户加倍仍然生效', () => {

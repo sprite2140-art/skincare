@@ -5,7 +5,7 @@ export const TARGETS = [
   'dandruff', 'scalp_oil', 'scalp_itch', 'scalp_redness', 'hair_loss',
   'damage', 'frizz', 'flat_hair', 'tangling', 'color_fade',
   // 头皮状态与发丝效果（主要来自品牌宣称，成分库暂少有对应）
-  'dry_scalp', 'sensitive_scalp', 'clarifying', 'shine', 'curl_definition',
+  'dry_scalp', 'sensitive_scalp', 'clarifying', 'shine', 'curl_definition', 'tone_correction',
 ] as const;
 export type Target = (typeof TARGETS)[number];
 
@@ -55,6 +55,13 @@ export type WaterHardness = (typeof WATER_HARDNESS)[number];
 export const FRAGRANCE_FREE_CLAIMS = ['yes', 'no', 'unknown'] as const;
 export type FragranceFreeClaim = (typeof FRAGRANCE_FREE_CLAIMS)[number];
 
+/**
+ * claimed_benefits 的来源：brand_text = 品牌原文（产品页明确写的）；data_classification = 资料整理时的分类。
+ * 两者都按"产品定位"计分，页面分别标注"品牌宣称"和"资料分类"。
+ */
+export const CLAIM_SOURCES = ['brand_text', 'data_classification'] as const;
+export type ClaimSource = (typeof CLAIM_SOURCES)[number];
+
 /** 榜单 / 奖项，结果页显示为标签，详情注明来源与年份 */
 export interface Award {
   source: string;
@@ -76,6 +83,9 @@ export interface Conflict {
   severity: ConflictSeverity;
 }
 
+/** 成分条目的来源：成分库（ingredients.csv）/ 欧盟 CosIng 批量导入 / 欧盟香料致敏原清单 */
+export type IngredientOrigin = 'library' | 'cosing' | 'eu_allergen_list';
+
 export interface Ingredient {
   inciName: string;
   nameZh: string;
@@ -93,6 +103,12 @@ export interface Ingredient {
   sources: string[];
   reviewStatus: ReviewStatus;
   reviewedOn: string;
+  /** 来源；成分库的条目为 library（解析 CSV 时省略，见 expandIngredients） */
+  origin?: IngredientOrigin;
+  /** 在欧盟需标注的香料致敏原清单上 */
+  euAllergen?: boolean;
+  /** CosIng 登记的功能（小写），仅批量导入后才有 */
+  cosingFunctions?: string[];
 }
 
 export interface Product {
@@ -109,8 +125,10 @@ export interface Product {
   channels: string[];
   inclusionBasis: string;
   awards: Award[];
-  /** 品牌宣称（产品定位）针对的困扰 / 效果 */
+  /** 产品定位针对的困扰 / 效果 */
   claimedBenefits: Target[];
+  /** claimedBenefits 的来源；没有填写时为 null（按资料分类处理） */
+  claimSource: ClaimSource | null;
   testedClaims: TestedClaim[];
   fragranceFreeClaim: FragranceFreeClaim;
   /** 英文 INCI 名，按包装顺序；解析时已统一写法（去掉括号俗名和 [待核对] 标记），打分用这一列 */
