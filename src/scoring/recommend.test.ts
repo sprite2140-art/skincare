@@ -14,6 +14,7 @@ import { filterByMarket, marketForCity } from './market';
 import { recommendReasons } from './reasons';
 import { buildRoutine, routineTotal } from './routine';
 import { rankProducts, scoreProduct, type ProductScore } from './score';
+import { validateData } from '../data/validate';
 
 const real = loadDataFromDisk();
 const index = buildIngredientIndex(real.ingredients);
@@ -116,11 +117,17 @@ describe('场景 3：染烫受损，选洗护搭配，自填总预算', () => {
   const cap = moneyToUsd(a.base.setBudget, real.exchangeRates);
   const lists = { shampoo: recommend(a, 'shampoo').ranked, conditioner: recommend(a, 'conditioner').ranked };
 
-  it('护发素暂无数据时，洗发水正常推荐，护发素位显示整理中', () => {
+  it('洗发水 + 护发素都在总预算内，按发丝状态为护发素打分', () => {
     const routine = buildRoutine(['shampoo', 'conditioner'], lists, cap);
-    expect(routine.slots.map((s) => s.status)).toEqual(['ok', 'no_data']);
+    expect(routine.slots.map((s) => s.status)).toEqual(['ok', 'ok']);
     expect(routine.totalUsd!).toBeLessThanOrEqual(40);
     expect(routine.slots[0].chosen!.needMatches.map((m) => m.target)).toEqual(['color_fade', 'damage']);
+    expect(routine.slots[1].chosen!.product.category).toBe('conditioner');
+  });
+
+  it('某品类没有数据时，另一品类正常推荐，该位置显示整理中', () => {
+    const routine = buildRoutine(['shampoo', 'conditioner'], { shampoo: lists.shampoo, conditioner: [] }, cap);
+    expect(routine.slots.map((s) => s.status)).toEqual(['ok', 'no_data']);
   });
 
   it('有护发素时，在总预算内选总分最高的组合，不限定同品牌', () => {
@@ -159,14 +166,13 @@ describe('场景 4：跳过城市和所有可跳过的题', () => {
   });
 });
 
-describe('场景 5：无图片、无护发素数据、无符合条件商品', () => {
+describe('场景 5：无图片、品类无数据、无符合条件商品', () => {
   it('没有写明使用许可的图片：产品都没有可展示的图片（页面用占位图）', () => {
     expect(real.products.every((p) => !(p.imageUrl && p.imageSource && p.imageLicense))).toBe(true);
   });
 
-  it('护发素没有数据', () => {
-    expect(real.products.filter((p) => p.category === 'conditioner')).toEqual([]);
-    expect(recommend(answers({}), 'conditioner').ranked).toEqual([]);
+  it('品类没有数据时（如发膜）返回空列表', () => {
+    expect(recommend(answers({}), 'hair_mask').ranked).toEqual([]);
   });
 
   it('预算太低时没有可推荐的商品，全部附排除原因', () => {
@@ -227,5 +233,66 @@ describe('效果依据', () => {
     const two = scoreProduct(withClaims({ keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA', 'Sodium Phytate'] }), clean, data);
     expect(one.dimensions.need.score).toBe(30);
     expect(two.dimensions.need.score).toBe(30);
+  });
+});
+
+describe('护发素数据', () => {
+  const co = real.products.filter((p) => p.category === 'conditioner');
+  const byId = (id: string) => real.products.find((p) => p.productId === id)!;
+
+  it('30 款，冲洗型；需求标签为资料分类；品牌宣称是产品页概括，带出处', () => {
+    expect(co).toHaveLength(30);
+    expect(co.every((p) => p.claimSource === 'data_classification' && p.claimedBenefits.length > 0)).toBe(true);
+    const c1 = byId('CO-US-001');
+    expect(c1.brandClaims).toMatchObject({ status: 'brand_page_summary', quote: 'leaves strands feeling healthy and soft' });
+    expect(c1.brandClaims.sourceUrl).toMatch(/^https:\/\/www\.cerave\.com\//);
+    expect(c1.claimedBenefits).toEqual(['dryness', 'tangling']);
+    // 在售版本与品牌页不一致：不采用品牌宣称
+    expect(byId('CO-US-005').brandClaims).toMatchObject({ text: '', status: 'version_mismatch' });
+    // 洗发水没有收集品牌宣称
+    expect(byId('SH-US-001').brandClaims.status).toBe('not_collected');
+  });
+
+  it('无香声明只有两款，并有出处；"无香优先"时它们排在前面', () => {
+    expect(co.filter((p) => p.fragranceFreeClaim === 'yes').map((p) => p.productId)).toEqual(['CO-US-001', 'CO-US-029']);
+    const prof = toScoringProfile(answers({ hair: { fragrancePref: 'free_first' } }), 'conditioner', ctx);
+    const ranked = rankProducts(co, 'conditioner', prof, data).filter((r) => !r.excluded);
+    const labeled = ranked.filter((r) => r.fragrance.status === 'labeled_free').map((r) => r.product.productId);
+    expect(ranked.slice(0, labeled.length).map((r) => r.product.productId).sort()).toEqual([...labeled].sort());
+    expect(labeled.length).toBeGreaterThan(0);
+  });
+
+  it('同系列关系双向记录，不同品类', () => {
+    expect(byId('CO-US-001').pairedProductIds).toEqual(['SH-US-001', 'SH-US-002']);
+    expect(byId('SH-US-001').pairedProductIds).toContain('CO-US-001');
+    expect(byId('CO-US-025').pairedProductIds).toEqual([]);
+  });
+
+  it('护发素只按发丝状态和期望效果打分，不看头皮困扰', () => {
+    const a = answers({ scalp: { concerns: ['dandruff'] }, hair: { conditions: ['tangling'], goals: ['smooth'] } });
+    const r = recommend(a, 'conditioner');
+    expect(r.profile.concerns).toEqual(['tangling', 'frizz']);
+    expect(r.ok.length).toBeGreaterThan(0);
+    expect(r.ok[0].needMatches.every((m) => m.target !== 'dandruff')).toBe(true);
+  });
+
+  it('数据校验：无香声明必须有出处；品牌宣称必须有出处和状态；同系列 ID 必须存在', () => {
+    const base: Product = { ...byId('CO-US-001'), pairedProductIds: [] };
+    const errs = (patch: Partial<Product>) =>
+      validateData(real.ingredients, [{ ...base, ...patch }], real.cities, real.exchangeRates).filter((i) => i.level === 'error').map((i) => i.message);
+    expect(errs({})).toEqual([]);
+    expect(errs({ fragranceFreeSourceUrl: '' })).toEqual([expect.stringContaining('fragrance_free_source_url')]);
+    expect(errs({ brandClaims: { ...base.brandClaims, sourceUrl: '' } })).toEqual([expect.stringContaining('brand_claims_source_url')]);
+    expect(errs({ pairedProductIds: ['SH-XX-999'] })).toEqual([expect.stringContaining('SH-XX-999')]);
+  });
+});
+
+describe('环境适配：水硬度因分区而异', () => {
+  it('按中性计分并说明原因', () => {
+    const la = real.cities.find((c) => c.city === 'Los Angeles')!;
+    const prof = { ...toScoringProfile(answers({}), 'shampoo', ctx), city: la };
+    const r = scoreProduct(real.products[0], prof, data);
+    expect(r.dimensions.environment.score).toBe(50);
+    expect(r.dimensions.environment.reason.zh).toContain('不同供水分区或时期的水硬度不同');
   });
 });

@@ -560,6 +560,12 @@ function scoreEnvironment(verified: (Resolved & { ingredient: Ingredient })[], c
   if (city.reviewStatus !== 'verified' && !(allowDraft && city.waterHardness !== 'unknown')) {
     return neutral({ zh: `${city.city}的水硬度数据未核对，按中性计分`, en: `Water hardness for ${city.city} is not verified yet, scored as neutral` });
   }
+  if (city.waterHardness === 'varies') {
+    return neutral({
+      zh: `${city.city}不同供水分区或时期的水硬度不同，无法确定你家的水，按中性计分`,
+      en: `Water hardness in ${city.city} differs by supply zone or period, so yours cannot be determined; scored as neutral`,
+    });
+  }
   if (city.waterHardness === 'unknown') {
     return neutral({ zh: `暂无${city.city}的水硬度数据，按中性计分`, en: `No water hardness data for ${city.city}, scored as neutral` });
   }

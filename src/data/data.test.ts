@@ -1,5 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { parseInciList, parseProducts } from './parse';
+import { parseCities, parseInciList, parseProducts } from './parse';
 import { buildIngredientIndex, cleanInciName } from './ingredientIndex';
 import { ingredientFrequency } from './frequency';
 import { loadDataFromDisk } from './node';
@@ -7,7 +8,7 @@ import { validateData } from './validate';
 import type { ExchangeRate, Ingredient, Product } from './types';
 
 const real = loadDataFromDisk();
-const sample = real.products[0];
+const sample = { ...real.products[0], pairedProductIds: [] };
 const errorsOf = (opts: { ingredients?: Ingredient[]; products?: Product[]; rates?: ExchangeRate[] }) =>
   validateData(opts.ingredients ?? real.ingredients, opts.products ?? real.products, real.cities, opts.rates ?? real.exchangeRates)
     .filter((i) => i.level === 'error')
@@ -123,9 +124,9 @@ describe('数据校验', () => {
 
 describe('本轮新增的产品列', () => {
   const header =
-    'product_id,brand,name_en,name_zh,zone,category,region,inclusion_basis,awards,claimed_benefits,tested_claims,fragrance_free_claim,inci_list,key_actives,price,currency,transparency,source_url,purchase_url,image_url,image_source,image_license';
+    'product_id,brand,name_en,name_zh,zone,category,region,inclusion_basis,awards,claimed_benefits,tested_claims,fragrance_free_claim,fragrance_free_source_url,inci_list,key_actives,price,currency,transparency,source_url,purchase_url,image_url,image_source,image_license';
   const row =
-    'CO-US-T01,B,N,名,hair,conditioner,US,,Allure Best of Beauty|2025|Best Conditioner|https://a.example/award,frizz;shine,frizz|第三方仪器测试梳理力|2025|https://lab.example/report,yes,Water;Cetearyl Alcohol,Not separately disclosed,12,USD,medium,https://a.example/p,https://shop.example/p,,,';
+    'CO-US-T01,B,N,名,hair,conditioner,US,,Allure Best of Beauty|2025|Best Conditioner|https://a.example/award,frizz;shine,frizz|第三方仪器测试梳理力|2025|https://lab.example/report,yes,https://brand.example/ff,Water;Cetearyl Alcohol,Not separately disclosed,12,USD,medium,https://a.example/p,https://shop.example/p,,,';
   const [p] = parseProducts(`${header}\n${row}\n`);
 
   it('awards、claimed_benefits、tested_claims、fragrance_free_claim、购买和图片列', () => {
@@ -164,13 +165,55 @@ describe('本轮新增的产品列', () => {
 });
 
 describe('城市水硬度', () => {
-  it('有供水机构数据的城市带数值、适用范围和来源；没有的为 unknown', () => {
-    const sf = real.cities.find((c) => c.city === 'San Francisco')!;
-    expect(sf).toMatchObject({ waterHardness: 'moderate', hardnessMgL: '62', confidence: 'medium' });
-    expect(sf.dataPeriod).toContain('2025');
-    expect(sf.hardnessMgL).toContain('62');
-    expect(sf.source).toMatch(/^https:\/\/www\.sfpuc\.gov\//);
-    expect(real.cities.find((c) => c.city === 'Las Vegas')!.waterHardness).toBe('very_hard');
-    expect(real.cities.find((c) => c.city === 'Seattle')!.waterHardness).toBe('unknown');
+  const byCity = (name: string) => real.cities.find((c) => c.city === name)!;
+
+  it('按供水分区 / 时期保存多条记录，数值、口径、来源原样保留', () => {
+    const sf = byCity('San Francisco');
+    expect(sf.water).toHaveLength(1);
+    expect(sf.water[0]).toMatchObject({ value: 62, min: 8.1, max: 112, statisticType: 'reported_annual_mean', hardnessClass: 'moderately_hard' });
+    expect(sf.water[0].sources[0]).toMatch(/^https:\/\/www\.sfpuc\.gov\//);
+    expect(byCity('Los Angeles').water).toHaveLength(6);
+    expect(byCity('Philadelphia').water).toHaveLength(3);
+    expect(byCity('Dallas').water[0]).toMatchObject({ value: null, min: 120, max: 155 });
+  });
+
+  it('城市等级：一致时取该等级；硬和很硬混合记为硬；其他不一致或跨两级记为"因分区而异"；没有分级为 unknown', () => {
+    expect(byCity('San Francisco').waterHardness).toBe('moderate');
+    expect(byCity('Seattle').waterHardness).toBe('soft');
+    expect(byCity('Las Vegas').waterHardness).toBe('very_hard');
+    expect(byCity('San Diego').waterHardness).toBe('hard'); // 三个很硬 + 一个硬
+    expect(byCity('Los Angeles').waterHardness).toBe('varies');
+    expect(byCity('Philadelphia').waterHardness).toBe('varies');
+    expect(byCity('Dallas').waterHardness).toBe('varies'); // 120–155 跨中等和硬
+    expect(byCity('Miami').waterHardness).toBe('unknown');
+    expect(byCity('Atlanta').waterHardness).toBe('unknown');
+    expect(byCity('San Jose').waterHardness).toBe('unknown');
+    expect(byCity('Minneapolis').waterHardness).toBe('moderate');
+  });
+
+  it('每条记录的口径都有中英文说明；适用范围是可读的供水系统名称', () => {
+    const zh = JSON.parse(readFileSync(new URL('../i18n/zh.json', import.meta.url), 'utf8'));
+    const en = JSON.parse(readFileSync(new URL('../i18n/en.json', import.meta.url), 'utf8'));
+    for (const w of real.water) {
+      expect(zh[`water.stat.${w.statisticType}`], w.statisticType).toBeTruthy();
+      expect(en[`water.stat.${w.statisticType}`], w.statisticType).toBeTruthy();
+      expect(w.scope).not.toMatch(/^[a-z0-9_]+$/);
+    }
+    expect(byCity('San Francisco').water[0].scope).toBe('San Francisco / SFPUC reported system');
+  });
+
+  it('旧格式 cities.csv（直接写 water_hardness）仍可读取', () => {
+    expect(parseCities('city,country,water_hardness,review_status\nX,US,hard,draft\n')[0]).toMatchObject({ waterHardness: 'hard', water: [] });
+  });
+
+  it('数据校验：城市必须在 cities.csv，范围上下限、分级、来源', () => {
+    const w = real.water[0];
+    const errs = (patch: Partial<typeof w>) =>
+      validateData(real.ingredients, [], real.cities, real.exchangeRates, { water: [{ ...w, ...patch }] }).filter((i) => i.level === 'error').map((i) => i.message);
+    expect(errs({})).toEqual([]);
+    expect(errs({ city: 'Nowhere' })).toEqual([expect.stringContaining('不在 cities.csv')]);
+    expect(errs({ min: 200, max: 100 })).toEqual([expect.stringContaining('大于上限')]);
+    expect(errs({ hardnessClass: 'medium' })).toEqual([expect.stringContaining('hardness_class')]);
+    expect(errs({ sources: [] })).toEqual([expect.stringContaining('source_url')]);
   });
 });

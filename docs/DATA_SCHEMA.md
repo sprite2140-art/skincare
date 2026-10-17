@@ -56,8 +56,11 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | awards | 榜单与奖项，结果页显示为标签。每项格式 `来源\|年份\|名称\|链接`，多项用分号分隔；来源和 4 位年份必填 | Allure Best of Beauty\|2025\|敏感肌洗护组合获奖\|https://… |
 | claimed_benefits | 产品定位针对的困扰或效果，取 targets 的值，分号分隔。不从成分推断 | dandruff;sensitive_scalp |
 | claim_source | claimed_benefits 的来源：brand_text（产品页的品牌原文）/ data_classification（资料整理时的分类）。页面分别显示"品牌宣称"和"资料分类"，都按产品定位 0.7 计分。本轮 47 款美国产品来自资料中的"需求"字段，是整理时的分类，全部填 data_classification；"日常清洁"对应 clarifying，"去黄 / 去橙"对应 tone_correction | data_classification |
+| brand_claims / brand_claims_quote / brand_claims_source_url | 品牌产品页效果的中文概括、短原文和官方产品页。概括不是逐字翻译，也不是独立验证的效果；页面显示为"品牌宣称（产品页概括）"。目前只展示，不参与计分（计分仍用 claimed_benefits） | |
+| brand_claims_status | brand_page_summary（有对应版本的品牌页概括）/ version_mismatch（在售版本与品牌页不一致，留空）/ not_collected（尚未收集）。brand_claims 有内容时必须为 brand_page_summary 并有出处 | brand_page_summary |
 | tested_claims | 可靠的成品测试（第三方或公开方法），每项格式 `困扰\|测试说明\|年份\|链接`，链接必填。目前没有数据 | |
-| fragrance_free_claim | 产品是否明确标注 fragrance-free：yes / no / unknown。留空视为 unknown | unknown |
+| fragrance_free_claim | 产品是否明确标注 fragrance-free：yes / no / unknown。留空视为 unknown（未确认，不等于含香） | unknown |
+| fragrance_free_source_url | 无香声明出处；fragrance_free_claim = yes 时必填 | |
 | inci_list | 完整成分表，**英文 INCI 名**，按包装顺序，分号分隔。打分用这一列，解析时统一写法（见下方"成分名称统一"） | Aqua;Glycerin;Piroctone Olamine |
 | key_actives | 品牌宣称的主打成分，**按品牌原文**保存（可带浓度、复数、复配物或技术名称，美国药品标签上的 Active Ingredient 也算），分号分隔。匹配规则见下方"主打成分匹配"。对应不上成分表的写法只作为品牌宣称展示，`validate-data` 给提示不报错。留空表示还没填写，暂按全部满分计算并提示；品牌没有单独公布时填 `Not separately disclosed`，所有有效成分按非主打计 | Pyrithione Zinc 1%; Ceramides |
 | inci_list_original | 包装原文成分表（中文、日文、韩文等），原样保存，只用于展示和核对，不参与打分 | 水、甘油、吡罗克酮乙醇胺盐 |
@@ -67,6 +70,7 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | transparency | high / medium / low | |
 | source_url | 成分表来源链接，可有多个，用分号分隔 | https://a.example;https://b.example |
 | purchase_url | 购买链接（零售商或品牌产品页）。本轮取 source_url 中与 channels 对应的零售商产品页 | https://www.ulta.com/p/… |
+| paired_product_ids | 同系列的其他品类产品 ID，分号分隔，双向记录（洗发水记护发素、护发素记洗发水）。只用于显示"同系列"，不代表必须成套购买，搭配不限定同系列 | CO-US-001 |
 | image_url / image_source / image_license | 产品图链接、来源、使用许可。**三项都填写时页面才展示图片**，否则用统一占位图；不得使用没有明确许可的图片 | |
 | reviewed_on | 核对日期 | |
 
@@ -141,6 +145,15 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 
 当前数据：2026 年 10 月 13 日发布的 H.10 中 10 月 9 日的汇率。
 
+## water_hardness.csv（水硬度记录）
+
+每行是一个供水系统、水厂、水源或配水点在某个时期的数据，一个城市可以有多行（例如洛杉矶 6 个水源、费城 3 个水厂）。列沿用资料提供的 21 列（region_id、geographic_scope、statistic_type、hardness_value_mg_L_CaCO3、reported_range_min/max、hardness_class、sample_period、confidence_for_household_tap、formula_note、source_url、retrieved_on 等），前面加 city、country 两列对应 cities.csv。
+
+- 数值单位 mg/L，以 CaCO3 计；hardness_class 按 USGS：≤60 soft，>60–120 moderately_hard，>120–180 hard，>180 very_hard；跨两级的写 hard_or_very_hard 或 moderately_hard_or_hard；官方报告没有数值的写 unknown。
+- **不按同城记录平均，也不以第一条代表全市。** 城市等级由记录汇总（`summarizeHardness`）：所有记录等级相同时取该等级；都属于硬或很硬时取"硬"；其他不一致或跨两级时为 varies（"因供水分区而异"，环境适配按中性计分）；没有分级记录为 unknown。
+- 页面逐条显示分区、口径（年均、单次、范围、月均、由钙镁换算等）、数值或范围、时期、来源和资料备注。
+- 现有 20 个城市有记录（2026-10-16、10-17 核对）。Miami、Atlanta 官方报告没有总硬度数值，保持 unknown；San Jose、Irvine 尚无记录。
+
 ## cities.csv（城市环境）
 
 湿度、紫外线、季节由天气接口实时获取，这里只存不常变化的属性。
@@ -148,13 +161,7 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 | 字段 | 含义 |
 |---|---|
 | city / country | 城市、国家 |
-| water_hardness | soft / moderate / hard / very_hard / unknown。按 USGS 分级（以 CaCO3 计）：0–60 软、61–120 中等、121–180 硬、180 以上很硬 |
-| hardness_mg_l | 供水机构公布的数值（mg/L，以 CaCO3 计），均值或范围原样写；没有均值时不用范围中点代替 |
-| data_period | 数据对应的时期和统计口径（年均值、单次快照、未注明采样期等） |
-| supply_scope | 数据适用的供水范围；不能推广到整个城市或州 |
-| confidence | 用于估计住户自来水的可靠程度：low / medium / high |
-| source | 来源链接（当地供水部门水质报告） |
-| retrieved_on | 核对日期 |
 | review_status | draft / verified。只有 verified 城市的水硬度参与环境适配；测试模式下 draft 的也参与 |
 
-当前数据（2026-10-16 核对，来自供水机构公开报告，均为 draft）：New York 软（NYC DEP 全市一般说明）、San Francisco 中等（SFPUC 2025 年均值 62）、Boston 软（MWRA 2026 年 1 月单点快照）、Phoenix 硬（2025 年范围 172–302，未公布均值）、Las Vegas 很硬（LVVWD 平均 280）。其他城市为 unknown，页面显示"暂无数据"。按 USGS 说明，不只凭州名自动赋值；州级地下水统计（USGS NWQP 2020–2023）不是住户自来水硬度，本轮没有导入。
+水硬度见 water_hardness.csv。旧格式（直接写 water_hardness 列）仍可读取，没有分区记录时沿用。
+

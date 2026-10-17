@@ -3,7 +3,7 @@
 import Papa from 'papaparse';
 import { cleanInciName } from './ingredientIndex';
 import type {
-  Award, City, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
+  Award, BrandClaimStatus, City, WaterRecord, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
   UsageType, WaterHardness, Zone,
 } from './types';
@@ -114,8 +114,15 @@ export function parseProducts(text: string): Product[] {
     awards: parseAwards(r.awards),
     claimedBenefits: splitList(r.claimed_benefits) as Target[],
     claimSource: (r.claim_source || null) as ClaimSource | null,
+    brandClaims: {
+      text: r.brand_claims ?? '',
+      quote: r.brand_claims_quote ?? '',
+      sourceUrl: r.brand_claims_source_url ?? '',
+      status: (r.brand_claims_status || null) as BrandClaimStatus | null,
+    },
     testedClaims: parseTestedClaims(r.tested_claims),
     fragranceFreeClaim: (r.fragrance_free_claim || 'unknown') as FragranceFreeClaim,
+    fragranceFreeSourceUrl: r.fragrance_free_source_url ?? '',
     inciList: inci.names,
     inciNameUnverified: inci.unverified,
     keyActives: (r.key_actives ?? '').trim().toLowerCase() === NOT_DISCLOSED ? [] : splitList(r.key_actives),
@@ -128,6 +135,7 @@ export function parseProducts(text: string): Product[] {
     transparency: r.transparency as Transparency,
     sourceUrls: splitList(r.source_url),
     purchaseUrl: r.purchase_url ?? '',
+    pairedProductIds: splitList(r.paired_product_ids),
     imageUrl: r.image_url ?? '',
     imageSource: r.image_source ?? '',
     imageLicense: r.image_license ?? '',
@@ -145,17 +153,64 @@ export function parseExchangeRates(text: string): ExchangeRate[] {
   }));
 }
 
-export function parseCities(text: string): City[] {
+const num = (v: string | undefined) => (v && Number.isFinite(Number(v)) ? Number(v) : null);
+
+export function parseWaterRecords(text: string): WaterRecord[] {
   return parseCsv(text).map((r) => ({
     city: r.city ?? '',
     country: r.country ?? '',
-    waterHardness: (r.water_hardness || 'unknown') as WaterHardness,
-    hardnessMgL: r.hardness_mg_l ?? '',
-    dataPeriod: r.data_period ?? '',
-    supplyScope: r.supply_scope ?? '',
-    confidence: r.confidence ?? '',
-    source: r.source ?? '',
+    regionId: r.region_id ?? '',
+    // 旧记录的 geographic_scope 只是分类代码（如 named_utility_or_supply_system_only），这时用 region_name 的供水系统说明
+    scope: /^[a-z0-9_]+$/.test(r.geographic_scope ?? '') ? r.region_name ?? '' : r.geographic_scope ?? '',
+    statisticType: r.statistic_type ?? '',
+    value: num(r.hardness_value_mg_L_CaCO3),
+    min: num(r.reported_range_min_mg_L_CaCO3),
+    max: num(r.reported_range_max_mg_L_CaCO3),
+    hardnessClass: r.hardness_class || 'unknown',
+    period: r.sample_period ?? '',
+    confidence: r.confidence_for_household_tap ?? '',
+    note: r.formula_note ?? '',
+    sources: splitList(r.source_url),
     retrievedOn: r.retrieved_on ?? '',
-    reviewStatus: r.review_status as ReviewStatus,
   }));
+}
+
+/** 原始分级 → 页面用的等级；跨两级的记为 null（按"不同"处理） */
+const CLASS_MAP: Record<string, WaterHardness | null> = {
+  soft: 'soft',
+  moderately_hard: 'moderate',
+  hard: 'hard',
+  very_hard: 'very_hard',
+  hard_or_very_hard: 'hard',
+  moderately_hard_or_hard: null,
+};
+
+/**
+ * 汇总一个城市的水硬度：所有有分级的记录等级相同时取该等级；都属于硬或很硬时取"硬"（全部很硬时取"很硬"）；
+ * 其他不一致的情况（例如不同水厂一软一硬，或单条记录本身跨两级）记为 varies；没有分级记录为 unknown。
+ * 不按记录平均，也不以第一条代表全市。
+ */
+export function summarizeHardness(records: WaterRecord[]): WaterHardness {
+  const known = records.filter((r) => r.hardnessClass !== 'unknown');
+  if (known.length === 0) return 'unknown';
+  const classes = known.map((r) => CLASS_MAP[r.hardnessClass] ?? null);
+  if (classes.some((c) => c === null)) return 'varies';
+  const set = new Set(classes);
+  if (set.size === 1) return classes[0]!;
+  if ([...set].every((c) => c === 'hard' || c === 'very_hard')) return 'hard';
+  return 'varies';
+}
+
+export function parseCities(text: string, water: WaterRecord[] = []): City[] {
+  return parseCsv(text).map((r) => {
+    const records = water.filter((w) => w.city === r.city && w.country === r.country);
+    return {
+      city: r.city ?? '',
+      country: r.country ?? '',
+      // 旧格式的 cities.csv 直接写了 water_hardness，没有分区记录时沿用
+      waterHardness: records.length > 0 ? summarizeHardness(records) : ((r.water_hardness || 'unknown') as WaterHardness),
+      water: records,
+      reviewStatus: r.review_status as ReviewStatus,
+    };
+  });
 }
