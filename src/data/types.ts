@@ -48,7 +48,8 @@ export type CnAvailability = (typeof CN_AVAILABILITY)[number];
 export const TRANSPARENCY = ['high', 'medium', 'low'] as const;
 export type Transparency = (typeof TRANSPARENCY)[number];
 
-export const WATER_HARDNESS = ['soft', 'moderate', 'hard', 'very_hard', 'unknown'] as const;
+/** varies：同一城市不同供水分区或时期的硬度等级不同，无法确定住户用水 */
+export const WATER_HARDNESS = ['soft', 'moderate', 'hard', 'very_hard', 'varies', 'unknown'] as const;
 export type WaterHardness = (typeof WATER_HARDNESS)[number];
 
 /** 产品是否明确标注 fragrance-free（无香） */
@@ -61,6 +62,22 @@ export type FragranceFreeClaim = (typeof FRAGRANCE_FREE_CLAIMS)[number];
  */
 export const CLAIM_SOURCES = ['brand_text', 'data_classification'] as const;
 export type ClaimSource = (typeof CLAIM_SOURCES)[number];
+
+/**
+ * 品牌产品页效果的中文概括（不是逐字翻译，也不是独立验证的效果）。
+ * brand_page_summary = 有对应版本的品牌页概括；version_mismatch = 在售版本与品牌页不一致，留空；not_collected = 尚未收集。
+ */
+export const BRAND_CLAIM_STATUSES = ['brand_page_summary', 'version_mismatch', 'not_collected'] as const;
+export type BrandClaimStatus = (typeof BRAND_CLAIM_STATUSES)[number];
+
+export interface BrandClaims {
+  /** 中文概括 */
+  text: string;
+  /** 产品页短原文 */
+  quote: string;
+  sourceUrl: string;
+  status: BrandClaimStatus | null;
+}
 
 /** 榜单 / 奖项，结果页显示为标签，详情注明来源与年份 */
 export interface Award {
@@ -129,8 +146,11 @@ export interface Product {
   claimedBenefits: Target[];
   /** claimedBenefits 的来源；没有填写时为 null（按资料分类处理） */
   claimSource: ClaimSource | null;
+  brandClaims: BrandClaims;
   testedClaims: TestedClaim[];
   fragranceFreeClaim: FragranceFreeClaim;
+  /** 无香声明的出处（fragrance_free_claim = yes 时必填） */
+  fragranceFreeSourceUrl: string;
   /** 英文 INCI 名，按包装顺序；解析时已统一写法（去掉括号俗名和 [待核对] 标记），打分用这一列 */
   inciList: string[];
   /** inciList 中原文带 [待核对] 标记的成分（统一后的名称）：名称未核对，不参与打分 */
@@ -153,6 +173,8 @@ export interface Product {
   sourceUrls: string[];
   /** 购买链接（零售商或品牌产品页） */
   purchaseUrl: string;
+  /** 同系列的其他品类产品（如洗发水对应的护发素）；不代表必须成套购买 */
+  pairedProductIds: string[];
   /** 产品图：只有 image_license 写明可用时才展示，否则用统一占位图 */
   imageUrl: string;
   imageSource: string;
@@ -200,18 +222,33 @@ export function usageTypeOf(product: Pick<Product, 'category' | 'usageType'>): U
   return product.usageType ?? CATEGORY_DEFAULT_USAGE[product.category as Category] ?? null;
 }
 
+/** 一条水硬度记录（data/water_hardness.csv）：某个供水系统、水厂、水源或配水点在某个时期的数据 */
+export interface WaterRecord {
+  city: string;
+  country: string;
+  regionId: string;
+  /** 适用范围，如 "LADWP source: MWD Weymouth Plant" */
+  scope: string;
+  /** 统计口径：annual_mean / single_sample / reported_typical_range / monthly_mean 等 */
+  statisticType: string;
+  /** mg/L，以 CaCO3 计；没有时为 null */
+  value: number | null;
+  min: number | null;
+  max: number | null;
+  /** 原始分级：soft / moderately_hard / hard / very_hard / hard_or_very_hard / moderately_hard_or_hard / unknown */
+  hardnessClass: string;
+  period: string;
+  confidence: string;
+  note: string;
+  sources: string[];
+  retrievedOn: string;
+}
+
 export interface City {
   city: string;
   country: string;
+  /** 由该城市的水硬度记录汇总得出，见 summarizeHardness() */
   waterHardness: WaterHardness;
-  /** 供水机构公布的硬度（mg/L，以 CaCO3 计），可能是均值或范围，原样显示 */
-  hardnessMgL: string;
-  dataPeriod: string;
-  /** 数据适用的供水范围，不能推广到整个城市或州 */
-  supplyScope: string;
-  /** 用于估计住户自来水的可靠程度：low / medium / high */
-  confidence: string;
-  source: string;
-  retrievedOn: string;
+  water: WaterRecord[];
   reviewStatus: ReviewStatus;
 }

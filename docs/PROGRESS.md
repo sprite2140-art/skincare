@@ -13,6 +13,15 @@
 
 ## 记录
 
+### 2026-10-17（Claude Code：护发素 30 款、15 城水硬度、洗发水效果字段审计入库；新 PR）
+- 完成：
+  1. **护发素**：conditioners_us_30.csv 导入为 CO-US-001 至 030（category = conditioner，冲洗型）。映射：concern_tags → claimed_benefits（资料分类，干涩 → dryness、打结 → tangling、毛躁 → frizz、染烫受损 / 易断 → damage、细软扁塌 → flat_hair、卷发 → curl_definition、光泽 → shine、护色 → color_fade、去黄 / 去橙 → tone_correction）；size 换算 size_ml；入库依据转为 awards（Ulta 热销结果页 / Allure 2024）；inci_source_url 等出处已在 source_url 中。新增列 brand_claims、brand_claims_quote、brand_claims_source_url、brand_claims_status（29 款品牌页概括，CO-US-005 版本不一致留空）、fragrance_free_source_url（CO-US-001、029 明确无香）、paired_product_ids（同系列，双向记录）。品牌宣称目前只展示，不参与计分。护发素预算档位自动算出：≤ $17.27 / ≤ $28.43 / 不限。
+  2. **洗发水效果字段审计**：47 款的"需求"都是整理者分类，与上一轮 claim_source = data_classification 一致；brand_claims_status 记为 not_collected，品牌宣称留空。
+  3. **水硬度**：新增 data/water_hardness.csv，一个城市可有多条分区 / 时期记录（上一轮的 5 城 + 本轮 15 城，共 35 条）；cities.csv 只保留城市本身，加 Minneapolis、Detroit。城市等级按记录汇总，不平均、不以第一条代表全市；不一致时显示"因供水分区而异"，环境适配按中性计分。问卷选城市后逐条显示分区、口径、数值或范围、时期、来源和备注。
+  4. **结果页**：显示品牌宣称（产品页概括 + 原文短摘 + 出处）、版本不一致说明、同系列产品；洗护搭配选中同系列时说明"不限定同系列，可以替换"，替换列表标出同系列。
+- 验证：测试 136 个全部通过；类型检查、数据校验（0 错误）、构建通过。390px 浏览器：洛杉矶显示"因供水分区而异"和 6 条记录；洗护搭配（干涩、打结、柔顺，整套 $35）选出洗发水 + 护发素，合计 $31.99；护发素列表 30 款，详情显示品牌宣称和同系列；无报错、无横向滚动。
+- 待补：Miami、Atlanta 官方总硬度；San Jose、Irvine 水硬度；品牌宣称如需参与计分，需要把概括映射到 targets（建议新增 brand_claim_targets 列）；洗发水品牌宣称；产品图授权；CosIng 数据；2023/1545 致敏原清单。
+
 ### 2026-10-17（Claude Code：头皮问卷完整实现、资料分类标注、CosIng 导入工具；新 PR）
 - 完成：
   1. **头皮问卷**按作者决定实现（docs/QUIZ.md）：瘙痒 0–10（4 分敏感、7 分就医）；出油时间 4 档（措辞不写成医学结论）；头皮屑类型（含厚痂 / 银白鳞屑）和 4 级多少（自绘示意图）；用后不适及频率；头皮发红 4 档；选了掉发时问发长、一天掉发量（及肩 / 长发看 6 张自绘示意图，短发用下水口、枕头上的文字描述，注明粗略估计）和稀疏位置；洗头频率与造型产品合成一屏。严重程度不加权。

@@ -2,7 +2,7 @@
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { parseCities, parseExchangeRates, parseIngredients, parseProducts } from './parse';
+import { parseCities, parseExchangeRates, parseIngredients, parseProducts, parseWaterRecords } from './parse';
 import { expandIngredients, parseAllergens, parseCosingTable } from './cosing';
 import { buildIngredientIndex } from './ingredientIndex';
 
@@ -23,7 +23,8 @@ export function loadDataFromDisk() {
     allIngredients,
     ingredientIndex: buildIngredientIndex(allIngredients),
     products: parseProducts(read('products.csv')),
-    cities: parseCities(read('cities.csv')),
+    water: parseWaterRecords(read('water_hardness.csv')),
+    cities: parseCities(read('cities.csv'), parseWaterRecords(read('water_hardness.csv'))),
     exchangeRates: parseExchangeRates(read('exchange_rates.csv')),
   };
 }

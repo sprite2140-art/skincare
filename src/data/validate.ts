@@ -5,10 +5,13 @@ import { unmatchedKeyActives } from './keyActives';
 import { expandIngredients, type AllergenEntry, type CosingEntry } from './cosing';
 import { ingredientFrequency } from './frequency';
 import {
-  CATEGORIES, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
+  BRAND_CLAIM_STATUSES, CATEGORIES, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
   REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
 } from './types';
-import type { Category, City, ExchangeRate, Ingredient, Product } from './types';
+import type { Category, City, ExchangeRate, Ingredient, Product, WaterRecord } from './types';
+
+/** water_hardness.csv 的 hardness_class 取值（USGS 分级，以 CaCO3 计；跨两级的单独列出） */
+const WATER_CLASSES = ['soft', 'moderately_hard', 'hard', 'very_hard', 'hard_or_very_hard', 'moderately_hard_or_hard', 'unknown'] as const;
 
 export interface Issue {
   level: 'error' | 'warning';
@@ -25,7 +28,7 @@ export function validateData(
   cities: City[],
   exchangeRates: ExchangeRate[],
   /** CosIng 批量导入的成分和欧盟香料致敏原清单；用于匹配产品成分，不做成分库的格式检查 */
-  extra: { cosing?: CosingEntry[]; allergens?: AllergenEntry[] } = {},
+  extra: { cosing?: CosingEntry[]; allergens?: AllergenEntry[]; water?: WaterRecord[] } = {},
 ): Issue[] {
   const issues: Issue[] = [];
   const err = (file: string, key: string, message: string) =>
@@ -136,6 +139,13 @@ export function validateData(
       if (!/^https?:\/\//.test(c.url)) err(F_PRD, key, 'tested_claims 每一项都必须有测试来源链接');
     }
     oneOf(F_PRD, key, 'fragrance_free_claim', p.fragranceFreeClaim, FRAGRANCE_FREE_CLAIMS);
+    if (p.fragranceFreeClaim === 'yes' && !/^https?:\/\//.test(p.fragranceFreeSourceUrl)) {
+      err(F_PRD, key, 'fragrance_free_claim = yes 时必须填写 fragrance_free_source_url（无香声明出处）');
+    }
+    const bc = p.brandClaims;
+    if (bc.status !== null) oneOf(F_PRD, key, 'brand_claims_status', bc.status, BRAND_CLAIM_STATUSES);
+    if (bc.text && !/^https?:\/\//.test(bc.sourceUrl)) err(F_PRD, key, 'brand_claims 有内容时必须填写 brand_claims_source_url');
+    if (bc.text && bc.status !== 'brand_page_summary') err(F_PRD, key, 'brand_claims 有内容时 brand_claims_status 应为 brand_page_summary');
     for (const a of p.awards) {
       if (!a.source || !/^\d{4}$/.test(a.year)) err(F_PRD, key, `awards 每一项需写明来源和 4 位年份（来源|年份|名称|链接）：${a.source}|${a.year}`);
       if (a.url && !/^https?:\/\//.test(a.url)) err(F_PRD, key, `awards 链接不是 http(s)：${a.url}`);
@@ -149,6 +159,13 @@ export function validateData(
     if (p.sizeMl !== null && !(p.sizeMl > 0)) err(F_PRD, key, `size_ml 应为正数：${p.sizeMl}`);
     for (const url of p.sourceUrls) {
       if (!/^https?:\/\//.test(url)) err(F_PRD, key, `source_url 中的 "${url}" 不是 http(s) 链接（多个链接用分号分隔）`);
+    }
+  }
+  for (const p of products) {
+    for (const id of p.pairedProductIds) {
+      const other = products.find((x) => x.productId === id);
+      if (!other) err(F_PRD, p.productId, `paired_product_ids 中的 "${id}" 不在产品表中`);
+      else if (other.category === p.category) warn(F_PRD, p.productId, `paired_product_ids 中的 "${id}" 与本产品是同一品类`);
     }
   }
   // 按统一后的名称合并、按出现次数排序，即"成分库扩充优先清单"
@@ -166,6 +183,26 @@ export function validateData(
     const key = `${c.city}, ${c.country}`;
     oneOf(F_CITY, key, 'water_hardness', c.waterHardness, WATER_HARDNESS);
     oneOf(F_CITY, key, 'review_status', c.reviewStatus, REVIEW_STATUSES);
+    if (c.country === 'US' && c.water.length === 0) warn(F_CITY, key, '没有水硬度记录（water_hardness.csv）');
+  }
+
+  // water_hardness.csv
+  const F_WATER = 'water_hardness.csv';
+  const seenRegions = new Set<string>();
+  for (const w of extra.water ?? []) {
+    const key = w.regionId || '(缺 region_id)';
+    if (!w.regionId) err(F_WATER, key, 'region_id 为空');
+    if (seenRegions.has(w.regionId)) err(F_WATER, key, 'region_id 重复');
+    seenRegions.add(w.regionId);
+    if (!cities.some((c) => c.city === w.city && c.country === w.country)) err(F_WATER, key, `城市 "${w.city}, ${w.country}" 不在 cities.csv`);
+    oneOf(F_WATER, key, 'hardness_class', w.hardnessClass, WATER_CLASSES);
+    for (const n of [w.value, w.min, w.max]) if (n !== null && n < 0) err(F_WATER, key, '硬度数值不能为负');
+    if (w.min !== null && w.max !== null && w.min > w.max) err(F_WATER, key, `范围下限 ${w.min} 大于上限 ${w.max}`);
+    if (w.sources.length === 0) err(F_WATER, key, '缺少 source_url');
+    for (const u of w.sources) if (!/^https?:\/\//.test(u)) err(F_WATER, key, `source_url 不是 http(s) 链接：${u}`);
+    if (w.hardnessClass !== 'unknown' && w.value === null && (w.min === null || w.max === null)) {
+      err(F_WATER, key, '有分级但没有数值或范围');
+    }
   }
 
   return issues;

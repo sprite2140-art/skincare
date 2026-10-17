@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { budgetCaps, cities, exchangeRates, ingredients } from '../data/load';
-import type { Category, City } from '../data/types';
+import type { Category, City, WaterRecord } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import {
@@ -84,7 +84,39 @@ function Multi<T extends string>(props: {
   );
 }
 
-/** 城市的水硬度：有数据时显示等级、数值、适用范围和来源，没有时显示"暂无数据" */
+const STATISTIC_KEYS = [
+  'annual_mean', 'single_sample', 'single_sample_calculated', 'single_sample_with_historical_range', 'single_snapshot',
+  'monthly_mean', 'reported_typical_range', 'reported_annual_range', 'reported_average', 'supplier_reported_annual_mean',
+  'official_approximate_citywide_average', 'not_available',
+];
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/** 一条水硬度记录的数值说明：口径 + 数值 / 范围；不同口径（年均、单次、范围、月均）用不同文案 */
+function WaterRecordRow({ r }: { r: WaterRecord }) {
+  const { t } = useI18n();
+  const stat = STATISTIC_KEYS.includes(r.statisticType) ? t(`water.stat.${r.statisticType}` as Key) : r.statisticType;
+  const range = r.min !== null && r.max !== null ? `${round1(r.min)}–${round1(r.max)}` : '';
+  const value = r.value !== null
+    ? range ? t('water.valueRange', { v: round1(r.value), range }) : t('water.value', { v: round1(r.value) })
+    : range ? t('water.rangeOnly', { range }) : t('water.noValue');
+  return (
+    <li>
+      <div className="small"><strong style={{ fontWeight: 500 }}>{r.scope}</strong></div>
+      <div className="small">
+        {stat} · {value}
+        {r.hardnessClass !== 'unknown' && ` · ${t(`water.class.${r.hardnessClass}` as Key)}`}
+      </div>
+      <div className="small muted">
+        {r.period}
+        {r.sources[0] && <> · <a href={r.sources[0]} target="_blank" rel="noreferrer">{t('quiz.water.source')}</a></>}
+        {r.retrievedOn && ` · ${t('quiz.water.retrieved', { d: r.retrievedOn })}`}
+      </div>
+      {r.note && <div className="small muted">{r.note}</div>}
+    </li>
+  );
+}
+
+/** 城市的水硬度：有数据时显示等级和各条记录（分区、口径、来源）；没有时显示"暂无数据" */
 function WaterInfo({ city }: { city: City }) {
   const { t } = useI18n();
   const known = city.waterHardness !== 'unknown';
@@ -92,24 +124,16 @@ function WaterInfo({ city }: { city: City }) {
     <div className="infobox" aria-live="polite">
       <div className="label">{t('quiz.water.title', { city: city.city })}</div>
       <div className="value">{known ? t(`water.${city.waterHardness}` as Key) : t('quiz.water.none')}</div>
-      {known && (
-        <>
-          {city.hardnessMgL && (
-            <p className="small" style={{ marginTop: 6 }}>
-              {t('quiz.water.value', { v: city.hardnessMgL })}{city.dataPeriod ? ` · ${city.dataPeriod}` : ''}
-            </p>
-          )}
-          <details className="more small">
-            <summary>{t('quiz.water.detail')}</summary>
-            {city.supplyScope && <p className="muted" style={{ marginTop: 6 }}>{t('quiz.water.scope', { s: city.supplyScope })}</p>}
-            <p className="muted" style={{ marginTop: 6 }}>{t('quiz.water.caveat')}</p>
-            <p className="muted" style={{ marginTop: 6 }}>
-              {city.source ? <a href={city.source} target="_blank" rel="noreferrer">{t('quiz.water.source')}</a> : t('quiz.water.noSource')}
-              {city.retrievedOn && ` · ${t('quiz.water.retrieved', { d: city.retrievedOn })}`}
-              {city.reviewStatus !== 'verified' && ` · ${t('quiz.water.unverified')}`}
-            </p>
-          </details>
-        </>
+      {city.waterHardness === 'varies' && <p className="small" style={{ marginTop: 6 }}>{t('quiz.water.variesNote')}</p>}
+      {city.water.length > 0 && (
+        <details className="more small">
+          <summary>{t('quiz.water.detail', { n: city.water.length })}</summary>
+          <ul className="water-records">{city.water.map((r) => <WaterRecordRow key={r.regionId} r={r} />)}</ul>
+          <p className="muted" style={{ marginTop: 8 }}>
+            {t('quiz.water.caveat')}
+            {city.reviewStatus !== 'verified' && ` ${t('quiz.water.unverified')}`}
+          </p>
+        </details>
       )}
       <p className="small muted" style={{ marginTop: 6 }}>{t('quiz.water.why')}</p>
     </div>

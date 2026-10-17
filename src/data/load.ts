@@ -4,18 +4,19 @@
 import ingredientsCsv from '../../data/ingredients.csv?raw';
 import productsCsv from '../../data/products.csv?raw';
 import citiesCsv from '../../data/cities.csv?raw';
+import waterCsv from '../../data/water_hardness.csv?raw';
 import exchangeRatesCsv from '../../data/exchange_rates.csv?raw';
 import allergensCsv from '../../data/eu_fragrance_allergens.csv?raw';
 // CosIng 全表很大，构建时只保留产品成分表中出现的成分（见 vite.config.ts）
 import cosingCsv from 'virtual:cosing-used';
 import { expandIngredients, parseAllergens, parseCosingTable } from './cosing';
-import { parseCities, parseExchangeRates, parseIngredients, parseProducts } from './parse';
+import { parseCities, parseExchangeRates, parseIngredients, parseProducts, parseWaterRecords } from './parse';
 import { buildIngredientIndex } from './ingredientIndex';
 import { computeBudgetCaps } from '../scoring/budget';
 
 export const ingredients = parseIngredients(ingredientsCsv);
 export const products = parseProducts(productsCsv);
-export const cities = parseCities(citiesCsv);
+export const cities = parseCities(citiesCsv, parseWaterRecords(waterCsv));
 export const exchangeRates = parseExchangeRates(exchangeRatesCsv);
 export const ingredientIndex = buildIngredientIndex(expandIngredients(ingredients, parseCosingTable(cosingCsv), parseAllergens(allergensCsv)));
 // 预算档位界线：每次构建时按当前产品库自动重新计算

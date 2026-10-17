@@ -35,7 +35,9 @@ describe('data/ 真实数据', () => {
   const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
   it('CSV 能正确解析，名称已统一', () => {
-    expect(real.products).toHaveLength(57);
+    // 洗发水 57 款（美国 47、日韩中 10），护发素 30 款
+    expect(real.products).toHaveLength(87);
+    expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(30);
     // 保留原有产品 ID
     for (const id of ['SH-US-001', 'SH-US-008', 'SH-JP-001', 'SH-KR-003', 'SH-CN-002']) expect(byId(id)).toBeDefined();
     const us1 = byId('SH-US-001');
@@ -61,7 +63,7 @@ describe('data/ 真实数据', () => {
   });
 
   it('数据校验能发现未知品类和汇率表缺少的币种', () => {
-    const bad = { ...byId('SH-US-001'), productId: 'BAD-1', category: 'shampooo', currency: 'EUR' };
+    const bad = { ...byId('SH-US-001'), productId: 'BAD-1', category: 'shampooo', currency: 'EUR', pairedProductIds: [] };
     const errors = validateData(real.ingredients, [bad], real.cities, real.exchangeRates).filter((i) => i.level === 'error');
     expect(errors.map((e) => e.message)).toEqual([
       expect.stringContaining('category 取值 "shampooo"'),
@@ -130,11 +132,10 @@ describe('data/ 真实数据', () => {
 });
 
 describe('按市场筛选', () => {
-  const shampoos = real.products;
+  const shampoos = real.products.filter((p) => p.category === 'shampoo');
   const ids = (ps: Product[]) => ps.map((p) => p.productId);
   const cityIn = (country: string): City => ({
-    city: 'X', country, waterHardness: 'unknown', hardnessMgL: '', dataPeriod: '', supplyScope: '', confidence: '', source: '', retrievedOn: '',
-    reviewStatus: 'draft',
+    city: 'X', country, waterHardness: 'unknown', water: [], reviewStatus: 'draft',
   });
 
   it('默认市场取档案城市所在国家，只显示该市场的版本', () => {
@@ -204,11 +205,11 @@ const data = { index, exchangeRates: real.exchangeRates, budgetCaps: {} };
 const sample: Product = {
   productId: 'SH-T-000', brand: 'Test', nameEn: 'Test Shampoo', nameZh: '测试洗发水', zone: 'scalp', category: 'shampoo',
   usageType: null, region: 'US', formulaNote: '', channels: [], inclusionBasis: '',
-  awards: [], claimedBenefits: [], claimSource: null, testedClaims: [], fragranceFreeClaim: 'unknown',
+  awards: [], claimedBenefits: [], claimSource: null, brandClaims: { text: '', quote: '', sourceUrl: '', status: null }, testedClaims: [], fragranceFreeSourceUrl: '', fragranceFreeClaim: 'unknown',
   inciList: ['Aqua', 'Sodium Laureth Sulfate', 'Glycerin', 'Piroctone Olamine', 'Parfum'], inciNameUnverified: [], keyActives: [],
   keyActivesDisclosed: true,
   inciListOriginal: '', price: 12, currency: 'USD', sizeMl: null, availableInCn: 'unknown', transparency: 'medium',
-  sourceUrls: [], purchaseUrl: '', imageUrl: '', imageSource: '', imageLicense: '', reviewedOn: '',
+  sourceUrls: [], purchaseUrl: '', pairedProductIds: [], imageUrl: '', imageSource: '', imageLicense: '', reviewedOn: '',
 };
 // 默认用免洗型品类，刺激风险不减半；需要冲洗型时显式传 category: 'shampoo'
 const product = (id: string, inciList: string[], extra: Partial<Product> = {}): Product => ({
@@ -216,8 +217,7 @@ const product = (id: string, inciList: string[], extra: Partial<Product> = {}): 
 });
 const leaveOnSample = product('LEAVE-ON', sample.inciList);
 const city = (waterHardness: City['waterHardness'], reviewStatus: City['reviewStatus'] = 'verified'): City => ({
-  city: 'Testville', country: 'US', waterHardness, hardnessMgL: '', dataPeriod: '', supplyScope: '', confidence: '', source: '', retrievedOn: '',
-  reviewStatus,
+  city: 'Testville', country: 'US', waterHardness, water: [], reviewStatus,
 });
 
 describe('需求匹配', () => {

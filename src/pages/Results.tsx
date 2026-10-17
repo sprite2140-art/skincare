@@ -185,7 +185,25 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
               {p.claimedBenefits.map((c) => tx(TARGET_LABELS[c])).join('、')}
             </p>
           )}
+          {p.brandClaims.text && (
+            <p className="small" style={{ marginTop: 6 }}>
+              {t('results.brandClaims')}：{p.brandClaims.text}
+              {p.brandClaims.quote && <span className="muted">（“{p.brandClaims.quote}”）</span>}
+              {p.brandClaims.sourceUrl && <> · <a href={p.brandClaims.sourceUrl} target="_blank" rel="noreferrer">{t('results.source')}</a></>}
+            </p>
+          )}
+          {p.brandClaims.status === 'version_mismatch' && <p className="small muted" style={{ marginTop: 6 }}>{t('results.brandClaimsMismatch')}</p>}
         </div>
+        {p.pairedProductIds.length > 0 && (
+          <p className="small muted" style={{ marginTop: 12 }}>
+            {t('results.paired')}：
+            {p.pairedProductIds.map((id) => products.find((x) => x.productId === id)).filter(Boolean)
+              .map((x) => {
+                const name = productName(x!, lang);
+                return name.toLowerCase().startsWith(x!.brand.toLowerCase()) ? name : `${x!.brand} ${name}`;
+              }).join('；')}
+          </p>
+        )}
         <div className="flags">
           <span className="label">{t('results.fragrance')}</span>
           <p className="small" style={{ marginTop: 6 }}>{t(`fragrance.${f.status}` as Key)}</p>
@@ -332,6 +350,10 @@ export default function Results() {
       return { slot: s, item, removed: false };
     });
     const total = routineTotal(items.map((x) => x.item));
+    // 选中的单品互为同系列时标出（只是说明，不要求成套购买）
+    const chosen = items.filter((x) => x.item && !x.removed).map((x) => x.item!.product);
+    const sameSeries = chosen.length === 2 && chosen[0].pairedProductIds.includes(chosen[1].productId);
+    const otherChosen = (category: string) => chosen.find((p) => p.category !== category);
     const over = setCap !== null && total !== null && total > setCap + 1e-9;
     return (
       <>
@@ -342,6 +364,7 @@ export default function Results() {
             <Link to="/quiz">{t('results.editQuiz')}</Link>
           </div>
         )}
+        {sameSeries && <p className="small muted">{t('set.sameSeries')}</p>}
         {items.map(({ slot, item, removed }) => (
           <section key={slot.category} className="slot">
             <div className="slot-head">
@@ -369,6 +392,7 @@ export default function Results() {
                       {slot.options.map((o) => (
                         <option key={o.product.productId} value={o.product.productId}>
                           {o.product.brand} · {o.product.nameEn} · {o.price.usd !== null ? usdLabel(o.price.usd) : t('results.noPrice')} · {o.score}
+                          {otherChosen(slot.category)?.pairedProductIds.includes(o.product.productId) ? ` · ${t('set.sameSeriesTag')}` : ''}
                         </option>
                       ))}
                     </select>

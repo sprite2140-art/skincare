@@ -4,8 +4,8 @@ import { loadDataFromDisk } from '../src/data/node';
 import { validateData } from '../src/data/validate';
 import { computeBudgetCaps } from '../src/scoring/budget';
 
-const { ingredients, products, cities, exchangeRates, cosing, allergens } = loadDataFromDisk();
-const issues = validateData(ingredients, products, cities, exchangeRates, { cosing, allergens });
+const { ingredients, products, cities, exchangeRates, cosing, allergens, water } = loadDataFromDisk();
+const issues = validateData(ingredients, products, cities, exchangeRates, { cosing, allergens, water });
 const errors = issues.filter((i) => i.level === 'error');
 const warnings = issues.filter((i) => i.level === 'warning');
 

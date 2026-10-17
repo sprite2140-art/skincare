@@ -179,6 +179,9 @@ button.tag { cursor: pointer; }
 .infobox { margin-top: 20px; padding: 16px; background: var(--tint); border-radius: var(--radius); }
 .infobox .value { font-size: var(--fs-h2); font-weight: 500; margin-top: 4px; }
 .infobox details.more { margin-top: 10px; padding-top: 8px; }
+.water-records { list-style: none; padding: 0; margin: 8px 0 0; }
+.water-records li { padding: 8px 0; border-top: 1px solid var(--line); }
+.water-records li > div + div { margin-top: 2px; }
 
 /* 0–10 分量表 */
 .scale { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 24px; }
