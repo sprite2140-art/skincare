@@ -2,7 +2,7 @@
 
 import type { Category, City, ExchangeRate, Product, RiskTag, Target } from '../data/types';
 import type { BudgetChoice } from '../scoring/budget';
-import { SHAMPOO_SCALP_WEIGHT } from '../scoring/config';
+import { BUILDUP_WEIGHT, SHAMPOO_SCALP_WEIGHT } from '../scoring/config';
 import type { Text } from '../scoring/labels';
 import { toUsd } from '../scoring/price';
 import type { FragrancePref, ScoringProfile, SpecialStatus, WashFrequency } from '../scoring/score';
@@ -366,11 +366,16 @@ export function toScoringProfile(
 ): ScoringProfile {
   const { base, scalp, hair } = answers;
   const forScalp = category === 'shampoo' || category === 'scalp_care';
-  const scalpT = forScalp ? scalpTargets(scalp) : [];
+  const scalpT: Target[] = forScalp ? scalpTargets(scalp) : [];
   const hairT = hairTargets(hair);
   const targetWeights: Partial<Record<Target, number>> = {};
   for (const t of hairT) targetWeights[t] = 1;
   for (const t of scalpT) targetWeights[t] = SHAMPOO_SCALP_WEIGHT;
+  // 常用造型产品（每周 3 次以上）：洗发水增加"产品残留"需求，由螯合剂清单匹配
+  if (forScalp && frequentStyling(scalp) && !scalpT.includes('buildup')) {
+    scalpT.push('buildup');
+    targetWeights.buildup = BUILDUP_WEIGHT;
+  }
   const itemBudget = base.budgetMode === 'item';
   const budget = itemBudget ? base.budgets[category] ?? 'none' : 'none';
   return {

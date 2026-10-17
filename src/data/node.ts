@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parseCities, parseExchangeRates, parseIngredients, parseProducts, parseReferenceWater, parseWaterRecords } from './parse';
-import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations } from './cosing';
+import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseIngredientList } from './cosing';
 import { buildIngredientIndex } from './ingredientIndex';
 
 const dataDir = fileURLToPath(new URL('../../data/', import.meta.url));
@@ -14,7 +14,11 @@ export function loadDataFromDisk() {
   const cosing = parseCosingTable(read('cosing_ingredients.csv'));
   const allergens = parseAllergens(read('eu_fragrance_allergens.csv'));
   const explanations = parseExplanations(read('ingredient_explanations.csv'));
-  const allIngredients = expandIngredients(ingredients, cosing, allergens, explanations);
+  const lists = {
+    chelators: parseIngredientList(read('chelators.csv')),
+    fragrances: parseIngredientList(read('fragrance_ingredients.csv')),
+  };
+  const allIngredients = expandIngredients(ingredients, cosing, allergens, explanations, lists);
   return {
     /** 成分库 ingredients.csv 本身 */
     ingredients,
@@ -22,6 +26,8 @@ export function loadDataFromDisk() {
     allergens,
     /** 常见成分通俗解释（起草稿，未核对） */
     explanations,
+    /** 本项目维护的判断清单：螯合剂、加香成分 */
+    lists,
     /** 成分库 + CosIng + 致敏原清单，用于匹配产品成分 */
     allIngredients,
     ingredientIndex: buildIngredientIndex(allIngredients),

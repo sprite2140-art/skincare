@@ -186,7 +186,8 @@ const fixtureIngredients: Ingredient[] = [
   verify(realIng('Fragrance')),
   verify(realIng('Glycerin')),
   fake('Aqua', { aliases: ['Water'] }),
-  fake('Test Chelator', { functions: ['chelating'] }),
+  fake('Test Chelator', { functions: ['chelating'], chelator: true }),
+  fake('Test Function Chelator', { functions: ['chelating'] }),
   fake('Test Itch Relief', { category: 'active', targets: ['scalp_itch'], evidenceLevel: 'C' }),
   fake('Test Oil Control', { category: 'active', targets: ['scalp_oil'], evidenceLevel: 'B' }),
   fake('Test Essential Oil', { category: 'risk', riskTags: ['essential_oil'] }),
@@ -416,8 +417,10 @@ describe('证据强度', () => {
 
 describe('环境适配', () => {
   const withChelator = product('P12', ['Aqua', 'Test Chelator']);
-  it('硬水 + 螯合剂 = 100，硬水无螯合剂 = 50', () => {
+  it('硬水 + 螯合剂（清单上的）= 100，硬水无螯合剂 = 50；只登记了 chelating 功能不算', () => {
     expect(scoreProduct(withChelator, profile({ city: city('hard') }), data).dimensions.environment.score).toBe(100);
+    const fnOnly = product('P12b', ['Aqua', 'Test Function Chelator']);
+    expect(scoreProduct(fnOnly, profile({ city: city('hard') }), data).dimensions.environment.score).toBe(50);
     expect(scoreProduct(sample, profile({ city: city('hard') }), data).dimensions.environment.score).toBe(50);
   });
   it('未设城市、水硬度未知、城市数据未核对、软水：不计分并说明原因', () => {
@@ -636,5 +639,52 @@ describe('排序', () => {
     ];
     const ranked = rankProducts(products, 'shampoo', profile({ concerns: ['dandruff'], specialStatus: 'pregnant' }), data);
     expect(ranked.map((r) => r.product.productId)).toEqual(['D-high', 'C-low', 'B-noscore', 'A-excluded']);
+  });
+});
+
+describe('证据缺失时总分封顶', () => {
+  // 两款都只针对头皮痒：一款有 C 级成分，一款只有资料分类（需求匹配 0.7）
+  const cLevel = product('CAP-C', ['Aqua', 'Test Itch Relief'], { keyActives: ['Test Itch Relief'] });
+  const claimOnly = product('CAP-CLAIM', ['Aqua', 'Glycerin'], { claimedBenefits: ['scalp_itch'], claimSource: 'data_classification', keyActives: ['Glycerin'] });
+  const prof = profile({ concerns: ['scalp_itch'] });
+
+  it('只有资料分类的产品最多与 C 级证据产品打平，不反超', () => {
+    const c = scoreProduct(cLevel, prof, data);
+    const claim = scoreProduct(claimOnly, prof, data);
+    expect(c.dimensions.evidence.score).toBe(40);
+    expect(claim.dimensions.evidence.score).toBeNull();
+    // 不封顶时：(70*0.5 + 100*0.25) / 0.75 = 80；封顶按证据 40：(70*0.5 + 100*0.25 + 40*0.15) / 0.9 = 73
+    expect(claim.score).toBe(73);
+    expect(claim.evidenceCapped).toBe(true);
+    expect(claim.dimensions.evidence.reason.zh).toContain('总分上限按证据弱');
+    expect(claim.score!).toBeLessThanOrEqual(c.score!);
+  });
+
+  it('封顶后的分数正好等于"证据按 C 级计"的结果，不额外扣分', () => {
+    const r = scoreProduct(claimOnly, prof, data);
+    const asC = weightedTotal({ ...r.dimensions, evidence: { ...r.dimensions.evidence, score: 40 } });
+    expect(r.score).toBe(asC);
+  });
+});
+
+describe('没有选任何需求', () => {
+  it('不给适合等级；按温和程度、价格排序', () => {
+    const list = [
+      product('G1', ['Aqua', 'Parfum'], { category: 'shampoo', price: 5 }),
+      product('G2', ['Aqua', 'Glycerin'], { category: 'shampoo', price: 20 }),
+      product('G3', ['Aqua', 'Glycerin'], { category: 'shampoo', price: 10 }),
+    ];
+    const ranked = rankProducts(list, 'shampoo', profile({}), data);
+    expect(ranked.map((r) => r.product.productId)).toEqual(['G3', 'G2', 'G1']);
+    expect(ranked.every((r) => r.noNeeds && r.fitLevel === null && !r.lowMatch)).toBe(true);
+  });
+
+  it('选了需求时，需求匹配为 0 的产品标为不太匹配，排在推荐之后', () => {
+    const list = [
+      product('M1', ['Aqua', 'Glycerin'], { category: 'shampoo' }),
+      product('M2', ['Aqua', 'Test Itch Relief'], { category: 'shampoo', keyActives: ['Test Itch Relief'] }),
+    ];
+    const ranked = rankProducts(list, 'shampoo', profile({ concerns: ['scalp_itch'] }), data);
+    expect(ranked.map((r) => [r.product.productId, r.lowMatch])).toEqual([['M2', false], ['M1', true]]);
   });
 });

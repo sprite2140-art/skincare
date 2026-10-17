@@ -6,6 +6,8 @@ export const TARGETS = [
   'damage', 'frizz', 'flat_hair', 'tangling', 'color_fade',
   // 头皮状态与发丝效果（主要来自品牌宣称，成分库暂少有对应）
   'dry_scalp', 'sensitive_scalp', 'clarifying', 'shine', 'curl_definition', 'tone_yellow', 'tone_orange',
+  // 造型产品残留：只来自问卷（常用造型产品的用户），由螯合剂清单匹配
+  'buildup',
 ] as const;
 export type Target = (typeof TARGETS)[number];
 
@@ -131,7 +133,9 @@ export interface Ingredient {
   origin?: IngredientOrigin;
   /** 在欧盟需标注的香料致敏原清单上 */
   euAllergen?: boolean;
-  /** CosIng 登记的功能（小写），仅批量导入后才有 */
+  /** 在本项目维护的螯合剂清单（data/chelators.csv）上 */
+  chelator?: boolean;
+  /** CosIng 登记的功能（小写），仅批量导入后才有；只用于展示，不参与打分 */
   cosingFunctions?: string[];
 }
 

@@ -1,7 +1,7 @@
 // 香味信息：用于"无香优先"排序和结果页说明。安全相关，draft 成分也算（宁可多提示）。
 //
 // - 加香成分：risk_tags 含 fragrance 的成分，判断规则见 src/data/cosing.ts 的 isFragrance()：
-//   香精统称、欧盟香料致敏原、CosIng 功能只有香料类的成分；精油（essential_oil）也算加香，单独列出。
+//   香精统称、欧盟香料致敏原、本项目维护的加香成分清单（data/fragrance_ingredients.csv）；精油（essential_oil）也算加香，单独列出。
 // - 精油单独列出：risk_tags 含 essential_oil。
 // - 不在成分库或名称未核对的成分无法判断，明确标注数量；因此"未发现"不等于"无致敏原"。
 
@@ -23,7 +23,7 @@ export interface FragranceInfo {
   fragrance: string[];
   /** 其中在欧盟香料致敏原清单上的 */
   allergens: string[];
-  /** 其中因 CosIng 功能只有香料类而识别的 */
+  /** 其中由加香成分清单识别的（非致敏原、只在 CosIng 中的成分） */
   cosingPerfuming: string[];
   /** 成分表中的精油（原文写法） */
   essentialOils: string[];
@@ -58,9 +58,12 @@ export function fragranceInfo(product: Product, index: IngredientIndex): Fragran
   return { status, claim: product.fragranceFreeClaim, fragrance, allergens, cosingPerfuming, essentialOils, unknownCount };
 }
 
-/** "无香优先"时的排序层级，数字越小越靠前：标注无香 → 未发现香精 → 只含精油 → 含香精 */
+/**
+ * "无香优先"时的排序层级，数字越小越靠前：无香（标注无香、成分表中未发现加香成分为同一层，卡片上分别标注）
+ * → 只含精油 → 含香精
+ */
 export function fragranceTier(info: FragranceInfo): number {
-  if (info.fragrance.length > 0) return 3;
-  if (info.essentialOils.length > 0) return 2;
-  return info.status === 'labeled_free' ? 0 : 1;
+  if (info.fragrance.length > 0) return 2;
+  if (info.essentialOils.length > 0) return 1;
+  return 0;
 }

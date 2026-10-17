@@ -18,7 +18,7 @@ export const COVERAGE_BUDGETS: BudgetChoice[] = ['p33', 'p67', 'none'];
 
 /** 问卷中的需求分组；"香味好闻"不对应任何需求，不统计 */
 export const COVERAGE_GROUPS: { key: 'scalp' | 'hair' | 'goals'; targets: Target[] }[] = [
-  { key: 'scalp', targets: ['dandruff', 'scalp_oil', 'scalp_itch', 'dry_scalp', 'sensitive_scalp', 'scalp_redness', 'hair_loss'] },
+  { key: 'scalp', targets: ['dandruff', 'scalp_oil', 'scalp_itch', 'dry_scalp', 'sensitive_scalp', 'scalp_redness', 'hair_loss', 'buildup'] },
   { key: 'hair', targets: ['dryness', 'tangling', 'damage', 'color_fade'] },
   { key: 'goals', targets: ['frizz', 'flat_hair', 'shine', 'clarifying', 'curl_definition', 'tone_yellow', 'tone_orange'] },
 ];
@@ -56,11 +56,11 @@ export function coverageCell(products: Product[], category: string, target: Targ
   const ok = products
     .filter((p) => p.category === category && inMarket(p, DEFAULT_MARKET))
     .map((p) => scoreProduct(p, minimalProfile(target, category, budget), data))
-    .filter((r) => !r.excluded && (r.dimensions.need.score ?? 0) > 0);
+    .filter((r) => !r.excluded && !r.lowMatch && (r.dimensions.need.score ?? 0) > 0);
   return {
     count: ok.length,
     // 无香：有无香声明，或成分表中没有发现加香成分和精油
-    fragranceFree: ok.filter((r) => fragranceTier(r.fragrance) <= 1).length,
+    fragranceFree: ok.filter((r) => fragranceTier(r.fragrance) === 0).length,
     productIds: ok.map((r) => r.product.productId),
   };
 }

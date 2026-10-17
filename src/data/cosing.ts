@@ -38,19 +38,45 @@ export const COSING_RETRIEVED_ON = '2026-10-17';
 export const PERFUMING = 'perfuming';
 /** 香精的统称（规则 a） */
 const FRAGRANCE_NAMES = new Set(['parfum', 'fragrance', 'aroma', 'flavor', 'flavour']);
-/** 只登记这些功能时视为纯香料（规则 c） */
+/** CosIng 登记的香料类功能；只用于数据校验提示维护清单，不直接参与判断 */
 const FRAGRANCE_FUNCTIONS = new Set(['perfuming', 'fragrance']);
 
-/** CosIng 登记的功能只有香料类（perfuming / fragrance），没有其他功能 */
+/** CosIng 登记的功能只有香料类（perfuming / fragrance），没有其他功能。只用于校验时提示补充加香清单 */
 export function onlyFragranceFunctions(functions: string[]): boolean {
   return functions.length > 0 && functions.every((f) => FRAGRANCE_FUNCTIONS.has(f));
 }
 
-/** 是否算加香成分（规则 a–c；精油 d 由成分库的 essential_oil 标签单独处理） */
-export function isFragrance(names: string[], cosingFunctions: string[] | undefined, allergen: boolean): boolean {
+/**
+ * 是否算加香成分（规则 a–c；精油 d 由成分库的 essential_oil 标签单独处理）：
+ * (a) 香精统称；(b) 欧盟香料致敏原清单；(c) 本项目维护的加香成分清单 data/fragrance_ingredients.csv。
+ * 不读 CosIng 登记功能（原则：CosIng 功能只用于展示，判断一律用自己维护的清单）。
+ */
+export function isFragrance(names: string[], allergen: boolean, fragranceList: ReadonlySet<string>): boolean {
   if (names.some((n) => FRAGRANCE_NAMES.has(normalizeName(n)))) return true;
   if (allergen) return true;
-  return !!cosingFunctions && onlyFragranceFunctions(cosingFunctions);
+  return names.some((n) => fragranceList.has(normalizeName(n)));
+}
+
+/** 本项目维护的成分清单（data/chelators.csv、data/fragrance_ingredients.csv）的一条 */
+export interface ListEntry {
+  inciName: string;
+  /** 缩写或别名，如 GLDA */
+  abbreviation: string;
+  sourceUrl: string;
+}
+
+export function parseIngredientList(text: string): ListEntry[] {
+  return parseCsv(text).map((r) => ({
+    inciName: r.inci_name ?? '',
+    abbreviation: r.abbreviation ?? '',
+    sourceUrl: r.source_url ?? '',
+  }));
+}
+
+/** 判断用的清单：螯合剂、加香成分 */
+export interface IngredientLists {
+  chelators?: ListEntry[];
+  fragrances?: ListEntry[];
 }
 
 /** data/cosing_ingredients.csv（已转换的格式） */
@@ -147,8 +173,12 @@ export function parseExplanations(text: string): ExplanationEntry[] {
  * 只在 CosIng 中的成分：通俗解释取自 explanations（有的话），CosIng 登记功能另存在 cosingFunctions，页面单独翻译显示。
  */
 export function expandIngredients(
-  library: Ingredient[], cosing: CosingEntry[], allergens: AllergenEntry[], explanations: ExplanationEntry[] = [],
+  library: Ingredient[], cosing: CosingEntry[], allergens: AllergenEntry[], explanations: ExplanationEntry[] = [], lists: IngredientLists = {},
 ): Ingredient[] {
+  const keys = (l: ListEntry[] = []) => new Set(l.flatMap((e) => [e.inciName, e.abbreviation]).filter(Boolean).map(normalizeName));
+  const chelatorKeys = keys(lists.chelators);
+  const fragranceKeys = keys(lists.fragrances);
+  const isChelator = (names: string[]) => names.some((n) => chelatorKeys.has(normalizeName(n)));
   const explained = new Map(explanations.map((e) => [normalizeName(e.inciName), e]));
   const known = new Map<string, Ingredient>();
   const allergenKeys = new Set(allergens.map((a) => normalizeName(a.inciName)));
@@ -158,11 +188,14 @@ export function expandIngredients(
   const out: Ingredient[] = library.map((ing) => {
     const c = cosingByName.get(normalizeName(ing.inciName));
     const allergen = isAllergen(ing);
-    // 成分库条目同样适用：CosIng 登记功能含香料，或在致敏原清单上，都识别为加香成分
+    // 在 CosIng 中能找到的成分库条目也按规则 a–c 重新判断加香；找不到的保留成分库的标签
+    const names = [ing.inciName, ...ing.aliases];
     const others = ing.riskTags.filter((t) => t !== 'fragrance');
-    const fragrance = c ? isFragrance([ing.inciName, ...ing.aliases], c.functions, allergen) : ing.riskTags.includes('fragrance') || allergen;
+    const fragrance = c ? isFragrance(names, allergen, fragranceKeys) : ing.riskTags.includes('fragrance') || allergen;
     const riskTags = fragrance ? [...others, 'fragrance' as const] : others;
-    const full: Ingredient = { ...ing, riskTags, origin: 'library', euAllergen: allergen, cosingFunctions: c?.functions };
+    const full: Ingredient = {
+      ...ing, riskTags, origin: 'library', euAllergen: allergen, chelator: isChelator(names), cosingFunctions: c?.functions,
+    };
     for (const n of [ing.inciName, ...ing.aliases]) known.set(normalizeName(n), full);
     return full;
   });
@@ -171,13 +204,14 @@ export function expandIngredients(
     const key = normalizeName(c.inciName);
     if (known.has(key)) continue;
     const allergen = allergenKeys.has(key);
-    const fragrance = isFragrance([c.inciName], c.functions, allergen);
+    const fragrance = isFragrance([c.inciName], allergen, fragranceKeys);
     const ing: Ingredient = {
       inciName: c.inciName,
       nameZh: '',
       aliases: [],
       category: fragrance ? 'risk' : 'base',
-      functions: c.functions,
+      // CosIng 登记功能只放在 cosingFunctions 里展示，不作为本项目的 functions 参与打分
+      functions: [],
       targets: [],
       effectiveRange: '',
       maxLimit: '',
@@ -191,6 +225,7 @@ export function expandIngredients(
       reviewedOn: '',
       origin: 'cosing',
       euAllergen: allergen,
+      chelator: isChelator([c.inciName]),
       cosingFunctions: c.functions,
     };
     known.set(key, ing);

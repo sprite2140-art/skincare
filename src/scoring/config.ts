@@ -31,7 +31,6 @@ export const ENVIRONMENT_SCORES = {
   hardWithoutChelator: 50,
 } as const;
 // 水质不硬、未设城市、无数据或各区不同时，环境适配不计分（score = null），其余维度权重重新归一化。
-export const CHELATING_FUNCTION = 'chelating';
 
 /** 高 / 中 / 低 的分界 */
 export const LEVEL_THRESHOLDS = { high: 70, medium: 40 } as const;
@@ -61,10 +60,18 @@ export const BRAND_CLAIM_CREDIT = 0.7;
  */
 export const TESTED_EVIDENCE_SCORE = 100;
 
-/** 成分功能（functions）→ 困扰：用于成分库里暂未逐个标注 targets 的情况 */
-export const FUNCTION_TARGETS: Record<string, string[]> = {
-  chelating: ['clarifying'],
-};
+/**
+ * 螯合剂（data/chelators.csv 清单上的成分）对应的需求：只对应"产品残留"（常用造型产品的用户），
+ * 另在环境适配中用于硬水。不对应"清爽洁净"。CosIng 登记功能不参与判断。
+ */
+export const CHELATOR_TARGETS: string[] = ['buildup'];
+/** 常用造型产品（每周 3 次以上）的用户，洗发水增加"产品残留"需求，权重为此值 */
+export const BUILDUP_WEIGHT = 1;
+/**
+ * 证据缺失（只有品牌宣称或资料分类）时，总分上限按"这些需求的证据按 C 级计"算出的总分：
+ * 最多与 C 级证据的产品打平，不反超，也不额外扣分。
+ */
+export const MISSING_EVIDENCE_CAP_LEVEL = 'C' as const;
 
 /** 洗发水侧重头皮与清洁：头皮相关困扰的权重；发丝状态和期望效果权重为 1 */
 export const SHAMPOO_SCALP_WEIGHT = 2;

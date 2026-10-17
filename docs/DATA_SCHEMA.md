@@ -10,7 +10,7 @@
 | name_zh | 中文标准名 | 吡罗克酮乙醇胺盐 |
 | aliases | 别名，匹配产品成分表时与 inci_name 一起查（忽略大小写和括号内俗名）。同一成分的不同写法都登记在这里，如 Aqua 的 Water、Sodium Lauroyl Methylalaninate 的 Sodium Lauroyl Methyl Alaninate | Octopirox |
 | category | active / risk / base | active |
-| functions | 功能（参考 CosIng，小写）。螯合剂写 `chelating`，环境适配会用到 | anti-dandruff;preservative |
+| functions | 功能（参考 CosIng，小写），只作说明。螯合剂的判断用 data/chelators.csv，不看这一列 | anti-dandruff;preservative |
 | targets | 针对的困扰（取值见下） | dandruff;scalp_itch |
 | effective_range | 有效浓度范围 | |
 | max_limit | 法规限量 | |
@@ -28,7 +28,7 @@ targets 取值：
 - 面部：acne, oil, dryness, redness, pigmentation, aging, pores
 - 头皮：dandruff, scalp_oil, scalp_itch, scalp_redness, hair_loss
 - 头发：damage, frizz, flat_hair, tangling, color_fade
-- 头皮状态与发丝效果：dry_scalp（头皮干）, sensitive_scalp（敏感头皮）, clarifying（清洁残留）, shine（光泽）, curl_definition（卷度）, tone_yellow（去黄）, tone_orange（去橙）。去黄和去橙分开记录（原 tone_correction 已拆分）。目前主要来自品牌宣称（products.csv 的 claimed_benefits）；clarifying 也按成分功能辅助匹配（functions 含 chelating 的成分）
+- 头皮状态与发丝效果：dry_scalp（头皮干）, sensitive_scalp（敏感头皮）, clarifying（清爽洁净）, buildup（产品残留，只来自问卷：常用造型产品的用户）, shine（光泽）, curl_definition（卷度）, tone_yellow（去黄）, tone_orange（去橙）。去黄和去橙分开记录（原 tone_correction 已拆分）。目前主要来自品牌宣称（products.csv 的 claimed_benefits）；clarifying 也按成分功能辅助匹配（functions 含 chelating 的成分）
 
 risk_tags 取值：fragrance, essential_oil, alcohol, strong_acid, sensitizer, strong_cleanser, pregnancy_caution, rx_caution
 
@@ -132,13 +132,33 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 - **CosIng 匹配检查**：`npm run validate-data` 会列出产品成分表中在 CosIng 里找不到的成分名（成分库登记的别名也算找到，如美国写法 Fragrance 对应欧盟 Parfum），多数是拼写错误、拆分错误或美国色素名（如 Yellow 5，欧盟用 CI 编号）。
 - **eu_fragrance_allergens.csv**：欧盟需标注的香料致敏原清单（inci_name、list、source）。目前收录法规 1223/2009 附录 III 的 26 种；2023/1545 号法规新增的条目待按法规原文补充。
 - **合并规则**（`src/data/cosing.ts` 的 expandIngredients）：成分库 ingredients.csv 优先；成分库没有的成分用 CosIng 补充，来源标记为 CosIng、review_status 为 draft，category 为 base（基础分类，没有 targets）。打分仍按现有规则区分已核对和未核对。
-- **加香成分的判断**（`isFragrance`）：CosIng 给很多普通成分也登记了 PERFUMING / FRAGRANCE 功能（如 Glycerin、Citric Acid、Butylene Glycol、Caffeine、Arginine），产品中有 120 个成分带此功能，其中只有 17 个只登记了香料功能。因此只有以下情况才算加香（risk_tags = fragrance）：
+- **CosIng 登记功能不参与判断**：只在成分弹窗中翻译显示（`cosingFunctions`）。只在 CosIng 中的成分 functions 为空。需要参与判断的功能用本项目维护的清单，见下面两节。
+- **加香成分的判断**（`isFragrance`）：只有以下情况才算加香（risk_tags = fragrance）：
   - (a) 成分名为 Parfum / Fragrance / Aroma / Flavor；
   - (b) 在欧盟香料致敏原清单中；
-  - (c) CosIng 登记的功能只有 perfuming 和 / 或 fragrance，没有其他功能；
+  - (c) 在本项目的加香成分清单 data/fragrance_ingredients.csv 中；
   - (d) 精油（成分库 risk_tags = essential_oil，在结果页单独列出）。
-  其余成分即使登记了香料功能也不算加香。成分库已有的条目在 CosIng 中能找到时同样按这条规则判断；找不到时保留成分库的标签。
+  CosIng 给很多普通成分也登记了 PERFUMING / FRAGRANCE 功能（如 Glycerin、Citric Acid、Butylene Glycol），这些不算加香。成分库已有的条目在 CosIng 中能找到时同样按 a–c 判断；找不到时保留成分库的标签。
 - **网页只打包用到的部分**：CosIng 全表有数万行，构建时只保留产品成分表中出现的成分（vite.config.ts 的 cosing-used 插件）；测试和脚本读取完整文件。
+
+## chelators.csv（螯合剂清单）
+
+本项目维护的螯合剂清单，只收录明确的螯合剂。用于两处：硬水城市的环境适配，以及常用造型产品的用户的"产品残留"需求。**不对应"清爽洁净"**。柠檬酸、柠檬酸钠、葡萄糖酸钠等虽然在 CosIng 登记了 chelating 功能，但不算。
+
+| 字段 | 含义 |
+|---|---|
+| inci_name | INCI 名 |
+| abbreviation | 常用缩写（如 GLDA、MGDA），匹配时也算 |
+| name_zh | 中文名 |
+| cas_no / cosing_ref | CAS 号、CosIng 编号 |
+| source_url | 来源（目前为对应的 CosIng 条目页） |
+| added_on | 加入日期 |
+
+当前 10 个（2026-10-17，按作者指定）：Disodium EDTA、Tetrasodium EDTA、Tetrasodium Glutamate Diacetate（GLDA）、Trisodium Ethylenediamine Disuccinate、Trisodium Dicarboxymethyl Alaninate（MGDA）、Tetrasodium Iminodisuccinate、Sodium Phytate、Phytic Acid、Etidronic Acid、Pentasodium Pentetate。来源链接按 CosIng 条目编号生成；本开发环境无法访问 ec.europa.eu，未能逐个打开核对。
+
+## fragrance_ingredients.csv（加香成分清单）
+
+加香判断规则 (c) 用的清单：inci_name、basis（列入依据，目前都是 cosing_perfuming_only = CosIng 只登记了香料功能）、cosing_ref、source_url、added_on。2026-10-17 由原规则"CosIng 功能只有香料类"在产品中识别出的 12 个成分转入，判断结果与原规则相同。新产品中出现 CosIng 只登记了香料功能、但不在清单上的成分时，`npm run validate-data` 会提示，由人工决定是否加入。
 
 ## exchange_rates.csv（固定汇率表）
 

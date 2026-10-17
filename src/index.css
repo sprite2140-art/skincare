@@ -355,3 +355,9 @@ details.more[open] summary::after { content: '−'; }
 .basis .basis-note { color: var(--muted); font-size: var(--fs-label); }
 .basis dt::first-letter { text-transform: uppercase; }
 .ing-src { display: block; font-size: var(--fs-label); margin-top: 2px; }
+.score .fit { margin-top: 4px; font-size: var(--fs-label); }
+.score .fit.high { color: var(--good); }
+.score .fit.medium { color: var(--mid); }
+.score .fit.low { color: var(--bad); }
+.score.gentle .num { font-size: 28px; }
+.tag.scent { font-size: 12px; padding: 2px 8px; }

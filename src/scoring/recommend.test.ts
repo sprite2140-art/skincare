@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadDataFromDisk } from '../data/node';
 import { buildIngredientIndex } from '../data/ingredientIndex';
+import { expandIngredients } from '../data/cosing';
 import type { Category, Product } from '../data/types';
 import {
   EMPTY_HAIR, moneyToUsd, scalpMedicalAlerts, toScoringProfile, type Answers, type BaseAnswers, type HairAnswers, type ScalpAnswers,
@@ -18,7 +19,8 @@ import { validateData } from '../data/validate';
 import { coverageCell, coverageGroups, shampoosWithPairedConditioner } from './coverage';
 
 const real = loadDataFromDisk();
-const index = buildIngredientIndex(real.ingredients);
+// 只用成分库（加上本项目的螯合剂、加香清单标记），不含 CosIng 补充条目
+const index = buildIngredientIndex(expandIngredients(real.ingredients, [], [], [], real.lists));
 const data = { index, exchangeRates: real.exchangeRates, budgetCaps: computeBudgetCaps(real.products, real.exchangeRates), allowDraft: true };
 const ctx = { cities: real.cities, exchangeRates: real.exchangeRates };
 const noScalp: ScalpAnswers = { concerns: [], oilTiming: null, washFrequency: null };
@@ -81,10 +83,24 @@ describe('场景 2：头皮屑、瘙痒 7 分，无香优先', () => {
     expect(profile.concerns).toEqual(['dandruff', 'scalp_itch', 'sensitive_scalp']);
   });
 
-  it('可推荐的产品按香味层级排序：没发现加香成分的在前，含香精的在后', () => {
-    const tiers = ok.map((r) => fragranceTier(r.fragrance));
-    expect(tiers).toEqual([...tiers].sort((x, y) => x - y));
-    expect(tiers.at(-1)).toBe(3);
+  it('推荐列表排序：适合等级 → 香味层级（无香优先）→ 综合分；需求匹配为 0 的放到"不太匹配"', () => {
+    const rec = ok.filter((r) => !r.lowMatch);
+    const order = { high: 0, medium: 1, low: 2 } as const;
+    const key = (r: ProductScore) => order[r.fitLevel!] * 10 + fragranceTier(r.fragrance);
+    const keys = rec.map(key);
+    expect(keys).toEqual([...keys].sort((x, y) => x - y));
+    for (let i = 1; i < rec.length; i++) {
+      if (key(rec[i]) === key(rec[i - 1])) expect(rec[i].score!).toBeLessThanOrEqual(rec[i - 1].score!);
+    }
+    // 不太匹配的都排在推荐列表之后
+    const firstLow = ok.findIndex((r) => r.lowMatch);
+    if (firstLow >= 0) expect(ok.slice(firstLow).every((r) => r.lowMatch)).toBe(true);
+    expect(ok.filter((r) => r.lowMatch).every((r) => r.dimensions.need.score === 0)).toBe(true);
+  });
+
+  it('标注无香和成分表中未发现加香成分为同一香味层级', () => {
+    const tier0 = ok.filter((r) => fragranceTier(r.fragrance) === 0).map((r) => r.fragrance.status);
+    expect(new Set(tier0)).toEqual(new Set(['labeled_free', 'none_found']));
   });
 
   it('理由说明香味情况，未知成分明确标注，不保证无致敏原', () => {
@@ -263,12 +279,19 @@ describe('效果依据', () => {
     expect(recommendReasons(tested, prof, false)[0].zh).toContain('依据：成品测试');
   });
 
-  it('成分功能辅助匹配：螯合剂对应"清爽洁净"，非主打按 30%，不按数量加分', () => {
+  it('螯合剂（清单）只对应"产品残留"（常用造型产品的用户），非主打按 30%，不按数量加分；不对应"清爽洁净"', () => {
     const clean = toScoringProfile(answers({ hair: { goals: ['clean'] } }), 'shampoo', ctx);
-    const one = scoreProduct(withClaims({ keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA'] }), clean, data);
-    const two = scoreProduct(withClaims({ keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA', 'Sodium Phytate'] }), clean, data);
+    expect(scoreProduct(withClaims({ keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA'] }), clean, data).dimensions.need.score).toBe(0);
+    const styling = toScoringProfile(answers({ scalp: { styling: 'weekly_3_plus' } }), 'shampoo', ctx);
+    expect(styling.concerns).toEqual(['buildup']);
+    const one = scoreProduct(withClaims({ keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA'] }), styling, data);
+    const two = scoreProduct(withClaims({ keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA', 'Sodium Phytate'] }), styling, data);
     expect(one.dimensions.need.score).toBe(30);
     expect(two.dimensions.need.score).toBe(30);
+    // 柠檬酸在 CosIng 登记了螯合功能，但不在清单上，不算
+    expect(scoreProduct(withClaims({ keyActives: ['Glycerin'], inciList: ['Water', 'Citric Acid'] }), styling, data).dimensions.need.score).toBe(0);
+    // 护发素不加"产品残留"
+    expect(toScoringProfile(answers({ scalp: { styling: 'daily' } }), 'conditioner', ctx).concerns).toEqual([]);
   });
 });
 
@@ -296,9 +319,11 @@ describe('护发素数据', () => {
     expect(co.filter((p) => p.fragranceFreeClaim === 'yes').map((p) => p.productId)).toEqual(['CO-US-001', 'CO-US-029', 'CO-US-031', 'CO-US-032']);
     const prof = toScoringProfile(answers({ hair: { fragrancePref: 'free_first' } }), 'conditioner', ctx);
     const ranked = rankProducts(co, 'conditioner', prof, data).filter((r) => !r.excluded);
-    const labeled = ranked.filter((r) => r.fragrance.status === 'labeled_free').map((r) => r.product.productId);
-    expect(ranked.slice(0, labeled.length).map((r) => r.product.productId).sort()).toEqual([...labeled].sort());
-    expect(labeled.length).toBeGreaterThan(0);
+    // 没有选需求：按温和程度和价格排序，不按香味层级；标注无香的产品都在无香层级
+    expect(ranked.every((r) => r.noNeeds && r.fitLevel === null)).toBe(true);
+    expect(ranked.filter((r) => r.fragrance.status === 'labeled_free').every((r) => fragranceTier(r.fragrance) === 0)).toBe(true);
+    const gentle = ranked.map((r) => r.dimensions.irritation.score!);
+    expect(gentle).toEqual([...gentle].sort((x, y) => y - x));
   });
 
   it('同系列关系双向记录，不同品类', () => {
@@ -388,7 +413,7 @@ describe('数据覆盖统计（npm run coverage）', () => {
 
 describe('证据缺失的说明', () => {
   it('只靠没有证据等级的成分匹配时，说明里不说成"只有品牌宣称或资料分类"', () => {
-    const clean = toScoringProfile(answers({ hair: { goals: ['clean'] } }), 'shampoo', ctx);
+    const clean = toScoringProfile(answers({ scalp: { styling: 'daily' } }), 'shampoo', ctx);
     const p = { ...real.products[1], productId: 'T-UNRATED', keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA'], inciNameUnverified: [], claimedBenefits: [], testedClaims: [] };
     const r = scoreProduct(p, clean, data);
     expect(r.dimensions.need.score).toBeGreaterThan(0);

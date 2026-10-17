@@ -238,18 +238,33 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
             {otherRegion && <span>{t('results.region')} {p.region} · {t('results.otherRegion')}</span>}
             {r.usesDraftData && <span className="flag">{t('results.testData')}</span>}
           </div>
+          {/* 无香：标注无香和成分表中未发现加香成分是同一香味层级，卡片上分别标注 */}
+          {f.status !== 'contains' && (
+            <div className="tags" style={{ marginTop: 8 }}>
+              <span className="tag scent">{t(`scentTag.${f.status}` as Key)}</span>
+            </div>
+          )}
           {p.awards.length > 0 && (
             <div className="tags" style={{ marginTop: 8 }}>
               {p.awards.map((a, i) => <span key={i} className="tag award">{a.source} {a.year}</span>)}
             </div>
           )}
         </div>
-        {r.score !== null && !compact && (
+        {r.score !== null && !compact && (r.noNeeds ? (
+          // 没有选需求：不显示总分和适合等级，只显示温和度
+          r.dimensions.irritation.level && (
+            <div className="score gentle">
+              <div className="num">{t(`gentle.${r.dimensions.irritation.level}` as Key)}</div>
+              <div className="of">{t('results.gentle')}</div>
+            </div>
+          )
+        ) : (
           <div className="score">
             <div className="num">{r.score}</div>
             <div className="of">{t('results.score')}</div>
+            {r.fitLevel && <div className={`fit ${r.fitLevel}`}>{t(`fit.${r.fitLevel}` as Key)}</div>}
           </div>
-        )}
+        ))}
       </div>
 
       {r.exclusions.length > 0 && (
@@ -409,7 +424,9 @@ export default function Results() {
         </div>
       );
     }
-    const shown = sorted(d.ranked.filter((r) => !r.excluded));
+    const shown = sorted(d.ranked.filter((r) => !r.excluded && !r.lowMatch));
+    // 选了需求但需求匹配为 0 的产品：不进入推荐列表，放在"不太匹配"
+    const lowMatch = sorted(d.ranked.filter((r) => !r.excluded && r.lowMatch));
     const excluded = d.ranked.filter((r) => r.excluded);
     return (
       <>
@@ -422,6 +439,13 @@ export default function Results() {
           </div>
         )}
         {shown.map((r) => <ProductCard key={r.product.productId} r={r} market={market} profile={d.profile} scentGoal={scentGoal} />)}
+        {lowMatch.length > 0 && (
+          <details className="excluded-list">
+            <summary>{t('results.lowMatch', { n: lowMatch.length })}</summary>
+            <p className="small muted">{t('results.lowMatchBody')}</p>
+            {lowMatch.map((r) => <ProductCard key={r.product.productId} r={r} market={market} profile={d.profile} scentGoal={scentGoal} />)}
+          </details>
+        )}
         {excluded.length > 0 && (
           <details className="excluded-list">
             <summary>{t('results.excluded', { n: excluded.length })}</summary>
@@ -546,6 +570,9 @@ export default function Results() {
             <strong>{t('results.testData')}</strong>
             {t('results.testBanner')}
           </div>
+        )}
+        {(view === 'set' ? data.shampoo.profile : data[view].profile).concerns.length === 0 && (
+          <p className="small muted">{t('results.noNeeds')}</p>
         )}
         {!profile?.scalp && <p className="small muted">{t('results.noProfile')}</p>}
       </div>
