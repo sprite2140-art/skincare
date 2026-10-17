@@ -118,6 +118,7 @@ export function parseProducts(text: string): Product[] {
       text: r.brand_claims ?? '',
       quote: r.brand_claims_quote ?? '',
       sourceUrl: r.brand_claims_source_url ?? '',
+      targets: splitList(r.brand_claim_targets) as Target[],
       status: (r.brand_claims_status || null) as BrandClaimStatus | null,
     },
     testedClaims: parseTestedClaims(r.tested_claims),

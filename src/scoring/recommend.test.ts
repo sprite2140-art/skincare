@@ -101,6 +101,17 @@ describe('场景 2：头皮屑、瘙痒 7 分，无香优先', () => {
     expect(f.essentialOils).toContain('Melaleuca Alternifolia Leaf Oil');
   });
 
+  it('只含精油的产品：理由写"含精油"，不显示空的香精列表', () => {
+    const oil = { ...real.products[1], productId: 'T-OIL', inciList: ['Water', 'Mentha Piperita Oil'], inciNameUnverified: [] };
+    const r = scoreProduct(oil, profile, data);
+    expect(r.fragrance).toMatchObject({ status: 'contains', fragrance: [] });
+    const texts = recommendReasons(r, profile, false).map((x) => x.zh).join(' / ');
+    expect(texts).toContain('含精油（Mentha Piperita Oil）');
+    expect(texts).not.toContain('含香精（）');
+    const scent = toScoringProfile(answers({ hair: { goals: ['scent'] } }), 'shampoo', ctx);
+    expect(recommendReasons(scoreProduct(oil, scent, data), scent, true).map((x) => x.zh)).toContain('含精油；气味和留香因人而异，需要自己试');
+  });
+
   it('标注 fragrance-free 且未发现加香成分的排在最前（层级 0）', () => {
     const free = { ...real.products[1], productId: 'T-FREE', fragranceFreeClaim: 'yes' as const, inciList: ['Water', 'Glycerin'], inciNameUnverified: [] };
     expect(fragranceTier(fragranceInfo(free, index))).toBe(0);
@@ -202,14 +213,35 @@ describe('产品定位的来源标注', () => {
     expect(recommendReasons(r, prof, false)[0].zh).toBe('产品定位针对光泽（依据：品牌宣称）');
   });
 
-  it('"日常清洁"对应清爽洁净；"去黄 / 去橙"对应新的期望效果', () => {
+  it('"日常清洁"对应清爽洁净；去黄、去橙分开记录', () => {
     const byId = (id: string) => real.products.find((p) => p.productId === id)!;
     expect(byId('SH-US-027').claimedBenefits).toEqual(['clarifying']);
-    expect(byId('SH-US-020').claimedBenefits).toContain('tone_correction');
-    expect(byId('SH-US-035').claimedBenefits).toContain('tone_correction');
-    const tone = toScoringProfile(answers({ hair: { conditions: ['colored'], goals: ['tone'] } }), 'shampoo', ctx);
+    expect(byId('SH-US-020').claimedBenefits).toContain('tone_yellow');
+    expect(byId('SH-US-035').claimedBenefits).toContain('tone_orange');
+    expect(byId('CO-US-008').claimedBenefits).toEqual(expect.arrayContaining(['tone_yellow', 'tone_orange']));
+    const tone = toScoringProfile(answers({ hair: { conditions: ['colored'], goals: ['tone_orange'] } }), 'shampoo', ctx);
     const r = scoreProduct(byId('SH-US-035'), tone, data);
-    expect(r.needMatches.find((m) => m.target === 'tone_correction')).toMatchObject({ credit: 0.7, bases: ['claim'] });
+    expect(r.needMatches.find((m) => m.target === 'tone_orange')).toMatchObject({ credit: 0.7, bases: ['claim'] });
+    // 旧档案的"去黄 / 去橙"合并选项对应两者
+    expect(toScoringProfile(answers({ hair: { conditions: ['colored'], goals: ['tone'] } }), 'shampoo', ctx).concerns)
+      .toEqual(expect.arrayContaining(['tone_yellow', 'tone_orange']));
+  });
+
+  it('品牌明确宣称的效果（brand_claim_targets）显示为"品牌宣称"，按 0.7 计分', () => {
+    const byId = (id: string) => real.products.find((p) => p.productId === id)!;
+    const co = byId('CO-US-014');
+    expect(co.brandClaims.targets).toEqual(['dryness', 'tangling', 'flat_hair']);
+    const prof = toScoringProfile(answers({ hair: { goals: ['volume'] } }), 'conditioner', ctx);
+    const r = scoreProduct(co, prof, data);
+    const m = r.needMatches.find((x) => x.target === 'flat_hair')!;
+    expect(m.bases).toEqual(expect.arrayContaining(['brand_claim', 'claim']));
+    expect(m.credit).toBeGreaterThanOrEqual(0.7);
+    expect(r.dimensions.need.reason.zh).toContain('品牌宣称');
+    // 只有品牌宣称、没有资料分类的困扰也计分
+    const onlyBrand = { ...co, claimedBenefits: [], keyActives: ['Nothing Matching'] };
+    const r2 = scoreProduct(onlyBrand, prof, data);
+    expect(r2.needMatches.find((x) => x.target === 'flat_hair')).toMatchObject({ credit: 0.7, bases: ['brand_claim'] });
+    expect(recommendReasons(r2, prof, false)[0].zh).toBe('品牌宣称针对扁塌（依据：品牌宣称）');
   });
 });
 

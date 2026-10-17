@@ -334,7 +334,7 @@
   "claimSource.brand_text": "brand claim",
   "claimSource.data_classification": "data classification",
   "fragrance.allergens": "EU-labelled fragrance allergens",
-  "fragrance.cosing": "Registered in CosIng with a perfuming function",
+  "fragrance.cosing": "Registered in CosIng with only a perfuming / fragrance function",
   "fragrance.other": "Other fragrance ingredients",
   "quiz.water.variesNote": "Hardness differs between plants, sources or periods; it depends on which supply zone your home is in.",
   "water.varies": "Varies by supply zone",
@@ -367,5 +367,8 @@
   "set.sameSeriesTag": "same line",
   "water.stat.reported_annual_mean": "Reported annual mean",
   "water.stat.other": "Other measure",
-  "results.brandClaimsQuote": "Brand product page"
+  "results.brandClaimsQuote": "Brand product page",
+  "quiz.goal.tone_yellow": "Tone out yellow (blonde or lightened hair)",
+  "quiz.goal.tone_orange": "Tone out orange (lightened brown hair)",
+  "results.brandClaimTargets": "Needs the brand claims to address"
 }

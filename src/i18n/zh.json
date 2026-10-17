@@ -334,7 +334,7 @@
   "claimSource.brand_text": "品牌宣称",
   "claimSource.data_classification": "资料分类",
   "fragrance.allergens": "欧盟需标注的香料致敏原",
-  "fragrance.cosing": "CosIng 登记功能含香料",
+  "fragrance.cosing": "CosIng 只登记了香料功能",
   "fragrance.other": "其他加香成分",
   "quiz.water.variesNote": "不同水厂、水源或时期的硬度等级不同，需要看你家属于哪个供水分区。",
   "water.varies": "因供水分区而异",
@@ -367,5 +367,8 @@
   "set.sameSeriesTag": "同系列",
   "water.stat.reported_annual_mean": "公布的年均",
   "water.stat.other": "其他口径",
-  "results.brandClaimsQuote": "品牌产品页原文"
+  "results.brandClaimsQuote": "品牌产品页原文",
+  "quiz.goal.tone_yellow": "去黄（金发、漂浅的头发）",
+  "quiz.goal.tone_orange": "去橙（染浅的棕发）",
+  "results.brandClaimTargets": "品牌宣称对应的需求"
 }

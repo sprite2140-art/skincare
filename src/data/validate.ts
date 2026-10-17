@@ -145,6 +145,8 @@ export function validateData(
     const bc = p.brandClaims;
     if (bc.status !== null) oneOf(F_PRD, key, 'brand_claims_status', bc.status, BRAND_CLAIM_STATUSES);
     if (bc.text && !/^https?:\/\//.test(bc.sourceUrl)) err(F_PRD, key, 'brand_claims 有内容时必须填写 brand_claims_source_url');
+    for (const t of bc.targets) oneOf(F_PRD, key, 'brand_claim_targets', t, TARGETS);
+    if (bc.targets.length > 0 && !bc.text) err(F_PRD, key, 'brand_claim_targets 有内容时必须有 brand_claims（品牌宣称原文概括）');
     if (bc.text && bc.status !== 'brand_page_summary') err(F_PRD, key, 'brand_claims 有内容时 brand_claims_status 应为 brand_page_summary');
     for (const a of p.awards) {
       if (!a.source || !/^\d{4}$/.test(a.year)) err(F_PRD, key, `awards 每一项需写明来源和 4 位年份（来源|年份|名称|链接）：${a.source}|${a.year}`);
@@ -166,6 +168,26 @@ export function validateData(
       const other = products.find((x) => x.productId === id);
       if (!other) err(F_PRD, p.productId, `paired_product_ids 中的 "${id}" 不在产品表中`);
       else if (other.category === p.category) warn(F_PRD, p.productId, `paired_product_ids 中的 "${id}" 与本产品是同一品类`);
+    }
+  }
+  // 在 CosIng 中找不到的产品成分名：多数是拼写错误或非 INCI 写法，方便逐个核对
+  if (extra.cosing && extra.cosing.length > 0) {
+    const cosingNames = new Set(extra.cosing.map((c) => normalizeName(c.inciName)));
+    const libraryIndex = buildIngredientIndex(ingredients);
+    const missing = new Map<string, Set<string>>();
+    for (const p of products) {
+      for (const n of p.inciList) {
+        // 成分库登记的别名也算（如美国写法 Fragrance ↔ 欧盟 Parfum、Pyrithione Zinc ↔ Zinc Pyrithione）
+        const lib = libraryIndex.get(n);
+        const candidates = [n, ...(lib ? [lib.inciName, ...lib.aliases] : [])];
+        if (candidates.some((c) => cosingNames.has(normalizeName(c)))) continue;
+        const ids = missing.get(n) ?? new Set<string>();
+        ids.add(p.productId);
+        missing.set(n, ids);
+      }
+    }
+    for (const [n, ids] of [...missing].sort((a, b) => b[1].size - a[1].size || a[0].localeCompare(b[0]))) {
+      warn(F_PRD, n, `成分名在 CosIng 中找不到（可能是拼写错误或非 INCI 写法），出现在：${[...ids].join('、')}`);
     }
   }
   // 按统一后的名称合并、按出现次数排序，即"成分库扩充优先清单"

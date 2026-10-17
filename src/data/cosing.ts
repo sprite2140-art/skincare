@@ -4,9 +4,13 @@
 //   data/cosing_ingredients.csv（只保留 INCI 名、功能、CAS 号、CosIng 编号、更新日期）。
 // - 合并规则（expandIngredients）：成分库 ingredients.csv 的条目优先；成分库没有的成分用 CosIng 补充，
 //   来源标记为 cosing，review_status 一律为 draft（未核对）。
-//   - 功能含 perfuming（香料）的：category = risk，risk_tags = fragrance，视为加香成分；
+//   - 加香成分（category = risk，risk_tags = fragrance）只限以下情况，见 isFragrance()：
+//     (a) 名称为 Parfum / Fragrance / Aroma / Flavor；(b) 在欧盟香料致敏原清单中；
+//     (c) CosIng 登记的功能只有 perfuming 和 / 或 fragrance，没有其他功能；(d) 精油（成分库 risk_tags = essential_oil，单独列出）。
+//     CosIng 给很多普通成分也登记了香料功能（如 Glycerin、Citric Acid、Caffeine），这些不算加香。
 //   - 其他：category = base（基础分类，按现有规则不需要人工核对即可用于打分，但没有 targets，不影响需求匹配）。
-// - 欧盟香料致敏原清单（data/eu_fragrance_allergens.csv）上的成分都标注 euAllergen，并视为加香成分；
+// - 成分库已有的条目：在 CosIng 中能找到时，是否加香也按上面的规则判断（覆盖成分库原来的 fragrance 标签）；找不到时保留成分库的标签。
+// - 欧盟香料致敏原清单（data/eu_fragrance_allergens.csv）上的成分都标注 euAllergen；
 //   成分库和 CosIng 里都没有的，按清单补一个 draft 条目。
 
 import { parseCsv, splitList } from './parse';
@@ -30,6 +34,22 @@ export interface AllergenEntry {
 
 export const COSING_SOURCE = 'https://ec.europa.eu/growth/tools-databases/cosing/';
 export const PERFUMING = 'perfuming';
+/** 香精的统称（规则 a） */
+const FRAGRANCE_NAMES = new Set(['parfum', 'fragrance', 'aroma', 'flavor', 'flavour']);
+/** 只登记这些功能时视为纯香料（规则 c） */
+const FRAGRANCE_FUNCTIONS = new Set(['perfuming', 'fragrance']);
+
+/** CosIng 登记的功能只有香料类（perfuming / fragrance），没有其他功能 */
+export function onlyFragranceFunctions(functions: string[]): boolean {
+  return functions.length > 0 && functions.every((f) => FRAGRANCE_FUNCTIONS.has(f));
+}
+
+/** 是否算加香成分（规则 a–c；精油 d 由成分库的 essential_oil 标签单独处理） */
+export function isFragrance(names: string[], cosingFunctions: string[] | undefined, allergen: boolean): boolean {
+  if (names.some((n) => FRAGRANCE_NAMES.has(normalizeName(n)))) return true;
+  if (allergen) return true;
+  return !!cosingFunctions && onlyFragranceFunctions(cosingFunctions);
+}
 
 /** data/cosing_ingredients.csv（已转换的格式） */
 export function parseCosingTable(text: string): CosingEntry[] {
@@ -118,8 +138,9 @@ export function expandIngredients(library: Ingredient[], cosing: CosingEntry[], 
     const c = cosingByName.get(normalizeName(ing.inciName));
     const allergen = isAllergen(ing);
     // 成分库条目同样适用：CosIng 登记功能含香料，或在致敏原清单上，都识别为加香成分
-    const perfuming = !!c?.functions.some((f) => f.includes(PERFUMING));
-    const riskTags = (perfuming || allergen) && !ing.riskTags.includes('fragrance') ? [...ing.riskTags, 'fragrance' as const] : ing.riskTags;
+    const others = ing.riskTags.filter((t) => t !== 'fragrance');
+    const fragrance = c ? isFragrance([ing.inciName, ...ing.aliases], c.functions, allergen) : ing.riskTags.includes('fragrance') || allergen;
+    const riskTags = fragrance ? [...others, 'fragrance' as const] : others;
     const full: Ingredient = { ...ing, riskTags, origin: 'library', euAllergen: allergen, cosingFunctions: c?.functions };
     for (const n of [ing.inciName, ...ing.aliases]) known.set(normalizeName(n), full);
     return full;
@@ -128,9 +149,8 @@ export function expandIngredients(library: Ingredient[], cosing: CosingEntry[], 
   for (const c of cosing) {
     const key = normalizeName(c.inciName);
     if (known.has(key)) continue;
-    const perfuming = c.functions.some((f) => f.includes(PERFUMING));
     const allergen = allergenKeys.has(key);
-    const fragrance = perfuming || allergen;
+    const fragrance = isFragrance([c.inciName], c.functions, allergen);
     const ing: Ingredient = {
       inciName: c.inciName,
       nameZh: '',

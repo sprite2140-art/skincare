@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   EMPTY_HAIR, adviseCare, hairTargets, isSensitiveScalp, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, scalpTargets, scopeCategories,
-  migrateScalp, toScoringProfile, toneGoalAvailable,
+  migrateHair, migrateScalp, toScoringProfile, toneGoalAvailable,
   type Answers, type BaseAnswers, type HairAnswers, type ScalpAnswers,
 } from './questionnaire';
 import {
@@ -133,11 +133,18 @@ describe('头发问卷映射', () => {
     expect(hairTargets({ ...EMPTY_HAIR, goals: ['volume', 'shine', 'curl', 'clean'] })).toEqual(['flat_hair', 'shine', 'curl_definition']);
   });
 
+  it('旧档案的合并"去黄 / 去橙"迁移为两项，仍不超过 3 项', () => {
+    expect(migrateHair({ ...EMPTY_HAIR, goals: ['smooth', 'tone'] }).goals).toEqual(['smooth', 'tone_yellow', 'tone_orange']);
+    expect(migrateHair({ ...EMPTY_HAIR, goals: ['smooth', 'shine', 'tone'] }).goals).toEqual(['smooth', 'shine', 'tone_yellow']);
+    const h = { ...EMPTY_HAIR, goals: ['smooth' as const] };
+    expect(migrateHair(h)).toBe(h);
+  });
+
   it('"去黄 / 去橙"只在选了染或烫漂时出现并生效', () => {
     expect(toneGoalAvailable({ conditions: ['dry'] })).toBe(false);
     expect(toneGoalAvailable({ conditions: ['permed_bleached'] })).toBe(true);
-    expect(hairTargets({ ...EMPTY_HAIR, conditions: ['colored'], goals: ['tone'] })).toEqual(['color_fade', 'damage', 'tone_correction']);
-    expect(hairTargets({ ...EMPTY_HAIR, goals: ['tone'] })).toEqual([]);
+    expect(hairTargets({ ...EMPTY_HAIR, conditions: ['colored'], goals: ['tone_yellow'] })).toEqual(['color_fade', 'damage', 'tone_yellow']);
+    expect(hairTargets({ ...EMPTY_HAIR, goals: ['tone_orange'] })).toEqual([]);
   });
 });
 

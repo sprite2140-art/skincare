@@ -30,7 +30,8 @@ export const TARGET_LABELS: Record<Target, Text> = {
   clarifying: { zh: '清洁残留', en: 'clarifying' },
   shine: { zh: '光泽', en: 'shine' },
   curl_definition: { zh: '卷度', en: 'curl definition' },
-  tone_correction: { zh: '去黄 / 去橙', en: 'brass toning' },
+  tone_yellow: { zh: '去黄', en: 'yellow toning' },
+  tone_orange: { zh: '去橙', en: 'orange toning' },
 };
 
 export const RISK_TAG_LABELS: Record<RiskTag, Text> = {

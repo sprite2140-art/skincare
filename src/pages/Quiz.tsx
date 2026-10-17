@@ -8,7 +8,7 @@ import type { Category, City, WaterRecord } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import {
-  EMPTY_HAIR, MAX_GOALS, cityKey, migrateScalp, scopeCategories, toneGoalAvailable,
+  EMPTY_HAIR, MAX_GOALS, TONE_GOALS, cityKey, migrateHair, migrateScalp, scopeCategories, toneGoalAvailable,
   type Discomfort, type DiscomfortFrequency, type HairLength, type HairLossAmount, type Redness, type StylingUse, type ThinningArea, type AvoidOption, type BaseAnswers, type BudgetMode, type CarePref,
   type ConditionerStatus, type DandruffType, type HairAnswers, type HairCondition, type HairGoal,
   type HairTexture, type HairThickness, type Money, type PurchaseScope, type ScalpAnswers, type ScalpConcern, type ScalpOilTiming,
@@ -26,7 +26,7 @@ const AUTO_ADVANCE_MS = 220;
 
 /** 取消染、烫漂后，"去黄 / 去橙"不再可选，从已选效果中去掉，避免占用 3 项名额 */
 function withoutUnavailableTone(h: HairAnswers): HairAnswers {
-  return toneGoalAvailable(h) ? h : { ...h, goals: h.goals.filter((g) => g !== 'tone') };
+  return toneGoalAvailable(h) ? h : { ...h, goals: h.goals.filter((g) => !TONE_GOALS.includes(g)) };
 }
 
 type StepId =
@@ -173,7 +173,7 @@ export default function Quiz() {
   const start = startRef.current;
   const [base, setBase] = useState<BaseAnswers>(start.base);
   const [scalp, setScalp] = useState<ScalpAnswers>(migrateScalp({ ...EMPTY_SCALP, ...(start.scalp ?? {}) }));
-  const [hair, setHair] = useState<HairAnswers>(start.hair ?? EMPTY_HAIR);
+  const [hair, setHair] = useState<HairAnswers>(migrateHair(start.hair ?? EMPTY_HAIR));
   const [avoidInput, setAvoidInput] = useState('');
   // "想避开的成分"选了"没有，跳过"；修改已有档案时，已保存过的答案视为已选择
   const [avoidNone, setAvoidNone] = useState(!!start.scalp && start.base.avoid.length === 0 && start.base.avoidIngredients.length === 0);
@@ -222,7 +222,7 @@ export default function Quiz() {
       hairLossLevel: scalp.concerns.includes('hair_loss') && scalp.hairLossAmount == null ? scalp.hairLossLevel : null,
     };
     // "去黄 / 去橙"只在选了染或烫漂时有效
-    const cleanedHair: HairAnswers = { ...hair, goals: toneGoalAvailable(hair) ? hair.goals : hair.goals.filter((g) => g !== 'tone') };
+    const cleanedHair: HairAnswers = withoutUnavailableTone(hair);
     // 只有一个品类时预算一定按单品
     const cleanedBase: BaseAnswers = { ...base, budgetMode: multiCategory ? base.budgetMode : 'item' };
     save({ ...start, base: cleanedBase, scalp: cleanedScalp, hair: cleanedHair });
@@ -628,7 +628,7 @@ export default function Quiz() {
           <Multi<HairGoal>
             options={[
               'smooth', 'moisture', 'less_frizz', 'clean', 'volume', 'shine', 'curl',
-              ...(toneGoalAvailable(hair) ? (['tone'] as HairGoal[]) : []), 'scent',
+              ...(toneGoalAvailable(hair) ? (['tone_yellow', 'tone_orange'] as HairGoal[]) : []), 'scent',
             ]}
             value={hair.goals}
             label={(v) => t(`quiz.goal.${v}` as Key)}

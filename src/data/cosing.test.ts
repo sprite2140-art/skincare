@@ -50,14 +50,18 @@ describe('CosIng 导入', () => {
     expect(index.get('Evernia Prunastri Extract')).toMatchObject({ origin: 'eu_allergen_list', riskTags: ['fragrance'], euAllergen: true });
   });
 
-  it('成分库已有的条目：CosIng 登记功能含香料时同样识别为加香成分（例如植物油）', () => {
-    const lib = real.ingredients.find((i) => i.inciName === 'Glycine Soja Oil')!;
-    expect(lib.riskTags).not.toContain('fragrance');
-    const cos = parseCosingTable('inci_name,functions,cas_no,cosing_ref,update_date\nGlycine Soja Oil,perfuming;skin conditioning,,1,\n');
-    const index = buildIngredientIndex(expandIngredients(real.ingredients, cos, []));
-    expect(index.get('Glycine Soja Oil')).toMatchObject({ origin: 'library', riskTags: ['fragrance'] });
-    const p = { ...real.products[0], inciList: ['Water', 'Glycine Soja Oil'], inciNameUnverified: [] };
-    expect(fragranceInfo(p, index).status).toBe('contains');
+  it('加香规则：只按香精统称、致敏原清单、功能只有香料类；登记了香料功能的普通成分不算', () => {
+    const tbl = parseCosingTable(
+      'inci_name,functions,cas_no,cosing_ref,update_date\n' +
+      'Glycine Soja Oil,perfuming;skin conditioning,,1,\n' +
+      'Pure Perfume Base,perfuming;fragrance,,2,\n' +
+      'Aroma,flavouring,,3,\n',
+    );
+    const index = buildIngredientIndex(expandIngredients(real.ingredients, tbl, real.allergens));
+    // 成分库条目在 CosIng 有其他功能：不算加香
+    expect(index.get('Glycine Soja Oil')!.riskTags).not.toContain('fragrance');
+    expect(index.get('Pure Perfume Base')).toMatchObject({ origin: 'cosing', category: 'risk', riskTags: ['fragrance'] });
+    expect(index.get('Aroma')!.riskTags).toEqual(['fragrance']);
   });
 
   it('香味信息区分欧盟致敏原和 CosIng 登记功能含香料的成分', () => {
@@ -75,5 +79,37 @@ describe('CosIng 导入', () => {
     expect(real.allergens).toHaveLength(26);
     expect(new Set(real.allergens.map((a) => a.inciName.toLowerCase())).size).toBe(26);
     expect(parseCosingTable('inci_name,functions,cas_no,cosing_ref,update_date\nX,perfuming;solvent,,1,\n')[0].functions).toEqual(['perfuming', 'solvent']);
+  });
+});
+
+describe('data/ 中导入的 CosIng（2026-10-17）', () => {
+  const index = real.ingredientIndex;
+  const tagged = (name: string) => index.get(name)?.riskTags.includes('fragrance') ?? false;
+
+  it('已导入完整清单', () => {
+    expect(real.cosing.length).toBe(33640);
+    expect(index.get('Glycerin')?.cosingFunctions).toContain('perfuming');
+  });
+
+  it('甘油、柠檬酸、丁二醇、咖啡因、精氨酸等登记了香料功能，但还有其他功能：不算加香', () => {
+    for (const n of ['Glycerin', 'Citric Acid', 'Butylene Glycol', 'Caffeine', 'Arginine', 'Salicylic Acid', 'Cocos Nucifera Oil', 'Menthol']) {
+      expect(tagged(n), n).toBe(false);
+    }
+    const p = { ...real.products[0], inciList: ['Water', 'Glycerin', 'Citric Acid', 'Butylene Glycol', 'Caffeine', 'Arginine'], inciNameUnverified: [] };
+    expect(fragranceInfo(p, index)).toMatchObject({ status: 'none_found', fragrance: [] });
+  });
+
+  it('香精统称、欧盟致敏原、功能只有香料类的成分算加香；精油也算并单独列出', () => {
+    for (const n of ['Parfum', 'Fragrance', 'Linalool', 'Limonene', 'Coumarin', 'Citrus Aurantium Peel Oil', 'Terpineol']) expect(tagged(n), n).toBe(true);
+    const oil = { ...real.products[0], inciList: ['Water', 'Mentha Piperita Oil'], inciNameUnverified: [] };
+    expect(fragranceInfo(oil, index)).toMatchObject({ status: 'contains', fragrance: [], essentialOils: ['Mentha Piperita Oil'] });
+  });
+
+  it('产品中带香料功能的成分里，只有少数按规则算加香', () => {
+    const names = new Set(real.products.flatMap((p) => p.inciList));
+    const withFn = [...names].filter((n) => index.get(n)?.cosingFunctions?.some((f) => f === 'perfuming' || f === 'fragrance'));
+    const counted = withFn.filter((n) => tagged(n));
+    expect(withFn.length).toBeGreaterThan(100);
+    expect(counted.length).toBeLessThan(40);
   });
 });

@@ -1,6 +1,6 @@
 inci_name,name_zh,aliases,category,functions,targets,effective_range,max_limit,evidence_level,risk_tags,conflicts_with,explain_zh,explain_en,sources,review_status,reviewed_on
 Piroctone Olamine,吡罗克酮乙醇胺盐,Octopirox,active,anti-dandruff;preservative,dandruff;scalp_itch,0.5%–1%（冲洗型）,欧盟冲洗型产品 1%,B,,,常见的去屑成分，抑制与头皮屑相关的马拉色菌。,A common anti-dandruff ingredient that inhibits Malassezia yeast linked to dandruff.,https://ec.europa.eu/growth/tools-databases/cosing/;https://pubmed.ncbi.nlm.nih.gov/18503415/;https://pubmed.ncbi.nlm.nih.gov/10773717/,draft,
-Parfum,香精,Fragrance,risk,perfuming,,,,,fragrance,,用来增加香味，对敏感皮肤或头皮可能有刺激。,Adds scent; can irritate sensitive skin or scalp.,https://ec.europa.eu/growth/tools-databases/cosing/;https://eur-lex.europa.eu/eli/reg/2023/1545/oj,draft,
+Fragrance,香精,Parfum,risk,perfuming,,,,,fragrance,,用来增加香味，对敏感皮肤或头皮可能有刺激。,Adds scent; can irritate sensitive skin or scalp.,https://ec.europa.eu/growth/tools-databases/cosing/;https://eur-lex.europa.eu/eli/reg/2023/1545/oj,draft,
 Glycerin,甘油,,base,humectant,,,,,,,常见保湿基础成分。,A common moisturizing base ingredient.,,draft,
 Aqua,水,Water,base,solvent,,,,,,,最常见的溶剂成分。,The most common solvent ingredient.,,draft,
 Sodium Lauroyl Methylalaninate,月桂酰甲基氨基丙酸钠,Sodium Lauroyl Methyl Alaninate,base,cleansing;surfactant,,,,,,,氨基酸类清洁成分。,An amino-acid-based cleansing ingredient.,,draft,

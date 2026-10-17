@@ -13,6 +13,17 @@
 
 ## 记录
 
+### 2026-10-17（Claude Code：导入 CosIng、修改加香规则、修正成分表、品牌宣称对应需求；新 PR）
+- 完成：
+  1. **CosIng**：导入作者上传的 data/cosing_export_2026-10-17.csv（33,640 条，欧盟委员会 CosIng 数据库，经 CosIng 网站公开数据接口于 2026-10-17 获取）为 data/cosing_ingredients.csv；DATA_SCHEMA.md 注明来源和获取日期。
+  2. **加香规则**：改为只有 (a) Parfum / Fragrance / Aroma / Flavor，(b) 欧盟香料致敏原，(c) CosIng 功能只有 perfuming / fragrance，(d) 精油 才算加香。甘油、柠檬酸、丁二醇、咖啡因、精氨酸等加了测试，确认不算加香。成分库已有条目在 CosIng 中能找到时也按此规则判断。
+  3. **成分表修正**（26 处，只改 inci_list，原文列不变）：Alicylic Acid → Salicylic Acid；Celluose → Cellulose；Methylchloroisothiasolinone → Methylchloroisothiazolinone；拆开 "Magnesium Nitrate. Geraniol"；合并 2-Oleamido-1,3-Octadecanediol（CO-US-011）；Alcohol Denat 补句点；"INCI 名 / 俗名"写法只保留 INCI 名（19 处，CosIng 能找到斜杠前名称时才改）。成分库主名改为 Fragrance，别名 Parfum；Pyrithione Zinc 已有别名 Zinc Pyrithione。
+  4. **数据校验**：新增"成分名在 CosIng 中找不到"清单（成分库别名也算找到），目前 12 个。
+  5. **品牌宣称对应需求**：按作者给的对应表，从 29 款护发素的品牌原文和概括生成 brand_claim_targets，计分按"品牌宣称"0.7；去黄、去橙拆为 tone_yellow / tone_orange 分开记录，问卷"去黄""去橙"分成两个选项（旧档案的合并选项对应两者）。
+- 结果：产品成分出现 2,875 次，2,858 次（99.4%）能在 CosIng 找到；不重复的成分名 636 个，624 个（98.1%）能找到。按新规则，无香产品：洗发水 57 款中 2 款（SH-US-001、002，均未标注无香），护发素 30 款中 2 款（CO-US-001、029，均有无香声明）。
+- 验证：测试 142 个全部通过；类型检查、数据校验（0 错误）、构建通过。
+- 待作者确认：CosIng 找不到的 12 个名称（见校验输出），其中 SH-US-041 的 "Sodium Lauroyl" + "Sarcosinat" 应是一个成分被拆开，美国色素名（Yellow 5、Blue 1、Red 33、Yellow 10）在欧盟对应 CI 编号。
+
 ### 2026-10-17（Claude Code：护发素 30 款、15 城水硬度、洗发水效果字段审计入库；新 PR）
 - 完成：
   1. **护发素**：conditioners_us_30.csv 导入为 CO-US-001 至 030（category = conditioner，冲洗型）。映射：concern_tags → claimed_benefits（资料分类，干涩 → dryness、打结 → tangling、毛躁 → frizz、染烫受损 / 易断 → damage、细软扁塌 → flat_hair、卷发 → curl_definition、光泽 → shine、护色 → color_fade、去黄 / 去橙 → tone_correction）；size 换算 size_ml；入库依据转为 awards（Ulta 热销结果页 / Allure 2024）；inci_source_url 等出处已在 source_url 中。新增列 brand_claims、brand_claims_quote、brand_claims_source_url、brand_claims_status（29 款品牌页概括，CO-US-005 版本不一致留空）、fragrance_free_source_url（CO-US-001、029 明确无香）、paired_product_ids（同系列，双向记录）。品牌宣称目前只展示，不参与计分。护发素预算档位自动算出：≤ $17.27 / ≤ $28.43 / 不限。

@@ -28,7 +28,7 @@ targets 取值：
 - 面部：acne, oil, dryness, redness, pigmentation, aging, pores
 - 头皮：dandruff, scalp_oil, scalp_itch, scalp_redness, hair_loss
 - 头发：damage, frizz, flat_hair, tangling, color_fade
-- 头皮状态与发丝效果：dry_scalp（头皮干）, sensitive_scalp（敏感头皮）, clarifying（清洁残留）, shine（光泽）, curl_definition（卷度）, tone_correction（去黄 / 去橙）。目前主要来自品牌宣称（products.csv 的 claimed_benefits）；clarifying 也按成分功能辅助匹配（functions 含 chelating 的成分）
+- 头皮状态与发丝效果：dry_scalp（头皮干）, sensitive_scalp（敏感头皮）, clarifying（清洁残留）, shine（光泽）, curl_definition（卷度）, tone_yellow（去黄）, tone_orange（去橙）。去黄和去橙分开记录（原 tone_correction 已拆分）。目前主要来自品牌宣称（products.csv 的 claimed_benefits）；clarifying 也按成分功能辅助匹配（functions 含 chelating 的成分）
 
 risk_tags 取值：fragrance, essential_oil, alcohol, strong_acid, sensitizer, strong_cleanser, pregnancy_caution, rx_caution
 
@@ -57,6 +57,7 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | claimed_benefits | 产品定位针对的困扰或效果，取 targets 的值，分号分隔。不从成分推断 | dandruff;sensitive_scalp |
 | claim_source | claimed_benefits 的来源：brand_text（产品页的品牌原文）/ data_classification（资料整理时的分类）。页面分别显示"品牌宣称"和"资料分类"，都按产品定位 0.7 计分。本轮 47 款美国产品来自资料中的"需求"字段，是整理时的分类，全部填 data_classification；"日常清洁"对应 clarifying，"去黄 / 去橙"对应 tone_correction | data_classification |
 | brand_claims / brand_claims_quote / brand_claims_source_url | 品牌产品页效果的中文概括、短原文和官方产品页。概括不是逐字翻译，也不是独立验证的效果；页面显示为"品牌宣称（产品页概括）"。目前只展示，不参与计分（计分仍用 claimed_benefits） | |
+| brand_claim_targets | 品牌产品页明确宣称的效果对应的困扰，分号分隔，按下表从 brand_claims_quote（英文原文）和 brand_claims（中文概括）对应；计分时按"品牌宣称"0.7 计，与资料分类相同，页面标注"品牌宣称"。对应表：Moisturizing / Hydrating → dryness；Detangling → tangling；Smoothing / Frizz Control → frizz；Repair / Strengthening / Anti-breakage → damage；Volume / Body → flat_hair；Curl Definition → curl_definition；Neutralizes Yellow → tone_yellow，Orange / Brassiness（棕发）→ tone_orange，金发的 Brassiness → tone_yellow | dryness;tangling |
 | brand_claims_status | brand_page_summary（有对应版本的品牌页概括）/ version_mismatch（在售版本与品牌页不一致，留空）/ not_collected（尚未收集）。brand_claims 有内容时必须为 brand_page_summary 并有出处 | brand_page_summary |
 | tested_claims | 可靠的成品测试（第三方或公开方法），每项格式 `困扰\|测试说明\|年份\|链接`，链接必填。目前没有数据 | |
 | fragrance_free_claim | 产品是否明确标注 fragrance-free：yes / no / unknown。留空视为 unknown（未确认，不等于含香） | unknown |
@@ -125,9 +126,17 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 
 ## cosing_ingredients.csv 与 eu_fragrance_allergens.csv（欧盟成分基础分类）
 
-- **cosing_ingredients.csv**：欧盟 CosIng "Ingredients & Fragrance Inventory" 的转换结果，列为 inci_name、functions（登记功能，小写，分号分隔）、cas_no、cosing_ref、update_date。不要手改：从 CosIng 下载导出 CSV 后运行 `npm run import-cosing -- <文件>` 重新生成（脚本会自动找表头，逗号或分号分隔都可以）。目前为空，等待导入。
+- **cosing_export_2026-10-17.csv**：原始数据，共 33,640 条。来源为欧盟委员会 CosIng 数据库（https://ec.europa.eu/growth/tools-databases/cosing/ ），由作者通过 CosIng 网站使用的公开数据接口于 **2026-10-17** 获取。列为 COSING Ref No、INCI name、CAS No、Function、Update Date。
+- **cosing_ingredients.csv**：由上面的原始文件转换而来，列为 inci_name、functions（登记功能，小写，分号分隔）、cas_no、cosing_ref、update_date。不要手改：更新时下载新的导出文件，运行 `npm run import-cosing -- <文件>` 重新生成（脚本会自动找表头，逗号或分号分隔都可以），并更新本节的获取日期。
+- **CosIng 匹配检查**：`npm run validate-data` 会列出产品成分表中在 CosIng 里找不到的成分名（成分库登记的别名也算找到，如美国写法 Fragrance 对应欧盟 Parfum），多数是拼写错误、拆分错误或美国色素名（如 Yellow 5，欧盟用 CI 编号）。
 - **eu_fragrance_allergens.csv**：欧盟需标注的香料致敏原清单（inci_name、list、source）。目前收录法规 1223/2009 附录 III 的 26 种；2023/1545 号法规新增的条目待按法规原文补充。
-- **合并规则**（`src/data/cosing.ts` 的 expandIngredients）：成分库 ingredients.csv 优先；成分库没有的成分用 CosIng 补充，来源标记为 CosIng、review_status 为 draft。登记功能含 perfuming 的识别为加香成分（category = risk，risk_tags = fragrance）；其他为基础分类（category = base，没有 targets）。在致敏原清单上的成分都标注为欧盟致敏原；成分库和 CosIng 都没有的致敏原按清单补条目。打分仍按现有规则区分已核对和未核对。
+- **合并规则**（`src/data/cosing.ts` 的 expandIngredients）：成分库 ingredients.csv 优先；成分库没有的成分用 CosIng 补充，来源标记为 CosIng、review_status 为 draft，category 为 base（基础分类，没有 targets）。打分仍按现有规则区分已核对和未核对。
+- **加香成分的判断**（`isFragrance`）：CosIng 给很多普通成分也登记了 PERFUMING / FRAGRANCE 功能（如 Glycerin、Citric Acid、Butylene Glycol、Caffeine、Arginine），产品中有 120 个成分带此功能，其中只有 17 个只登记了香料功能。因此只有以下情况才算加香（risk_tags = fragrance）：
+  - (a) 成分名为 Parfum / Fragrance / Aroma / Flavor；
+  - (b) 在欧盟香料致敏原清单中；
+  - (c) CosIng 登记的功能只有 perfuming 和 / 或 fragrance，没有其他功能；
+  - (d) 精油（成分库 risk_tags = essential_oil，在结果页单独列出）。
+  其余成分即使登记了香料功能也不算加香。成分库已有的条目在 CosIng 中能找到时同样按这条规则判断；找不到时保留成分库的标签。
 - **网页只打包用到的部分**：CosIng 全表有数万行，构建时只保留产品成分表中出现的成分（vite.config.ts 的 cosing-used 插件）；测试和脚本读取完整文件。
 
 ## exchange_rates.csv（固定汇率表）

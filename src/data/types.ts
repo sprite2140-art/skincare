@@ -5,7 +5,7 @@ export const TARGETS = [
   'dandruff', 'scalp_oil', 'scalp_itch', 'scalp_redness', 'hair_loss',
   'damage', 'frizz', 'flat_hair', 'tangling', 'color_fade',
   // 头皮状态与发丝效果（主要来自品牌宣称，成分库暂少有对应）
-  'dry_scalp', 'sensitive_scalp', 'clarifying', 'shine', 'curl_definition', 'tone_correction',
+  'dry_scalp', 'sensitive_scalp', 'clarifying', 'shine', 'curl_definition', 'tone_yellow', 'tone_orange',
 ] as const;
 export type Target = (typeof TARGETS)[number];
 
@@ -76,6 +76,8 @@ export interface BrandClaims {
   /** 产品页短原文 */
   quote: string;
   sourceUrl: string;
+  /** 按品牌明确宣称的效果对应的困扰（brand_claim_targets），计分时按"品牌宣称"计 */
+  targets: Target[];
   status: BrandClaimStatus | null;
 }
 

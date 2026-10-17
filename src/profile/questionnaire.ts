@@ -139,7 +139,8 @@ export type HairThickness = 'fine' | 'medium' | 'coarse';
 export type HairTexture = 'straight' | 'wavy' | 'curly' | 'coily';
 export type HairCondition = 'dry' | 'tangling' | 'colored' | 'permed_bleached' | 'breakage' | 'heat';
 /** 期望效果，最多选 3 项 */
-export type HairGoal = 'smooth' | 'moisture' | 'less_frizz' | 'clean' | 'volume' | 'shine' | 'curl' | 'scent' | 'tone';
+/** tone 为旧选项（去黄 / 去橙合在一起），新档案分为 tone_yellow 和 tone_orange */
+export type HairGoal = 'smooth' | 'moisture' | 'less_frizz' | 'clean' | 'volume' | 'shine' | 'curl' | 'scent' | 'tone_yellow' | 'tone_orange' | 'tone';
 export const MAX_GOALS = 3;
 /** 是否已有满意的护发素 */
 export type ConditionerStatus = 'satisfied' | 'not_satisfied' | 'none';
@@ -179,10 +180,24 @@ const GOAL_TARGETS: Record<HairGoal, Target[]> = {
   shine: ['shine'],
   curl: ['curl_definition'],
   scent: [],
-  tone: ['tone_correction'],
+  tone_yellow: ['tone_yellow'],
+  tone_orange: ['tone_orange'],
+  tone: ['tone_yellow', 'tone_orange'],
 };
 
-/** "去黄 / 去橙"只在发丝状态选了染或烫漂时出现 */
+export const TONE_GOALS: HairGoal[] = ['tone_yellow', 'tone_orange', 'tone'];
+
+/** 旧档案迁移：合并的"去黄 / 去橙"（tone）拆为去黄、去橙两项，仍不超过 MAX_GOALS 项 */
+export function migrateHair(h: HairAnswers): HairAnswers {
+  if (!h.goals.includes('tone')) return h;
+  const goals: HairGoal[] = [];
+  for (const g of h.goals.flatMap((x): HairGoal[] => (x === 'tone' ? ['tone_yellow', 'tone_orange'] : [x]))) {
+    if (!goals.includes(g)) goals.push(g);
+  }
+  return { ...h, goals: goals.slice(0, MAX_GOALS) };
+}
+
+/** "去黄""去橙"只在发丝状态选了染或烫漂时出现 */
 export function toneGoalAvailable(hair: Pick<HairAnswers, 'conditions'>): boolean {
   return hair.conditions.includes('colored') || hair.conditions.includes('permed_bleached');
 }
@@ -194,7 +209,7 @@ export function hairTargets(a: HairAnswers): Target[] {
   };
   for (const c of a.conditions) CONDITION_TARGETS[c].forEach(add);
   for (const g of a.goals.slice(0, MAX_GOALS)) {
-    if (g === 'tone' && !toneGoalAvailable(a)) continue;
+    if (TONE_GOALS.includes(g) && !toneGoalAvailable(a)) continue;
     GOAL_TARGETS[g].forEach(add);
   }
   return targets;
