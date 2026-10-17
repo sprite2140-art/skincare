@@ -8,7 +8,7 @@ import type { Category, City } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import {
-  EMPTY_HAIR, MAX_GOALS, cityKey, scopeCategories, toneGoalAvailable,
+  EMPTY_HAIR, MAX_GOALS, cityKey, migrateScalp, scopeCategories, toneGoalAvailable,
   type Discomfort, type DiscomfortFrequency, type HairLength, type HairLossAmount, type Redness, type StylingUse, type ThinningArea, type AvoidOption, type BaseAnswers, type BudgetMode, type CarePref,
   type ConditionerStatus, type DandruffType, type HairAnswers, type HairCondition, type HairGoal,
   type HairTexture, type HairThickness, type Money, type PurchaseScope, type ScalpAnswers, type ScalpConcern, type ScalpOilTiming,
@@ -23,6 +23,11 @@ const EMPTY_SCALP: ScalpAnswers = {
   oilTiming: null, concerns: [], noConcerns: false, dandruffType: null, itchScore: null, hairLossLevel: null, washFrequency: null,
 };
 const AUTO_ADVANCE_MS = 220;
+
+/** 取消染、烫漂后，"去黄 / 去橙"不再可选，从已选效果中去掉，避免占用 3 项名额 */
+function withoutUnavailableTone(h: HairAnswers): HairAnswers {
+  return toneGoalAvailable(h) ? h : { ...h, goals: h.goals.filter((g) => g !== 'tone') };
+}
 
 type StepId =
   | 'intro' | 'scope' | 'city' | 'oil' | 'concerns' | 'dandruff' | 'dandruffAmount' | 'itch' | 'discomfort' | 'redness'
@@ -141,7 +146,7 @@ export default function Quiz() {
   const startRef = useRef(profile ?? newProfile(t('profile.defaultName')));
   const start = startRef.current;
   const [base, setBase] = useState<BaseAnswers>(start.base);
-  const [scalp, setScalp] = useState<ScalpAnswers>({ ...EMPTY_SCALP, ...(start.scalp ?? {}) });
+  const [scalp, setScalp] = useState<ScalpAnswers>(migrateScalp({ ...EMPTY_SCALP, ...(start.scalp ?? {}) }));
   const [hair, setHair] = useState<HairAnswers>(start.hair ?? EMPTY_HAIR);
   const [avoidInput, setAvoidInput] = useState('');
   // "想避开的成分"选了"没有，跳过"；修改已有档案时，已保存过的答案视为已选择
@@ -187,7 +192,8 @@ export default function Quiz() {
       hairLength: scalp.concerns.includes('hair_loss') ? scalp.hairLength : null,
       hairLossAmount: scalp.concerns.includes('hair_loss') ? scalp.hairLossAmount : null,
       thinning: scalp.concerns.includes('hair_loss') ? scalp.thinning : [],
-      hairLossLevel: scalp.concerns.includes('hair_loss') ? scalp.hairLossLevel : null,
+      // 回答了新的掉发量题后，不再保留旧版追问
+      hairLossLevel: scalp.concerns.includes('hair_loss') && scalp.hairLossAmount == null ? scalp.hairLossLevel : null,
     };
     // "去黄 / 去橙"只在选了染或烫漂时有效
     const cleanedHair: HairAnswers = { ...hair, goals: toneGoalAvailable(hair) ? hair.goals : hair.goals.filter((g) => g !== 'tone') };
@@ -575,13 +581,13 @@ export default function Quiz() {
             value={hair.conditions}
             label={(v) => t(`quiz.condition.${v}` as Key)}
             onChange={(v) => {
-              setHairField('conditions', v);
+              setHair((h) => withoutUnavailableTone({ ...h, conditions: v }));
               setConditionsNone(false);
             }}
             noneLabel={t('quiz.condition.none')}
             noneOn={conditionsNone}
             onNone={() => {
-              setHairField('conditions', []);
+              setHair((h) => withoutUnavailableTone({ ...h, conditions: [] }));
               setConditionsNone(true);
             }}
           />

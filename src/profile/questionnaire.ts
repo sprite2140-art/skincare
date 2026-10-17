@@ -61,6 +61,12 @@ export type StylingUse = 'none' | 'weekly_1_2' | 'weekly_3_plus' | 'daily';
 /** 旧版掉发追问 */
 export type HairLossLevel = 'same_as_before' | 'more_than_before' | 'sudden_or_patchy';
 
+/** 旧档案迁移：旧的"发红"困扰转到新的发红题（未回答时预填"偶尔，轻微发红"） */
+export function migrateScalp(a: ScalpAnswers): ScalpAnswers {
+  if (!a.concerns.includes('redness')) return a;
+  return { ...a, concerns: a.concerns.filter((c) => c !== 'redness'), redness: a.redness ?? 'occasional' };
+}
+
 export interface ScalpAnswers {
   oilTiming: ScalpOilTiming | null;
   concerns: ScalpConcern[];
@@ -109,7 +115,11 @@ export function scalpTargets(a: ScalpAnswers): Target[] {
   const add = (t: Target) => {
     if (!targets.includes(t)) targets.push(t);
   };
-  for (const c of a.concerns) add(SCALP_CONCERN_TARGETS[c]);
+  for (const c of a.concerns) {
+    // 旧档案的"发红"困扰：已回答新的发红题时以新答案为准
+    if (c === 'redness' && a.redness != null) continue;
+    add(SCALP_CONCERN_TARGETS[c]);
+  }
   if (a.concerns.includes('dandruff') && a.dandruffType === 'oily_large') add('scalp_oil');
   if (a.redness && a.redness !== 'none') add('scalp_redness');
   if (a.oilTiming === 'same_day' || a.oilTiming === 'next_day') add('scalp_oil');
@@ -233,7 +243,9 @@ export function scalpMedicalAlerts(a: ScalpAnswers): MedicalAlert[] {
     alerts.push(alert('discomfort_red', '你提到用产品后经常不适，而且头皮经常发红', 'You mentioned frequent discomfort after products and frequent scalp redness'));
   }
   if (a.concerns.includes('hair_loss')) {
-    if (a.hairLossAmount === 6 || a.hairLossAmount === 'sudden' || a.hairLossLevel === 'sudden_or_patchy') {
+    // 旧档案的掉发追问只在还没回答新的掉发量题时生效
+    const legacy = a.hairLossAmount == null && a.hairLossLevel === 'sudden_or_patchy';
+    if (a.hairLossAmount === 6 || a.hairLossAmount === 'sudden' || legacy) {
       alerts.push(alert('hair_loss_heavy', '你提到掉发很多，或最近突然大量掉发', 'You mentioned heavy hair shedding or a sudden increase'));
     }
     if ((a.thinning ?? []).includes('patches')) {

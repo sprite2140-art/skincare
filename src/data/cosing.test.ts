@@ -50,6 +50,16 @@ describe('CosIng 导入', () => {
     expect(index.get('Evernia Prunastri Extract')).toMatchObject({ origin: 'eu_allergen_list', riskTags: ['fragrance'], euAllergen: true });
   });
 
+  it('成分库已有的条目：CosIng 登记功能含香料时同样识别为加香成分（例如植物油）', () => {
+    const lib = real.ingredients.find((i) => i.inciName === 'Glycine Soja Oil')!;
+    expect(lib.riskTags).not.toContain('fragrance');
+    const cos = parseCosingTable('inci_name,functions,cas_no,cosing_ref,update_date\nGlycine Soja Oil,perfuming;skin conditioning,,1,\n');
+    const index = buildIngredientIndex(expandIngredients(real.ingredients, cos, []));
+    expect(index.get('Glycine Soja Oil')).toMatchObject({ origin: 'library', riskTags: ['fragrance'] });
+    const p = { ...real.products[0], inciList: ['Water', 'Glycine Soja Oil'], inciNameUnverified: [] };
+    expect(fragranceInfo(p, index).status).toBe('contains');
+  });
+
   it('香味信息区分欧盟致敏原和 CosIng 登记功能含香料的成分', () => {
     const all = expandIngredients(real.ingredients, entries, real.allergens);
     const index = buildIngredientIndex(all);

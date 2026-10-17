@@ -116,7 +116,11 @@ export function expandIngredients(library: Ingredient[], cosing: CosingEntry[], 
 
   const out: Ingredient[] = library.map((ing) => {
     const c = cosingByName.get(normalizeName(ing.inciName));
-    const full: Ingredient = { ...ing, origin: 'library', euAllergen: isAllergen(ing), cosingFunctions: c?.functions };
+    const allergen = isAllergen(ing);
+    // 成分库条目同样适用：CosIng 登记功能含香料，或在致敏原清单上，都识别为加香成分
+    const perfuming = !!c?.functions.some((f) => f.includes(PERFUMING));
+    const riskTags = (perfuming || allergen) && !ing.riskTags.includes('fragrance') ? [...ing.riskTags, 'fragrance' as const] : ing.riskTags;
+    const full: Ingredient = { ...ing, riskTags, origin: 'library', euAllergen: allergen, cosingFunctions: c?.functions };
     for (const n of [ing.inciName, ...ing.aliases]) known.set(normalizeName(n), full);
     return full;
   });

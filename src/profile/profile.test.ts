@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   EMPTY_HAIR, adviseCare, hairTargets, isSensitiveScalp, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, scalpTargets, scopeCategories,
-  toScoringProfile, toneGoalAvailable,
+  migrateScalp, toScoringProfile, toneGoalAvailable,
   type Answers, type BaseAnswers, type HairAnswers, type ScalpAnswers,
 } from './questionnaire';
 import {
@@ -57,8 +57,9 @@ describe('头皮问卷映射', () => {
     expect(scalpMedicalAlerts({ ...hl, hairLossAmount: 5 })).toEqual([]);
     expect(scalpMedicalAlerts({ ...hl, thinning: ['patches'] }).map((x) => x.code)).toEqual(['hair_loss_patches']);
     expect(scalpMedicalAlerts({ ...noScalp, hairLossAmount: 6, thinning: ['patches'] })).toEqual([]);
-    // 旧档案的追问答案仍然有效
+    // 旧档案的追问答案在还没回答新题时仍然有效；回答了新的掉发量后以新答案为准
     expect(scalpMedicalAlerts({ ...hl, hairLossLevel: 'sudden_or_patchy' }).map((x) => x.code)).toEqual(['hair_loss_heavy']);
+    expect(scalpMedicalAlerts({ ...hl, hairLossLevel: 'sudden_or_patchy', hairLossAmount: 2 })).toEqual([]);
   });
 
   it('头皮发红：经常发红 + 用后经常不适、经常发红 + 油腻偏黄大片、经常发红 + 头皮屑第 4 级、伴渗液或蔓延', () => {
@@ -106,6 +107,13 @@ describe('头皮问卷映射', () => {
     expect(scalpTargets({ ...noScalp, redness: 'occasional' })).toEqual(['scalp_redness']);
     const p = toScoringProfile(answers({ scalp: { concerns: ['dandruff'], dandruffAmount: 4, redness: 'often' } }), 'shampoo', ctx);
     expect(p.targetWeights).toEqual({ dandruff: 2, scalp_redness: 2, sensitive_scalp: 2 });
+  });
+
+  it('旧档案的"发红"困扰：迁移到新的发红题；回答新题后以新答案为准', () => {
+    const old = { ...noScalp, concerns: ['dandruff' as const, 'redness' as const] };
+    expect(migrateScalp(old)).toMatchObject({ concerns: ['dandruff'], redness: 'occasional' });
+    expect(scalpTargets({ ...old, redness: 'none' })).toEqual(['dandruff']);
+    expect(scalpTargets(old)).toEqual(['dandruff', 'scalp_redness']);
   });
 
   it('油腻偏黄大片 → 同时针对头皮油', () => {
