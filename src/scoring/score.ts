@@ -10,10 +10,12 @@ import { usageTypeOf } from '../data/types';
 import type { City, ExchangeRate, Ingredient, Product, RiskTag, Target } from '../data/types';
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import {
-  CHELATING_FUNCTION, ENVIRONMENT_SCORES, EVIDENCE_SCORES, IRRITANT_DEDUCTION, IRRITANT_TAGS,
-  LEVEL_THRESHOLDS, NON_KEY_ACTIVE_CREDIT, RANKED_CONCERN_WEIGHTS, RINSE_OFF_MULTIPLIER, SENSITIVE_MULTIPLIER,
-  STRONG_CLEANSER_DEDUCTION, WEIGHTS, type DimensionKey,
+  BRAND_CLAIM_CREDIT, CHELATING_FUNCTION, CLAIM_ONLY_EVIDENCE_SCORE, ENVIRONMENT_SCORES, EVIDENCE_SCORES, FUNCTION_TARGETS,
+  IRRITANT_DEDUCTION, IRRITANT_TAGS, LEVEL_THRESHOLDS, NON_KEY_ACTIVE_CREDIT, RANKED_CONCERN_WEIGHTS, RINSE_OFF_MULTIPLIER,
+  SENSITIVE_MULTIPLIER, STRONG_CLEANSER_DEDUCTION, TESTED_CLAIM_CREDIT, TESTED_EVIDENCE_SCORE, WEIGHTS, type DimensionKey,
 } from './config';
+import { matchesKeyActive, productKeyActiveTerms, type KeyActiveTerm } from '../data/keyActives';
+import { fragranceInfo, fragranceTier, type FragranceInfo } from './fragrance';
 import { RISK_TAG_LABELS, TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
 import { priceInfo, withinBudget, type PriceInfo } from './price';
 import { capFor, type BudgetCapsByCategory, type BudgetChoice } from './budget';
@@ -30,10 +32,14 @@ export interface ScoringData {
 
 export type SpecialStatus = 'none' | 'pregnant' | 'trying' | 'breastfeeding' | 'rx';
 export type WashFrequency = 'daily' | 'every_other_day' | 'twice_weekly_or_less';
+/** 香味偏好：无香优先 / 接受香味 / 无所谓 */
+export type FragrancePref = 'free_first' | 'ok' | 'any';
 
 export interface ScoringProfile {
-  /** 用户的困扰，已映射到 targets 取值 */
+  /** 用户的困扰和期望效果，已映射到 targets 取值 */
   concerns: Target[];
+  /** 各困扰的权重；未写的按 concernsRanked 规则计算（洗发水侧重头皮，护发素只看发丝） */
+  targetWeights?: Partial<Record<Target, number>>;
   /** true：按重要程度排序（面部）；false：多选不排序（头皮、头发），平均加权 */
   concernsRanked: boolean;
   /** 敏感肌或头皮易痒 */
@@ -43,8 +49,11 @@ export interface ScoringProfile {
   avoidIngredients: string[];
   /** 想避开的成分类型，如 fragrance */
   avoidTags: RiskTag[];
-  /** 该品类的预算档位：第一档 / 第二档 / 不限 */
+  /** 该品类的预算档位：第一档 / 第二档 / 不限 / 自填 */
   budget: BudgetChoice;
+  /** budget 为 custom 时的上限（USD） */
+  customBudgetUsd?: number | null;
+  fragrancePref?: FragrancePref | null;
   washFrequency: WashFrequency | null;
   city: City | null;
   inUseProducts: Product[];
@@ -93,6 +102,9 @@ export interface ProductScore {
   unverifiedIngredients: string[];
   /** 测试模式下，打分用到了未核对的成分 */
   usesDraftData: boolean;
+  /** 需求匹配的明细，供推荐理由使用 */
+  needMatches: NeedMatch[];
+  fragrance: FragranceInfo;
   /** 展示用当地价格；usd 用于预算比较 */
   price: { amount: number | null; currency: string; usd: number | null };
   transparency: Product['transparency'];
@@ -143,14 +155,16 @@ export function ingredientStatuses(product: Product, index: IngredientIndex): { 
   }));
 }
 
-export function concernWeights(concerns: Target[], ranked: boolean): Map<Target, number> {
+export function concernWeights(
+  concerns: Target[], ranked: boolean, overrides: Partial<Record<Target, number>> = {},
+): Map<Target, number> {
   const weights = new Map<Target, number>();
   concerns.forEach((c, i) => {
     if (weights.has(c)) return;
-    const w = ranked
+    const w = overrides[c] ?? (ranked
       ? RANKED_CONCERN_WEIGHTS[Math.min(i, RANKED_CONCERN_WEIGHTS.length - 1)]
-      : 1;
-    weights.set(c, w);
+      : 1);
+    if (w > 0) weights.set(c, w);
   });
   return weights;
 }
@@ -326,29 +340,69 @@ function checkConflicts(items: Resolved[], profile: ScoringProfile, index: Ingre
 
 // ---------- 四个维度（只用 verified 成分） ----------
 
+/** 一个困扰的匹配依据 */
+export type NeedBasis = 'tested' | 'claim' | 'key_active' | 'ingredient';
+
+export interface NeedMatch {
+  target: Target;
+  weight: number;
+  /** 0–1 */
+  credit: number;
+  bases: NeedBasis[];
+  /** 针对该困扰的有效成分（成分功能） */
+  ingredients: Ingredient[];
+  keyIngredients: Ingredient[];
+}
+
+/** 成分是否针对某困扰：成分库 targets，或按功能（如螯合剂 → 清洁残留）辅助匹配 */
+function ingredientTargets(i: Ingredient, target: Target): boolean {
+  if (i.category === 'active' && i.targets.includes(target)) return true;
+  return i.functions.some((f) => FUNCTION_TARGETS[f]?.includes(target));
+}
+
 /**
- * 需求匹配。keyActives 为产品主打有效成分的规范化名称集合：
- * 主打成分覆盖的困扰按满分计，只有非主打成分覆盖的按 NON_KEY_ACTIVE_CREDIT 计。
- * keyActives 为 null（产品还没填写主打成分）时，所有有效成分都按满分计。
+ * 需求匹配。每个困扰按最可靠的依据计分（不按成分数量加分）：
+ * 成品测试 1；主打成分覆盖 1；品牌宣称（产品定位）BRAND_CLAIM_CREDIT；只有非主打成分覆盖 NON_KEY_ACTIVE_CREDIT。
+ * keyTerms 为 null（产品还没填写主打成分）时，有效成分都按满分计。
  */
 function scoreNeed(
+  product: Product,
   verified: (Resolved & { ingredient: Ingredient })[],
   weights: Map<Target, number>,
-  keyActives: Set<string> | null,
+  keyTerms: KeyActiveTerm[] | null,
 ) {
-  const isKey = (i: Ingredient) => keyActives === null || keyActives.has(normalizeName(i.inciName));
-  const matches = new Map<Target, Ingredient[]>();
-  for (const [target] of weights) {
-    matches.set(
-      target,
-      verified.filter((r) => r.ingredient.category === 'active' && r.ingredient.targets.includes(target)).map((r) => r.ingredient),
-    );
+  const isKey = (r: Resolved & { ingredient: Ingredient }) => keyTerms === null || matchesKeyActive(r.raw, r.ingredient, keyTerms);
+  const needMatches: NeedMatch[] = [];
+  for (const [target, weight] of weights) {
+    const hits = verified.filter((r) => ingredientTargets(r.ingredient, target));
+    const unique = (list: (Resolved & { ingredient: Ingredient })[]) =>
+      list.map((r) => r.ingredient).filter((ing, i, arr) => arr.indexOf(ing) === i);
+    const ingredients = unique(hits);
+    const keyIngredients = unique(hits.filter(isKey));
+    const bases: NeedBasis[] = [];
+    let credit = 0;
+    if (product.testedClaims.some((c) => c.target === target)) {
+      bases.push('tested');
+      credit = Math.max(credit, TESTED_CLAIM_CREDIT);
+    }
+    if (product.claimedBenefits.includes(target)) {
+      bases.push('claim');
+      credit = Math.max(credit, BRAND_CLAIM_CREDIT);
+    }
+    if (keyIngredients.length > 0) {
+      bases.push('key_active');
+      credit = Math.max(credit, 1);
+    } else if (ingredients.length > 0) {
+      bases.push('ingredient');
+      credit = Math.max(credit, NON_KEY_ACTIVE_CREDIT);
+    }
+    needMatches.push({ target, weight, credit, bases, ingredients, keyIngredients });
   }
 
   if (weights.size === 0) {
     return {
-      matches,
-      dim: dimension('need', null, { zh: '你没有选择困扰，此项不计分', en: 'No concerns selected, so this is not scored' }),
+      needMatches,
+      dim: dimension('need', null, { zh: '你没有选择困扰或期望效果，此项不计分', en: 'No concerns or goals selected, so this is not scored' }),
     };
   }
 
@@ -356,32 +410,42 @@ function scoreNeed(
   let covered = 0;
   const zh: string[] = [];
   const en: string[] = [];
-  for (const [target, w] of weights) {
-    total += w;
-    const label = TARGET_LABELS[target];
-    const hit = matches.get(target)!;
-    if (hit.length > 0) {
-      const hasKey = hit.some(isKey);
-      covered += w * (hasKey ? 1 : NON_KEY_ACTIVE_CREDIT);
-      const pct = Math.round(NON_KEY_ACTIVE_CREDIT * 100);
-      const label2 = (i: Ingredient): Text => {
-        const n = ingredientName(i, i.inciName);
-        if (keyActives === null) return n;
-        return isKey(i)
-          ? { zh: `${n.zh}（主打）`, en: `${n.en} (key active)` }
-          : { zh: `${n.zh}（非主打，按 ${pct}% 计）`, en: `${n.en} (not a key active, counted at ${pct}%)` };
-      };
-      const names = joinNames(hit.map(label2));
-      zh.push(`针对${label.zh}：含${names.zh}`);
-      en.push(`for ${label.en}: contains ${names.en}`);
+  const pct = Math.round(NON_KEY_ACTIVE_CREDIT * 100);
+  for (const m of needMatches) {
+    total += m.weight;
+    covered += m.weight * m.credit;
+    const label = TARGET_LABELS[m.target];
+    const partsZh: string[] = [];
+    const partsEn: string[] = [];
+    if (m.bases.includes('tested')) {
+      partsZh.push('有成品测试');
+      partsEn.push('product test available');
+    }
+    if (m.bases.includes('claim')) {
+      partsZh.push('品牌宣称');
+      partsEn.push('brand claim');
+    }
+    if (m.keyIngredients.length > 0) {
+      const n = joinNames(m.keyIngredients.map((i) => ingredientName(i, i.inciName)));
+      const tag = keyTerms === null ? { zh: '', en: '' } : { zh: '（主打）', en: ' (key active)' };
+      partsZh.push(`含${n.zh}${tag.zh}`);
+      partsEn.push(`contains ${n.en}${tag.en}`);
+    } else if (m.ingredients.length > 0) {
+      const n = joinNames(m.ingredients.map((i) => ingredientName(i, i.inciName)));
+      partsZh.push(`含${n.zh}（非主打，按 ${pct}% 计）`);
+      partsEn.push(`contains ${n.en} (not a key active, counted at ${pct}%)`);
+    }
+    if (partsZh.length === 0) {
+      zh.push(`针对${label.zh}：没有找到依据`);
+      en.push(`for ${label.en}: no support found`);
     } else {
-      zh.push(`针对${label.zh}：未找到有数据的有效成分`);
-      en.push(`for ${label.en}: no active ingredient with data found`);
+      zh.push(`针对${label.zh}：${partsZh.join('，')}`);
+      en.push(`for ${label.en}: ${partsEn.join(', ')}`);
     }
   }
   const enText = en.join('; ');
   return {
-    matches,
+    needMatches,
     dim: dimension('need', (covered / total) * 100, {
       zh: zh.join('；'),
       en: enText.charAt(0).toUpperCase() + enText.slice(1),
@@ -389,31 +453,48 @@ function scoreNeed(
   };
 }
 
-function scoreEvidence(matches: Map<Target, Ingredient[]>, weights: Map<Target, number>): Dimension {
+function scoreEvidence(needMatches: NeedMatch[]): Dimension {
   let total = 0;
   let sum = 0;
-  const parts: { name: Text; level: string }[] = [];
-  for (const [target, w] of weights) {
-    // 每个困扰取针对它的成分中证据最强的一个，再按困扰权重平均
-    const best = (matches.get(target) ?? [])
+  const zh: string[] = [];
+  const en: string[] = [];
+  for (const m of needMatches) {
+    // 每个困扰取最强的依据：成品测试 > 成分证据等级 > 只有品牌宣称
+    const best = m.ingredients
       .filter((i) => i.evidenceLevel !== null)
       .sort((a, b) => EVIDENCE_SCORES[b.evidenceLevel!] - EVIDENCE_SCORES[a.evidenceLevel!])[0];
-    if (!best) continue;
-    total += w;
-    sum += w * EVIDENCE_SCORES[best.evidenceLevel!];
-    if (!parts.some((p) => p.name.en === best.inciName)) {
-      parts.push({ name: ingredientName(best, best.inciName), level: best.evidenceLevel! });
+    let score: number | null = null;
+    if (m.bases.includes('tested')) {
+      score = TESTED_EVIDENCE_SCORE;
+      const t = TARGET_LABELS[m.target];
+      zh.push(`${t.zh}有成品测试`);
+      en.push(`product test for ${t.en}`);
+    } else if (best) {
+      score = EVIDENCE_SCORES[best.evidenceLevel!];
+      const n = ingredientName(best, best.inciName);
+      if (!zh.includes(`${n.zh} ${best.evidenceLevel} 级`)) {
+        zh.push(`${n.zh} ${best.evidenceLevel} 级`);
+        en.push(`${n.en} level ${best.evidenceLevel}`);
+      }
+    } else if (m.bases.includes('claim')) {
+      score = CLAIM_ONLY_EVIDENCE_SCORE;
+      const t = TARGET_LABELS[m.target];
+      zh.push(`${t.zh}只有品牌宣称`);
+      en.push(`brand claim only for ${t.en}`);
     }
+    if (score === null) continue;
+    total += m.weight;
+    sum += m.weight * score;
   }
   if (total === 0) {
     return dimension('evidence', null, {
-      zh: '没有针对你困扰的有数据成分，无法评估证据强度',
-      en: 'No ingredient with data targets your concerns, so evidence cannot be rated',
+      zh: '没有针对你需求的依据，无法评估证据强度',
+      en: 'Nothing supports your needs, so evidence cannot be rated',
     });
   }
   return dimension('evidence', sum / total, {
-    zh: '证据等级：' + parts.map((p) => `${p.name.zh} ${p.level} 级`).join('、'),
-    en: 'Evidence: ' + parts.map((p) => `${p.name.en} level ${p.level}`).join(', '),
+    zh: '依据：' + zh.join('、'),
+    en: 'Basis: ' + en.join(', '),
   });
 }
 
@@ -462,16 +543,16 @@ function scoreIrritation(
   });
 }
 
-function scoreEnvironment(verified: (Resolved & { ingredient: Ingredient })[], city: City | null): Dimension {
+function scoreEnvironment(verified: (Resolved & { ingredient: Ingredient })[], city: City | null, allowDraft: boolean): Dimension {
   const neutral = (reason: Text) => dimension('environment', ENVIRONMENT_SCORES.neutral, reason);
   if (!city) return neutral({ zh: '未设置城市，按中性计分', en: 'No city set, scored as neutral' });
-  if (city.reviewStatus !== 'verified') {
+  if (city.reviewStatus !== 'verified' && !(allowDraft && city.waterHardness !== 'unknown')) {
     return neutral({ zh: `${city.city}的水硬度数据未核对，按中性计分`, en: `Water hardness for ${city.city} is not verified yet, scored as neutral` });
   }
   if (city.waterHardness === 'unknown') {
     return neutral({ zh: `暂无${city.city}的水硬度数据，按中性计分`, en: `No water hardness data for ${city.city}, scored as neutral` });
   }
-  if (city.waterHardness !== 'hard') {
+  if (city.waterHardness !== 'hard' && city.waterHardness !== 'very_hard') {
     return neutral({ zh: `${city.city}水质不硬，无需特别考虑`, en: `Water in ${city.city} is not hard, no special needs` });
   }
   const chelators = verified.filter((r) => r.ingredient.functions.includes(CHELATING_FUNCTION));
@@ -502,12 +583,6 @@ export function weightedTotal(dims: Record<DimensionKey, Dimension>): number | n
   return wSum === 0 ? null : Math.round(sum / wSum);
 }
 
-/** 产品主打有效成分的规范化名称（按成分库主名统一别名）；没填写时为 null */
-function keyActiveSet(product: Product, index: IngredientIndex): Set<string> | null {
-  if (product.keyActives.length === 0) return null;
-  return new Set(product.keyActives.map((n) => normalizeName(index.get(n)?.inciName ?? n)));
-}
-
 export function scoreProduct(product: Product, profile: ScoringProfile, data: ScoringData): ProductScore {
   const { index } = data;
   const items = resolve(product, index);
@@ -521,7 +596,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   const unverifiedIngredients = items.filter((r) => !r.nameUnverified && r.ingredient && !isVerified(r)).map((r) => r.raw);
 
   const caps = data.budgetCaps[product.category];
-  const capUsd = capFor(profile.budget, caps);
+  const capUsd = capFor(profile.budget, caps, profile.customBudgetUsd ?? null);
   const exclusions = hardFilters(product, items, profile, index, price, capUsd);
   const conflicts = checkConflicts(items, profile, index);
   for (const c of conflicts.filter((c) => c.severity === 'severe')) {
@@ -551,7 +626,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       text: { zh: `有 ${missing} 个成分暂无数据，未参与打分`, en: `${missing} ingredient(s) have no data yet and were not scored` },
     });
   }
-  if (product.keyActives.length === 0 && profile.concerns.length > 0) {
+  if (product.keyActives.length === 0 && product.keyActivesDisclosed && profile.concerns.length > 0) {
     notices.push({
       code: 'key_actives_missing',
       unverified: false,
@@ -568,7 +643,8 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       text: { zh: '测试数据，尚未核对：打分用到了未经人工核对的成分数据', en: 'Test data, not yet verified: scoring used ingredient data that has not been reviewed' },
     });
   }
-  if (profile.budget !== 'none' && price.status !== 'ok') {
+  const budgetLimited = profile.budget === 'custom' ? capUsd !== null : profile.budget !== 'none';
+  if (budgetLimited && price.status !== 'ok') {
     // 价格未知或无法换算的产品不参与预算档位计算，也只在"不限"档出现
     const why = price.status === 'no_price'
       ? { zh: '价格未知', en: 'Price unknown' }
@@ -578,7 +654,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       unverified: false,
       text: { zh: `${why.zh}，只在预算选"不限"时显示`, en: `${why.en}; shown only when budget is "No limit"` },
     });
-  } else if (profile.budget !== 'none' && !caps) {
+  } else if (budgetLimited && profile.budget !== 'custom' && !caps) {
     notices.push({
       code: 'budget_unchecked',
       unverified: false,
@@ -586,9 +662,10 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     });
   }
 
-  const weights = concernWeights(profile.concerns, profile.concernsRanked);
+  const weights = concernWeights(profile.concerns, profile.concernsRanked, profile.targetWeights);
   const noData: Text = { zh: '没有可用的成分数据，无法评分', en: 'No usable ingredient data, cannot score' };
   let dimensions: Record<DimensionKey, Dimension>;
+  let needMatches: NeedMatch[] = [];
   if (verified.length === 0) {
     dimensions = {
       need: dimension('need', null, noData),
@@ -597,12 +674,13 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       environment: dimension('environment', null, noData),
     };
   } else {
-    const need = scoreNeed(verified, weights, keyActiveSet(product, index));
+    const need = scoreNeed(product, verified, weights, productKeyActiveTerms(product));
+    needMatches = need.needMatches;
     dimensions = {
       need: need.dim,
       irritation: scoreIrritation(verified, profile, product),
-      evidence: scoreEvidence(need.matches, weights),
-      environment: scoreEnvironment(verified, profile.city),
+      evidence: scoreEvidence(needMatches),
+      environment: scoreEnvironment(verified, profile.city, !!data.allowDraft),
     };
   }
 
@@ -618,6 +696,8 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     nameUnverifiedIngredients,
     unverifiedIngredients,
     usesDraftData,
+    needMatches,
+    fragrance: fragranceInfo(product, index),
     price: { amount: product.price, currency: product.currency, usd: price.usd },
     transparency: product.transparency,
   };
@@ -631,8 +711,11 @@ export function rankProducts(
   data: ScoringData,
 ): ProductScore[] {
   const rank = (s: ProductScore) => (s.excluded ? 2 : s.score === null ? 1 : 0);
+  // 无香优先：可推荐的产品先按香味层级排序（标注无香 → 未发现香精 → 只含精油 → 含香精），同层按分数
+  const tier = (s: ProductScore) => (profile.fragrancePref === 'free_first' && !s.excluded ? fragranceTier(s.fragrance) : 0);
   return products
     .filter((p) => p.category === category)
     .map((p) => scoreProduct(p, profile, data))
-    .sort((a, b) => rank(a) - rank(b) || (b.score ?? 0) - (a.score ?? 0) || a.product.productId.localeCompare(b.product.productId));
+    .sort((a, b) =>
+      rank(a) - rank(b) || tier(a) - tier(b) || (b.score ?? 0) - (a.score ?? 0) || a.product.productId.localeCompare(b.product.productId));
 }

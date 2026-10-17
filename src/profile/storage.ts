@@ -1,7 +1,7 @@
 // 用户档案只存在浏览器本地（localStorage），不上传。
 // 格式带版本号，以后改字段时在 migrate() 里升级旧数据。
 
-import type { BaseAnswers, ScalpAnswers } from './questionnaire';
+import { EMPTY_HAIR, type BaseAnswers, type HairAnswers, type ScalpAnswers } from './questionnaire';
 
 export const STORAGE_KEY = 'skincare.profiles';
 export const STORE_VERSION = 1;
@@ -12,6 +12,8 @@ export interface Profile {
   name: string;
   base: BaseAnswers;
   scalp: ScalpAnswers | null;
+  /** 头发状态、期望效果、香味偏好和护理意愿；旧档案没有这一项 */
+  hair: HairAnswers | null;
   /** 在用产品的 product_id */
   inUseProductIds: string[];
   updatedAt: string;
@@ -36,8 +38,12 @@ export function newProfile(name: string, id: string = randomId()): Profile {
   return {
     id,
     name,
-    base: { cityKey: null, budgets: {}, specialStatus: 'none', avoid: [], avoidIngredients: [] },
+    base: {
+      cityKey: null, scope: null, budgetMode: 'item', budgets: {}, customBudgets: {}, setBudget: null,
+      specialStatus: 'none', avoid: [], avoidIngredients: [],
+    },
     scalp: null,
+    hair: null,
     inUseProductIds: [],
     updatedAt: new Date().toISOString(),
   };
@@ -56,7 +62,7 @@ function migrate(data: unknown): ProfileStore {
     // 补齐后来新增的字段，旧档案也能直接用
     const profiles = d.profiles.map((p) => {
       const blank = newProfile(p.name, p.id);
-      return { ...blank, ...p, base: { ...blank.base, ...p.base } };
+      return { ...blank, ...p, base: { ...blank.base, ...p.base }, hair: p.hair ? { ...EMPTY_HAIR, ...p.hair } : null };
     });
     return { version: STORE_VERSION, activeId: d.activeId ?? null, profiles };
   }

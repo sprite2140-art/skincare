@@ -1,9 +1,10 @@
 // 数据校验：error 表示格式错误（CI 失败），warning 表示需要补充的数据（不阻断）。
 
 import { buildIngredientIndex, normalizeName } from './ingredientIndex';
+import { unmatchedKeyActives } from './keyActives';
 import { ingredientFrequency } from './frequency';
 import {
-  CATEGORIES, CATEGORY_DEFAULT_USAGE, CN_AVAILABILITY, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
+  CATEGORIES, CATEGORY_DEFAULT_USAGE, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
   REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
 } from './types';
 import type { Category, City, ExchangeRate, Ingredient, Product } from './types';
@@ -120,13 +121,25 @@ export function validateData(
     else if (p.price <= 0) err(F_PRD, key, `price 应为正数：${p.price}`);
     else if (!p.currency) err(F_PRD, key, '有 price 但缺 currency');
     else if (!rateCurrencies.has(p.currency)) err(F_PRD, key, `currency "${p.currency}" 不在 exchange_rates.csv`);
-    // key_actives 中的每一项都必须出现在本产品的 inci_list 中（按统一写法和别名比较）
-    const canon = (n: string) => normalizeName(index.get(n)?.inciName ?? n);
-    const listed = new Set(p.inciList.map(canon));
-    for (const k of p.keyActives) {
-      if (!listed.has(canon(k))) err(F_PRD, key, `key_actives 中的 "${k}" 不在本产品的 inci_list 中`);
-      else if (index.get(k) && index.get(k)!.category !== 'active') warn(F_PRD, key, `key_actives 中的 "${k}" 在成分库中不是有效成分（category = ${index.get(k)!.category}）`);
+    // key_actives 按品牌原文保存；对应不上成分表的只作为品牌宣称展示，不参与成分匹配
+    const unmatched = unmatchedKeyActives(p, (n) => index.get(n));
+    if (unmatched.length > 0) warn(F_PRD, key, `key_actives 中对应不上成分表的写法（只作为品牌宣称展示）：${unmatched.join(' / ')}`);
+    for (const t of p.claimedBenefits) oneOf(F_PRD, key, 'claimed_benefits', t, TARGETS);
+    for (const c of p.testedClaims) {
+      oneOf(F_PRD, key, 'tested_claims 困扰', c.target, TARGETS);
+      if (!/^https?:\/\//.test(c.url)) err(F_PRD, key, 'tested_claims 每一项都必须有测试来源链接');
     }
+    oneOf(F_PRD, key, 'fragrance_free_claim', p.fragranceFreeClaim, FRAGRANCE_FREE_CLAIMS);
+    for (const a of p.awards) {
+      if (!a.source || !/^\d{4}$/.test(a.year)) err(F_PRD, key, `awards 每一项需写明来源和 4 位年份（来源|年份|名称|链接）：${a.source}|${a.year}`);
+      if (a.url && !/^https?:\/\//.test(a.url)) err(F_PRD, key, `awards 链接不是 http(s)：${a.url}`);
+    }
+    for (const [field, url] of [['purchase_url', p.purchaseUrl], ['image_url', p.imageUrl]] as const) {
+      if (url && !/^https?:\/\//.test(url)) err(F_PRD, key, `${field} 不是 http(s) 链接：${url}`);
+    }
+    // 图片必须写明来源和使用许可，否则页面不展示（用占位图）
+    if (p.imageUrl && (!p.imageSource || !p.imageLicense)) warn(F_PRD, key, 'image_url 缺少 image_source 或 image_license，页面将使用占位图');
+    if (!p.purchaseUrl) warn(F_PRD, key, '缺少 purchase_url（购买链接）');
     if (p.sizeMl !== null && !(p.sizeMl > 0)) err(F_PRD, key, `size_ml 应为正数：${p.sizeMl}`);
     for (const url of p.sourceUrls) {
       if (!/^https?:\/\//.test(url)) err(F_PRD, key, `source_url 中的 "${url}" 不是 http(s) 链接（多个链接用分号分隔）`);

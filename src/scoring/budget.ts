@@ -9,7 +9,8 @@ import type { ExchangeRate, Product } from '../data/types';
 import type { Text } from './labels';
 import { fromUsd, priceInfo, roundForDisplay } from './price';
 
-export type BudgetChoice = 'p33' | 'p67' | 'none';
+/** 第一档 / 第二档 / 不限 / 自填金额 */
+export type BudgetChoice = 'p33' | 'p67' | 'none' | 'custom';
 
 export interface BudgetCaps {
   /** 第一档上限（USD） */
@@ -50,8 +51,9 @@ export function computeBudgetCaps(products: Product[], rates: ExchangeRate[]): B
   return caps;
 }
 
-/** 用户所选档位对应的上限（USD）；null 表示不限 */
-export function capFor(choice: BudgetChoice, caps: BudgetCaps | undefined): number | null {
+/** 用户所选档位对应的上限（USD）；null 表示不限。自填时用 customUsd */
+export function capFor(choice: BudgetChoice, caps: BudgetCaps | undefined, customUsd: number | null = null): number | null {
+  if (choice === 'custom') return customUsd !== null && customUsd > 0 ? customUsd : null;
   if (choice === 'none' || !caps) return null;
   return choice === 'p33' ? caps.p33 : caps.p67;
 }
@@ -60,7 +62,10 @@ const CURRENCY_SYMBOLS: Record<string, string> = { USD: '$', CNY: '¥', JPY: '¥
 
 /** 金额显示，带货币符号。round 为 true 时按 roundForDisplay 取整（用于换算出的约数）；产品实际价格用 false */
 export function formatMoney(amount: number, currency: string, round = true): string {
-  const n = (round ? roundForDisplay(amount) : amount).toLocaleString('en-US', { maximumFractionDigits: 2 });
+  const value = round ? roundForDisplay(amount) : amount;
+  // 实际价格有小数时固定两位（$24.50）
+  const cents = !round && !Number.isInteger(value) && currency !== 'JPY' && currency !== 'KRW';
+  const n = value.toLocaleString('en-US', { minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: 2 });
   const symbol = CURRENCY_SYMBOLS[currency];
   return symbol ? `${symbol}${n}` : `${n} ${currency}`;
 }

@@ -3,7 +3,7 @@
 import Papa from 'papaparse';
 import { cleanInciName } from './ingredientIndex';
 import type {
-  City, CnAvailability, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
+  Award, City, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
   UsageType, WaterHardness, Zone,
 } from './types';
@@ -78,6 +78,24 @@ export function parseInciList(value: string | undefined): { names: string[]; unv
   };
 }
 
+/** awards：`来源|年份|名称|链接`，多项用分号分隔 */
+export function parseAwards(value: string | undefined): Award[] {
+  return splitList(value).map((entry) => {
+    const [source = '', year = '', title = '', url = ''] = entry.split('|').map((s) => s.trim());
+    return { source, year, title, url };
+  });
+}
+
+/** tested_claims：`困扰|测试说明|年份|链接`，多项用分号分隔 */
+export function parseTestedClaims(value: string | undefined): TestedClaim[] {
+  return splitList(value).map((entry) => {
+    const [target = '', description = '', year = '', url = ''] = entry.split('|').map((s) => s.trim());
+    return { target: target as Target, description, year, url };
+  });
+}
+
+const NOT_DISCLOSED = 'not separately disclosed';
+
 export function parseProducts(text: string): Product[] {
   return parseCsv(text).map((r) => {
     const inci = parseInciList(r.inci_list);
@@ -93,9 +111,14 @@ export function parseProducts(text: string): Product[] {
     formulaNote: r.formula_note ?? '',
     channels: splitList(r.channels),
     inclusionBasis: r.inclusion_basis ?? '',
+    awards: parseAwards(r.awards),
+    claimedBenefits: splitList(r.claimed_benefits) as Target[],
+    testedClaims: parseTestedClaims(r.tested_claims),
+    fragranceFreeClaim: (r.fragrance_free_claim || 'unknown') as FragranceFreeClaim,
     inciList: inci.names,
     inciNameUnverified: inci.unverified,
-    keyActives: parseInciList(r.key_actives).names,
+    keyActives: (r.key_actives ?? '').trim().toLowerCase() === NOT_DISCLOSED ? [] : splitList(r.key_actives),
+    keyActivesDisclosed: (r.key_actives ?? '').trim().toLowerCase() !== NOT_DISCLOSED,
     inciListOriginal: r.inci_list_original ?? '',
     price: parseNumber(r.price),
     currency: r.currency ?? '',
@@ -103,6 +126,10 @@ export function parseProducts(text: string): Product[] {
     availableInCn: (r.available_in_cn || 'unknown') as CnAvailability,
     transparency: r.transparency as Transparency,
     sourceUrls: splitList(r.source_url),
+    purchaseUrl: r.purchase_url ?? '',
+    imageUrl: r.image_url ?? '',
+    imageSource: r.image_source ?? '',
+    imageLicense: r.image_license ?? '',
     reviewedOn: r.reviewed_on ?? '',
     };
   });
@@ -122,7 +149,12 @@ export function parseCities(text: string): City[] {
     city: r.city ?? '',
     country: r.country ?? '',
     waterHardness: (r.water_hardness || 'unknown') as WaterHardness,
+    hardnessMgL: r.hardness_mg_l ?? '',
+    dataPeriod: r.data_period ?? '',
+    supplyScope: r.supply_scope ?? '',
+    confidence: r.confidence ?? '',
     source: r.source ?? '',
+    retrievedOn: r.retrieved_on ?? '',
     reviewStatus: r.review_status as ReviewStatus,
   }));
 }

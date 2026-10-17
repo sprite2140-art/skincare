@@ -7,6 +7,7 @@ import { concernWeights, ingredientStatuses, rankProducts, scoreProduct, weighte
 import { currencyForCountry } from './price';
 import { budgetOptions, computeBudgetCaps, formatMoney, percentile } from './budget';
 import { filterByMarket, inMarket, marketForCity } from './market';
+import { keyActiveTerms, matchesKeyActive } from '../data/keyActives';
 
 const real = loadDataFromDisk();
 
@@ -24,7 +25,7 @@ const baseProfile: ScoringProfile = {
 };
 const profile = (p: Partial<ScoringProfile>): ScoringProfile => ({ ...baseProfile, ...p });
 
-// ---------- 用 data/ 里的真实数据（18 个洗发水） ----------
+// ---------- 用 data/ 里的真实数据（57 个洗发水：美国 47 个，日韩中 10 个） ----------
 
 describe('data/ 真实数据', () => {
   const index = buildIngredientIndex(real.ingredients);
@@ -34,9 +35,21 @@ describe('data/ 真实数据', () => {
   const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
   it('CSV 能正确解析，名称已统一', () => {
-    expect(real.products).toHaveLength(18);
-    expect(byId('SH-US-001').inciList[0]).toBe('Pyrithione Zinc');
-    expect(byId('SH-US-005').inciList).toContain('Rosmarinus Officinalis Leaf Extract');
+    expect(real.products).toHaveLength(57);
+    // 保留原有产品 ID
+    for (const id of ['SH-US-001', 'SH-US-008', 'SH-JP-001', 'SH-KR-003', 'SH-CN-002']) expect(byId(id)).toBeDefined();
+    const us1 = byId('SH-US-001');
+    expect(us1.inciList[0]).toBe('Pyrithione Zinc');
+    expect(us1.keyActives).toEqual(['Pyrithione Zinc 1%', 'Ceramides', 'Hyaluronic Acid', 'Niacinamide']);
+    expect(us1.claimedBenefits).toEqual(['dandruff', 'sensitive_scalp']);
+    expect(us1.awards[0]).toMatchObject({ source: 'Cosmopolitan Holy Grail Beauty Awards', year: '2025' });
+    expect(us1.sizeMl).toBe(355);
+    expect(us1.purchaseUrl).toContain('ulta.com/p/');
+    expect(us1.imageUrl).toBe('');
+    expect(us1.fragranceFreeClaim).toBe('unknown');
+    // 品牌没有单独公布主打成分
+    expect(byId('SH-US-014').keyActivesDisclosed).toBe(false);
+    expect(byId('SH-US-014').keyActives).toEqual([]);
     expect(byId('SH-JP-001').inciNameUnverified).toContain('Bis-Methoxypropylamido Isodocosane');
     expect(byId('SH-CN-001').channels).toEqual(['天猫旗舰店']);
     expect(byId('SH-CN-001').formulaNote).toContain('渠道备注：具体商品链接待核验');
@@ -57,12 +70,14 @@ describe('data/ 真实数据', () => {
   });
 
   it('没有价格的产品不参与三分位计算', () => {
-    expect(budgetCaps.shampoo!.sampleSize).toBe(15);
+    expect(budgetCaps.shampoo!.sampleSize).toBe(54);
   });
 
-  it('关闭测试模式时，draft 有效成分不参与需求匹配；基础成分无需核对即可使用', () => {
+  it('关闭测试模式时，draft 有效成分不参与需求匹配（只剩品牌宣称）；基础成分无需核对即可使用', () => {
     const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), strict);
-    expect(r.dimensions.need.score).toBe(0);
+    expect(r.dimensions.need.score).toBe(70);
+    expect(r.dimensions.need.reason.zh).toBe('针对头皮屑：品牌宣称');
+    expect(r.dimensions.evidence.score).toBe(30);
     expect(r.unverifiedIngredients).toContain('Pyrithione Zinc');
     expect(r.unverifiedIngredients).not.toContain('Water'); // Aqua 是基础成分
     expect(r.usesDraftData).toBe(false);
@@ -85,8 +100,8 @@ describe('data/ 真实数据', () => {
     const need = ranked.map((r) => r.dimensions.need.score);
     expect(need).toEqual([...need].sort((a, b) => (b ?? 0) - (a ?? 0)));
     const matched = ranked.filter((r) => r.dimensions.need.score === 100).map((r) => r.product.productId);
-    for (const id of ['SH-US-001', 'SH-KR-004', 'SH-CN-001', 'SH-CN-002', 'SH-KR-002']) expect(matched).toContain(id);
-    expect(ranked[0].product.productId).toBe('SH-US-001');
+    for (const id of ['SH-US-001', 'SH-US-042', 'SH-US-043', 'SH-US-044', 'SH-KR-004', 'SH-CN-001']) expect(matched).toContain(id);
+    expect(ranked[0].dimensions.need.score).toBe(100);
   });
 
   it('安全相关的过滤也看 draft 成分，并标注未核对', () => {
@@ -117,7 +132,10 @@ describe('data/ 真实数据', () => {
 describe('按市场筛选', () => {
   const shampoos = real.products;
   const ids = (ps: Product[]) => ps.map((p) => p.productId);
-  const cityIn = (country: string): City => ({ city: 'X', country, waterHardness: 'unknown', source: '', reviewStatus: 'draft' });
+  const cityIn = (country: string): City => ({
+    city: 'X', country, waterHardness: 'unknown', hardnessMgL: '', dataPeriod: '', supplyScope: '', confidence: '', source: '', retrievedOn: '',
+    reviewStatus: 'draft',
+  });
 
   it('默认市场取档案城市所在国家，只显示该市场的版本', () => {
     expect(marketForCity(cityIn('JP'))).toBe('JP');
@@ -126,13 +144,13 @@ describe('按市场筛选', () => {
     expect(marketForCity(null)).toBe('US');
     const us = filterByMarket(shampoos, 'US', false);
     expect(ids(us.shown).every((id) => id.startsWith('SH-US'))).toBe(true);
-    expect(us.shown).toHaveLength(8);
+    expect(us.shown).toHaveLength(47);
     expect(us.hiddenCount).toBe(10);
     expect(filterByMarket(shampoos, 'JP', false).shown).toHaveLength(4);
   });
 
   it('打开"显示其他地区版本"后显示全部；没有市场时不筛选', () => {
-    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(18);
+    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(57);
     expect(filterByMarket(shampoos, null, false)).toEqual({ shown: shampoos, hiddenCount: 0 });
   });
 
@@ -186,9 +204,11 @@ const data = { index, exchangeRates: real.exchangeRates, budgetCaps: {} };
 const sample: Product = {
   productId: 'SH-T-000', brand: 'Test', nameEn: 'Test Shampoo', nameZh: '测试洗发水', zone: 'scalp', category: 'shampoo',
   usageType: null, region: 'US', formulaNote: '', channels: [], inclusionBasis: '',
+  awards: [], claimedBenefits: [], testedClaims: [], fragranceFreeClaim: 'unknown',
   inciList: ['Aqua', 'Sodium Laureth Sulfate', 'Glycerin', 'Piroctone Olamine', 'Parfum'], inciNameUnverified: [], keyActives: [],
+  keyActivesDisclosed: true,
   inciListOriginal: '', price: 12, currency: 'USD', sizeMl: null, availableInCn: 'unknown', transparency: 'medium',
-  sourceUrls: [], reviewedOn: '',
+  sourceUrls: [], purchaseUrl: '', imageUrl: '', imageSource: '', imageLicense: '', reviewedOn: '',
 };
 // 默认用免洗型品类，刺激风险不减半；需要冲洗型时显式传 category: 'shampoo'
 const product = (id: string, inciList: string[], extra: Partial<Product> = {}): Product => ({
@@ -196,7 +216,8 @@ const product = (id: string, inciList: string[], extra: Partial<Product> = {}): 
 });
 const leaveOnSample = product('LEAVE-ON', sample.inciList);
 const city = (waterHardness: City['waterHardness'], reviewStatus: City['reviewStatus'] = 'verified'): City => ({
-  city: 'Testville', country: 'US', waterHardness, source: '', reviewStatus,
+  city: 'Testville', country: 'US', waterHardness, hardnessMgL: '', dataPeriod: '', supplyScope: '', confidence: '', source: '', retrievedOn: '',
+  reviewStatus,
 });
 
 describe('需求匹配', () => {
@@ -210,7 +231,7 @@ describe('需求匹配', () => {
     const p = product('P1', ['Aqua', 'Test Oil Control']);
     const r = scoreProduct(p, profile({ concerns: ['dandruff', 'scalp_oil'] }), data);
     expect(r.dimensions.need.score).toBe(50);
-    expect(r.dimensions.need.reason.zh).toContain('针对头皮屑：未找到有数据的有效成分');
+    expect(r.dimensions.need.reason.zh).toContain('针对头皮屑：没有找到依据');
   });
 
   it('排序困扰按 3/2/1 加权', () => {
@@ -274,12 +295,33 @@ describe('主打有效成分 key_actives', () => {
     expect(r.notices.some((n) => n.code === 'key_actives_missing')).toBe(true);
   });
 
-  it('数据校验：key_actives 必须出现在本产品的成分表中', () => {
+  it('品牌写法：去掉浓度、复数匹配单数开头的成分、括号内容单独匹配、常见俗名对应 INCI', () => {
+    const terms = (k: string[]) => k.flatMap(keyActiveTerms);
+    expect(matchesKeyActive('Pyrithione Zinc', null, terms(['Pyrithione Zinc 1%']))).toBe(true);
+    expect(matchesKeyActive('Ceramide NP', null, terms(['Ceramides']))).toBe(true);
+    expect(matchesKeyActive('sh-Oligopeptide-78', null, terms(['K18PEPTIDE (sh-Oligopeptide-78)']))).toBe(true);
+    expect(matchesKeyActive('Sodium Hyaluronate', null, terms(['Hyaluronic Acid']))).toBe(true);
+    expect(matchesKeyActive('Hydrolyzed Keratin', null, terms(['Keratin']))).toBe(true);
+    // 单数写法不匹配以它开头的其他成分（Glycine ≠ Glycine Soja Oil）
+    expect(matchesKeyActive('Glycine Soja Oil', null, terms(['Glycine']))).toBe(false);
+    expect(matchesKeyActive('Niacinamide', null, terms(['Ceramides']))).toBe(false);
+  });
+
+  it('没有单独公布主打成分（Not separately disclosed）时，有效成分都按非主打计分', () => {
+    const p = product('K5', ['Aqua', 'Piroctone Olamine'], { keyActives: [], keyActivesDisclosed: false });
+    const r = scoreProduct(p, profile({ concerns: ['dandruff'] }), data);
+    expect(r.dimensions.need.score).toBe(30);
+    expect(r.notices.some((n) => n.code === 'key_actives_missing')).toBe(false);
+  });
+
+  it('数据校验：对应不上成分表的主打成分只给提示，不报错', () => {
     const base = real.products.find((x) => x.productId === 'SH-US-001')!;
-    const errs = (keyActives: string[]) =>
-      validateData(real.ingredients, [{ ...base, keyActives }], real.cities, real.exchangeRates).filter((i) => i.level === 'error').map((i) => i.message);
-    expect(errs(['Pyrithione Zinc', 'zinc pyrithione'])).toEqual([]);
-    expect(errs(['Ketoconazole'])).toEqual([expect.stringContaining('"Ketoconazole" 不在本产品的 inci_list 中')]);
+    const issues = (keyActives: string[]) =>
+      validateData(real.ingredients, [{ ...base, keyActives }], real.cities, real.exchangeRates).filter((i) => i.message.includes('key_actives'));
+    expect(issues(['Pyrithione Zinc 1%', 'zinc pyrithione'])).toEqual([]);
+    expect(issues(['OLAPLEX Bond Building Technology'])).toEqual([
+      expect.objectContaining({ level: 'warning', message: expect.stringContaining('OLAPLEX Bond Building Technology') }),
+    ]);
   });
 });
 
@@ -360,7 +402,7 @@ describe('证据强度', () => {
     // 头皮屑 A=100、头皮油 B=70，平均加权 = 85
     const r = scoreProduct(q, profile({ concerns: ['dandruff', 'scalp_oil'] }), data);
     expect(r.dimensions.evidence.score).toBe(85);
-    expect(r.dimensions.evidence.reason.zh).toBe('证据等级：吡罗克酮乙醇胺盐 A 级、Test Oil Control B 级');
+    expect(r.dimensions.evidence.reason.zh).toBe('依据：吡罗克酮乙醇胺盐 A 级、Test Oil Control B 级');
   });
 
   it('没有匹配成分时不计分', () => {
@@ -507,7 +549,8 @@ describe('预算（按品类三分位，USD）', () => {
     expect(budgetOptions(undefined, 'CNY', rates).map((o) => o.choice)).toEqual(['none']);
     expect(budgetOptions(caps.shampoo, 'CNY', rates).map((o) => o.choice)).toEqual(['p33', 'p67', 'none']);
     expect(formatMoney(1650, 'JPY', false)).toBe('¥1,650');
-    expect(formatMoney(12.5, 'USD', false)).toBe('$12.5');
+    expect(formatMoney(12.5, 'USD', false)).toBe('$12.50');
+    expect(formatMoney(12, 'USD', false)).toBe('$12');
     expect(formatMoney(1650, 'JPY')).toBe('¥1,700');
     expect(currencyForCountry('JP')).toBe('JPY');
     expect(currencyForCountry('FR')).toBe('USD');

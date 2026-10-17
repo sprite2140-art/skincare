@@ -25,6 +25,11 @@ export const TARGET_LABELS: Record<Target, Text> = {
   flat_hair: { zh: '扁塌', en: 'flat hair' },
   tangling: { zh: '打结', en: 'tangling' },
   color_fade: { zh: '褪色', en: 'color fading' },
+  dry_scalp: { zh: '头皮干', en: 'dry scalp' },
+  sensitive_scalp: { zh: '敏感头皮', en: 'sensitive scalp' },
+  clarifying: { zh: '清洁残留', en: 'clarifying' },
+  shine: { zh: '光泽', en: 'shine' },
+  curl_definition: { zh: '卷度', en: 'curl definition' },
 };
 
 export const RISK_TAG_LABELS: Record<RiskTag, Text> = {

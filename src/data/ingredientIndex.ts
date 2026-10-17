@@ -55,7 +55,14 @@ export function buildIngredientIndex(ingredients: Ingredient[]): IngredientIndex
     }
   }
   return {
-    get: (name) => map.get(normalizeName(name)),
+    get: (name) => {
+      const key = normalizeName(name);
+      const hit = map.get(key);
+      if (hit || !key.includes('/')) return hit;
+      // "INCI 名/俗名"写法（如 Glycine Soja Oil/Soybean Oil）：整体查不到时，用斜杠前的部分查
+      // 只用斜杠前的部分，避免 Hippophae Rhamnoides Fruit/Seed Oil 这类本身带斜杠的 INCI 名被拆错
+      return map.get(key.split('/')[0].trim());
+    },
     all: ingredients,
   };
 }

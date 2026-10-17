@@ -120,3 +120,57 @@ describe('数据校验', () => {
     expect(errorsOf({ rates })).toEqual([expect.stringContaining('各币种的 data_date 应相同')]);
   });
 });
+
+describe('本轮新增的产品列', () => {
+  const header =
+    'product_id,brand,name_en,name_zh,zone,category,region,inclusion_basis,awards,claimed_benefits,tested_claims,fragrance_free_claim,inci_list,key_actives,price,currency,transparency,source_url,purchase_url,image_url,image_source,image_license';
+  const row =
+    'CO-US-T01,B,N,名,hair,conditioner,US,,Allure Best of Beauty|2025|Best Conditioner|https://a.example/award,frizz;shine,frizz|第三方仪器测试梳理力|2025|https://lab.example/report,yes,Water;Cetearyl Alcohol,Not separately disclosed,12,USD,medium,https://a.example/p,https://shop.example/p,,,';
+  const [p] = parseProducts(`${header}\n${row}\n`);
+
+  it('awards、claimed_benefits、tested_claims、fragrance_free_claim、购买和图片列', () => {
+    expect(p.awards).toEqual([{ source: 'Allure Best of Beauty', year: '2025', title: 'Best Conditioner', url: 'https://a.example/award' }]);
+    expect(p.claimedBenefits).toEqual(['frizz', 'shine']);
+    expect(p.testedClaims).toEqual([{ target: 'frizz', description: '第三方仪器测试梳理力', year: '2025', url: 'https://lab.example/report' }]);
+    expect(p.fragranceFreeClaim).toBe('yes');
+    expect(p.keyActivesDisclosed).toBe(false);
+    expect(p.purchaseUrl).toBe('https://shop.example/p');
+    expect(p.imageUrl).toBe('');
+    expect(errorsOf({ products: [p] })).toEqual([]);
+  });
+
+  it('旧格式（没有新列）仍能解析，取默认值', () => {
+    expect(sample.productId).toBe('SH-US-001');
+    const [old] = parseProducts('product_id,brand,category,inci_list\nX,B,shampoo,Water\n');
+    expect(old).toMatchObject({ awards: [], claimedBenefits: [], testedClaims: [], fragranceFreeClaim: 'unknown', keyActivesDisclosed: true, imageUrl: '' });
+  });
+
+  it('取值检查：未知困扰、奖项缺年份、测试缺来源、图片缺许可', () => {
+    expect(errorsOf({ products: [{ ...p, claimedBenefits: ['softness' as never] }] })).toEqual([expect.stringContaining('claimed_benefits 取值 "softness"')]);
+    expect(errorsOf({ products: [{ ...p, awards: [{ source: 'X', year: '', title: '', url: '' }] }] })).toEqual([expect.stringContaining('4 位年份')]);
+    expect(errorsOf({ products: [{ ...p, testedClaims: [{ target: 'frizz', description: '', year: '', url: '' }] }] }))
+      .toEqual([expect.stringContaining('测试来源链接')]);
+    const warnings = validateData(real.ingredients, [{ ...p, imageUrl: 'https://img.example/a.jpg' }], real.cities, real.exchangeRates)
+      .filter((i) => i.level === 'warning').map((i) => i.message);
+    expect(warnings).toContain('image_url 缺少 image_source 或 image_license，页面将使用占位图');
+  });
+
+  it('"INCI 名/俗名"写法用斜杠前的部分匹配，本身带斜杠的 INCI 名不拆', () => {
+    const index = buildIngredientIndex(real.ingredients);
+    expect(index.get('Glycine Soja Oil/ Soybean Oil')?.inciName).toBe('Glycine Soja Oil');
+    expect(index.get('Rosmarinus Officinalis Leaf Oil/Rosemary Leaf Oil')?.inciName).toBe('Rosmarinus Officinalis Leaf Oil');
+    expect(index.get('Hippophae Rhamnoides Fruit/Seed Oil')).toBeUndefined();
+  });
+});
+
+describe('城市水硬度', () => {
+  it('有供水机构数据的城市带数值、适用范围和来源；没有的为 unknown', () => {
+    const sf = real.cities.find((c) => c.city === 'San Francisco')!;
+    expect(sf).toMatchObject({ waterHardness: 'moderate', hardnessMgL: '62', confidence: 'medium' });
+    expect(sf.dataPeriod).toContain('2025');
+    expect(sf.hardnessMgL).toContain('62');
+    expect(sf.source).toMatch(/^https:\/\/www\.sfpuc\.gov\//);
+    expect(real.cities.find((c) => c.city === 'Las Vegas')!.waterHardness).toBe('very_hard');
+    expect(real.cities.find((c) => c.city === 'Seattle')!.waterHardness).toBe('unknown');
+  });
+});

@@ -18,7 +18,7 @@ function Home() {
         <p>{t('app.tagline')}</p>
         <div className="stack" style={{ marginTop: 28 }}>
           <Link className="btn btn-primary btn-block" to="/quiz">{t('home.start')}</Link>
-          {profile?.scalp && <Link className="btn btn-block" to="/results/shampoo">{t('home.seeResults')}</Link>}
+          {profile?.scalp && <Link className="btn btn-block" to="/results">{t('home.seeResults')}</Link>}
         </div>
       </section>
 
@@ -52,7 +52,7 @@ export default function App() {
         <div className="topbar-inner">
           <Link to="/" className="wordmark">{t('app.title')}</Link>
           <nav className="topnav">
-            <NavLink to="/results/shampoo">{t('nav.results')}</NavLink>
+            <NavLink to="/results">{t('nav.results')}</NavLink>
             <NavLink to="/profile">{t('nav.profile')}</NavLink>
           </nav>
           <button type="button" className="textbtn" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}>
@@ -64,6 +64,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/quiz" element={<Quiz />} />
+        <Route path="/results" element={<Results />} />
+        {/* 旧链接兼容 */}
         <Route path="/results/shampoo" element={<Results />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>
