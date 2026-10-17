@@ -8,7 +8,7 @@ import type { Category, City, WaterRecord } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import {
-  EMPTY_HAIR, MAX_GOALS, TONE_GOALS, cityKey, migrateScalp, scopeCategories, toneGoalAvailable,
+  EMPTY_HAIR, MAX_GOALS, TONE_GOALS, cityKey, migrateHair, migrateScalp, scopeCategories, toneGoalAvailable,
   type Discomfort, type DiscomfortFrequency, type HairLength, type HairLossAmount, type Redness, type StylingUse, type ThinningArea, type AvoidOption, type BaseAnswers, type BudgetMode, type CarePref,
   type ConditionerStatus, type DandruffType, type HairAnswers, type HairCondition, type HairGoal,
   type HairTexture, type HairThickness, type Money, type PurchaseScope, type ScalpAnswers, type ScalpConcern, type ScalpOilTiming,
@@ -173,7 +173,7 @@ export default function Quiz() {
   const start = startRef.current;
   const [base, setBase] = useState<BaseAnswers>(start.base);
   const [scalp, setScalp] = useState<ScalpAnswers>(migrateScalp({ ...EMPTY_SCALP, ...(start.scalp ?? {}) }));
-  const [hair, setHair] = useState<HairAnswers>(start.hair ?? EMPTY_HAIR);
+  const [hair, setHair] = useState<HairAnswers>(migrateHair(start.hair ?? EMPTY_HAIR));
   const [avoidInput, setAvoidInput] = useState('');
   // "想避开的成分"选了"没有，跳过"；修改已有档案时，已保存过的答案视为已选择
   const [avoidNone, setAvoidNone] = useState(!!start.scalp && start.base.avoid.length === 0 && start.base.avoidIngredients.length === 0);

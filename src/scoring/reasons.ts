@@ -48,6 +48,10 @@ function fragranceReason(r: ProductScore): Text {
       en: `Not labeled fragrance-free; no known fragrance ingredient listed${oils.en}${unknown.en}`,
     };
   }
+  if (f.fragrance.length === 0) {
+    // 只含精油（精油也算加香）
+    return { zh: `含精油（${f.essentialOils.slice(0, 2).join('、')}）`, en: `Contains essential oils (${f.essentialOils.slice(0, 2).join(', ')})` };
+  }
   return { zh: `含香精（${f.fragrance.slice(0, 2).join('、')}）`, en: `Contains fragrance (${f.fragrance.slice(0, 2).join(', ')})` };
 }
 
@@ -61,7 +65,9 @@ export function recommendReasons(r: ProductScore, profile: ScoringProfile, scent
   if (profile.fragrancePref === 'free_first') {
     out.push(fragranceReason(r));
   } else if (scentGoal && r.fragrance.status === 'contains') {
-    out.push({ zh: '含香精；气味和留香因人而异，需要自己试', en: 'Contains fragrance; scent and how long it lasts vary, so try it yourself' });
+    out.push(r.fragrance.fragrance.length > 0
+      ? { zh: '含香精；气味和留香因人而异，需要自己试', en: 'Contains fragrance; scent and how long it lasts vary, so try it yourself' }
+      : { zh: '含精油；气味和留香因人而异，需要自己试', en: 'Contains essential oils; scent and how long it lasts vary, so try it yourself' });
   } else if (needs[1]) {
     out.push(needReason(needs[1], r.product));
   } else if (r.dimensions.irritation.level === 'high') {

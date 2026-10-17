@@ -187,6 +187,16 @@ const GOAL_TARGETS: Record<HairGoal, Target[]> = {
 
 export const TONE_GOALS: HairGoal[] = ['tone_yellow', 'tone_orange', 'tone'];
 
+/** 旧档案迁移：合并的"去黄 / 去橙"（tone）拆为去黄、去橙两项，仍不超过 MAX_GOALS 项 */
+export function migrateHair(h: HairAnswers): HairAnswers {
+  if (!h.goals.includes('tone')) return h;
+  const goals: HairGoal[] = [];
+  for (const g of h.goals.flatMap((x): HairGoal[] => (x === 'tone' ? ['tone_yellow', 'tone_orange'] : [x]))) {
+    if (!goals.includes(g)) goals.push(g);
+  }
+  return { ...h, goals: goals.slice(0, MAX_GOALS) };
+}
+
 /** "去黄""去橙"只在发丝状态选了染或烫漂时出现 */
 export function toneGoalAvailable(hair: Pick<HairAnswers, 'conditions'>): boolean {
   return hair.conditions.includes('colored') || hair.conditions.includes('permed_bleached');

@@ -101,6 +101,17 @@ describe('场景 2：头皮屑、瘙痒 7 分，无香优先', () => {
     expect(f.essentialOils).toContain('Melaleuca Alternifolia Leaf Oil');
   });
 
+  it('只含精油的产品：理由写"含精油"，不显示空的香精列表', () => {
+    const oil = { ...real.products[1], productId: 'T-OIL', inciList: ['Water', 'Mentha Piperita Oil'], inciNameUnverified: [] };
+    const r = scoreProduct(oil, profile, data);
+    expect(r.fragrance).toMatchObject({ status: 'contains', fragrance: [] });
+    const texts = recommendReasons(r, profile, false).map((x) => x.zh).join(' / ');
+    expect(texts).toContain('含精油（Mentha Piperita Oil）');
+    expect(texts).not.toContain('含香精（）');
+    const scent = toScoringProfile(answers({ hair: { goals: ['scent'] } }), 'shampoo', ctx);
+    expect(recommendReasons(scoreProduct(oil, scent, data), scent, true).map((x) => x.zh)).toContain('含精油；气味和留香因人而异，需要自己试');
+  });
+
   it('标注 fragrance-free 且未发现加香成分的排在最前（层级 0）', () => {
     const free = { ...real.products[1], productId: 'T-FREE', fragranceFreeClaim: 'yes' as const, inciList: ['Water', 'Glycerin'], inciNameUnverified: [] };
     expect(fragranceTier(fragranceInfo(free, index))).toBe(0);
