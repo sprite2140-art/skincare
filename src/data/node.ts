@@ -2,8 +2,8 @@
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { parseCities, parseExchangeRates, parseIngredients, parseProducts, parseWaterRecords } from './parse';
-import { expandIngredients, parseAllergens, parseCosingTable } from './cosing';
+import { parseCities, parseExchangeRates, parseIngredients, parseProducts, parseReferenceWater, parseWaterRecords } from './parse';
+import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations } from './cosing';
 import { buildIngredientIndex } from './ingredientIndex';
 
 const dataDir = fileURLToPath(new URL('../../data/', import.meta.url));
@@ -13,17 +13,21 @@ export function loadDataFromDisk() {
   const ingredients = parseIngredients(read('ingredients.csv'));
   const cosing = parseCosingTable(read('cosing_ingredients.csv'));
   const allergens = parseAllergens(read('eu_fragrance_allergens.csv'));
-  const allIngredients = expandIngredients(ingredients, cosing, allergens);
+  const explanations = parseExplanations(read('ingredient_explanations.csv'));
+  const allIngredients = expandIngredients(ingredients, cosing, allergens, explanations);
   return {
     /** 成分库 ingredients.csv 本身 */
     ingredients,
     cosing,
     allergens,
+    /** 常见成分通俗解释（起草稿，未核对） */
+    explanations,
     /** 成分库 + CosIng + 致敏原清单，用于匹配产品成分 */
     allIngredients,
     ingredientIndex: buildIngredientIndex(allIngredients),
     products: parseProducts(read('products.csv')),
     water: parseWaterRecords(read('water_hardness.csv')),
+    referenceWater: parseReferenceWater(read('water_hardness_reference.csv')),
     cities: parseCities(read('cities.csv'), parseWaterRecords(read('water_hardness.csv'))),
     exchangeRates: parseExchangeRates(read('exchange_rates.csv')),
   };

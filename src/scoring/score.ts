@@ -10,7 +10,7 @@ import { usageTypeOf } from '../data/types';
 import type { City, ExchangeRate, Ingredient, Product, RiskTag, Target } from '../data/types';
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import {
-  BRAND_CLAIM_CREDIT, CHELATING_FUNCTION, CLAIM_ONLY_EVIDENCE_SCORE, ENVIRONMENT_SCORES, EVIDENCE_SCORES, FUNCTION_TARGETS,
+  BRAND_CLAIM_CREDIT, CHELATING_FUNCTION, ENVIRONMENT_SCORES, EVIDENCE_SCORES, FUNCTION_TARGETS,
   IRRITANT_DEDUCTION, IRRITANT_TAGS, LEVEL_THRESHOLDS, NON_KEY_ACTIVE_CREDIT, RANKED_CONCERN_WEIGHTS, RINSE_OFF_MULTIPLIER,
   SENSITIVE_MULTIPLIER, STRONG_CLEANSER_DEDUCTION, TESTED_CLAIM_CREDIT, TESTED_EVIDENCE_SCORE, WEIGHTS, type DimensionKey,
 } from './config';
@@ -69,6 +69,11 @@ export interface Dimension {
   level: Level | null;
   weight: number;
   reason: Text;
+  /**
+   * score 为 null 的原因：not_scored = 这个维度对你不适用（如水质不硬、未设城市），
+   * missing = 数据缺失（如只有品牌宣称或资料分类，没有成分或测试证据）。两者都不参与加权。
+   */
+  state?: 'not_scored' | 'missing';
 }
 
 export interface Flag {
@@ -132,9 +137,11 @@ export function levelOf(score: number | null): Level | null {
   return 'low';
 }
 
-function dimension(key: DimensionKey, score: number | null, reason: Text): Dimension {
+function dimension(key: DimensionKey, score: number | null, reason: Text, state?: Dimension['state']): Dimension {
   const rounded = score === null ? null : Math.round(score);
-  return { score: rounded, level: levelOf(rounded), weight: WEIGHTS[key], reason };
+  const d: Dimension = { score: rounded, level: levelOf(rounded), weight: WEIGHTS[key], reason };
+  if (rounded === null) d.state = state ?? 'missing';
+  return d;
 }
 
 function resolve(product: Product, index: IngredientIndex): Resolved[] {
@@ -476,19 +483,23 @@ function scoreNeed(
 }
 
 function scoreEvidence(needMatches: NeedMatch[], product: Product): Dimension {
+  // 只有成品测试和成分证据计入证据强度。只有品牌宣称或资料分类的需求不计入（数据缺失），
+  // 在说明里写"暂无成分或测试证据"，不再记一个低分。
   let total = 0;
   let sum = 0;
   const zh: string[] = [];
   const en: string[] = [];
+  const missingZh: string[] = [];
+  const missingEn: string[] = [];
   for (const m of needMatches) {
-    // 每个困扰取最强的依据：成品测试 > 成分证据等级 > 只有品牌宣称
+    // 每个需求取最强的依据：成品测试 > 成分证据等级
     const best = m.ingredients
       .filter((i) => i.evidenceLevel !== null)
       .sort((a, b) => EVIDENCE_SCORES[b.evidenceLevel!] - EVIDENCE_SCORES[a.evidenceLevel!])[0];
+    const t = TARGET_LABELS[m.target];
     let score: number | null = null;
     if (m.bases.includes('tested')) {
       score = TESTED_EVIDENCE_SCORE;
-      const t = TARGET_LABELS[m.target];
       zh.push(`${t.zh}有成品测试`);
       en.push(`product test for ${t.en}`);
     } else if (best) {
@@ -498,26 +509,33 @@ function scoreEvidence(needMatches: NeedMatch[], product: Product): Dimension {
         zh.push(`${n.zh} ${best.evidenceLevel} 级`);
         en.push(`${n.en} level ${best.evidenceLevel}`);
       }
-    } else if (positioningLabel(m, product)) {
-      score = CLAIM_ONLY_EVIDENCE_SCORE;
-      const t = TARGET_LABELS[m.target];
-      const c = positioningLabel(m, product)!;
-      zh.push(`${t.zh}只有${c.zh}`);
-      en.push(`${c.en} only for ${t.en}`);
+    } else if (positioningLabel(m, product) || m.ingredients.length > 0) {
+      // 有品牌宣称、资料分类或没有证据等级的成分，但没有可评级的证据
+      missingZh.push(t.zh);
+      missingEn.push(t.en);
     }
     if (score === null) continue;
     total += m.weight;
     sum += m.weight * score;
   }
+  const missing = missingZh.length > 0
+    ? { zh: `${missingZh.join('、')}暂无成分或测试证据，不计入`, en: `no ingredient or test evidence for ${missingEn.join(', ')}, not counted` }
+    : null;
   if (total === 0) {
+    if (missing) {
+      return dimension('evidence', null, {
+        zh: `暂无成分或测试证据（${missingZh.join('、')}只有品牌宣称或资料分类），不计分`,
+        en: `No ingredient or test evidence yet (only brand claims or data classification for ${missingEn.join(', ')}); not scored`,
+      }, 'missing');
+    }
     return dimension('evidence', null, {
       zh: '没有针对你需求的依据，无法评估证据强度',
       en: 'Nothing supports your needs, so evidence cannot be rated',
-    });
+    }, 'missing');
   }
   return dimension('evidence', sum / total, {
-    zh: '依据：' + zh.join('、'),
-    en: 'Basis: ' + en.join(', '),
+    zh: '依据：' + zh.join('、') + (missing ? `；${missing.zh}` : ''),
+    en: 'Basis: ' + en.join(', ') + (missing ? `; ${missing.en}` : ''),
   });
 }
 
@@ -567,22 +585,23 @@ function scoreIrritation(
 }
 
 function scoreEnvironment(verified: (Resolved & { ingredient: Ingredient })[], city: City | null, allowDraft: boolean): Dimension {
-  const neutral = (reason: Text) => dimension('environment', ENVIRONMENT_SCORES.neutral, reason);
-  if (!city) return neutral({ zh: '未设置城市，按中性计分', en: 'No city set, scored as neutral' });
+  // 只有水偏硬时才计分；未设城市、无数据、数据未核对、各区不同、水质不硬时不计分，其余维度权重重新归一化
+  const skip = (reason: Text) => dimension('environment', null, reason, 'not_scored');
+  if (!city) return skip({ zh: '未设置城市，不计分', en: 'No city set; not scored' });
   if (city.reviewStatus !== 'verified' && !(allowDraft && city.waterHardness !== 'unknown')) {
-    return neutral({ zh: `${city.city}的水硬度数据未核对，按中性计分`, en: `Water hardness for ${city.city} is not verified yet, scored as neutral` });
+    return skip({ zh: `${city.city}的水硬度数据未核对，不计分`, en: `Water hardness for ${city.city} is not verified yet; not scored` });
   }
   if (city.waterHardness === 'varies') {
-    return neutral({
-      zh: `${city.city}不同供水分区或时期的水硬度不同，无法确定你家的水，按中性计分`,
-      en: `Water hardness in ${city.city} differs by supply zone or period, so yours cannot be determined; scored as neutral`,
+    return skip({
+      zh: `${city.city}不同供水分区或时期的水硬度不同，无法确定你家的水，不计分`,
+      en: `Water hardness in ${city.city} differs by supply zone or period, so yours cannot be determined; not scored`,
     });
   }
   if (city.waterHardness === 'unknown') {
-    return neutral({ zh: `暂无${city.city}的水硬度数据，按中性计分`, en: `No water hardness data for ${city.city}, scored as neutral` });
+    return skip({ zh: `暂无${city.city}的水硬度数据，不计分`, en: `No water hardness data for ${city.city}; not scored` });
   }
   if (city.waterHardness !== 'hard' && city.waterHardness !== 'very_hard') {
-    return neutral({ zh: `${city.city}水质不硬，无需特别考虑`, en: `Water in ${city.city} is not hard, no special needs` });
+    return skip({ zh: `${city.city}水质不硬，不计分`, en: `Water in ${city.city} is not hard; not scored` });
   }
   const chelators = verified.filter((r) => r.ingredient.functions.includes(CHELATING_FUNCTION));
   if (chelators.length > 0) {

@@ -49,16 +49,17 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | zone | face / scalp / hair / body | scalp |
 | category | 品类编号（取值见下） | shampoo |
 | usage_type | 使用方式：rinse_off（冲洗型）/ leave_on（免洗型）。留空则用品类默认值；卸妆、去角质必须填写 | |
+| subtype | 细分类型，普通产品留空。co_wash = 清洁型护发素：代替洗发水使用，category 必须为 shampoo（清洁步骤），页面显示"Co-wash · 清洁型护发素"标签和单独的使用说明，不能当作洗后护发素 | co_wash |
 | region | US / JP / KR / CN | US |
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |
 | inclusion_basis | 入库依据（榜单/奖项），原文 | |
 | awards | 榜单与奖项，结果页显示为标签。每项格式 `来源\|年份\|名称\|链接`，多项用分号分隔；来源和 4 位年份必填 | Allure Best of Beauty\|2025\|敏感肌洗护组合获奖\|https://… |
 | claimed_benefits | 产品定位针对的困扰或效果，取 targets 的值，分号分隔。不从成分推断 | dandruff;sensitive_scalp |
-| claim_source | claimed_benefits 的来源：brand_text（产品页的品牌原文）/ data_classification（资料整理时的分类）。页面分别显示"品牌宣称"和"资料分类"，都按产品定位 0.7 计分。本轮 47 款美国产品来自资料中的"需求"字段，是整理时的分类，全部填 data_classification；"日常清洁"对应 clarifying，"去黄 / 去橙"对应 tone_correction | data_classification |
+| claim_source | claimed_benefits 的来源：brand_text（产品页的品牌原文）/ data_classification（资料整理时的分类）。页面分别显示"品牌宣称"和"资料分类"，都按产品定位 0.7 计分。本轮 47 款美国产品来自资料中的"需求"字段，是整理时的分类，全部填 data_classification；"日常清洁"对应 clarifying，"去黄 / 去橙"拆为 tone_yellow / tone_orange。2026-10-17 第 1 批扩充（20 款）的资料里 claim_source 写的是 brand_text，但资料说明写明 claimed_benefits 是项目的需求映射、不是品牌原话，导入时改为 data_classification；紫色洗发水（SH-US-057）的 tone_correction 记为 tone_yellow | data_classification |
 | brand_claims / brand_claims_quote / brand_claims_source_url | 品牌产品页效果的中文概括、短原文和官方产品页。概括不是逐字翻译，也不是独立验证的效果；页面显示为"品牌宣称（产品页概括）"。目前只展示，不参与计分（计分仍用 claimed_benefits） | |
 | brand_claim_targets | 品牌产品页明确宣称的效果对应的困扰，分号分隔，按下表从 brand_claims_quote（英文原文）和 brand_claims（中文概括）对应；计分时按"品牌宣称"0.7 计，与资料分类相同，页面标注"品牌宣称"。对应表：Moisturizing / Hydrating → dryness；Detangling → tangling；Smoothing / Frizz Control → frizz；Repair / Strengthening / Anti-breakage → damage；Volume / Body → flat_hair；Curl Definition → curl_definition；Neutralizes Yellow → tone_yellow，Orange / Brassiness（棕发）→ tone_orange，金发的 Brassiness → tone_yellow | dryness;tangling |
-| brand_claims_status | brand_page_summary（有对应版本的品牌页概括）/ version_mismatch（在售版本与品牌页不一致，留空）/ not_collected（尚未收集）。brand_claims 有内容时必须为 brand_page_summary 并有出处 | brand_page_summary |
+| brand_claims_status | brand_page_summary（brand_claims 是品牌页的中文概括）/ brand_page_quote（brand_claims 是品牌页英文原文摘录，与 brand_claims_quote 相同，页面只显示原文，不显示为"中文概括"）/ version_mismatch（在售版本与品牌页不一致，留空）/ not_collected（尚未收集）。brand_claims 有内容时必须为前两者之一并有出处。2026-10-17 第 1 批扩充（SH-US-048 起、CO-US-031 起）为 brand_page_quote | brand_page_summary |
 | tested_claims | 可靠的成品测试（第三方或公开方法），每项格式 `困扰\|测试说明\|年份\|链接`，链接必填。目前没有数据 | |
 | fragrance_free_claim | 产品是否明确标注 fragrance-free：yes / no / unknown。留空视为 unknown（未确认，不等于含香） | unknown |
 | fragrance_free_source_url | 无香声明出处；fragrance_free_claim = yes 时必填 | |
@@ -162,6 +163,42 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 - **不按同城记录平均，也不以第一条代表全市。** 城市等级由记录汇总（`summarizeHardness`）：所有记录等级相同时取该等级；都属于硬或很硬时取"硬"；其他不一致或跨两级时为 varies（"因供水分区而异"，环境适配按中性计分）；没有分级记录为 unknown。
 - 页面逐条显示分区、口径（年均、单次、范围、月均、由钙镁换算等）、数值或范围、时期、来源和资料备注。
 - 现有 20 个城市有记录（2026-10-16、10-17 核对）。Miami、Atlanta 官方报告没有总硬度数值，保持 unknown；San Jose、Irvine 尚无记录。
+
+## water_hardness_reference.csv（参照城市水硬度）
+
+只用于问卷城市页刻度条上的对照，**不赋给用户城市**，也不参与打分。各城市统计口径不同（年均、单点、分区），不能当作同一年度全城平均直接比较。
+
+| 字段 | 含义 |
+|---|---|
+| city / city_zh / country | 城市英文名、中文名、国家或地区 |
+| water_supplier | 供水或发布机构（原文） |
+| hardness_value_mg_L_CaCO3 | 数值，mg/L，以 CaCO3 计；未取得时留空，statistic_type 写 not_found |
+| range_min_mg_L_CaCO3 / range_max_mg_L_CaCO3 | 范围，按原文保留（如 "<5"），只用于显示 |
+| data_period / data_year | 数据时期、年份 |
+| supply_scope | 适用范围（中文），页面在数据说明中显示 |
+| statistic_type | annual_mean / single_sample / quarterly_mean_and_range / annual_mean_and_max / period_mean_and_range / annual_mean_and_range / not_found |
+| data_status / source_url / notes / retrieved_on | 数据状态、官方来源（分号分隔）、资料备注、核对日期 |
+
+当前 7 个城市（2026-10-17 核对）：东京 61.4（区部净水厂出水年均）、首尔 58（单点）、上海 126（青浦区出厂水）、巴黎 297（CENTRE 供水区，°f 按 1 °f = 10 mg/L 换算）、香港 38（范围 <5–72）、多伦多 119；伦敦未找到可核查的官方数值，不填第三方数值。
+
+## 水硬度在页面上的显示
+
+- 默认只显示一行"等级 · 数值 · 来源"和刻度条：刻度条按 USGS 分四档（0–60 软水、61–120 中等、121–180 硬水、>180 很硬），用户城市只有一个数值时为圆点，多个分区时为一段；参照城市为细刻度，下方列出名称和数值。
+- 各条记录的口径、时期、范围、资料备注，以及参照城市的范围和出处，收进"数据说明"折叠。
+- 内部取值不直接显示：统计口径代码翻译成中文（未登记的写"其他口径"）；采样时期整理成"2025 年全年""2025 年第 4 季度"等，写明未注明的（如 not_stated_in_FAQ）显示"未注明"，其他认不出的写法只取其中的日期或不显示（`src/data/water.ts` 的 formatPeriod）。
+
+## ingredient_explanations.csv（常见成分通俗解释）
+
+产品中出现频率最高的约 150 个成分里，成分库没有的（只在 CosIng 中）在这里起草一两句中英文通俗解释。**全部为起草稿，未经人工核对**（review_status = draft），页面标注"通俗解释为起草稿，未核对"。成分库已有的条目用成分库的 explain_zh / explain_en。
+
+| 字段 | 含义 |
+|---|---|
+| inci_name | INCI 名（与 CosIng 写法一致即可，大小写不限） |
+| explain_zh / explain_en | 通俗解释，一两句；只说明在配方中的作用，不写功效承诺 |
+| review_status | draft / verified |
+| drafted_on | 起草日期 |
+
+成分弹窗还会显示该成分的 CosIng 登记功能（翻译成通俗中文，见 `src/data/cosingFunctions.ts`），并注明来源和获取日期。登记功能是成分在配方中的作用，不是功效。
 
 ## cities.csv（城市环境）
 

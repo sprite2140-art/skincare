@@ -3,7 +3,7 @@
 import Papa from 'papaparse';
 import { cleanInciName } from './ingredientIndex';
 import type {
-  Award, BrandClaimStatus, City, WaterRecord, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
+  Award, BrandClaimStatus, ProductSubtype, City, WaterRecord, ReferenceWater, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
   UsageType, WaterHardness, Zone,
 } from './types';
@@ -107,6 +107,7 @@ export function parseProducts(text: string): Product[] {
     zone: r.zone as Zone,
     category: r.category ?? '',
     usageType: (r.usage_type || null) as UsageType | null,
+    subtype: (r.subtype || null) as ProductSubtype | null,
     region: r.region as Region,
     formulaNote: r.formula_note ?? '',
     channels: splitList(r.channels),
@@ -200,6 +201,25 @@ export function summarizeHardness(records: WaterRecord[]): WaterHardness {
   if (set.size === 1) return classes[0]!;
   if ([...set].every((c) => c === 'hard' || c === 'very_hard')) return 'hard';
   return 'varies';
+}
+
+export function parseReferenceWater(text: string): ReferenceWater[] {
+  return parseCsv(text).map((r) => ({
+    city: r.city ?? '',
+    cityZh: r.city_zh ?? '',
+    country: r.country ?? '',
+    supplier: r.water_supplier ?? '',
+    value: num(r.hardness_value_mg_L_CaCO3),
+    minText: r.range_min_mg_L_CaCO3 ?? '',
+    maxText: r.range_max_mg_L_CaCO3 ?? '',
+    period: r.data_period ?? '',
+    year: r.data_year ?? '',
+    scope: r.supply_scope ?? '',
+    statisticType: r.statistic_type ?? '',
+    sources: splitList(r.source_url),
+    note: r.notes ?? '',
+    retrievedOn: r.retrieved_on ?? '',
+  }));
 }
 
 export function parseCities(text: string, water: WaterRecord[] = []): City[] {

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { expandIngredients, parseAllergens, parseCosingExport, parseCosingTable } from './cosing';
+import { expandIngredients, parseAllergens, parseCosingExport, parseCosingTable, parseExplanations } from './cosing';
+import { translateCosingFunctions, untranslatedFunctions } from './cosingFunctions';
+import { ingredientFrequency } from './frequency';
 import { buildIngredientIndex } from './ingredientIndex';
 import { loadDataFromDisk } from './node';
 import { fragranceInfo } from '../scoring/fragrance';
@@ -40,7 +42,8 @@ describe('CosIng 导入', () => {
     expect(perfume.sources[0]).toContain('cosing');
     const ester = index.get('Test Emollient Ester')!;
     expect(ester).toMatchObject({ origin: 'cosing', category: 'base', riskTags: [] });
-    expect(ester.explainZh).toBe('CosIng 登记功能：skin conditioning - emollient、hair conditioning。');
+    expect(ester.explainZh).toBe(''); // 没有起草通俗解释；登记功能在页面上单独翻译显示
+    expect(ester.cosingFunctions).toEqual(['skin conditioning - emollient', 'hair conditioning']);
     expect(index.get('Test Chelator Salt')!.functions).toContain('chelating');
     // 成分库已有的 Limonene 保留成分库条目，补上致敏原标注和 CosIng 功能
     const lim = index.get('Limonene')!;
@@ -111,5 +114,25 @@ describe('data/ 中导入的 CosIng（2026-10-17）', () => {
     const counted = withFn.filter((n) => tagged(n));
     expect(withFn.length).toBeGreaterThan(100);
     expect(counted.length).toBeLessThan(40);
+  });
+});
+
+describe('CosIng 功能翻译与常见成分通俗解释', () => {
+  it('当前 CosIng 数据里出现的全部功能都有中英文翻译；相同译文去重', () => {
+    const all = [...new Set(real.cosing.flatMap((c) => c.functions))];
+    expect(untranslatedFunctions(all)).toEqual([]);
+    expect(translateCosingFunctions(['humectant', 'skin conditioning - humectant', 'chelating'], 'zh')).toEqual([
+      '保湿（吸住水分）', '螯合（结合水中的钙镁等金属离子）',
+    ]);
+    expect(translateCosingFunctions(['made up function'], 'en')).toEqual(['made up function']);
+  });
+
+  it('通俗解释用于只在 CosIng 中的成分，标为未核对；出现频率最高的 150 个成分都有解释', () => {
+    const exp = parseExplanations('inci_name,explain_zh,explain_en,review_status,drafted_on\nTest Emollient Ester,润泽,Softens,draft,2026-10-17\n');
+    const index = buildIngredientIndex(expandIngredients(real.ingredients, parseCosingExport(EXPORT), [], exp));
+    expect(index.get('Test Emollient Ester')).toMatchObject({ explainZh: '润泽', explainEn: 'Softens', reviewStatus: 'draft' });
+    const top = ingredientFrequency(real.products, real.ingredientIndex).filter((r) => r.origin !== null).slice(0, 150);
+    const missing = top.filter((r) => !real.ingredientIndex.get(r.name)?.explainZh).map((r) => r.name);
+    expect(missing).toEqual([]);
   });
 });

@@ -2,13 +2,13 @@
 
 import { buildIngredientIndex, normalizeName } from './ingredientIndex';
 import { unmatchedKeyActives } from './keyActives';
-import { expandIngredients, type AllergenEntry, type CosingEntry } from './cosing';
+import { expandIngredients, type AllergenEntry, type CosingEntry, type ExplanationEntry } from './cosing';
 import { ingredientFrequency } from './frequency';
 import {
-  BRAND_CLAIM_STATUSES, CATEGORIES, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
+  BRAND_CLAIM_STATUSES, CATEGORIES, PRODUCT_SUBTYPES, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
   REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
 } from './types';
-import type { Category, City, ExchangeRate, Ingredient, Product, WaterRecord } from './types';
+import type { Category, City, ExchangeRate, Ingredient, Product, ReferenceWater, WaterRecord } from './types';
 
 /** water_hardness.csv 的 hardness_class 取值（USGS 分级，以 CaCO3 计；跨两级的单独列出） */
 const WATER_CLASSES = ['soft', 'moderately_hard', 'hard', 'very_hard', 'hard_or_very_hard', 'moderately_hard_or_hard', 'unknown'] as const;
@@ -28,7 +28,7 @@ export function validateData(
   cities: City[],
   exchangeRates: ExchangeRate[],
   /** CosIng 批量导入的成分和欧盟香料致敏原清单；用于匹配产品成分，不做成分库的格式检查 */
-  extra: { cosing?: CosingEntry[]; allergens?: AllergenEntry[]; water?: WaterRecord[] } = {},
+  extra: { cosing?: CosingEntry[]; allergens?: AllergenEntry[]; water?: WaterRecord[]; referenceWater?: ReferenceWater[]; explanations?: ExplanationEntry[] } = {},
 ): Issue[] {
   const issues: Issue[] = [];
   const err = (file: string, key: string, message: string) =>
@@ -80,7 +80,7 @@ export function validateData(
     if (ing.reviewedOn && !DATE_RE.test(ing.reviewedOn)) err(F_ING, key, `reviewed_on 应为 YYYY-MM-DD：${ing.reviewedOn}`);
   }
 
-  const index = buildIngredientIndex(expandIngredients(ingredients, extra.cosing ?? [], extra.allergens ?? []));
+  const index = buildIngredientIndex(expandIngredients(ingredients, extra.cosing ?? [], extra.allergens ?? [], extra.explanations ?? []));
   if (extra.cosing && extra.cosing.length === 0) warn('cosing_ingredients.csv', '-', '尚未导入 CosIng 数据（npm run import-cosing -- <文件>），只用成分库和致敏原清单匹配');
   for (const ing of ingredients) {
     for (const c of ing.conflictsWith) {
@@ -147,7 +147,13 @@ export function validateData(
     if (bc.text && !/^https?:\/\//.test(bc.sourceUrl)) err(F_PRD, key, 'brand_claims 有内容时必须填写 brand_claims_source_url');
     for (const t of bc.targets) oneOf(F_PRD, key, 'brand_claim_targets', t, TARGETS);
     if (bc.targets.length > 0 && !bc.text) err(F_PRD, key, 'brand_claim_targets 有内容时必须有 brand_claims（品牌宣称原文概括）');
-    if (bc.text && bc.status !== 'brand_page_summary') err(F_PRD, key, 'brand_claims 有内容时 brand_claims_status 应为 brand_page_summary');
+    if (bc.text && bc.status !== 'brand_page_summary' && bc.status !== 'brand_page_quote') {
+      err(F_PRD, key, 'brand_claims 有内容时 brand_claims_status 应为 brand_page_summary（中文概括）或 brand_page_quote（原文摘录）');
+    }
+    if (p.subtype !== null) {
+      oneOf(F_PRD, key, 'subtype', p.subtype, PRODUCT_SUBTYPES);
+      if (p.subtype === 'co_wash' && p.category !== 'shampoo') err(F_PRD, key, 'co_wash 是清洁步骤，category 应为 shampoo');
+    }
     for (const a of p.awards) {
       if (!a.source || !/^\d{4}$/.test(a.year)) err(F_PRD, key, `awards 每一项需写明来源和 4 位年份（来源|年份|名称|链接）：${a.source}|${a.year}`);
       if (a.url && !/^https?:\/\//.test(a.url)) err(F_PRD, key, `awards 链接不是 http(s)：${a.url}`);
@@ -225,6 +231,31 @@ export function validateData(
     if (w.hardnessClass !== 'unknown' && w.value === null && (w.min === null || w.max === null)) {
       err(F_WATER, key, '有分级但没有数值或范围');
     }
+  }
+
+  // ingredient_explanations.csv（常见成分通俗解释，起草稿）
+  const F_EXP = 'ingredient_explanations.csv';
+  const seenExp = new Set<string>();
+  for (const e of extra.explanations ?? []) {
+    const key = e.inciName || '(缺 inci_name)';
+    const n = normalizeName(e.inciName);
+    if (seenExp.has(n)) err(F_EXP, key, '重复');
+    seenExp.add(n);
+    if (!e.explainZh || !e.explainEn) err(F_EXP, key, 'explain_zh 和 explain_en 都要填写');
+    const ing = index.get(e.inciName);
+    if (!ing) warn(F_EXP, key, '成分不在成分库，也不在 CosIng');
+    else if (ing.origin === 'library') warn(F_EXP, key, '成分库已有通俗解释，这里的不会使用');
+  }
+
+  // water_hardness_reference.csv（参照城市，只用于刻度条对照）
+  const F_REF = 'water_hardness_reference.csv';
+  for (const w of extra.referenceWater ?? []) {
+    const key = w.city || '(缺 city)';
+    if (!w.city) err(F_REF, key, 'city 为空');
+    if (w.value !== null && w.value < 0) err(F_REF, key, '硬度数值不能为负');
+    if (w.value === null && w.statisticType !== 'not_found') err(F_REF, key, '没有数值时 statistic_type 应为 not_found');
+    if (w.sources.length === 0) err(F_REF, key, '缺少 source_url');
+    for (const u of w.sources) if (!/^https?:\/\//.test(u)) err(F_REF, key, `source_url 不是 http(s) 链接：${u}`);
   }
 
   return issues;

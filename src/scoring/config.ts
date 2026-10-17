@@ -29,8 +29,8 @@ export const EVIDENCE_SCORES: Record<EvidenceLevel, number> = { A: 100, B: 70, C
 export const ENVIRONMENT_SCORES = {
   hardWithChelator: 100,
   hardWithoutChelator: 50,
-  neutral: 50,
 } as const;
+// 水质不硬、未设城市、无数据或各区不同时，环境适配不计分（score = null），其余维度权重重新归一化。
 export const CHELATING_FUNCTION = 'chelating';
 
 /** 高 / 中 / 低 的分界 */
@@ -55,9 +55,11 @@ export const TEST_MODE_DRAFT_SCORING = true;
 export const TESTED_CLAIM_CREDIT = 1;
 /** 只有品牌宣称（claimed_benefits，产品定位）支持的困扰，按此比例计分 */
 export const BRAND_CLAIM_CREDIT = 0.7;
-/** 证据强度：成品测试支持的困扰记 100；只有品牌宣称、没有成分证据的困扰记此分 */
+/**
+ * 证据强度：成品测试支持的需求记 100；成分证据按 A/B/C 等级记分（C 级即"证据弱"）。
+ * 只有品牌宣称或资料分类、没有成分或测试证据的需求不计入证据强度（数据缺失），全部如此时该维度不计分。
+ */
 export const TESTED_EVIDENCE_SCORE = 100;
-export const CLAIM_ONLY_EVIDENCE_SCORE = 30;
 
 /** 成分功能（functions）→ 困扰：用于成分库里暂未逐个标注 targets 的情况 */
 export const FUNCTION_TARGETS: Record<string, string[]> = {

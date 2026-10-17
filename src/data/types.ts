@@ -64,14 +64,15 @@ export const CLAIM_SOURCES = ['brand_text', 'data_classification'] as const;
 export type ClaimSource = (typeof CLAIM_SOURCES)[number];
 
 /**
- * 品牌产品页效果的中文概括（不是逐字翻译，也不是独立验证的效果）。
- * brand_page_summary = 有对应版本的品牌页概括；version_mismatch = 在售版本与品牌页不一致，留空；not_collected = 尚未收集。
+ * 品牌产品页的效果宣称（不是独立验证的效果）。
+ * brand_page_summary = brand_claims 是品牌页的中文概括；brand_page_quote = brand_claims 是品牌页英文原文摘录；
+ * version_mismatch = 在售版本与品牌页不一致，留空；not_collected = 尚未收集。
  */
-export const BRAND_CLAIM_STATUSES = ['brand_page_summary', 'version_mismatch', 'not_collected'] as const;
+export const BRAND_CLAIM_STATUSES = ['brand_page_summary', 'brand_page_quote', 'version_mismatch', 'not_collected'] as const;
 export type BrandClaimStatus = (typeof BRAND_CLAIM_STATUSES)[number];
 
 export interface BrandClaims {
-  /** 中文概括 */
+  /** 中文概括；status = brand_page_quote 时为英文原文摘录 */
   text: string;
   /** 产品页短原文 */
   quote: string;
@@ -80,6 +81,10 @@ export interface BrandClaims {
   targets: Target[];
   status: BrandClaimStatus | null;
 }
+
+/** 产品细分类型：co_wash = 清洁型护发素（代替洗发水使用，归入 shampoo 品类，按清洁步骤使用） */
+export const PRODUCT_SUBTYPES = ['co_wash'] as const;
+export type ProductSubtype = (typeof PRODUCT_SUBTYPES)[number];
 
 /** 榜单 / 奖项，结果页显示为标签，详情注明来源与年份 */
 export interface Award {
@@ -139,6 +144,8 @@ export interface Product {
   category: string;
   /** 产品表填写的使用方式；为空时用品类默认值，见 usageTypeOf() */
   usageType: UsageType | null;
+  /** 细分类型（subtype），如 co_wash；普通产品为 null */
+  subtype: ProductSubtype | null;
   region: Region;
   formulaNote: string;
   channels: string[];
@@ -243,6 +250,31 @@ export interface WaterRecord {
   confidence: string;
   note: string;
   sources: string[];
+  retrievedOn: string;
+}
+
+/**
+ * 参照城市的水硬度（data/water_hardness_reference.csv）：只用于在刻度条上做对照，不赋给用户城市。
+ * 各城市统计口径不同（年均、单点、分区），不能当作同一年度全城平均直接比较。
+ */
+export interface ReferenceWater {
+  city: string;
+  cityZh: string;
+  country: string;
+  supplier: string;
+  /** mg/L，以 CaCO3 计；未取得时为 null */
+  value: number | null;
+  /** 范围按原文保留（如 "<5"），只用于显示 */
+  minText: string;
+  maxText: string;
+  period: string;
+  year: string;
+  /** 适用范围说明（中文） */
+  scope: string;
+  statisticType: string;
+  sources: string[];
+  /** 资料备注（中文） */
+  note: string;
   retrievedOn: string;
 }
 

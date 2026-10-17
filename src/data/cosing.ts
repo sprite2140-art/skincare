@@ -15,7 +15,7 @@
 
 import { parseCsv, splitList } from './parse';
 import { normalizeName } from './ingredientIndex';
-import type { Ingredient } from './types';
+import type { Ingredient, ReviewStatus } from './types';
 
 export interface CosingEntry {
   inciName: string;
@@ -33,6 +33,8 @@ export interface AllergenEntry {
 }
 
 export const COSING_SOURCE = 'https://ec.europa.eu/growth/tools-databases/cosing/';
+/** 本项目 CosIng 数据的获取日期（见 docs/DATA_SCHEMA.md） */
+export const COSING_RETRIEVED_ON = '2026-10-17';
 export const PERFUMING = 'perfuming';
 /** 香精的统称（规则 a） */
 const FRAGRANCE_NAMES = new Set(['parfum', 'fragrance', 'aroma', 'flavor', 'flavour']);
@@ -123,12 +125,31 @@ export function parseCosingExport(text: string): CosingEntry[] {
   return out;
 }
 
-function functionsText(fns: string[]) {
-  return fns.join('、');
+/** 常见成分的通俗解释（data/ingredient_explanations.csv）：起草稿，未经人工核对 */
+export interface ExplanationEntry {
+  inciName: string;
+  explainZh: string;
+  explainEn: string;
+  reviewStatus: ReviewStatus;
 }
 
-/** 成分库 + CosIng + 致敏原清单合并后的全部条目，用于建索引 */
-export function expandIngredients(library: Ingredient[], cosing: CosingEntry[], allergens: AllergenEntry[]): Ingredient[] {
+export function parseExplanations(text: string): ExplanationEntry[] {
+  return parseCsv(text).map((r) => ({
+    inciName: r.inci_name ?? '',
+    explainZh: r.explain_zh ?? '',
+    explainEn: r.explain_en ?? '',
+    reviewStatus: (r.review_status || 'draft') as ReviewStatus,
+  }));
+}
+
+/**
+ * 成分库 + CosIng + 致敏原清单合并后的全部条目，用于建索引。
+ * 只在 CosIng 中的成分：通俗解释取自 explanations（有的话），CosIng 登记功能另存在 cosingFunctions，页面单独翻译显示。
+ */
+export function expandIngredients(
+  library: Ingredient[], cosing: CosingEntry[], allergens: AllergenEntry[], explanations: ExplanationEntry[] = [],
+): Ingredient[] {
+  const explained = new Map(explanations.map((e) => [normalizeName(e.inciName), e]));
   const known = new Map<string, Ingredient>();
   const allergenKeys = new Set(allergens.map((a) => normalizeName(a.inciName)));
   const isAllergen = (ing: Ingredient) => [ing.inciName, ...ing.aliases].some((n) => allergenKeys.has(normalizeName(n)));
@@ -163,8 +184,8 @@ export function expandIngredients(library: Ingredient[], cosing: CosingEntry[], 
       evidenceLevel: null,
       riskTags: fragrance ? ['fragrance'] : [],
       conflictsWith: [],
-      explainZh: `CosIng 登记功能：${functionsText(c.functions) || '未登记'}${allergen ? '；欧盟需标注的香料致敏原' : ''}。`,
-      explainEn: `CosIng functions: ${c.functions.join(', ') || 'none listed'}${allergen ? '; an EU labelled fragrance allergen' : ''}.`,
+      explainZh: explained.get(key)?.explainZh ?? '',
+      explainEn: explained.get(key)?.explainEn ?? '',
       sources: [COSING_SOURCE],
       reviewStatus: 'draft',
       reviewedOn: '',
@@ -182,7 +203,7 @@ export function expandIngredients(library: Ingredient[], cosing: CosingEntry[], 
     const ing: Ingredient = {
       inciName: a.inciName, nameZh: '', aliases: [], category: 'risk', functions: ['perfuming'], targets: [], effectiveRange: '',
       maxLimit: '', evidenceLevel: null, riskTags: ['fragrance'], conflictsWith: [],
-      explainZh: '欧盟需标注的香料致敏原，敏感人群可能过敏。', explainEn: 'An EU labelled fragrance allergen; may cause allergy in sensitive people.',
+      explainZh: '', explainEn: '', // 页面按 euAllergen 单独说明
       sources: [a.source], reviewStatus: 'draft', reviewedOn: '', origin: 'eu_allergen_list', euAllergen: true,
     };
     known.set(key, ing);

@@ -35,9 +35,9 @@ describe('data/ 真实数据', () => {
   const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
   it('CSV 能正确解析，名称已统一', () => {
-    // 洗发水 57 款（美国 47、日韩中 10），护发素 30 款
-    expect(real.products).toHaveLength(87);
-    expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(30);
+    // 洗发水 70 款（美国 60、日韩中 10），护发素 37 款
+    expect(real.products).toHaveLength(107);
+    expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(37);
     // 保留原有产品 ID
     for (const id of ['SH-US-001', 'SH-US-008', 'SH-JP-001', 'SH-KR-003', 'SH-CN-002']) expect(byId(id)).toBeDefined();
     const us1 = byId('SH-US-001');
@@ -72,14 +72,15 @@ describe('data/ 真实数据', () => {
   });
 
   it('没有价格的产品不参与三分位计算', () => {
-    expect(budgetCaps.shampoo!.sampleSize).toBe(54);
+    expect(budgetCaps.shampoo!.sampleSize).toBe(67);
   });
 
   it('关闭测试模式时，draft 有效成分不参与需求匹配（只剩资料分类的产品定位）；基础成分无需核对即可使用', () => {
     const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), strict);
     expect(r.dimensions.need.score).toBe(70);
     expect(r.dimensions.need.reason.zh).toBe('针对头皮屑：资料分类');
-    expect(r.dimensions.evidence.score).toBe(30);
+    expect(r.dimensions.evidence.score).toBeNull(); // 只有资料分类：数据缺失，不计入
+    expect(r.dimensions.evidence.reason.zh).toContain('暂无成分或测试证据');
     expect(r.unverifiedIngredients).toContain('Pyrithione Zinc');
     expect(r.unverifiedIngredients).not.toContain('Water'); // Aqua 是基础成分
     expect(r.usesDraftData).toBe(false);
@@ -145,13 +146,13 @@ describe('按市场筛选', () => {
     expect(marketForCity(null)).toBe('US');
     const us = filterByMarket(shampoos, 'US', false);
     expect(ids(us.shown).every((id) => id.startsWith('SH-US'))).toBe(true);
-    expect(us.shown).toHaveLength(47);
+    expect(us.shown).toHaveLength(60);
     expect(us.hiddenCount).toBe(10);
     expect(filterByMarket(shampoos, 'JP', false).shown).toHaveLength(4);
   });
 
   it('打开"显示其他地区版本"后显示全部；没有市场时不筛选', () => {
-    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(57);
+    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(70);
     expect(filterByMarket(shampoos, null, false)).toEqual({ shown: shampoos, hiddenCount: 0 });
   });
 
@@ -204,7 +205,7 @@ const data = { index, exchangeRates: real.exchangeRates, budgetCaps: {} };
 // 测试用的虚构洗发水
 const sample: Product = {
   productId: 'SH-T-000', brand: 'Test', nameEn: 'Test Shampoo', nameZh: '测试洗发水', zone: 'scalp', category: 'shampoo',
-  usageType: null, region: 'US', formulaNote: '', channels: [], inclusionBasis: '',
+  usageType: null, subtype: null, region: 'US', formulaNote: '', channels: [], inclusionBasis: '',
   awards: [], claimedBenefits: [], claimSource: null, brandClaims: { text: '', quote: '', sourceUrl: '', status: null, targets: [] }, testedClaims: [], fragranceFreeSourceUrl: '', fragranceFreeClaim: 'unknown',
   inciList: ['Aqua', 'Sodium Laureth Sulfate', 'Glycerin', 'Piroctone Olamine', 'Parfum'], inciNameUnverified: [], keyActives: [],
   keyActivesDisclosed: true,
@@ -419,10 +420,11 @@ describe('环境适配', () => {
     expect(scoreProduct(withChelator, profile({ city: city('hard') }), data).dimensions.environment.score).toBe(100);
     expect(scoreProduct(sample, profile({ city: city('hard') }), data).dimensions.environment.score).toBe(50);
   });
-  it('未设城市、水硬度未知、城市数据未核对、软水：中性 50 并说明原因', () => {
+  it('未设城市、水硬度未知、城市数据未核对、软水：不计分并说明原因', () => {
     for (const c of [null, city('unknown'), city('hard', 'draft'), city('soft')]) {
       const d = scoreProduct(withChelator, profile({ city: c }), data).dimensions.environment;
-      expect(d.score).toBe(50);
+      expect(d.score).toBeNull();
+      expect(d.state).toBe('not_scored');
       expect(d.reason.zh.length).toBeGreaterThan(0);
     }
     expect(scoreProduct(withChelator, profile({ city: city('hard', 'draft') }), data).dimensions.environment.reason.zh).toContain('未核对');
@@ -440,9 +442,13 @@ describe('综合分', () => {
 
   it('数据不足的维度不计入，其余权重重新归一化', () => {
     const r = scoreProduct(leaveOnSample, profile({}), data);
-    // 只有刺激 85 (0.25) 和环境 50 (0.1)：(85*0.25 + 50*0.1) / 0.35 = 75
-    expect(r.score).toBe(75);
-    expect(weightedTotal(r.dimensions)).toBe(75);
+    // 未设城市，环境不计分；需求、证据无数据：只剩刺激 85
+    expect(r.dimensions.environment.score).toBeNull();
+    expect(r.score).toBe(85);
+    expect(weightedTotal(r.dimensions)).toBe(85);
+    const hard = scoreProduct(leaveOnSample, profile({ city: city('hard') }), data);
+    // 刺激 85 (0.25) 和环境 50 (0.1)：(85*0.25 + 50*0.1) / 0.35 = 75
+    expect(hard.score).toBe(75);
   });
 
   it('高 / 中 / 低分界为 70 / 40', () => {
