@@ -160,7 +160,8 @@ export function parseWaterRecords(text: string): WaterRecord[] {
     city: r.city ?? '',
     country: r.country ?? '',
     regionId: r.region_id ?? '',
-    scope: r.geographic_scope ?? '',
+    // 旧记录的 geographic_scope 只是分类代码（如 named_utility_or_supply_system_only），这时用 region_name 的供水系统说明
+    scope: /^[a-z0-9_]+$/.test(r.geographic_scope ?? '') ? r.region_name ?? '' : r.geographic_scope ?? '',
     statisticType: r.statistic_type ?? '',
     value: num(r.hardness_value_mg_L_CaCO3),
     min: num(r.reported_range_min_mg_L_CaCO3),

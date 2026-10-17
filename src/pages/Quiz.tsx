@@ -85,7 +85,7 @@ function Multi<T extends string>(props: {
 }
 
 const STATISTIC_KEYS = [
-  'annual_mean', 'single_sample', 'single_sample_calculated', 'single_sample_with_historical_range', 'single_snapshot',
+  'annual_mean', 'reported_annual_mean', 'single_sample', 'single_sample_calculated', 'single_sample_with_historical_range', 'single_snapshot',
   'monthly_mean', 'reported_typical_range', 'reported_annual_range', 'reported_average', 'supplier_reported_annual_mean',
   'official_approximate_citywide_average', 'not_available',
 ];
@@ -93,8 +93,9 @@ const round1 = (n: number) => Math.round(n * 10) / 10;
 
 /** 一条水硬度记录的数值说明：口径 + 数值 / 范围；不同口径（年均、单次、范围、月均）用不同文案 */
 function WaterRecordRow({ r }: { r: WaterRecord }) {
-  const { t } = useI18n();
-  const stat = STATISTIC_KEYS.includes(r.statisticType) ? t(`water.stat.${r.statisticType}` as Key) : r.statisticType;
+  const { t, lang } = useI18n();
+  // 未登记的口径不显示内部代码
+  const stat = STATISTIC_KEYS.includes(r.statisticType) ? t(`water.stat.${r.statisticType}` as Key) : t('water.stat.other');
   const range = r.min !== null && r.max !== null ? `${round1(r.min)}–${round1(r.max)}` : '';
   const value = r.value !== null
     ? range ? t('water.valueRange', { v: round1(r.value), range }) : t('water.value', { v: round1(r.value) })
@@ -111,7 +112,8 @@ function WaterRecordRow({ r }: { r: WaterRecord }) {
         {r.sources[0] && <> · <a href={r.sources[0]} target="_blank" rel="noreferrer">{t('quiz.water.source')}</a></>}
         {r.retrievedOn && ` · ${t('quiz.water.retrieved', { d: r.retrievedOn })}`}
       </div>
-      {r.note && <div className="small muted">{r.note}</div>}
+      {/* 资料备注只有中文，英文界面不显示 */}
+      {r.note && lang === 'zh' && <div className="small muted">{r.note}</div>}
     </li>
   );
 }

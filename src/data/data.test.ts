@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parseCities, parseInciList, parseProducts } from './parse';
 import { buildIngredientIndex, cleanInciName } from './ingredientIndex';
@@ -188,6 +189,17 @@ describe('城市水硬度', () => {
     expect(byCity('Atlanta').waterHardness).toBe('unknown');
     expect(byCity('San Jose').waterHardness).toBe('unknown');
     expect(byCity('Minneapolis').waterHardness).toBe('moderate');
+  });
+
+  it('每条记录的口径都有中英文说明；适用范围是可读的供水系统名称', () => {
+    const zh = JSON.parse(readFileSync(new URL('../i18n/zh.json', import.meta.url), 'utf8'));
+    const en = JSON.parse(readFileSync(new URL('../i18n/en.json', import.meta.url), 'utf8'));
+    for (const w of real.water) {
+      expect(zh[`water.stat.${w.statisticType}`], w.statisticType).toBeTruthy();
+      expect(en[`water.stat.${w.statisticType}`], w.statisticType).toBeTruthy();
+      expect(w.scope).not.toMatch(/^[a-z0-9_]+$/);
+    }
+    expect(byCity('San Francisco').water[0].scope).toBe('San Francisco / SFPUC reported system');
   });
 
   it('旧格式 cities.csv（直接写 water_hardness）仍可读取', () => {

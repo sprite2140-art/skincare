@@ -338,9 +338,9 @@
   "fragrance.other": "其他加香成分",
   "quiz.water.variesNote": "不同水厂、水源或时期的硬度等级不同，需要看你家属于哪个供水分区。",
   "water.varies": "因供水分区而异",
-  "water.value": "{v} mg/L",
-  "water.valueRange": "{v} mg/L（范围 {range}）",
-  "water.rangeOnly": "{range} mg/L",
+  "water.value": "{v} mg/L（以 CaCO3 计）",
+  "water.valueRange": "{v} mg/L（以 CaCO3 计；范围 {range}）",
+  "water.rangeOnly": "{range} mg/L（以 CaCO3 计）",
   "water.noValue": "未取得数值",
   "water.stat.annual_mean": "年均",
   "water.stat.single_sample": "单次采样",
@@ -364,5 +364,8 @@
   "results.brandClaimsMismatch": "在售版本与品牌页不一致，没有采用品牌宣称。",
   "results.paired": "同系列",
   "set.sameSeries": "这两款是同系列产品；搭配不限定同系列，可以替换。",
-  "set.sameSeriesTag": "同系列"
+  "set.sameSeriesTag": "同系列",
+  "water.stat.reported_annual_mean": "公布的年均",
+  "water.stat.other": "其他口径",
+  "results.brandClaimsQuote": "品牌产品页原文"
 }

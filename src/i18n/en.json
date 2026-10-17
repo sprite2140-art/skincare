@@ -338,9 +338,9 @@
   "fragrance.other": "Other fragrance ingredients",
   "quiz.water.variesNote": "Hardness differs between plants, sources or periods; it depends on which supply zone your home is in.",
   "water.varies": "Varies by supply zone",
-  "water.value": "{v} mg/L",
-  "water.valueRange": "{v} mg/L (range {range})",
-  "water.rangeOnly": "{range} mg/L",
+  "water.value": "{v} mg/L as CaCO3",
+  "water.valueRange": "{v} mg/L as CaCO3 (range {range})",
+  "water.rangeOnly": "{range} mg/L as CaCO3",
   "water.noValue": "No value available",
   "water.stat.annual_mean": "Annual mean",
   "water.stat.single_sample": "Single sample",
@@ -364,5 +364,8 @@
   "results.brandClaimsMismatch": "The version on sale differs from the brand page, so the brand claim is not used.",
   "results.paired": "Same line",
   "set.sameSeries": "These two are from the same line; you don't have to match lines and can swap either.",
-  "set.sameSeriesTag": "same line"
+  "set.sameSeriesTag": "same line",
+  "water.stat.reported_annual_mean": "Reported annual mean",
+  "water.stat.other": "Other measure",
+  "results.brandClaimsQuote": "Brand product page"
 }

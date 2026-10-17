@@ -187,8 +187,15 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
           )}
           {p.brandClaims.text && (
             <p className="small" style={{ marginTop: 6 }}>
-              {t('results.brandClaims')}：{p.brandClaims.text}
-              {p.brandClaims.quote && <span className="muted">（“{p.brandClaims.quote}”）</span>}
+              {/* 概括只有中文；英文界面显示产品页原文短摘 */}
+              {lang === 'zh' || !p.brandClaims.quote ? (
+                <>
+                  {t('results.brandClaims')}：{p.brandClaims.text}
+                  {p.brandClaims.quote && <span className="muted">（“{p.brandClaims.quote}”）</span>}
+                </>
+              ) : (
+                <>{t('results.brandClaimsQuote')}: “{p.brandClaims.quote}”</>
+              )}
               {p.brandClaims.sourceUrl && <> · <a href={p.brandClaims.sourceUrl} target="_blank" rel="noreferrer">{t('results.source')}</a></>}
             </p>
           )}
