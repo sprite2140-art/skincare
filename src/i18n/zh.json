@@ -406,5 +406,6 @@
   "ing.cosingFunctions": "CosIng 登记功能",
   "ing.cosingSource": "来源：欧盟 CosIng 数据库，{d} 获取；登记功能是配方中的作用，不是功效",
   "ing.euAllergen": "欧盟需标注的香料致敏原，敏感人群可能过敏。",
-  "ing.perfumingNotFragrance": "CosIng 也登记了香料功能，但它还有其他功能，本项目不算加香成分。"
+  "ing.perfumingNotFragrance": "CosIng 也登记了香料功能，但它还有其他功能，本项目不算加香成分。",
+  "basis.keyActivesMissing": "资料还没有填写主打成分。"
 }

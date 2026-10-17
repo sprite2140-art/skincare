@@ -491,6 +491,8 @@ function scoreEvidence(needMatches: NeedMatch[], product: Product): Dimension {
   const en: string[] = [];
   const missingZh: string[] = [];
   const missingEn: string[] = [];
+  // 缺证据的需求里，有没有是靠"没有证据等级的成分"匹配上的（不是只有宣称或分类）
+  let unratedIngredient = false;
   for (const m of needMatches) {
     // 每个需求取最强的依据：成品测试 > 成分证据等级
     const best = m.ingredients
@@ -513,6 +515,7 @@ function scoreEvidence(needMatches: NeedMatch[], product: Product): Dimension {
       // 有品牌宣称、资料分类或没有证据等级的成分，但没有可评级的证据
       missingZh.push(t.zh);
       missingEn.push(t.en);
+      if (m.ingredients.length > 0) unratedIngredient = true;
     }
     if (score === null) continue;
     total += m.weight;
@@ -523,9 +526,12 @@ function scoreEvidence(needMatches: NeedMatch[], product: Product): Dimension {
     : null;
   if (total === 0) {
     if (missing) {
+      const basis = unratedIngredient
+        ? { zh: '只有品牌宣称、资料分类或尚无证据等级的成分', en: 'only brand claims, data classification or ingredients without an evidence level' }
+        : { zh: '只有品牌宣称或资料分类', en: 'only brand claims or data classification' };
       return dimension('evidence', null, {
-        zh: `暂无成分或测试证据（${missingZh.join('、')}只有品牌宣称或资料分类），不计分`,
-        en: `No ingredient or test evidence yet (only brand claims or data classification for ${missingEn.join(', ')}); not scored`,
+        zh: `暂无成分或测试证据（${missingZh.join('、')}${basis.zh}），不计分`,
+        en: `No ingredient or test evidence yet (${basis.en} for ${missingEn.join(', ')}); not scored`,
       }, 'missing');
     }
     return dimension('evidence', null, {

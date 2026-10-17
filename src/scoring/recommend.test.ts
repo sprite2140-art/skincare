@@ -385,3 +385,14 @@ describe('数据覆盖统计（npm run coverage）', () => {
     expect(r.paired).toBe(r.ids.length);
   });
 });
+
+describe('证据缺失的说明', () => {
+  it('只靠没有证据等级的成分匹配时，说明里不说成"只有品牌宣称或资料分类"', () => {
+    const clean = toScoringProfile(answers({ hair: { goals: ['clean'] } }), 'shampoo', ctx);
+    const p = { ...real.products[1], productId: 'T-UNRATED', keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA'], inciNameUnverified: [], claimedBenefits: [], testedClaims: [] };
+    const r = scoreProduct(p, clean, data);
+    expect(r.dimensions.need.score).toBeGreaterThan(0);
+    expect(r.dimensions.evidence.state).toBe('missing');
+    expect(r.dimensions.evidence.reason.zh).toContain('尚无证据等级的成分');
+  });
+});

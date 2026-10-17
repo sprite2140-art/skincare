@@ -88,6 +88,7 @@ function ReferenceRow({ r }: { r: ReferenceWater }) {
       <div className="small"><strong style={{ fontWeight: 500 }}>{refName(r, lang)}</strong> · {stat(r.statisticType)} · {value}</div>
       {/* 适用范围和备注只有中文，英文界面不显示 */}
       {lang === 'zh' && r.scope && <div className="small muted">{r.scope}</div>}
+      {lang === 'zh' && r.note && <div className="small muted">{r.note}</div>}
       <div className="small muted">
         {period && <>{t('quiz.water.period', { p: period })} · </>}
         <SourceLinks urls={r.sources} />

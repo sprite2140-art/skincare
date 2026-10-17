@@ -406,5 +406,6 @@
   "ing.cosingFunctions": "CosIng functions",
   "ing.cosingSource": "Source: EU CosIng database, retrieved {d}; functions describe the role in a formula, not a proven effect",
   "ing.euAllergen": "An EU labelled fragrance allergen; may cause allergy in sensitive people.",
-  "ing.perfumingNotFragrance": "CosIng also lists a fragrance function, but it has other functions too, so we do not count it as added fragrance."
+  "ing.perfumingNotFragrance": "CosIng also lists a fragrance function, but it has other functions too, so we do not count it as added fragrance.",
+  "basis.keyActivesMissing": "Key ingredients have not been filled in yet."
 }

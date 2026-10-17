@@ -197,7 +197,9 @@ function BasisBlock({ p }: { p: Product }) {
         <div>
           <dt>{t('basis.keyActives')}</dt>
           <dd>
-            {p.keyActives.length > 0 ? p.keyActives.join('；') : t('results.keyActivesNone')}
+            {p.keyActives.length > 0
+              ? p.keyActives.join('；')
+              : t(p.keyActivesDisclosed ? 'basis.keyActivesMissing' : 'results.keyActivesNone')}
             <span className="basis-note">{t('basis.ingredientNote')}</span>
           </dd>
         </div>
