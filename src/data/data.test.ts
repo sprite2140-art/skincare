@@ -42,8 +42,8 @@ describe('产品表新列', () => {
     const index = buildIngredientIndex(real.ingredients);
     expect(index.get('AQUA')?.inciName).toBe('Aqua');
     expect(index.get('PIROCTONE OLAMINE')?.inciName).toBe('Piroctone Olamine');
-    expect(index.get('parfum')?.inciName).toBe('Parfum');
-    expect(index.get('FRAGRANCE')?.inciName).toBe('Parfum');
+    expect(index.get('parfum')?.inciName).toBe('Fragrance');
+    expect(index.get('FRAGRANCE')?.inciName).toBe('Fragrance');
   });
 });
 

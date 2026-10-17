@@ -136,8 +136,8 @@ describe('头发问卷映射', () => {
   it('"去黄 / 去橙"只在选了染或烫漂时出现并生效', () => {
     expect(toneGoalAvailable({ conditions: ['dry'] })).toBe(false);
     expect(toneGoalAvailable({ conditions: ['permed_bleached'] })).toBe(true);
-    expect(hairTargets({ ...EMPTY_HAIR, conditions: ['colored'], goals: ['tone'] })).toEqual(['color_fade', 'damage', 'tone_correction']);
-    expect(hairTargets({ ...EMPTY_HAIR, goals: ['tone'] })).toEqual([]);
+    expect(hairTargets({ ...EMPTY_HAIR, conditions: ['colored'], goals: ['tone_yellow'] })).toEqual(['color_fade', 'damage', 'tone_yellow']);
+    expect(hairTargets({ ...EMPTY_HAIR, goals: ['tone_orange'] })).toEqual([]);
   });
 });
 

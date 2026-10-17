@@ -350,7 +350,15 @@ export function claimLabel(product: Pick<Product, 'claimSource'>): Text {
 }
 
 /** 一个困扰的匹配依据 */
-export type NeedBasis = 'tested' | 'claim' | 'key_active' | 'ingredient';
+/** claim = 产品定位（claimed_benefits，品牌原文或资料分类）；brand_claim = 品牌产品页明确宣称的效果（brand_claim_targets） */
+export type NeedBasis = 'tested' | 'claim' | 'brand_claim' | 'key_active' | 'ingredient';
+
+/** 产品定位类依据的标注：有品牌明确宣称时显示"品牌宣称"，否则按 claimed_benefits 的来源 */
+export function positioningLabel(m: Pick<NeedMatch, 'bases'>, product: Pick<Product, 'claimSource'>): Text | null {
+  if (m.bases.includes('brand_claim')) return { zh: '品牌宣称', en: 'brand claim' };
+  if (m.bases.includes('claim')) return claimLabel(product);
+  return null;
+}
 
 export interface NeedMatch {
   target: Target;
@@ -394,6 +402,10 @@ function scoreNeed(
       bases.push('tested');
       credit = Math.max(credit, TESTED_CLAIM_CREDIT);
     }
+    if (product.brandClaims.targets.includes(target)) {
+      bases.push('brand_claim');
+      credit = Math.max(credit, BRAND_CLAIM_CREDIT);
+    }
     if (product.claimedBenefits.includes(target)) {
       bases.push('claim');
       credit = Math.max(credit, BRAND_CLAIM_CREDIT);
@@ -430,10 +442,10 @@ function scoreNeed(
       partsZh.push('有成品测试');
       partsEn.push('product test available');
     }
-    if (m.bases.includes('claim')) {
-      const c = claimLabel(product);
-      partsZh.push(c.zh);
-      partsEn.push(c.en);
+    const pos = positioningLabel(m, product);
+    if (pos) {
+      partsZh.push(pos.zh);
+      partsEn.push(pos.en);
     }
     if (m.keyIngredients.length > 0) {
       const n = joinNames(m.keyIngredients.map((i) => ingredientName(i, i.inciName)));
@@ -486,10 +498,10 @@ function scoreEvidence(needMatches: NeedMatch[], product: Product): Dimension {
         zh.push(`${n.zh} ${best.evidenceLevel} 级`);
         en.push(`${n.en} level ${best.evidenceLevel}`);
       }
-    } else if (m.bases.includes('claim')) {
+    } else if (positioningLabel(m, product)) {
       score = CLAIM_ONLY_EVIDENCE_SCORE;
       const t = TARGET_LABELS[m.target];
-      const c = claimLabel(product);
+      const c = positioningLabel(m, product)!;
       zh.push(`${t.zh}只有${c.zh}`);
       en.push(`${c.en} only for ${t.en}`);
     }

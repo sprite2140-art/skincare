@@ -199,6 +199,11 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
               {p.brandClaims.sourceUrl && <> · <a href={p.brandClaims.sourceUrl} target="_blank" rel="noreferrer">{t('results.source')}</a></>}
             </p>
           )}
+          {p.brandClaims.targets.length > 0 && (
+            <p className="small" style={{ marginTop: 6 }}>
+              {t('results.brandClaimTargets')}：{p.brandClaims.targets.map((c) => tx(TARGET_LABELS[c])).join('、')}
+            </p>
+          )}
           {p.brandClaims.status === 'version_mismatch' && <p className="small muted" style={{ marginTop: 6 }}>{t('results.brandClaimsMismatch')}</p>}
         </div>
         {p.pairedProductIds.length > 0 && (

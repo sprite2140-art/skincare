@@ -182,7 +182,7 @@ const fake = (inciName: string, extra: Partial<Ingredient>): Ingredient => verif
 
 const fixtureIngredients: Ingredient[] = [
   verify(realIng('Piroctone Olamine'), { evidenceLevel: 'A' }),
-  verify(realIng('Parfum')),
+  verify(realIng('Fragrance')),
   verify(realIng('Glycerin')),
   fake('Aqua', { aliases: ['Water'] }),
   fake('Test Chelator', { functions: ['chelating'] }),
@@ -205,7 +205,7 @@ const data = { index, exchangeRates: real.exchangeRates, budgetCaps: {} };
 const sample: Product = {
   productId: 'SH-T-000', brand: 'Test', nameEn: 'Test Shampoo', nameZh: '测试洗发水', zone: 'scalp', category: 'shampoo',
   usageType: null, region: 'US', formulaNote: '', channels: [], inclusionBasis: '',
-  awards: [], claimedBenefits: [], claimSource: null, brandClaims: { text: '', quote: '', sourceUrl: '', status: null }, testedClaims: [], fragranceFreeSourceUrl: '', fragranceFreeClaim: 'unknown',
+  awards: [], claimedBenefits: [], claimSource: null, brandClaims: { text: '', quote: '', sourceUrl: '', status: null, targets: [] }, testedClaims: [], fragranceFreeSourceUrl: '', fragranceFreeClaim: 'unknown',
   inciList: ['Aqua', 'Sodium Laureth Sulfate', 'Glycerin', 'Piroctone Olamine', 'Parfum'], inciNameUnverified: [], keyActives: [],
   keyActivesDisclosed: true,
   inciListOriginal: '', price: 12, currency: 'USD', sizeMl: null, availableInCn: 'unknown', transparency: 'medium',

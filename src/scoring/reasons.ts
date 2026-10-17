@@ -2,25 +2,27 @@
 // 理由只说明依据（成品测试 / 品牌宣称或资料分类 / 成分功能），不推断实际柔顺程度或留香时长。
 
 import { TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
-import { claimLabel, type NeedMatch, type ProductScore, type ScoringProfile } from './score';
+import { positioningLabel, type NeedMatch, type ProductScore, type ScoringProfile } from './score';
 import type { Product } from '../data/types';
 
 function needReason(m: NeedMatch, product: Product): Text {
-  const c = claimLabel(product);
+  const c = positioningLabel(m, product);
   const t = TARGET_LABELS[m.target];
   if (m.bases.includes('tested')) {
     return { zh: `针对${t.zh}：有成品测试支持（依据：成品测试）`, en: `For ${t.en}: supported by a product test (basis: product test)` };
   }
   if (m.keyIngredients.length > 0) {
     const n = joinNames(m.keyIngredients.slice(0, 2).map((i) => ingredientName(i, i.inciName)));
-    const claim = m.bases.includes('claim') ? { zh: `${c.zh} + `, en: `${c.en} + ` } : { zh: '', en: '' };
+    const claim = c ? { zh: `${c.zh} + `, en: `${c.en} + ` } : { zh: '', en: '' };
     return {
       zh: `针对${t.zh}：主打成分含${n.zh}（依据：${claim.zh}成分功能）`,
       en: `For ${t.en}: key ingredient ${n.en} (basis: ${claim.en}ingredient function)`,
     };
   }
-  if (m.bases.includes('claim')) {
-    return { zh: `产品定位针对${t.zh}（依据：${c.zh}）`, en: `Positioned for ${t.en} (basis: ${c.en})` };
+  if (c) {
+    return m.bases.includes('brand_claim')
+      ? { zh: `品牌宣称针对${t.zh}（依据：品牌宣称）`, en: `Brand claims it helps with ${t.en} (basis: brand claim)` }
+      : { zh: `产品定位针对${t.zh}（依据：${c.zh}）`, en: `Positioned for ${t.en} (basis: ${c.en})` };
   }
   const n = joinNames(m.ingredients.slice(0, 2).map((i) => ingredientName(i, i.inciName)));
   return {

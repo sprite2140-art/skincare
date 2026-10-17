@@ -55,6 +55,7 @@
 | 依据 | 来源 | 需求匹配计分 |
 |---|---|---|
 | 可靠的成品测试 | products.csv 的 tested_claims（必须有来源链接；目前没有数据） | 1 |
+| 品牌宣称 | brand_claim_targets（品牌产品页明确宣称的效果，按对应表从原文整理） | 0.7 |
 | 产品定位 | claimed_benefits。claim_source = brand_text（品牌原文）时显示"品牌宣称"，data_classification（资料整理时的分类）时显示"资料分类"；目前的数据全部是资料分类 | 0.7（两种来源相同） |
 | 品牌宣称的主打成分 | key_actives（品牌原文）对应到成分表 | 1 |
 | 成分功能 | 成分库 targets；螯合剂按功能对应"清洁残留"（`FUNCTION_TARGETS`） | 只有非主打成分覆盖：0.3 |
@@ -67,8 +68,7 @@
 
 代码在 `src/scoring/fragrance.ts`。安全相关，draft 成分也算。
 
-- 加香成分：risk_tags 含 fragrance 的成分，包括成分库中的香精 Fragrance/Parfum 和香料、欧盟需标注的香料致敏原（data/eu_fragrance_allergens.csv），以及 CosIng 登记功能含香料（perfuming）的成分。详情分开列出"欧盟需标注的香料致敏原""CosIng 登记功能含香料""其他加香成分"。精油（essential_oil）单独列出。
-- 注意：CosIng 的 perfuming 是登记功能，有些植物油、提取物也登记了这一功能，可能在配方中并非用于加香；按作者决定一律识别为加香成分，宁可多提示。
+- 加香成分只限：(a) 香精统称 Parfum / Fragrance / Aroma / Flavor；(b) 欧盟香料致敏原；(c) CosIng 功能只有 perfuming / fragrance；(d) 精油。规则见 DATA_SCHEMA.md。甘油、柠檬酸、咖啡因等登记了香料功能但还有其他功能的成分不算加香。详情分开列出"欧盟需标注的香料致敏原""CosIng 只登记了香料功能""其他加香成分"和精油。
 - 状态：标注无香（fragrance_free_claim = yes）且未发现加香成分 / 未标注无香但未发现加香成分 / 含加香成分。标了无香但成分表里有香精的，按含加香成分处理。
 - 不在成分库或名称未核对的成分无法判断，在理由和详情中写明"另有 N 个成分暂无数据，无法完全确认"，并说明"不能保证不含致敏原"。
 - 用户选"无香优先"时，可推荐的产品先按层级排序：标注无香 → 未发现加香成分 → 只含精油 → 含加香成分，同一层级内按综合分。只是排序，不排除；想排除香精请在"想避开的成分"中选。
