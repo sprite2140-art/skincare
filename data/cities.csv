@@ -1,0 +1,29 @@
+city,country,water_hardness,hardness_mg_l,data_period,supply_scope,confidence,source,retrieved_on,review_status
+New York,US,soft,约 31,官方 FAQ 全市均值约 1.8 gpg（未注明采样年）,NYC DEP citywide general guidance（全市一般说明；部分混合供水区可达约 120 mg/L）,low,https://www.nyc.gov/site/dep/water/drinking-water-frequently-asked-questions.page?question=faq2,2026-10-16,draft
+Los Angeles,US,unknown,,,,,,,draft
+San Francisco,US,moderate,62,2025 年均值（年内范围 8.1–112）,SFPUC reported system（年均值；不能推广到整个湾区）,medium,https://www.sfpuc.gov/sites/default/files/accounts-and-services/water-quality/water-quality-en-SF-2025.pdf,2026-10-16,draft
+San Jose,US,unknown,,,,,,,draft
+Seattle,US,unknown,,,,,,,draft
+Boston,US,soft,13.1,2026 年 1 月单次快照,MWRA Metro-Boston / Carroll 处理后水样点（单点，不是全年均值）,low,https://www.mwra.com/media/file/wq-update-032026rev1,2026-10-16,draft
+Chicago,US,unknown,,,,,,,draft
+Houston,US,unknown,,,,,,,draft
+Dallas,US,unknown,,,,,,,draft
+Austin,US,unknown,,,,,,,draft
+Philadelphia,US,unknown,,,,,,,draft
+Washington,US,unknown,,,,,,,draft
+Atlanta,US,unknown,,,,,,,draft
+Miami,US,unknown,,,,,,,draft
+Phoenix,US,hard,172–302,2025 年度范围（未公布均值）,Phoenix Public Water System（硬到很硬）,medium,https://www.phoenix.gov/content/dam/phoenix/waterservicessite/documents/wsdprimarywqr.pdf,2026-10-16,draft
+San Diego,US,unknown,,,,,,,draft
+Las Vegas,US,very_hard,280,2026 年摘要中的平均值（未注明采样期）,Las Vegas Valley Water District service area,medium,https://www.lvvwd.com/assets/pdf/water-quality-summary-las-vegas-valley.pdf,2026-10-16,draft
+Denver,US,unknown,,,,,,,draft
+Portland,US,unknown,,,,,,,draft
+Irvine,US,unknown,,,,,,,draft
+Tokyo,JP,unknown,,,,,,,draft
+Osaka,JP,unknown,,,,,,,draft
+Seoul,KR,unknown,,,,,,,draft
+Busan,KR,unknown,,,,,,,draft
+Beijing,CN,unknown,,,,,,,draft
+Shanghai,CN,unknown,,,,,,,draft
+Guangzhou,CN,unknown,,,,,,,draft
+Shenzhen,CN,unknown,,,,,,,draft
