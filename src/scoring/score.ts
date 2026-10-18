@@ -10,7 +10,7 @@ import { usageTypeOf } from '../data/types';
 import type { City, ExchangeRate, Ingredient, Product, RiskTag, Target } from '../data/types';
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import {
-  BRAND_CLAIM_CREDIT, CHELATING_FUNCTION, CLAIM_ONLY_EVIDENCE_SCORE, ENVIRONMENT_SCORES, EVIDENCE_SCORES, FUNCTION_TARGETS,
+  BRAND_CLAIM_CREDIT, CHELATOR_TARGETS, ENVIRONMENT_SCORES, EVIDENCE_SCORES, MISSING_EVIDENCE_CAP_LEVEL,
   IRRITANT_DEDUCTION, IRRITANT_TAGS, LEVEL_THRESHOLDS, NON_KEY_ACTIVE_CREDIT, RANKED_CONCERN_WEIGHTS, RINSE_OFF_MULTIPLIER,
   SENSITIVE_MULTIPLIER, STRONG_CLEANSER_DEDUCTION, TESTED_CLAIM_CREDIT, TESTED_EVIDENCE_SCORE, WEIGHTS, type DimensionKey,
 } from './config';
@@ -69,6 +69,11 @@ export interface Dimension {
   level: Level | null;
   weight: number;
   reason: Text;
+  /**
+   * score 为 null 的原因：not_scored = 这个维度对你不适用（如水质不硬、未设城市），
+   * missing = 数据缺失（如只有品牌宣称或资料分类，没有成分或测试证据）。两者都不参与加权。
+   */
+  state?: 'not_scored' | 'missing';
 }
 
 export interface Flag {
@@ -93,6 +98,14 @@ export interface ProductScore {
   exclusions: Flag[];
   /** 综合适配分 0–100；null 表示没有可用的已核对数据 */
   score: number | null;
+  /** 适合等级（高 / 中 / 低，按综合分）；没有选需求时为 null，页面不显示总分和适合等级 */
+  fitLevel: Level | null;
+  /** 用户没有选任何需求：按温和程度和价格排序 */
+  noNeeds: boolean;
+  /** 选了需求但需求匹配为 0：不进入推荐列表，放在"不太匹配"区域 */
+  lowMatch: boolean;
+  /** 总分因证据缺失按 C 级封顶 */
+  evidenceCapped: boolean;
   dimensions: Record<DimensionKey, Dimension>;
   notices: Flag[];
   conflicts: ConflictWarning[];
@@ -132,9 +145,11 @@ export function levelOf(score: number | null): Level | null {
   return 'low';
 }
 
-function dimension(key: DimensionKey, score: number | null, reason: Text): Dimension {
+function dimension(key: DimensionKey, score: number | null, reason: Text, state?: Dimension['state']): Dimension {
   const rounded = score === null ? null : Math.round(score);
-  return { score: rounded, level: levelOf(rounded), weight: WEIGHTS[key], reason };
+  const d: Dimension = { score: rounded, level: levelOf(rounded), weight: WEIGHTS[key], reason };
+  if (rounded === null) d.state = state ?? 'missing';
+  return d;
 }
 
 function resolve(product: Product, index: IngredientIndex): Resolved[] {
@@ -371,10 +386,10 @@ export interface NeedMatch {
   keyIngredients: Ingredient[];
 }
 
-/** 成分是否针对某困扰：成分库 targets，或按功能（如螯合剂 → 清洁残留）辅助匹配 */
+/** 成分是否针对某困扰：成分库 targets，或螯合剂清单上的成分 → 产品残留 */
 function ingredientTargets(i: Ingredient, target: Target): boolean {
   if (i.category === 'active' && i.targets.includes(target)) return true;
-  return i.functions.some((f) => FUNCTION_TARGETS[f]?.includes(target));
+  return !!i.chelator && CHELATOR_TARGETS.includes(target);
 }
 
 /**
@@ -475,20 +490,26 @@ function scoreNeed(
   };
 }
 
-function scoreEvidence(needMatches: NeedMatch[], product: Product): Dimension {
+function scoreEvidence(needMatches: NeedMatch[], product: Product): { dim: Dimension; capScore: number | null } {
+  // 只有成品测试和成分证据计入证据强度。只有品牌宣称或资料分类的需求不计入（数据缺失），
+  // 在说明里写"暂无成分或测试证据"，不再记一个低分。
   let total = 0;
   let sum = 0;
   const zh: string[] = [];
   const en: string[] = [];
+  const missingZh: string[] = [];
+  const missingEn: string[] = [];
+  // 缺证据的需求里，有没有是靠"没有证据等级的成分"匹配上的（不是只有宣称或分类）
+  let unratedIngredient = false;
   for (const m of needMatches) {
-    // 每个困扰取最强的依据：成品测试 > 成分证据等级 > 只有品牌宣称
+    // 每个需求取最强的依据：成品测试 > 成分证据等级
     const best = m.ingredients
       .filter((i) => i.evidenceLevel !== null)
       .sort((a, b) => EVIDENCE_SCORES[b.evidenceLevel!] - EVIDENCE_SCORES[a.evidenceLevel!])[0];
+    const t = TARGET_LABELS[m.target];
     let score: number | null = null;
     if (m.bases.includes('tested')) {
       score = TESTED_EVIDENCE_SCORE;
-      const t = TARGET_LABELS[m.target];
       zh.push(`${t.zh}有成品测试`);
       en.push(`product test for ${t.en}`);
     } else if (best) {
@@ -498,27 +519,57 @@ function scoreEvidence(needMatches: NeedMatch[], product: Product): Dimension {
         zh.push(`${n.zh} ${best.evidenceLevel} 级`);
         en.push(`${n.en} level ${best.evidenceLevel}`);
       }
-    } else if (positioningLabel(m, product)) {
-      score = CLAIM_ONLY_EVIDENCE_SCORE;
-      const t = TARGET_LABELS[m.target];
-      const c = positioningLabel(m, product)!;
-      zh.push(`${t.zh}只有${c.zh}`);
-      en.push(`${c.en} only for ${t.en}`);
+    } else if (positioningLabel(m, product) || m.ingredients.length > 0) {
+      // 有品牌宣称、资料分类或没有证据等级的成分，但没有可评级的证据
+      missingZh.push(t.zh);
+      missingEn.push(t.en);
+      if (m.ingredients.length > 0) unratedIngredient = true;
     }
     if (score === null) continue;
     total += m.weight;
     sum += m.weight * score;
   }
-  if (total === 0) {
-    return dimension('evidence', null, {
-      zh: '没有针对你需求的依据，无法评估证据强度',
-      en: 'Nothing supports your needs, so evidence cannot be rated',
-    });
+  // 证据缺失的需求按 C 级计算的证据分：用于总分封顶（缺证据最多与 C 级打平）
+  let capW = total;
+  let capSum = sum;
+  for (const m of needMatches) {
+    if (missingEn.includes(TARGET_LABELS[m.target].en)) {
+      capW += m.weight;
+      capSum += m.weight * EVIDENCE_SCORES[MISSING_EVIDENCE_CAP_LEVEL];
+    }
   }
-  return dimension('evidence', sum / total, {
-    zh: '依据：' + zh.join('、'),
-    en: 'Basis: ' + en.join(', '),
-  });
+  const capScore = missingZh.length > 0 && capW > 0 ? capSum / capW : null;
+  const missing = missingZh.length > 0
+    ? { zh: `${missingZh.join('、')}暂无成分或测试证据，不计入`, en: `no ingredient or test evidence for ${missingEn.join(', ')}, not counted` }
+    : null;
+  if (total === 0) {
+    if (missing) {
+      const basis = unratedIngredient
+        ? { zh: '只有品牌宣称、资料分类或尚无证据等级的成分', en: 'only brand claims, data classification or ingredients without an evidence level' }
+        : { zh: '只有品牌宣称或资料分类', en: 'only brand claims or data classification' };
+      return {
+        dim: dimension('evidence', null, {
+          zh: `暂无成分或测试证据（${missingZh.join('、')}${basis.zh}），不计分`,
+          en: `No ingredient or test evidence yet (${basis.en} for ${missingEn.join(', ')}); not scored`,
+        }, 'missing'),
+        capScore,
+      };
+    }
+    return {
+      dim: dimension('evidence', null, {
+        zh: '没有针对你需求的依据，无法评估证据强度',
+        en: 'Nothing supports your needs, so evidence cannot be rated',
+      }, 'missing'),
+      capScore: null,
+    };
+  }
+  return {
+    dim: dimension('evidence', sum / total, {
+      zh: '依据：' + zh.join('、') + (missing ? `；${missing.zh}` : ''),
+      en: 'Basis: ' + en.join(', ') + (missing ? `; ${missing.en}` : ''),
+    }),
+    capScore,
+  };
 }
 
 function scoreIrritation(
@@ -567,24 +618,25 @@ function scoreIrritation(
 }
 
 function scoreEnvironment(verified: (Resolved & { ingredient: Ingredient })[], city: City | null, allowDraft: boolean): Dimension {
-  const neutral = (reason: Text) => dimension('environment', ENVIRONMENT_SCORES.neutral, reason);
-  if (!city) return neutral({ zh: '未设置城市，按中性计分', en: 'No city set, scored as neutral' });
+  // 只有水偏硬时才计分；未设城市、无数据、数据未核对、各区不同、水质不硬时不计分，其余维度权重重新归一化
+  const skip = (reason: Text) => dimension('environment', null, reason, 'not_scored');
+  if (!city) return skip({ zh: '未设置城市，不计分', en: 'No city set; not scored' });
   if (city.reviewStatus !== 'verified' && !(allowDraft && city.waterHardness !== 'unknown')) {
-    return neutral({ zh: `${city.city}的水硬度数据未核对，按中性计分`, en: `Water hardness for ${city.city} is not verified yet, scored as neutral` });
+    return skip({ zh: `${city.city}的水硬度数据未核对，不计分`, en: `Water hardness for ${city.city} is not verified yet; not scored` });
   }
   if (city.waterHardness === 'varies') {
-    return neutral({
-      zh: `${city.city}不同供水分区或时期的水硬度不同，无法确定你家的水，按中性计分`,
-      en: `Water hardness in ${city.city} differs by supply zone or period, so yours cannot be determined; scored as neutral`,
+    return skip({
+      zh: `${city.city}不同供水分区或时期的水硬度不同，无法确定你家的水，不计分`,
+      en: `Water hardness in ${city.city} differs by supply zone or period, so yours cannot be determined; not scored`,
     });
   }
   if (city.waterHardness === 'unknown') {
-    return neutral({ zh: `暂无${city.city}的水硬度数据，按中性计分`, en: `No water hardness data for ${city.city}, scored as neutral` });
+    return skip({ zh: `暂无${city.city}的水硬度数据，不计分`, en: `No water hardness data for ${city.city}; not scored` });
   }
   if (city.waterHardness !== 'hard' && city.waterHardness !== 'very_hard') {
-    return neutral({ zh: `${city.city}水质不硬，无需特别考虑`, en: `Water in ${city.city} is not hard, no special needs` });
+    return skip({ zh: `${city.city}水质不硬，不计分`, en: `Water in ${city.city} is not hard; not scored` });
   }
-  const chelators = verified.filter((r) => r.ingredient.functions.includes(CHELATING_FUNCTION));
+  const chelators = verified.filter((r) => r.ingredient.chelator);
   if (chelators.length > 0) {
     const names = joinNames(chelators.map((r) => ingredientName(r.ingredient, r.raw)));
     return dimension('environment', ENVIRONMENT_SCORES.hardWithChelator, {
@@ -695,6 +747,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   const noData: Text = { zh: '没有可用的成分数据，无法评分', en: 'No usable ingredient data, cannot score' };
   let dimensions: Record<DimensionKey, Dimension>;
   let needMatches: NeedMatch[] = [];
+  let evidenceCap: number | null = null;
   if (verified.length === 0) {
     dimensions = {
       need: dimension('need', null, noData),
@@ -705,19 +758,44 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   } else {
     const need = scoreNeed(product, verified, weights, productKeyActiveTerms(product));
     needMatches = need.needMatches;
+    const evidence = scoreEvidence(needMatches, product);
+    evidenceCap = evidence.capScore;
     dimensions = {
       need: need.dim,
       irritation: scoreIrritation(verified, profile, product),
-      evidence: scoreEvidence(needMatches, product),
+      evidence: evidence.dim,
       environment: scoreEnvironment(verified, profile.city, !!data.allowDraft),
     };
   }
+
+  // 证据缺失时总分封顶：按缺失的需求证据为 C 级计算的总分，不反超 C 级证据的产品，也不额外扣分
+  let score = weightedTotal(dimensions);
+  let evidenceCapped = false;
+  if (score !== null && evidenceCap !== null) {
+    const capped = weightedTotal({ ...dimensions, evidence: { ...dimensions.evidence, score: Math.round(evidenceCap) } });
+    if (capped !== null && capped < score) {
+      score = capped;
+      evidenceCapped = true;
+      dimensions.evidence = {
+        ...dimensions.evidence,
+        reason: {
+          zh: `${dimensions.evidence.reason.zh}；总分上限按证据弱（C 级）计算`,
+          en: `${dimensions.evidence.reason.en}; total capped as if evidence were weak (level C)`,
+        },
+      };
+    }
+  }
+  const noNeeds = profile.concerns.length === 0;
 
   return {
     product,
     excluded: exclusions.length > 0,
     exclusions,
-    score: weightedTotal(dimensions),
+    score,
+    fitLevel: noNeeds ? null : levelOf(score),
+    noNeeds,
+    lowMatch: !noNeeds && dimensions.need.score === 0,
+    evidenceCapped,
     dimensions,
     notices,
     conflicts,
@@ -732,19 +810,32 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   };
 }
 
-/** 对某品类的所有产品打分并排序：可推荐的按分数从高到低，无法评分的其次，被排除的最后 */
+/**
+ * 对某品类的所有产品打分并排序。分组：可推荐 → 不太匹配（选了需求但需求匹配为 0）→ 无法评分 → 被排除。
+ * 组内：
+ * - 选了需求：适合等级（高 → 中 → 低）→ 香味层级（只在"无香优先"时）→ 综合分。
+ * - 没有选需求：温和程度（刺激风险分）从高到低 → 价格从低到高。
+ */
 export function rankProducts(
   products: Product[],
   category: string,
   profile: ScoringProfile,
   data: ScoringData,
 ): ProductScore[] {
-  const rank = (s: ProductScore) => (s.excluded ? 2 : s.score === null ? 1 : 0);
-  // 无香优先：可推荐的产品先按香味层级排序（标注无香 → 未发现香精 → 只含精油 → 含香精），同层按分数
+  const group = (s: ProductScore) => (s.excluded ? 3 : s.score === null ? 2 : s.lowMatch ? 1 : 0);
+  const LEVEL_ORDER = { high: 0, medium: 1, low: 2 } as const;
+  const level = (s: ProductScore) => (s.fitLevel ? LEVEL_ORDER[s.fitLevel] : 3);
   const tier = (s: ProductScore) => (profile.fragrancePref === 'free_first' && !s.excluded ? fragranceTier(s.fragrance) : 0);
+  const gentle = (s: ProductScore) => s.dimensions.irritation.score ?? -1;
+  const price = (s: ProductScore) => s.price.usd ?? Infinity;
+  const noNeeds = profile.concerns.length === 0;
   return products
     .filter((p) => p.category === category)
     .map((p) => scoreProduct(p, profile, data))
     .sort((a, b) =>
-      rank(a) - rank(b) || tier(a) - tier(b) || (b.score ?? 0) - (a.score ?? 0) || a.product.productId.localeCompare(b.product.productId));
+      group(a) - group(b)
+      || (noNeeds
+        ? gentle(b) - gentle(a) || price(a) - price(b)
+        : level(a) - level(b) || tier(a) - tier(b) || (b.score ?? 0) - (a.score ?? 0))
+      || a.product.productId.localeCompare(b.product.productId));
 }

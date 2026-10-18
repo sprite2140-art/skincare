@@ -321,3 +321,43 @@ details.more[open] summary::after { content: '−'; }
   .score .num { font-size: 32px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* 水硬度刻度条：USGS 四档，你的城市为深色圆点或一段，参照城市为细刻度 */
+.water-line { margin: 6px 0 0; }
+.wscale { margin-top: 14px; }
+.wscale-labels { position: relative; height: 18px; font-size: 11px; }
+.wscale-labels span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.wscale-bar { position: relative; height: 12px; border-radius: var(--radius); overflow: visible; }
+.wscale-band { position: absolute; top: 0; bottom: 0; border-right: 1px solid var(--surface); }
+.wscale-band.soft { background: color-mix(in srgb, var(--good) 22%, var(--surface)); border-radius: var(--radius) 0 0 var(--radius); }
+.wscale-band.moderate { background: color-mix(in srgb, var(--good) 9%, var(--surface)); }
+.wscale-band.hard { background: color-mix(in srgb, var(--mid) 22%, var(--surface)); }
+.wscale-band.very_hard { background: color-mix(in srgb, var(--bad) 22%, var(--surface)); border-radius: 0 var(--radius) var(--radius) 0; border-right: 0; }
+.wscale-ref { position: absolute; bottom: -5px; width: 1px; height: 8px; background: var(--muted); transform: translateX(-0.5px); }
+.wscale-you { position: absolute; top: 50%; transform: translateY(-50%); background: var(--ink); }
+.wscale-you.dot { width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; border: 2px solid var(--surface); box-sizing: content-box; }
+.wscale-you.span { height: 6px; border-radius: 3px; min-width: 6px; }
+.wscale-ticks { position: relative; height: 16px; margin-top: 6px; font-size: 11px; }
+.wscale-ticks span { position: absolute; transform: translateX(-50%); }
+.wscale-ticks span:first-child { transform: none; }
+.wscale-ticks span:last-child { transform: translateX(-100%); }
+.wscale-legend { margin-top: 8px; }
+.key-you, .key-ref { display: inline-block; vertical-align: middle; margin-right: 4px; }
+.key-you { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+.key-ref { width: 1px; height: 8px; background: var(--muted); }
+
+/* 效果依据：每类一条，左侧类别，右侧内容和一句说明 */
+.basis { margin: 8px 0 0; display: grid; gap: 10px; }
+.basis > div { display: grid; grid-template-columns: 5.5em 1fr; gap: 8px; font-size: var(--fs-small); }
+.basis dt { color: var(--muted); }
+.basis dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.basis .basis-sub, .basis .basis-note { display: block; margin-top: 2px; }
+.basis .basis-note { color: var(--muted); font-size: var(--fs-label); }
+.basis dt::first-letter { text-transform: uppercase; }
+.ing-src { display: block; font-size: var(--fs-label); margin-top: 2px; }
+.score .fit { margin-top: 4px; font-size: var(--fs-label); }
+.score .fit.high { color: var(--good); }
+.score .fit.medium { color: var(--mid); }
+.score .fit.low { color: var(--bad); }
+.score.gentle .num { font-size: 28px; }
+.tag.scent { font-size: 12px; padding: 2px 8px; }

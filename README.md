@@ -29,6 +29,7 @@ npm test               # 运行测试
 npm run validate-data  # 检查 data/ 下的 CSV
 npm run ingredient-frequency  # 成分出现频率（按统一后的名称合并），决定成分库整理顺序
 npm run ingredient-review     # 生成 docs/INGREDIENT_REVIEW.md：待核对的有效成分和风险成分清单
+npm run coverage      # 生成 docs/COVERAGE.md：各需求 × 预算档位的可推荐产品数（数据更新后重新运行）
 npm run build          # 构建静态网页到 dist/
 ```
 

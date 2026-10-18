@@ -22,7 +22,8 @@ export interface Routine {
   noMatch: boolean;
 }
 
-const eligible = (list: ProductScore[]) => list.filter((r) => !r.excluded && r.score !== null);
+// 不太匹配（选了需求但需求匹配为 0）的产品不参与搭配
+const eligible = (list: ProductScore[]) => list.filter((r) => !r.excluded && r.score !== null && !r.lowMatch);
 
 /**
  * lists：各品类已排序的打分结果（已应用单品预算和成分排除）。

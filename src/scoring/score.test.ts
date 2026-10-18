@@ -35,9 +35,9 @@ describe('data/ 真实数据', () => {
   const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
   it('CSV 能正确解析，名称已统一', () => {
-    // 洗发水 57 款（美国 47、日韩中 10），护发素 30 款
-    expect(real.products).toHaveLength(87);
-    expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(30);
+    // 洗发水 70 款（美国 60、日韩中 10），护发素 37 款
+    expect(real.products).toHaveLength(107);
+    expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(37);
     // 保留原有产品 ID
     for (const id of ['SH-US-001', 'SH-US-008', 'SH-JP-001', 'SH-KR-003', 'SH-CN-002']) expect(byId(id)).toBeDefined();
     const us1 = byId('SH-US-001');
@@ -72,14 +72,15 @@ describe('data/ 真实数据', () => {
   });
 
   it('没有价格的产品不参与三分位计算', () => {
-    expect(budgetCaps.shampoo!.sampleSize).toBe(54);
+    expect(budgetCaps.shampoo!.sampleSize).toBe(67);
   });
 
   it('关闭测试模式时，draft 有效成分不参与需求匹配（只剩资料分类的产品定位）；基础成分无需核对即可使用', () => {
     const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), strict);
     expect(r.dimensions.need.score).toBe(70);
     expect(r.dimensions.need.reason.zh).toBe('针对头皮屑：资料分类');
-    expect(r.dimensions.evidence.score).toBe(30);
+    expect(r.dimensions.evidence.score).toBeNull(); // 只有资料分类：数据缺失，不计入
+    expect(r.dimensions.evidence.reason.zh).toContain('暂无成分或测试证据');
     expect(r.unverifiedIngredients).toContain('Pyrithione Zinc');
     expect(r.unverifiedIngredients).not.toContain('Water'); // Aqua 是基础成分
     expect(r.usesDraftData).toBe(false);
@@ -145,13 +146,13 @@ describe('按市场筛选', () => {
     expect(marketForCity(null)).toBe('US');
     const us = filterByMarket(shampoos, 'US', false);
     expect(ids(us.shown).every((id) => id.startsWith('SH-US'))).toBe(true);
-    expect(us.shown).toHaveLength(47);
+    expect(us.shown).toHaveLength(60);
     expect(us.hiddenCount).toBe(10);
     expect(filterByMarket(shampoos, 'JP', false).shown).toHaveLength(4);
   });
 
   it('打开"显示其他地区版本"后显示全部；没有市场时不筛选', () => {
-    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(57);
+    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(70);
     expect(filterByMarket(shampoos, null, false)).toEqual({ shown: shampoos, hiddenCount: 0 });
   });
 
@@ -185,7 +186,8 @@ const fixtureIngredients: Ingredient[] = [
   verify(realIng('Fragrance')),
   verify(realIng('Glycerin')),
   fake('Aqua', { aliases: ['Water'] }),
-  fake('Test Chelator', { functions: ['chelating'] }),
+  fake('Test Chelator', { functions: ['chelating'], chelator: true }),
+  fake('Test Function Chelator', { functions: ['chelating'] }),
   fake('Test Itch Relief', { category: 'active', targets: ['scalp_itch'], evidenceLevel: 'C' }),
   fake('Test Oil Control', { category: 'active', targets: ['scalp_oil'], evidenceLevel: 'B' }),
   fake('Test Essential Oil', { category: 'risk', riskTags: ['essential_oil'] }),
@@ -204,7 +206,7 @@ const data = { index, exchangeRates: real.exchangeRates, budgetCaps: {} };
 // 测试用的虚构洗发水
 const sample: Product = {
   productId: 'SH-T-000', brand: 'Test', nameEn: 'Test Shampoo', nameZh: '测试洗发水', zone: 'scalp', category: 'shampoo',
-  usageType: null, region: 'US', formulaNote: '', channels: [], inclusionBasis: '',
+  usageType: null, subtype: null, region: 'US', formulaNote: '', channels: [], inclusionBasis: '',
   awards: [], claimedBenefits: [], claimSource: null, brandClaims: { text: '', quote: '', sourceUrl: '', status: null, targets: [] }, testedClaims: [], fragranceFreeSourceUrl: '', fragranceFreeClaim: 'unknown',
   inciList: ['Aqua', 'Sodium Laureth Sulfate', 'Glycerin', 'Piroctone Olamine', 'Parfum'], inciNameUnverified: [], keyActives: [],
   keyActivesDisclosed: true,
@@ -415,14 +417,17 @@ describe('证据强度', () => {
 
 describe('环境适配', () => {
   const withChelator = product('P12', ['Aqua', 'Test Chelator']);
-  it('硬水 + 螯合剂 = 100，硬水无螯合剂 = 50', () => {
+  it('硬水 + 螯合剂（清单上的）= 100，硬水无螯合剂 = 50；只登记了 chelating 功能不算', () => {
     expect(scoreProduct(withChelator, profile({ city: city('hard') }), data).dimensions.environment.score).toBe(100);
+    const fnOnly = product('P12b', ['Aqua', 'Test Function Chelator']);
+    expect(scoreProduct(fnOnly, profile({ city: city('hard') }), data).dimensions.environment.score).toBe(50);
     expect(scoreProduct(sample, profile({ city: city('hard') }), data).dimensions.environment.score).toBe(50);
   });
-  it('未设城市、水硬度未知、城市数据未核对、软水：中性 50 并说明原因', () => {
+  it('未设城市、水硬度未知、城市数据未核对、软水：不计分并说明原因', () => {
     for (const c of [null, city('unknown'), city('hard', 'draft'), city('soft')]) {
       const d = scoreProduct(withChelator, profile({ city: c }), data).dimensions.environment;
-      expect(d.score).toBe(50);
+      expect(d.score).toBeNull();
+      expect(d.state).toBe('not_scored');
       expect(d.reason.zh.length).toBeGreaterThan(0);
     }
     expect(scoreProduct(withChelator, profile({ city: city('hard', 'draft') }), data).dimensions.environment.reason.zh).toContain('未核对');
@@ -440,9 +445,13 @@ describe('综合分', () => {
 
   it('数据不足的维度不计入，其余权重重新归一化', () => {
     const r = scoreProduct(leaveOnSample, profile({}), data);
-    // 只有刺激 85 (0.25) 和环境 50 (0.1)：(85*0.25 + 50*0.1) / 0.35 = 75
-    expect(r.score).toBe(75);
-    expect(weightedTotal(r.dimensions)).toBe(75);
+    // 未设城市，环境不计分；需求、证据无数据：只剩刺激 85
+    expect(r.dimensions.environment.score).toBeNull();
+    expect(r.score).toBe(85);
+    expect(weightedTotal(r.dimensions)).toBe(85);
+    const hard = scoreProduct(leaveOnSample, profile({ city: city('hard') }), data);
+    // 刺激 85 (0.25) 和环境 50 (0.1)：(85*0.25 + 50*0.1) / 0.35 = 75
+    expect(hard.score).toBe(75);
   });
 
   it('高 / 中 / 低分界为 70 / 40', () => {
@@ -630,5 +639,61 @@ describe('排序', () => {
     ];
     const ranked = rankProducts(products, 'shampoo', profile({ concerns: ['dandruff'], specialStatus: 'pregnant' }), data);
     expect(ranked.map((r) => r.product.productId)).toEqual(['D-high', 'C-low', 'B-noscore', 'A-excluded']);
+  });
+});
+
+describe('证据缺失时总分封顶', () => {
+  // 两款都只针对头皮痒：一款有 C 级成分，一款只有资料分类（需求匹配 0.7）
+  const cLevel = product('CAP-C', ['Aqua', 'Test Itch Relief'], { keyActives: ['Test Itch Relief'] });
+  const claimOnly = product('CAP-CLAIM', ['Aqua', 'Glycerin'], { claimedBenefits: ['scalp_itch'], claimSource: 'data_classification', keyActives: ['Glycerin'] });
+  const prof = profile({ concerns: ['scalp_itch'] });
+
+  it('只有资料分类的产品最多与 C 级证据产品打平，不反超', () => {
+    const c = scoreProduct(cLevel, prof, data);
+    const claim = scoreProduct(claimOnly, prof, data);
+    expect(c.dimensions.evidence.score).toBe(40);
+    expect(claim.dimensions.evidence.score).toBeNull();
+    // 不封顶时：(70*0.5 + 100*0.25) / 0.75 = 80；封顶按证据 40：(70*0.5 + 100*0.25 + 40*0.15) / 0.9 = 73
+    expect(claim.score).toBe(73);
+    expect(claim.evidenceCapped).toBe(true);
+    expect(claim.dimensions.evidence.reason.zh).toContain('总分上限按证据弱');
+    expect(claim.score!).toBeLessThanOrEqual(c.score!);
+  });
+
+  it('封顶后的分数正好等于"证据按 C 级计"的结果，不额外扣分', () => {
+    const r = scoreProduct(claimOnly, prof, data);
+    const asC = weightedTotal({ ...r.dimensions, evidence: { ...r.dimensions.evidence, score: 40 } });
+    expect(r.score).toBe(asC);
+  });
+});
+
+describe('没有选任何需求', () => {
+  it('不给适合等级；按温和程度、价格排序', () => {
+    const list = [
+      product('G1', ['Aqua', 'Parfum'], { category: 'shampoo', price: 5 }),
+      product('G2', ['Aqua', 'Glycerin'], { category: 'shampoo', price: 20 }),
+      product('G3', ['Aqua', 'Glycerin'], { category: 'shampoo', price: 10 }),
+    ];
+    const ranked = rankProducts(list, 'shampoo', profile({}), data);
+    expect(ranked.map((r) => r.product.productId)).toEqual(['G3', 'G2', 'G1']);
+    expect(ranked.every((r) => r.noNeeds && r.fitLevel === null && !r.lowMatch)).toBe(true);
+  });
+
+  it('选了需求时，需求匹配为 0 的产品标为不太匹配，排在推荐之后', () => {
+    const list = [
+      product('M1', ['Aqua', 'Glycerin'], { category: 'shampoo' }),
+      product('M2', ['Aqua', 'Test Itch Relief'], { category: 'shampoo', keyActives: ['Test Itch Relief'] }),
+    ];
+    const ranked = rankProducts(list, 'shampoo', profile({ concerns: ['scalp_itch'] }), data);
+    expect(ranked.map((r) => [r.product.productId, r.lowMatch])).toEqual([['M2', false], ['M1', true]]);
+  });
+});
+
+describe('无法评分的产品', () => {
+  it('没有可用成分数据时不标为"不太匹配"', () => {
+    const r = scoreProduct(product('NODATA', ['Unknown Thing A', 'Unknown Thing B']), profile({ concerns: ['scalp_itch'] }), data);
+    expect(r.score).toBeNull();
+    expect(r.dimensions.need.score).toBeNull();
+    expect(r.lowMatch).toBe(false);
   });
 });
