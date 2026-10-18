@@ -419,5 +419,7 @@
   "scentTag.none_found": "未发现加香成分",
   "results.lowMatch": "不太匹配（{n} 款）",
   "results.lowMatchBody": "这些产品没有针对你所选需求的依据（需求匹配为 0），不进入推荐列表。",
-  "results.noNeeds": "你没有选择具体需求，以下按温和程度和价格排序。"
+  "results.noNeeds": "你没有选择具体需求，以下按温和程度和价格排序。",
+  "results.unscored": "无法评分（{n} 款）",
+  "scentTag.none_found_unknown": "未发现已知加香成分（{n} 个成分暂无数据）"
 }

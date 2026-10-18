@@ -794,7 +794,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     score,
     fitLevel: noNeeds ? null : levelOf(score),
     noNeeds,
-    lowMatch: !noNeeds && (dimensions.need.score ?? 0) === 0,
+    lowMatch: !noNeeds && dimensions.need.score === 0,
     evidenceCapped,
     dimensions,
     notices,

@@ -179,6 +179,7 @@ export function expandIngredients(
   const chelatorKeys = keys(lists.chelators);
   const fragranceKeys = keys(lists.fragrances);
   const isChelator = (names: string[]) => names.some((n) => chelatorKeys.has(normalizeName(n)));
+  const isListedFragrance = (names: string[]) => names.some((n) => fragranceKeys.has(normalizeName(n)));
   const explained = new Map(explanations.map((e) => [normalizeName(e.inciName), e]));
   const known = new Map<string, Ingredient>();
   const allergenKeys = new Set(allergens.map((a) => normalizeName(a.inciName)));
@@ -194,7 +195,8 @@ export function expandIngredients(
     const fragrance = c ? isFragrance(names, allergen, fragranceKeys) : ing.riskTags.includes('fragrance') || allergen;
     const riskTags = fragrance ? [...others, 'fragrance' as const] : others;
     const full: Ingredient = {
-      ...ing, riskTags, origin: 'library', euAllergen: allergen, chelator: isChelator(names), cosingFunctions: c?.functions,
+      ...ing, riskTags, origin: 'library', euAllergen: allergen, chelator: isChelator(names), fragranceListed: isListedFragrance(names),
+      cosingFunctions: c?.functions,
     };
     for (const n of [ing.inciName, ...ing.aliases]) known.set(normalizeName(n), full);
     return full;
@@ -226,6 +228,7 @@ export function expandIngredients(
       origin: 'cosing',
       euAllergen: allergen,
       chelator: isChelator([c.inciName]),
+      fragranceListed: isListedFragrance([c.inciName]),
       cosingFunctions: c.functions,
     };
     known.set(key, ing);

@@ -23,8 +23,8 @@ export interface FragranceInfo {
   fragrance: string[];
   /** 其中在欧盟香料致敏原清单上的 */
   allergens: string[];
-  /** 其中由加香成分清单识别的（非致敏原、只在 CosIng 中的成分） */
-  cosingPerfuming: string[];
+  /** 其中在本项目加香成分清单（data/fragrance_ingredients.csv）上的（不含欧盟致敏原） */
+  listed: string[];
   /** 成分表中的精油（原文写法） */
   essentialOils: string[];
   /** 无法判断的成分数（不在成分库或名称未核对） */
@@ -34,7 +34,7 @@ export interface FragranceInfo {
 export function fragranceInfo(product: Product, index: IngredientIndex): FragranceInfo {
   const fragrance: string[] = [];
   const allergens: string[] = [];
-  const cosingPerfuming: string[] = [];
+  const listed: string[] = [];
   const essentialOils: string[] = [];
   let unknownCount = 0;
   const flagged = new Set(product.inciNameUnverified.map(normalizeName));
@@ -47,7 +47,7 @@ export function fragranceInfo(product: Product, index: IngredientIndex): Fragran
     if (ing.riskTags.includes('fragrance')) {
       fragrance.push(raw);
       if (ing.euAllergen) allergens.push(raw);
-      else if (ing.origin === 'cosing') cosingPerfuming.push(raw);
+      else if (ing.fragranceListed) listed.push(raw);
     }
     if (ing.riskTags.includes('essential_oil')) essentialOils.push(raw);
   }
@@ -55,7 +55,7 @@ export function fragranceInfo(product: Product, index: IngredientIndex): Fragran
   const status: FragranceStatus = fragrance.length > 0 || essentialOils.length > 0
     ? 'contains'
     : product.fragranceFreeClaim === 'yes' ? 'labeled_free' : 'none_found';
-  return { status, claim: product.fragranceFreeClaim, fragrance, allergens, cosingPerfuming, essentialOils, unknownCount };
+  return { status, claim: product.fragranceFreeClaim, fragrance, allergens, listed, essentialOils, unknownCount };
 }
 
 /**

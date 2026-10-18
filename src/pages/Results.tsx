@@ -241,7 +241,11 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
           {/* 无香：标注无香和成分表中未发现加香成分是同一香味层级，卡片上分别标注 */}
           {f.status !== 'contains' && (
             <div className="tags" style={{ marginTop: 8 }}>
-              <span className="tag scent">{t(`scentTag.${f.status}` as Key)}</span>
+              <span className="tag scent">
+                {f.status === 'none_found' && f.unknownCount > 0
+                  ? t('scentTag.none_found_unknown', { n: f.unknownCount })
+                  : t(`scentTag.${f.status}` as Key)}
+              </span>
             </div>
           )}
           {p.awards.length > 0 && (
@@ -313,9 +317,9 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
           <span className="label">{t('results.fragrance')}</span>
           <p className="small" style={{ marginTop: 6 }}>{t(`fragrance.${f.status}` as Key)}</p>
           {f.allergens.length > 0 && <p className="small">{t('fragrance.allergens')}：{f.allergens.join('、')}</p>}
-          {f.cosingPerfuming.length > 0 && <p className="small">{t('fragrance.cosing')}：{f.cosingPerfuming.join('、')}</p>}
+          {f.listed.length > 0 && <p className="small">{t('fragrance.cosing')}：{f.listed.join('、')}</p>}
           {(() => {
-            const other = f.fragrance.filter((x) => !f.allergens.includes(x) && !f.cosingPerfuming.includes(x));
+            const other = f.fragrance.filter((x) => !f.allergens.includes(x) && !f.listed.includes(x));
             return other.length > 0 && <p className="small">{t('fragrance.other')}：{other.join('、')}</p>;
           })()}
           {f.essentialOils.length > 0 && <p className="small">{t('fragrance.oils')}：{f.essentialOils.join('、')}</p>}
@@ -424,9 +428,11 @@ export default function Results() {
         </div>
       );
     }
-    const shown = sorted(d.ranked.filter((r) => !r.excluded && !r.lowMatch));
+    const shown = sorted(d.ranked.filter((r) => !r.excluded && !r.lowMatch && r.score !== null));
     // 选了需求但需求匹配为 0 的产品：不进入推荐列表，放在"不太匹配"
-    const lowMatch = sorted(d.ranked.filter((r) => !r.excluded && r.lowMatch));
+    const lowMatch = sorted(d.ranked.filter((r) => !r.excluded && r.lowMatch && r.score !== null));
+    // 没有可用成分数据、无法评分的产品单独列出
+    const unscored = d.ranked.filter((r) => !r.excluded && r.score === null);
     const excluded = d.ranked.filter((r) => r.excluded);
     return (
       <>
@@ -444,6 +450,12 @@ export default function Results() {
             <summary>{t('results.lowMatch', { n: lowMatch.length })}</summary>
             <p className="small muted">{t('results.lowMatchBody')}</p>
             {lowMatch.map((r) => <ProductCard key={r.product.productId} r={r} market={market} profile={d.profile} scentGoal={scentGoal} />)}
+          </details>
+        )}
+        {unscored.length > 0 && (
+          <details className="excluded-list">
+            <summary>{t('results.unscored', { n: unscored.length })}</summary>
+            {unscored.map((r) => <ProductCard key={r.product.productId} r={r} market={market} profile={d.profile} scentGoal={scentGoal} />)}
           </details>
         )}
         {excluded.length > 0 && (

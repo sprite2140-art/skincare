@@ -419,5 +419,7 @@
   "scentTag.none_found": "No fragrance ingredient found",
   "results.lowMatch": "Less suitable ({n})",
   "results.lowMatchBody": "These products have nothing supporting the needs you chose (need match 0), so they are not in the recommendations.",
-  "results.noNeeds": "You did not choose any specific needs, so products are sorted by gentleness and price."
+  "results.noNeeds": "You did not choose any specific needs, so products are sorted by gentleness and price.",
+  "results.unscored": "Cannot be scored ({n})",
+  "scentTag.none_found_unknown": "No known fragrance found ({n} ingredients without data)"
 }

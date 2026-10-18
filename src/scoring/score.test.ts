@@ -688,3 +688,12 @@ describe('没有选任何需求', () => {
     expect(ranked.map((r) => [r.product.productId, r.lowMatch])).toEqual([['M2', false], ['M1', true]]);
   });
 });
+
+describe('无法评分的产品', () => {
+  it('没有可用成分数据时不标为"不太匹配"', () => {
+    const r = scoreProduct(product('NODATA', ['Unknown Thing A', 'Unknown Thing B']), profile({ concerns: ['scalp_itch'] }), data);
+    expect(r.score).toBeNull();
+    expect(r.dimensions.need.score).toBeNull();
+    expect(r.lowMatch).toBe(false);
+  });
+});

@@ -85,7 +85,7 @@ describe('CosIng 导入', () => {
     const f = fragranceInfo(p, index);
     expect(f.status).toBe('contains');
     expect(f.allergens).toEqual(['Linalool']);
-    expect(f.cosingPerfuming).toEqual(['TEST PERFUME BASE']);
+    expect(f.listed).toEqual(['TEST PERFUME BASE']);
     expect(f.fragrance).toEqual(['TEST PERFUME BASE', 'Linalool', 'Fragrance']);
   });
 
@@ -149,6 +149,14 @@ describe('CosIng 功能翻译与常见成分通俗解释', () => {
 });
 
 describe('本项目维护的判断清单', () => {
+  it('成分库已有的清单成分（如 Terpineol）在香味详情中也归入"加香清单"组', () => {
+    const p = { ...real.products[0], inciList: ['Water', 'Terpineol', 'Linalool'], inciNameUnverified: [] };
+    const f = fragranceInfo(p, real.ingredientIndex);
+    expect(real.ingredientIndex.get('Terpineol')!.origin).toBe('library');
+    expect(f.listed).toEqual(['Terpineol']);
+    expect(f.allergens).toEqual(['Linalool']);
+  });
+
   it('螯合剂清单只收录明确的螯合剂，柠檬酸、柠檬酸钠、葡萄糖酸钠不算；每条有来源', () => {
     const names = real.lists.chelators.map((c) => c.inciName);
     expect(names).toHaveLength(10);

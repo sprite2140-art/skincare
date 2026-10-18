@@ -133,6 +133,8 @@ export interface Ingredient {
   origin?: IngredientOrigin;
   /** 在欧盟需标注的香料致敏原清单上 */
   euAllergen?: boolean;
+  /** 在本项目维护的加香成分清单（data/fragrance_ingredients.csv）上 */
+  fragranceListed?: boolean;
   /** 在本项目维护的螯合剂清单（data/chelators.csv）上 */
   chelator?: boolean;
   /** CosIng 登记的功能（小写），仅批量导入后才有；只用于展示，不参与打分 */
