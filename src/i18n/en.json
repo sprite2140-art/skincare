@@ -489,6 +489,8 @@
   "card.scent.contains": "Contains fragrance: {list}",
   "card.scent.oils": "Contains essential oils: {list}",
   "card.contains": "contains {list}",
+  "card.noIrritantsUnknown": "no common irritants found ({n} ingredient(s) without data)",
+  "card.brandMismatch": "The brand site sells a different formula from the ingredient list checked here, so it is not listed.",
   "card.noIrritants": "no common irritants",
   "card.notice": "Note",
   "card.scoreDetail": "Score breakdown",

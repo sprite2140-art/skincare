@@ -66,9 +66,9 @@ function fragranceReason(r: ProductScore): Reason {
   return { zh: '含香精', en: 'Contains fragrance', ...b };
 }
 
-/** 温和：不含加香成分且没有常见刺激成分时合成一句 */
+/** 温和：不含加香成分且没有常见刺激成分、所有成分都有数据时，才合成"不含"的说法 */
 function gentleReason(r: ProductScore): Reason {
-  return r.fragrance.status !== 'contains' && r.dimensions.irritation.score === 100
+  return r.fragrance.status !== 'contains' && r.fragrance.unknownCount === 0 && r.dimensions.irritation.score === 100
     ? { zh: '不含香精和常见刺激成分', en: 'No fragrance or common irritants', basis: 'ingredients' }
     : { zh: '常见刺激成分少', en: 'Few common irritants', basis: 'ingredients' };
 }

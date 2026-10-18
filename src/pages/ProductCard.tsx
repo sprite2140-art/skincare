@@ -280,7 +280,7 @@ function CardDetails({ r, profile, scentGoal, rows }: { r: ProductScore; profile
               {x.basis && <span className="basis-tag">{t(`basisTag.${x.basis}` as Key)}</span>}
             </li>
           ))}
-          {p.awards.map((a, i) => (
+          {!r.excluded && p.awards.map((a, i) => (
             <li key={`a${i}`}>
               <span>
                 {a.url ? <a href={a.url} target="_blank" rel="noreferrer">{a.source} {a.year}</a> : `${a.source} ${a.year}`}：{a.title}
@@ -310,6 +310,9 @@ function CardDetails({ r, profile, scentGoal, rows }: { r: ProductScore; profile
               </li>
             ))}
           </ul>
+          {p.brandClaims.status === 'version_mismatch' && p.purchaseLinks.some((l) => l.platform === 'brand') && (
+            <p className="note">{t('card.brandMismatch')}</p>
+          )}
           {checked && (
             <p className="note">
               <Link to="/data#ratings">{t('card.ratingFoot', { d: checked })}</Link>
@@ -344,9 +347,10 @@ function CardDetails({ r, profile, scentGoal, rows }: { r: ProductScore; profile
             <dd>
               {f.status === 'labeled_free' && t('card.scent.labeled_free')}
               {f.status === 'none_found' && (f.unknownCount > 0 ? t('card.scent.none_found_unknown', { n: f.unknownCount }) : t('card.scent.none_found'))}
-              {f.status === 'contains' && (f.fragrance.length > 0
-                ? t('card.scent.contains', { list: f.fragrance.map(ingName).slice(0, 3).join(lang === 'zh' ? '、' : ', ') })
-                : t('card.scent.oils', { list: f.essentialOils.map(ingName).slice(0, 3).join(lang === 'zh' ? '、' : ', ') }))}
+              {f.status === 'contains' && [
+                f.fragrance.length > 0 && t('card.scent.contains', { list: f.fragrance.map(ingName).slice(0, 3).join(lang === 'zh' ? '、' : ', ') }),
+                f.essentialOils.length > 0 && t('card.scent.oils', { list: f.essentialOils.map(ingName).slice(0, 3).join(lang === 'zh' ? '、' : ', ') }),
+              ].filter(Boolean).join(lang === 'zh' ? '；' : '; ')}
             </dd>
           </div>
           {r.dimensions.irritation.level && (
@@ -355,7 +359,9 @@ function CardDetails({ r, profile, scentGoal, rows }: { r: ProductScore; profile
               <dd>
                 {t(`gentle.${r.dimensions.irritation.level}` as Key)}
                 {' · '}
-                {kinds.length > 0 ? t('card.contains', { list: tx(joinNames(kinds)) }) : t('card.noIrritants')}
+                {kinds.length > 0
+                  ? t('card.contains', { list: tx(joinNames(kinds)) })
+                  : f.unknownCount > 0 ? t('card.noIrritantsUnknown', { n: f.unknownCount }) : t('card.noIrritants')}
               </dd>
             </div>
           )}
@@ -403,7 +409,7 @@ function CardDetails({ r, profile, scentGoal, rows }: { r: ProductScore; profile
         {p.sourceUrls[0] && <> · <a href={p.sourceUrls[0]} target="_blank" rel="noreferrer">{t('results.dataSource')}</a></>}
         {p.imageUrl && p.imageAttribution && (
           <>
-            {' · '}{t('results.imageCredit')}：{p.imageAttribution}，<a href={p.imageLicenseUrl} target="_blank" rel="noreferrer">{p.imageLicense}</a>
+            {' · '}{t('results.imageCredit')}：{p.imageAttribution}，<a href={p.imageSource} target="_blank" rel="noreferrer">{t('results.imageSource')}</a>，<a href={p.imageLicenseUrl} target="_blank" rel="noreferrer">{p.imageLicense}</a>
           </>
         )}
       </p>

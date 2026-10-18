@@ -42,12 +42,16 @@ export function platformOf(url: string): { platform: StorePlatform; host: string
 export function storeRows(p: Product): StoreRow[] {
   const shown = new Set(visibleRatings(p).map((r) => r.platform));
   const ratingOf = (pl: StorePlatform) => (pl === 'other' ? null : p.ratings.find((r) => r.platform === pl) ?? null);
-  const rows: StoreRow[] = p.purchaseLinks.map((l) => {
+  // 品牌页与在售版本不一致（version_mismatch）时，品牌官网卖的不是打分用的配方，不列出
+  const mismatch = p.brandClaims.status === 'version_mismatch';
+  const links = mismatch ? p.purchaseLinks.filter((l) => l.platform !== 'brand') : p.purchaseLinks;
+  const rows: StoreRow[] = links.map((l) => {
     const r = ratingOf(l.platform);
     return { platform: l.platform, host: '', url: l.url, rating: r && shown.has(r.platform) ? r : null, lowCount: !!r && !shown.has(r.platform) };
   });
   // 产品表的 purchase_url 不在购买链接里时也列出
-  if (p.purchaseUrl && !rows.some((x) => x.url === p.purchaseUrl)) {
+  const dropped = new Set(p.purchaseLinks.filter((l) => !links.includes(l)).map((l) => l.url));
+  if (p.purchaseUrl && !dropped.has(p.purchaseUrl) && !rows.some((x) => x.url === p.purchaseUrl)) {
     const { platform, host } = platformOf(p.purchaseUrl);
     if (!rows.some((x) => x.platform === platform && platform !== 'other')) {
       const r = ratingOf(platform);

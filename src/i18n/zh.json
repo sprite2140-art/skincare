@@ -489,6 +489,8 @@
   "card.scent.contains": "含香精：{list}",
   "card.scent.oils": "含精油：{list}",
   "card.contains": "含{list}",
+  "card.noIrritantsUnknown": "没有发现常见刺激成分（{n} 个成分暂无数据）",
+  "card.brandMismatch": "品牌官网在售的是另一版配方，与这里核对的成分表不同，未列出。",
   "card.noIrritants": "没有常见刺激成分",
   "card.notice": "注意",
   "card.scoreDetail": "评分明细",

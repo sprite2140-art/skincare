@@ -74,3 +74,14 @@ describe('卡片：关键成分与温和度', () => {
     expect(irritantKinds(p, index, true).map((x) => x.zh)).toContain('强清洁力表活');
   });
 });
+
+describe('卡片：在售版本与品牌页不一致', () => {
+  it('version_mismatch 时不列出品牌官网（官网卖的不是打分用的配方）', () => {
+    const p = byId('CO-US-005');
+    expect(p.brandClaims.status).toBe('version_mismatch');
+    expect(p.purchaseLinks.some((l) => l.platform === 'brand')).toBe(true);
+    const rows = storeRows(p);
+    expect(rows.some((r) => r.platform === 'brand' || r.url.includes('lorealparisusa.com'))).toBe(false);
+    expect(primaryStore(p)?.platform).not.toBe('brand');
+  });
+});
