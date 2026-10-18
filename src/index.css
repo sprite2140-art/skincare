@@ -361,3 +361,10 @@ details.more[open] summary::after { content: '−'; }
 .score .fit.low { color: var(--bad); }
 .score.gentle .num { font-size: 28px; }
 .tag.scent { font-size: 12px; padding: 2px 8px; }
+
+/* ---------- 免责声明与隐私 ---------- */
+.about section { margin-top: 28px; }
+.about .h2 { margin-bottom: 8px; }
+.about-list { padding-left: 1.2em; margin: 0; display: grid; gap: 8px; font-size: var(--fs-small); line-height: 1.6; }
+.footer { max-width: var(--maxw); margin: 48px auto 0; padding: 20px var(--gutter) 32px; border-top: 1px solid var(--line); font-size: var(--fs-small); color: var(--muted); }
+.footer a { color: inherit; }

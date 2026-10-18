@@ -5,6 +5,7 @@ import { useProfiles } from './profile/ProfileContext';
 import Quiz from './pages/Quiz';
 import Results from './pages/Results';
 import ProfilePage from './pages/ProfilePage';
+import About from './pages/About';
 
 function Home() {
   const { t } = useI18n();
@@ -35,7 +36,9 @@ function Home() {
         ))}
       </ol>
 
-      <p className="small muted" style={{ marginTop: 24 }}>{t('home.privacy')}</p>
+      <p className="small muted" style={{ marginTop: 24 }}>
+        {t('home.privacy')} <Link to="/about">{t('nav.about')}</Link>
+      </p>
       <p className="small muted" style={{ marginTop: 6 }}>
         {t('home.dataSummary', { products: products.length, ingredients: ingredients.length, verified })}
       </p>
@@ -68,7 +71,11 @@ export default function App() {
         {/* 旧链接兼容 */}
         <Route path="/results/shampoo" element={<Results />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/about" element={<About />} />
       </Routes>
+      <footer className="footer">
+        <Link to="/about">{t('footer.about')}</Link>
+      </footer>
     </BrowserRouter>
   );
 }

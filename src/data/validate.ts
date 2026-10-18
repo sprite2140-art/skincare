@@ -2,7 +2,7 @@
 
 import { buildIngredientIndex, normalizeName } from './ingredientIndex';
 import { unmatchedKeyActives } from './keyActives';
-import { expandIngredients, onlyFragranceFunctions, type AllergenEntry, type CosingEntry, type ExplanationEntry, type IngredientLists } from './cosing';
+import { SOURCE_LEVELS, expandIngredients, onlyFragranceFunctions, type AllergenEntry, type CosingEntry, type ExplanationEntry, type IngredientLists } from './cosing';
 import { ingredientFrequency } from './frequency';
 import {
   BRAND_CLAIM_STATUSES, CATEGORIES, PRODUCT_SUBTYPES, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
@@ -255,6 +255,7 @@ export function validateData(
       if (seen.has(normalizeName(e.inciName))) err(file, key, '重复');
       seen.add(normalizeName(e.inciName));
       if (!/^https?:\/\//.test(e.sourceUrl)) err(file, key, '缺少来源链接 source_url');
+      if (file === 'chelators.csv') oneOf(file, key, 'source_level', e.sourceLevel, SOURCE_LEVELS);
     }
   }
   // 维护提示：产品中有 CosIng 只登记了香料功能、但不在加香清单的成分（CosIng 功能本身不参与判断）

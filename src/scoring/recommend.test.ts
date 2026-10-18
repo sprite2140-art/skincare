@@ -402,6 +402,12 @@ describe('数据覆盖统计（npm run coverage）', () => {
     expect(mid.fragranceFree).toBeLessThanOrEqual(mid.count);
     // 护发素不统计头皮困扰
     expect(coverageGroups('conditioner').map((g) => g.key)).toEqual(['hair', 'goals']);
+    // 洗发水不统计打结，护发素不统计清爽洁净，头皮发红不单独统计
+    const all = (c: string) => coverageGroups(c).flatMap((g) => g.targets);
+    expect(all('shampoo')).not.toContain('tangling');
+    expect(all('shampoo')).not.toContain('scalp_redness');
+    expect(all('conditioner')).not.toContain('clarifying');
+    expect(all('conditioner')).toContain('tangling');
   });
 
   it('有同系列护发素的洗发水', () => {

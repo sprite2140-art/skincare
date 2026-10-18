@@ -129,7 +129,7 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 
 - **cosing_export_2026-10-17.csv**：原始数据，共 33,640 条。来源为欧盟委员会 CosIng 数据库（https://ec.europa.eu/growth/tools-databases/cosing/ ），由作者通过 CosIng 网站使用的公开数据接口于 **2026-10-17** 获取。列为 COSING Ref No、INCI name、CAS No、Function、Update Date。
 - **cosing_ingredients.csv**：由上面的原始文件转换而来，列为 inci_name、functions（登记功能，小写，分号分隔）、cas_no、cosing_ref、update_date。不要手改：更新时下载新的导出文件，运行 `npm run import-cosing -- <文件>` 重新生成（脚本会自动找表头，逗号或分号分隔都可以），并更新本节的获取日期。
-- **CosIng 匹配检查**：`npm run validate-data` 会列出产品成分表中在 CosIng 里找不到的成分名（成分库登记的别名也算找到，如美国写法 Fragrance 对应欧盟 Parfum），多数是拼写错误、拆分错误或美国色素名（如 Yellow 5，欧盟用 CI 编号）。
+- **CosIng 匹配检查**：`npm run validate-data` 会列出产品成分表中在 CosIng 里找不到的成分名（成分库登记的别名也算找到，如美国写法 Fragrance 对应欧盟 Parfum），多数是拼写错误、拆分错误或美国色素名。美国色素名已在成分库登记为 CI 编号的别名（2026-10-18）：Yellow 5 = CI 19140、Blue 1 = CI 42090、Red 33 = CI 17200、Yellow 10 = CI 47005。
 - **eu_fragrance_allergens.csv**：欧盟需标注的香料致敏原清单（inci_name、list、source）。目前收录法规 1223/2009 附录 III 的 26 种；2023/1545 号法规新增的条目待按法规原文补充。
 - **合并规则**（`src/data/cosing.ts` 的 expandIngredients）：成分库 ingredients.csv 优先；成分库没有的成分用 CosIng 补充，来源标记为 CosIng、review_status 为 draft，category 为 base（基础分类，没有 targets）。打分仍按现有规则区分已核对和未核对。
 - **CosIng 登记功能不参与判断**：只在成分弹窗中翻译显示（`cosingFunctions`）。只在 CosIng 中的成分 functions 为空。需要参与判断的功能用本项目维护的清单，见下面两节。
@@ -151,10 +151,15 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 | abbreviation | 常用缩写（如 GLDA、MGDA），匹配时也算 |
 | name_zh | 中文名 |
 | cas_no / cosing_ref | CAS 号、CosIng 编号 |
+| source_level | 来源级别：cir（CIR 安全评估）/ peer_reviewed（同行评议文献）/ cosing（CosIng 条目）。优先用 CIR |
 | source_url | 来源（目前为对应的 CosIng 条目页） |
 | added_on | 加入日期 |
 
-当前 10 个（2026-10-17，按作者指定）：Disodium EDTA、Tetrasodium EDTA、Tetrasodium Glutamate Diacetate（GLDA）、Trisodium Ethylenediamine Disuccinate、Trisodium Dicarboxymethyl Alaninate（MGDA）、Tetrasodium Iminodisuccinate、Sodium Phytate、Phytic Acid、Etidronic Acid、Pentasodium Pentetate。来源链接按 CosIng 条目编号生成；本开发环境无法访问 ec.europa.eu，未能逐个打开核对。
+当前 17 个（按作者指定）：
+- 2026-10-17：Disodium EDTA、Tetrasodium EDTA、Tetrasodium Glutamate Diacetate（GLDA）、Trisodium Ethylenediamine Disuccinate、Trisodium Dicarboxymethyl Alaninate（MGDA）、Tetrasodium Iminodisuccinate、Sodium Phytate、Phytic Acid、Etidronic Acid、Pentasodium Pentetate；
+- 2026-10-18：EDTA、HEDTA、Trisodium HEDTA、Trisodium EDTA、Calcium Disodium EDTA、Dipotassium EDTA、Diammonium EDTA。
+
+EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the safety assessment of EDTA, calcium disodium EDTA, diammonium EDTA, dipotassium EDTA, disodium EDTA, TEA-EDTA, tetrasodium EDTA, tripotassium EDTA, trisodium EDTA, HEDTA, and trisodium HEDTA. Int J Toxicol 2002;21 Suppl 2:95–142，PubMed 12396676），source_level = cir；其余 8 个暂用 CosIng 条目页（source_level = cosing）。本开发环境无法访问 PubMed 和 ec.europa.eu，链接未能逐个打开核对。
 
 ## fragrance_ingredients.csv（加香成分清单）
 
@@ -213,7 +218,7 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 
 | 字段 | 含义 |
 |---|---|
-| inci_name | INCI 名（与 CosIng 写法一致即可，大小写不限） |
+| inci_name | INCI 名（与 CosIng 写法一致即可，大小写不限）；成分库已收录的成分不要放在这里 |
 | explain_zh / explain_en | 通俗解释，一两句；只说明在配方中的作用，不写功效承诺 |
 | review_status | draft / verified |
 | drafted_on | 起草日期 |

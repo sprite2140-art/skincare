@@ -8,8 +8,8 @@ import { fragranceInfo } from '../scoring/fragrance';
 
 const real = loadDataFromDisk();
 const LISTS = {
-  fragrances: [{ inciName: 'TEST PERFUME BASE', abbreviation: '', sourceUrl: 'https://x.example' }],
-  chelators: [{ inciName: 'Test Chelator Salt', abbreviation: '', sourceUrl: 'https://x.example' }],
+  fragrances: [{ inciName: 'TEST PERFUME BASE', abbreviation: '', sourceLevel: '', sourceUrl: 'https://x.example' }],
+  chelators: [{ inciName: 'Test Chelator Salt', abbreviation: '', sourceLevel: 'cosing', sourceUrl: 'https://x.example' }],
 };
 
 // 仿照 CosIng 导出文件：开头有说明行，功能用逗号分隔、大写，字段带引号
@@ -73,7 +73,7 @@ describe('CosIng 导入', () => {
     expect(index.get('Pure Perfume Base')).toMatchObject({ origin: 'cosing', category: 'base', riskTags: [] });
     expect(index.get('Aroma')!.riskTags).toEqual(['fragrance']);
     const listed = buildIngredientIndex(expandIngredients(real.ingredients, tbl, real.allergens, [], {
-      fragrances: [{ inciName: 'Pure Perfume Base', abbreviation: '', sourceUrl: 'https://x.example' }],
+      fragrances: [{ inciName: 'Pure Perfume Base', abbreviation: '', sourceLevel: '', sourceUrl: 'https://x.example' }],
     }));
     expect(listed.get('Pure Perfume Base')).toMatchObject({ category: 'risk', riskTags: ['fragrance'] });
   });
@@ -159,8 +159,14 @@ describe('本项目维护的判断清单', () => {
 
   it('螯合剂清单只收录明确的螯合剂，柠檬酸、柠檬酸钠、葡萄糖酸钠不算；每条有来源', () => {
     const names = real.lists.chelators.map((c) => c.inciName);
-    expect(names).toHaveLength(10);
-    expect(names).toEqual(expect.arrayContaining(['Disodium EDTA', 'Tetrasodium Glutamate Diacetate', 'Pentasodium Pentetate']));
+    expect(names).toHaveLength(17);
+    expect(names).toEqual(expect.arrayContaining(['Disodium EDTA', 'Tetrasodium Glutamate Diacetate', 'Pentasodium Pentetate', 'EDTA', 'Trisodium HEDTA']));
+    // EDTA 及其盐类的来源为 CIR 安全评估
+    for (const n of ['EDTA', 'Disodium EDTA', 'Trisodium HEDTA', 'Calcium Disodium EDTA']) {
+      expect(real.lists.chelators.find((c) => c.inciName === n)!.sourceLevel).toBe('cir');
+    }
+    expect(real.ingredientIndex.get('Trisodium HEDTA')!.chelator).toBe(true);
+    expect(real.ingredientIndex.get('EDTA')!.chelator).toBe(true);
     expect(real.lists.chelators.every((c) => /^https:\/\//.test(c.sourceUrl))).toBe(true);
     for (const n of ['Citric Acid', 'Sodium Citrate', 'Sodium Gluconate']) expect(real.ingredientIndex.get(n)?.chelator ?? false).toBe(false);
     expect(real.ingredientIndex.get('GLDA')?.inciName).toBeDefined();

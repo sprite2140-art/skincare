@@ -16,16 +16,22 @@ import type { BudgetChoice } from './budget';
 
 export const COVERAGE_BUDGETS: BudgetChoice[] = ['p33', 'p67', 'none'];
 
-/** 问卷中的需求分组；"香味好闻"不对应任何需求，不统计 */
+/** 问卷中的需求分组；"香味好闻"不对应任何需求，不统计。头皮发红按"敏感头皮"匹配，不单独统计 */
 export const COVERAGE_GROUPS: { key: 'scalp' | 'hair' | 'goals'; targets: Target[] }[] = [
-  { key: 'scalp', targets: ['dandruff', 'scalp_oil', 'scalp_itch', 'dry_scalp', 'sensitive_scalp', 'scalp_redness', 'hair_loss', 'buildup'] },
+  { key: 'scalp', targets: ['dandruff', 'scalp_oil', 'scalp_itch', 'dry_scalp', 'sensitive_scalp', 'hair_loss', 'buildup'] },
   { key: 'hair', targets: ['dryness', 'tangling', 'damage', 'color_fade'] },
   { key: 'goals', targets: ['frizz', 'flat_hair', 'shine', 'clarifying', 'curl_definition', 'tone_yellow', 'tone_orange'] },
 ];
 
+/** 各品类不统计的需求：洗发水不统计"打结"，护发素不统计"清爽洁净" */
+const SKIPPED_TARGETS: Record<string, Target[]> = { shampoo: ['tangling'], conditioner: ['clarifying'] };
+
 /** 护发素不针对头皮，头皮困扰只统计洗发水 */
 export function coverageGroups(category: string) {
-  return COVERAGE_GROUPS.filter((g) => category === 'shampoo' || g.key !== 'scalp');
+  const skip = SKIPPED_TARGETS[category] ?? [];
+  return COVERAGE_GROUPS
+    .filter((g) => category === 'shampoo' || g.key !== 'scalp')
+    .map((g) => ({ ...g, targets: g.targets.filter((t) => !skip.includes(t)) }));
 }
 
 export interface CoverageCell {

@@ -13,6 +13,17 @@
 
 ## 记录
 
+### 2026-10-18（Claude Code：螯合剂清单扩充、匹配与覆盖表调整、美国色素别名、上线前准备；新 PR）
+- 完成：
+  1. **螯合剂清单** 增加 EDTA、HEDTA、Trisodium HEDTA、Trisodium EDTA、Calcium Disodium EDTA、Dipotassium EDTA、Diammonium EDTA，共 17 个；新增 source_level 列（cir / peer_reviewed / cosing）。EDTA 及其盐类 9 个的来源为 CIR 安全评估（PubMed 12396676），其余 8 个暂为 CosIng 条目页。
+  2. **匹配与覆盖表**：头皮发红改为按"敏感头皮"匹配，不单独匹配产品，就医提示保留；覆盖表洗发水不统计"打结"，护发素不统计"清爽洁净"，不再有"头皮发红"行。少于 3 款的格子从 36 个降到 27 个。
+  3. **CosIng 找不到的名称**：Yellow 5 / Blue 1 / Red 33 / Yellow 10 在成分库登记为 CI 19140 / 42090 / 17200 / 47005 的别名；SH-US-041 的 "Sodium Lauroyl" + "Sarcosinat" 合并为 Sodium Lauroyl Sarcosinate。剩余 8 个（6 个原有 + 第 1 批的 Amine HCl、Brassica Oleracea Leaf Extract）待作者确认。
+  4. **成分核对表**（npm run ingredient-review → docs/INGREDIENT_REVIEW.md）：只列影响打分的 88 个成分（有效成分、风险成分、螯合剂和加香清单上的成分），每行附声称的作用、影响的维度、证据等级、有效浓度 / 限量、来源链接、状态和空的"核对结果"栏，按影响的产品数排序。
+  5. **免责声明与隐私说明页**（/about，中英文）：首页和每页底部有入口。
+  6. **README 英文版** README.en.md；中文 README 更新仓库结构和当前阶段。
+- 验证：测试 166 个全部通过；类型检查、数据校验（0 错误）、构建通过；390px 浏览器检查 /about 页（中英文），无报错、无横向滚动。
+- 待作者确认：螯合剂 CIR 来源（PMID 12396676）未能在本环境打开核对；隐私说明写了"代码不包含统计分析脚本"，如在 Cloudflare 后台开启了 Web Analytics 需要修改这一条；"本项目开源"按 README 的说法写入，仓库如为私有需修改。
+
 ### 2026-10-17（Claude Code：作者对 4 个打分问题的决定、CosIng 功能不参与判断；新 PR）
 - 完成：
   1. **证据缺失封顶**：缺证据的需求按 C 级计算一次总分，实际总分取较低者；最多与 C 级证据产品打平，不额外扣分（`MISSING_EVIDENCE_CAP_LEVEL`）。
