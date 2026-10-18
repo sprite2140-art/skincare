@@ -229,12 +229,14 @@ describe('产品定位的来源标注', () => {
     expect(r.dimensions.evidence.state).toBe('missing');
     expect(r.dimensions.evidence.reason.zh).toContain('暂无成分或测试证据');
     expect(recommendReasons(r, prof, false)[0].zh).toBe('定位为针对光泽的产品');
+    expect(recommendReasons(r, prof, false)[0].basis).toBe('classification');
   });
 
   it('品牌原文（brand_text）才显示为"品牌宣称"，计分相同', () => {
     const r = scoreProduct({ ...base, claimSource: 'brand_text' }, prof, data);
     expect(r.dimensions.need.score).toBe(70);
     expect(recommendReasons(r, prof, false)[0].zh).toBe('品牌说明针对光泽');
+    expect(recommendReasons(r, prof, false)[0].basis).toBe('brand_claim');
   });
 
   it('"日常清洁"对应清爽洁净；去黄、去橙分开记录', () => {

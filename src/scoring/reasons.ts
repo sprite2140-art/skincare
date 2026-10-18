@@ -29,40 +29,52 @@ const ACTION: Partial<Record<Target, Text>> = {
   buildup: { zh: '去除残留的螯合', en: 'chelating' },
 };
 
-/** 一句普通人能看懂的话；依据类型（成品测试 / 品牌宣称 / 资料分类 / 成分功能）只在详情中说明 */
-function needReason(m: NeedMatch, product: Product): Text {
+/** 理由的依据类型：详情中在每条理由后用小标签标注 */
+export type ReasonBasis = 'tested' | 'ingredients' | 'brand_claim' | 'classification';
+export type Reason = Text & { basis?: ReasonBasis };
+
+/** 一句普通人能看懂的话；依据类型只在详情中用小标签标注 */
+function needReason(m: NeedMatch, product: Product): Reason {
   const c = positioningLabel(m, product);
   const t = TARGET_LABELS[m.target];
   const a = ACTION[m.target] ?? t;
   if (m.bases.includes('tested')) {
-    return { zh: `有产品测试支持改善${t.zh}`, en: `A product test supports it for ${t.en}` };
+    return { zh: `有产品测试支持改善${t.zh}`, en: `A product test supports it for ${t.en}`, basis: 'tested' };
   }
   if (m.keyIngredients.length > 0) {
     const n = joinNames(m.keyIngredients.slice(0, 2).map((i) => ingredientName(i, i.inciName)));
-    return { zh: `含${a.zh}成分${n.zh}`, en: `Contains ${a.en} ingredient ${n.en}` };
+    return { zh: `含${a.zh}成分${n.zh}`, en: `Contains ${a.en} ingredient ${n.en}`, basis: 'ingredients' };
   }
   if (c) {
     return m.bases.includes('brand_claim') || product.claimSource === 'brand_text'
-      ? { zh: `品牌说明针对${t.zh}`, en: `The brand says it targets ${t.en}` }
-      : { zh: `定位为针对${t.zh}的产品`, en: `Positioned for ${t.en}` };
+      ? { zh: `品牌说明针对${t.zh}`, en: `The brand says it targets ${t.en}`, basis: 'brand_claim' }
+      : { zh: `定位为针对${t.zh}的产品`, en: `Positioned for ${t.en}`, basis: 'classification' };
   }
   const n = joinNames(m.ingredients.slice(0, 2).map((i) => ingredientName(i, i.inciName)));
-  return { zh: `成分表里有${a.zh}成分${n.zh}，但不是主打`, en: `Lists ${a.en} ingredient ${n.en}, though not as a key ingredient` };
+  return { zh: `成分表里有${a.zh}成分${n.zh}，但不是主打`, en: `Lists ${a.en} ingredient ${n.en}, though not as a key ingredient`, basis: 'ingredients' };
 }
 
-function fragranceReason(r: ProductScore): Text {
+function fragranceReason(r: ProductScore): Reason {
   const f = r.fragrance;
   const unknown = f.unknownCount > 0
     ? { zh: `（${f.unknownCount} 个成分暂无数据）`, en: ` (${f.unknownCount} ingredient(s) without data)` }
     : { zh: '', en: '' };
-  if (f.status === 'labeled_free') return { zh: `标注无香${unknown.zh}`, en: `Labeled fragrance-free${unknown.en}` };
-  if (f.status === 'none_found') return { zh: `成分表中没有发现加香成分${unknown.zh}`, en: `No fragrance ingredient found in the list${unknown.en}` };
-  if (f.fragrance.length === 0) return { zh: '含精油', en: 'Contains essential oils' };
-  return { zh: '含香精', en: 'Contains fragrance' };
+  const b = { basis: 'ingredients' as const };
+  if (f.status === 'labeled_free') return { zh: `标注无香${unknown.zh}`, en: `Labeled fragrance-free${unknown.en}`, ...b };
+  if (f.status === 'none_found') return { zh: `成分表中没有发现加香成分${unknown.zh}`, en: `No fragrance ingredient found in the list${unknown.en}`, ...b };
+  if (f.fragrance.length === 0) return { zh: '含精油', en: 'Contains essential oils', ...b };
+  return { zh: '含香精', en: 'Contains fragrance', ...b };
 }
 
-export function recommendReasons(r: ProductScore, profile: ScoringProfile, scentGoal: boolean): Text[] {
-  const out: Text[] = [];
+/** 温和：不含加香成分且没有常见刺激成分时合成一句 */
+function gentleReason(r: ProductScore): Reason {
+  return r.fragrance.status !== 'contains' && r.dimensions.irritation.score === 100
+    ? { zh: '不含香精和常见刺激成分', en: 'No fragrance or common irritants', basis: 'ingredients' }
+    : { zh: '常见刺激成分少', en: 'Few common irritants', basis: 'ingredients' };
+}
+
+export function recommendReasons(r: ProductScore, profile: ScoringProfile, scentGoal: boolean): Reason[] {
+  const out: Reason[] = [];
   const needs = [...r.needMatches]
     .filter((m) => m.credit > 0)
     .sort((a, b) => b.weight * b.credit - a.weight * a.credit || b.credit - a.credit);
@@ -77,7 +89,7 @@ export function recommendReasons(r: ProductScore, profile: ScoringProfile, scent
   } else if (needs[1]) {
     out.push(needReason(needs[1], r.product));
   } else if (r.dimensions.irritation.level === 'high') {
-    out.push({ zh: '常见刺激成分少', en: 'Few common irritants' });
+    out.push(gentleReason(r));
   } else if (r.dimensions.environment.score === 100) {
     out.push(r.dimensions.environment.reason);
   }
@@ -88,3 +100,17 @@ export function recommendReasons(r: ProductScore, profile: ScoringProfile, scent
   }
   return out.slice(0, 2);
 }
+
+/** 详情"为什么推荐给你"：所有有依据的需求，加香味或温和度一条 */
+export function detailReasons(r: ProductScore, profile: ScoringProfile, scentGoal: boolean): Reason[] {
+  if (r.excluded) return [];
+  const needs = [...r.needMatches]
+    .filter((m) => m.credit > 0)
+    .sort((a, b) => b.weight * b.credit - a.weight * a.credit || b.credit - a.credit)
+    .map((m) => needReason(m, r.product));
+  const extra = profile.fragrancePref === 'free_first' || r.fragrance.status !== 'contains' ? fragranceReason(r)
+    : r.dimensions.irritation.level === 'high' ? gentleReason(r) : null;
+  const out = extra ? [...needs, extra] : needs;
+  return out.length > 0 ? out : recommendReasons(r, profile, scentGoal);
+}
+

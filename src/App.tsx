@@ -6,6 +6,7 @@ import Quiz from './pages/Quiz';
 import Results from './pages/Results';
 import ProfilePage from './pages/ProfilePage';
 import About from './pages/About';
+import DataNotes from './pages/DataNotes';
 
 function Home() {
   const { t } = useI18n();
@@ -72,8 +73,11 @@ export default function App() {
         <Route path="/results/shampoo" element={<Results />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/about" element={<About />} />
+        <Route path="/data" element={<DataNotes />} />
       </Routes>
       <footer className="footer">
+        <Link to="/data">{t('footer.data')}</Link>
+        {' · '}
         <Link to="/about">{t('footer.about')}</Link>
       </footer>
     </BrowserRouter>

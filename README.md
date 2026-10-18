@@ -44,7 +44,7 @@ npm run build          # 构建静态网页到 dist/
 
 ## 当前阶段
 
-v0.1：头皮与头发（洗发水、护发素、洗护搭配），面向美国用户，中英文界面。正在做上线前的成分核对；`src/scoring/config.ts` 的 `TEST_MODE_DRAFT_SCORING` 上线前必须改为 false。免责声明与隐私说明见网站的 /about 页。
+v0.1：头皮与头发（洗发水、护发素、洗护搭配），面向美国用户，中英文界面。正在做上线前的成分核对；`src/scoring/config.ts` 的 `TEST_MODE_DRAFT_SCORING` 上线前必须改为 false。免责声明与隐私说明见网站的 /about 页，打分和数据的判断方法见 /data 页。
 
 ## 许可
 

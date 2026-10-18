@@ -1,6 +1,6 @@
 // 零售商评分和购买链接的展示规则（只展示，不计入任何分数）。
 
-import type { Product, PurchaseLink, RetailRating } from './types';
+import type { Product, RetailRating } from './types';
 
 /** 评价数少于此值的评分不显示 */
 export const MIN_RATING_COUNT = 50;
@@ -22,13 +22,4 @@ export function visibleRatings(p: Product): RetailRating[] {
 /** 评价数的显示文字：保留页面原文（如 5.5K），去掉括号 */
 export function ratingCountText(r: RetailRating): string {
   return r.ratingCountDisplay.replace(/[()]/g, '') || (r.ratingCount !== null ? r.ratingCount.toLocaleString('en-US') : '');
-}
-
-/**
- * 主购买按钮的链接：产品表的 purchase_url（资料整理时选定的零售商页）优先；
- * 没有时取购买链接中第一条（固定顺序）。其余链接作为"其他渠道"列出。
- */
-export function buyLinks(p: Product): { primary: string; others: PurchaseLink[] } {
-  const primary = p.purchaseUrl || p.purchaseLinks[0]?.url || '';
-  return { primary, others: p.purchaseLinks.filter((l) => l.url !== primary) };
 }

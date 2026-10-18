@@ -25,7 +25,7 @@
   --fs-h2: 20px;
   --fs-body: 16px;
   --fs-small: 14px;
-  --fs-label: 12px;
+  --fs-label: 13px;
   --radius: 4px;
   --gutter: 20px;
   --maxw: 640px;
@@ -252,7 +252,7 @@ button.tag { cursor: pointer; }
 .pimg { margin: 0; width: 72px; aspect-ratio: 3 / 4; border-radius: var(--radius); background: var(--tint); display: grid; place-items: center; overflow: hidden; }
 .pimg img { width: 100%; height: 100%; object-fit: contain; }
 .pimg.placeholder svg { width: 32px; height: 48px; fill: none; stroke: var(--muted); stroke-width: 1.5; }
-.tag.award { font-size: 12px; padding: 2px 8px; background: var(--tint); border-color: transparent; }
+.tag.award { font-size: 13px; padding: 2px 8px; background: var(--tint); border-color: transparent; }
 .reasons { margin: 16px 0 0; padding: 0; list-style: none; font-size: var(--fs-small); color: var(--ink-2); }
 .reasons li { padding-left: 16px; position: relative; }
 .reasons li + li { margin-top: 6px; }
@@ -276,8 +276,8 @@ button.tag { cursor: pointer; }
 .meter i.on { background: var(--ink); }
 .dim-level { font-size: var(--fs-label); letter-spacing: 0.08em; text-transform: uppercase; min-width: 4.5em; text-align: right; }
 .dim-level.high { color: var(--good); }
-.dim-level.medium { color: var(--mid); }
-.dim-level.low { color: var(--bad); }
+.dim-level.medium { color: var(--ink-2); }
+.dim-level.low { color: var(--ink-2); }
 .dim-level.none { color: var(--muted); }
 .dim-reason { margin-top: 6px; font-size: var(--fs-small); color: var(--ink-2); }
 
@@ -295,12 +295,9 @@ details.more[open] summary::after { content: '−'; }
 .ings { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .ing { position: relative; }
 .ing-chip {
-  border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 3px 10px;
-  font-size: 13px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 4px 10px;
+  font-size: 14px; cursor: pointer;
 }
-.ing-chip.verified { border-color: var(--ink); }
-.ing-chip.draft { border-style: dashed; }
-.ing-chip.unknown { color: var(--muted); border-style: dotted; }
 .ing-pop {
   position: absolute; z-index: 10; top: calc(100% + 6px); left: 0; width: min(300px, 80vw);
   display: flex; flex-direction: column; gap: 6px; padding: 14px; font-size: var(--fs-small);
@@ -325,7 +322,7 @@ details.more[open] summary::after { content: '−'; }
 /* 水硬度刻度条：USGS 四档，你的城市为深色圆点或一段，参照城市为细刻度 */
 .water-line { margin: 6px 0 0; }
 .wscale { margin-top: 14px; }
-.wscale-labels { position: relative; height: 18px; font-size: 11px; }
+.wscale-labels { position: relative; height: 18px; font-size: 13px; }
 .wscale-labels span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
 .wscale-bar { position: relative; height: 12px; border-radius: var(--radius); overflow: visible; }
 .wscale-band { position: absolute; top: 0; bottom: 0; border-right: 1px solid var(--surface); }
@@ -337,7 +334,7 @@ details.more[open] summary::after { content: '−'; }
 .wscale-you { position: absolute; top: 50%; transform: translateY(-50%); background: var(--ink); }
 .wscale-you.dot { width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; border: 2px solid var(--surface); box-sizing: content-box; }
 .wscale-you.span { height: 6px; border-radius: 3px; min-width: 6px; }
-.wscale-ticks { position: relative; height: 16px; margin-top: 6px; font-size: 11px; }
+.wscale-ticks { position: relative; height: 16px; margin-top: 6px; font-size: 13px; }
 .wscale-ticks span { position: absolute; transform: translateX(-50%); }
 .wscale-ticks span:first-child { transform: none; }
 .wscale-ticks span:last-child { transform: translateX(-100%); }
@@ -360,7 +357,7 @@ details.more[open] summary::after { content: '−'; }
 .score .fit.medium { color: var(--mid); }
 .score .fit.low { color: var(--bad); }
 .score.gentle .num { font-size: 28px; }
-.tag.scent { font-size: 12px; padding: 2px 8px; }
+.tag.scent { font-size: 13px; padding: 2px 8px; }
 
 /* ---------- 免责声明与隐私 ---------- */
 .about section { margin-top: 28px; }
@@ -371,7 +368,7 @@ details.more[open] summary::after { content: '−'; }
 
 /* ---------- 卡片：适合等级、统一标签、占位图、购买 ---------- */
 .product .tags { margin-top: 10px; gap: 6px; }
-.product .tag { font-size: 12px; padding: 2px 9px; background: var(--tint); border-color: transparent; color: var(--ink-2); }
+.product .tag { font-size: 13px; padding: 2px 9px; background: var(--tint); border-color: transparent; color: var(--ink-2); }
 .fitbadge { text-align: right; white-space: nowrap; }
 .fitbadge strong { display: inline-block; font-size: var(--fs-small); font-weight: 500; padding: 4px 10px; border-radius: 999px; }
 .fitbadge.high strong { background: color-mix(in srgb, var(--good) 14%, var(--surface)); color: var(--good); }
@@ -391,3 +388,50 @@ details.more[open] summary::after { content: '−'; }
 .ratings { list-style: none; padding: 0; margin: 8px 0 6px; font-size: var(--fs-small); display: grid; gap: 4px; }
 .product .tag { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; border-radius: 6px; }
 .pimg.placeholder svg { width: 40px; height: 54px; }
+
+
+/* ---------- 产品卡片（2026-10-18 重新排版）：只用一种强调色（--good）表示正面信息 ---------- */
+.fitbadge.medium strong { background: var(--tint); color: var(--ink); }
+.fitbadge.low strong { background: var(--tint); color: var(--ink-2); }
+.fitbadge.gentle strong { background: var(--tint); color: var(--ink); }
+.pimg.placeholder.shampoo, .pimg.placeholder.conditioner, .pimg.placeholder.cowash, .pimg.placeholder { background: var(--tint); }
+.pimg.placeholder svg, .pimg.placeholder.shampoo svg, .pimg.placeholder.conditioner svg, .pimg.placeholder.cowash svg { stroke: var(--ink-2); }
+.product .meta { color: var(--ink-2); }
+.rating-line { margin-top: 4px; font-size: var(--fs-small); color: var(--ink-2); }
+.rating-line span[aria-hidden] { color: var(--ink); }
+.product .tag { font-size: 13px; color: var(--ink); }
+.card-actions { display: flex; gap: 10px; margin-top: 16px; }
+.card-actions .btn { min-height: 44px; }
+.card-actions .btn-primary { flex: 1; }
+.card-actions .btn:not(.btn-primary) { flex: 0 0 auto; padding: 0 18px; }
+.card-details { margin-top: 18px; border-top: 1px solid var(--line); }
+.card-details section { padding: 16px 0; border-bottom: 1px solid var(--line); font-size: var(--fs-small); }
+.card-details section p { margin: 0; }
+.card-details section p + p { margin-top: 6px; }
+.sec-title { font-size: var(--fs-small); font-weight: 500; margin: 0 0 10px; }
+.why { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.why li { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.basis-tag { flex: none; font-size: 13px; color: var(--ink-2); background: var(--tint); border-radius: 6px; padding: 1px 8px; }
+.stores { list-style: none; margin: 0; padding: 0; }
+.stores li + li { border-top: 1px solid var(--line); }
+.store-row { display: grid; grid-template-columns: 1fr auto 16px; gap: 10px; align-items: center; padding: 10px 0; color: var(--ink); text-decoration: none; min-height: 44px; }
+.store-row:hover .store-name { text-decoration: underline; }
+.store-name { font-weight: 500; }
+.store-rating { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ext { width: 16px; height: 16px; fill: none; stroke: var(--ink-2); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.note { font-size: 13px; color: var(--muted); margin-top: 8px !important; }
+.note a { color: inherit; }
+.keyings { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.keyings .muted { color: var(--ink-2); }
+.kv { margin: 0; display: grid; gap: 8px; }
+.kv > div { display: grid; grid-template-columns: 4.5em 1fr; gap: 8px; }
+.kv dt { color: var(--ink-2); }
+.kv dd { margin: 0; }
+details.sub { margin-top: 12px; }
+details.sub > summary { cursor: pointer; font-size: var(--fs-small); color: var(--ink); }
+.card-details > details.sub { padding: 14px 0; border-bottom: 1px solid var(--line); margin: 0; }
+.card-foot { font-size: 13px; color: var(--muted); margin: 14px 0 0; line-height: 1.6; }
+.card-foot a { color: inherit; }
+.lead { color: var(--ink-2); margin-top: 12px; }
+.footer a + a { margin-left: 0; }
+.rating-line .nowrap { white-space: nowrap; }
