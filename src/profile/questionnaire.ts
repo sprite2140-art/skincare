@@ -99,7 +99,8 @@ const SCALP_CONCERN_TARGETS: Record<ScalpConcern, Target> = {
   itch: 'scalp_itch',
   dry_tight: 'dry_scalp',
   hair_loss: 'hair_loss',
-  redness: 'scalp_redness',
+  // 头皮发红不单独匹配产品，按"敏感头皮"匹配；就医提示仍按发红题判断（见 scalpMedicalAlerts）
+  redness: 'sensitive_scalp',
 };
 
 /** 敏感头皮：瘙痒 4 分及以上（选了痒但没填分数时偏保守也算）、用产品后有不适、头皮经常发红 */
@@ -121,7 +122,7 @@ export function scalpTargets(a: ScalpAnswers): Target[] {
     add(SCALP_CONCERN_TARGETS[c]);
   }
   if (a.concerns.includes('dandruff') && a.dandruffType === 'oily_large') add('scalp_oil');
-  if (a.redness && a.redness !== 'none') add('scalp_redness');
+  if (a.redness && a.redness !== 'none') add('sensitive_scalp');
   if (a.oilTiming === 'same_day' || a.oilTiming === 'next_day') add('scalp_oil');
   if (a.oilTiming === 'five_plus_days') add('dry_scalp');
   if (isSensitiveScalp(a)) add('sensitive_scalp');

@@ -23,9 +23,9 @@ const answers = (a: { base?: Partial<BaseAnswers>; scalp?: Partial<ScalpAnswers>
 });
 
 describe('头皮问卷映射', () => {
-  it('多选困扰映射到 targets，发红 → scalp_redness，头皮干 → dry_scalp，当天变油 → scalp_oil', () => {
+  it('多选困扰映射到 targets，发红 → sensitive_scalp（不单独匹配发红），头皮干 → dry_scalp，当天变油 → scalp_oil', () => {
     expect(scalpTargets({ concerns: ['dandruff', 'redness', 'dry_tight'], oilTiming: 'same_day', washFrequency: null }))
-      .toEqual(['dandruff', 'scalp_redness', 'dry_scalp', 'scalp_oil']);
+      .toEqual(['dandruff', 'sensitive_scalp', 'dry_scalp', 'scalp_oil']);
     expect(scalpTargets({ concerns: [], noConcerns: true, oilTiming: 'three_plus_days', washFrequency: null })).toEqual([]);
   });
 
@@ -104,16 +104,18 @@ describe('头皮问卷映射', () => {
     expect(isSensitiveScalp({ ...noScalp, discomfort: ['tightness'], discomfortFrequency: 'sometimes' })).toBe(true);
     expect(isSensitiveScalp({ ...noScalp, redness: 'often' })).toBe(true);
     expect(isSensitiveScalp({ ...noScalp, redness: 'occasional' })).toBe(false);
-    expect(scalpTargets({ ...noScalp, redness: 'occasional' })).toEqual(['scalp_redness']);
+    expect(scalpTargets({ ...noScalp, redness: 'occasional' })).toEqual(['sensitive_scalp']);
     const p = toScoringProfile(answers({ scalp: { concerns: ['dandruff'], dandruffAmount: 4, redness: 'often' } }), 'shampoo', ctx);
-    expect(p.targetWeights).toEqual({ dandruff: 2, scalp_redness: 2, sensitive_scalp: 2 });
+    expect(p.targetWeights).toEqual({ dandruff: 2, sensitive_scalp: 2 });
+    // 就医提示保留：发红并扩散
+    expect(scalpMedicalAlerts({ ...noScalp, redness: 'spreading' }).length).toBeGreaterThan(0);
   });
 
   it('旧档案的"发红"困扰：迁移到新的发红题；回答新题后以新答案为准', () => {
     const old = { ...noScalp, concerns: ['dandruff' as const, 'redness' as const] };
     expect(migrateScalp(old)).toMatchObject({ concerns: ['dandruff'], redness: 'occasional' });
     expect(scalpTargets({ ...old, redness: 'none' })).toEqual(['dandruff']);
-    expect(scalpTargets(old)).toEqual(['dandruff', 'scalp_redness']);
+    expect(scalpTargets(old)).toEqual(['dandruff', 'sensitive_scalp']);
   });
 
   it('油腻偏黄大片 → 同时针对头皮油', () => {

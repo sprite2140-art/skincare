@@ -62,13 +62,18 @@ export interface ListEntry {
   inciName: string;
   /** 缩写或别名，如 GLDA */
   abbreviation: string;
+  /** 来源级别：cir（CIR 安全评估）/ peer_reviewed（同行评议文献）/ cosing（CosIng 条目）；没有这一列的清单为空 */
+  sourceLevel: string;
   sourceUrl: string;
 }
+
+export const SOURCE_LEVELS = ['cir', 'peer_reviewed', 'cosing'] as const;
 
 export function parseIngredientList(text: string): ListEntry[] {
   return parseCsv(text).map((r) => ({
     inciName: r.inci_name ?? '',
     abbreviation: r.abbreviation ?? '',
+    sourceLevel: r.source_level ?? '',
     sourceUrl: r.source_url ?? '',
   }));
 }
