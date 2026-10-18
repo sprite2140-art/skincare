@@ -1,0 +1,42 @@
+product_id,platform,rating,rating_count,rating_count_display,count_label,checked_on,url,note
+SH-US-001,ulta,4,19,19,Reviews,2026-10-17,https://www.ulta.com/p/anti-dandruff-hydrating-shampoo-pimprod2053202?sku=2646267,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+SH-US-001,target,4.55,1346,"1,346",page header count,2026-10-17,https://www.target.com/p/-/A-92463477,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+SH-US-002,ulta,4.5,11,11,Reviews,2026-10-17,https://www.ulta.com/p/gentle-hydrating-shampoo-pimprod2053200,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+SH-US-002,target,4.52,1554,"1,554",page header count,2026-10-17,https://www.target.com/p/-/A-92463474,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+SH-US-002,amazon,4.5,6395,"(6,395)",ratings,2026-10-17,https://www.amazon.com/dp/B0DV42H38H,已在CeraVe品牌店首页目录核对到对应ASIN B0DV42H38H，产品页也链接Visit the CeraVe Store；供货/卖家显示Amazon.com，并非品牌自营卖家。按品牌店商品入口收录；未把仅有品牌名称的第三方商品纳入。评分总数含星级评价，不等于文字评论数。
+SH-US-003,ulta,4.7,2887,"2,887",Reviews,2026-10-17,https://www.ulta.com/p/clarifying-detox-shampoo-pimprod2015770,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+SH-US-003,sephora,4.5,,5.5K,header review link,2026-10-17,https://www.sephora.com/product/ouai-haircare-detox-shampoo-P457223?skuId=2319820,浏览器产品页头部星标的无障碍标签显示值；可能按半星显示，并非额外推算的精细均分。评价量若为K缩写，精确数字列留空；不同规格可能合并。
+SH-US-003,target,4.72,1311,"1,311",page header count,2026-10-17,https://www.target.com/p/-/A-82518837,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+SH-US-004,sephora,4.5,917,917,header review link,2026-10-17,https://www.sephora.com/product/peptide-prep-clarifying-detox-shampoo-P501449,浏览器产品页头部星标的无障碍标签显示值；可能按半星显示，并非额外推算的精细均分。评价量若为K缩写，精确数字列留空；不同规格可能合并。
+SH-US-004,target,3.72,7,7,page header count,2026-10-17,https://www.target.com/p/-/A-90038805,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。Target Plus第三方商家：Beacon Beauty Center；未认证为品牌授权商家。
+SH-US-005,ulta,4.3,3925,"3,925",Reviews,2026-10-17,https://www.ulta.com/p/no4-bond-maintenance-strengthening-hydrating-hair-repair-shampoo-pimprod2029348,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+SH-US-005,sephora,4,,3.4K,header review link,2026-10-17,https://www.sephora.com/product/no-4-bond-maintenance-shampoo-P433172?skuId=2118867,浏览器产品页头部星标的无障碍标签显示值；可能按半星显示，并非额外推算的精细均分。评价量若为K缩写，精确数字列留空；不同规格可能合并。
+SH-US-005,target,5,9,9,page header count,2026-10-17,https://www.target.com/p/-/A-92205260,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。Target Plus第三方商家：Beacon Beauty Center；未认证为品牌授权商家。
+SH-US-006,ulta,4.6,761,761,Reviews,2026-10-17,https://www.ulta.com/p/acidic-color-gloss-sulfate-free-shampoo-pimprod2042737,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+SH-US-006,target,5,1,1,page header count,2026-10-17,https://www.target.com/p/-/A-1006119329,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。Target Plus第三方商家：Beacon Beauty Center；未认证为品牌授权商家。
+SH-US-007,ulta,4.1,347,347,Reviews,2026-10-17,https://www.ulta.com/p/volume-shampoo-with-collagen-thin-fine-hair-pimprod2022902,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+SH-US-007,target,3.81,1041,"1,041",page header count,2026-10-17,https://www.target.com/p/-/A-80203657,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+SH-US-008,sephora,4.5,450,450,header review link,2026-10-17,https://www.sephora.com/product/necessaire-rosemary-shampoo-with-5-ceramides-5-proteins-peptide-rosemary-oil-for-thinning-hair-P510619,浏览器产品页头部星标的无障碍标签显示值；可能按半星显示，并非额外推算的精细均分。评价量若为K缩写，精确数字列留空；不同规格可能合并。
+SH-US-009,ulta,3.3,75,75,Reviews,2026-10-17,https://www.ulta.com/p/everpure-sulfate-free-bond-repair-shampoo-pimprod2025804?sku=2582256,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+SH-US-009,target,4.37,648,648,page header count,2026-10-17,https://www.target.com/p/-/A-82666719,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。品牌官网现称Bond Repair+，本轮仅补零售元数据，不据此更新旧表配方。
+SH-US-010,ulta,4.5,468,468,Reviews,2026-10-17,https://www.ulta.com/p/everpure-sulfate-free-clarify-shampoo-pimprod2042392?sku=2617200,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+SH-US-010,target,4.42,726,726,page header count,2026-10-17,https://www.target.com/p/-/A-89170432,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+CO-US-001,ulta,5,8,8,Reviews,2026-10-17,https://www.ulta.com/p/gentle-hydrating-conditioner-pimprod2053201?sku=2646266,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+CO-US-001,target,4.58,1326,"1,326",page header count,2026-10-17,https://www.target.com/p/-/A-92463478,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+CO-US-002,ulta,4.5,246,246,Reviews,2026-10-17,https://www.ulta.com/p/volume-conditioner-with-collagen-thin-fine-hair-pimprod2022910?sku=2579294,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+CO-US-002,target,4.24,774,774,page header count,2026-10-17,https://www.target.com/p/-/A-80203661,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+CO-US-003,ulta,4,811,811,Reviews,2026-10-17,https://www.ulta.com/p/moisture-conditioner-with-hyaluronic-acid-dry-dull-hair-pimprod2022909?sku=2579295,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+CO-US-003,target,4.17,1127,"1,127",page header count,2026-10-17,https://www.target.com/p/-/A-80203667,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+CO-US-004,ulta,4.3,300,300,Reviews,2026-10-17,https://www.ulta.com/p/smooth-conditioner-curly-frizzy-hair-with-wheat-protein-pimprod2022895?sku=2579290,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+CO-US-004,target,4.26,1738,"1,738",page header count,2026-10-17,https://www.target.com/p/-/A-80203669,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+CO-US-005,ulta,3.9,44,44,Reviews,2026-10-17,https://www.ulta.com/p/everpure-sulfate-free-bond-repair-conditioner-pimprod2025800?sku=2582257,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+CO-US-005,target,4.34,618,618,page header count,2026-10-17,https://www.target.com/p/-/A-82666718,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。品牌官网现称Bond Repair+，本轮仅补零售元数据，不据此更新旧表配方。
+CO-US-006,ulta,4.5,337,337,Reviews,2026-10-17,https://www.ulta.com/p/everpure-sulfate-free-glossing-conditioner-lasting-shine-pimprod2049541?sku=2633795,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+CO-US-006,target,4.47,559,559,page header count,2026-10-17,https://www.target.com/p/-/A-92331264,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+CO-US-007,ulta,4.4,1864,"1,864",Reviews,2026-10-17,https://www.ulta.com/p/everpure-sulfate-free-moisture-conditioner-xlsImpprod1170132?sku=2502787,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+CO-US-007,target,4.41,1801,"1,801",page header count,2026-10-17,https://www.target.com/p/-/A-11127045,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+CO-US-008,ulta,3.7,33,33,Reviews,2026-10-17,https://www.ulta.com/p/everpure-sulfate-free-purple-conditioner-pimprod2023206?sku=2576576,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+CO-US-008,target,4.38,2736,"2,736",page header count,2026-10-17,https://www.target.com/p/-/A-76150427,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+CO-US-009,ulta,4.5,606,606,Reviews,2026-10-17,https://www.ulta.com/p/curl-talk-bond-building-conditioner-pimprod2036417?sku=2602495,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。
+CO-US-009,target,4.53,784,784,page header count,2026-10-17,https://www.target.com/p/-/A-86804385,产品页头部星级及总数；没有将其当作仅包含文字评论的数量。
+CO-US-010,ulta,4.6,832,832,Reviews,2026-10-17,https://www.ulta.com/p/food-soft-hydrating-conditioner-dry-brittle-hair-pimprod2038873?sku=2609300,产品页标题区显示值；未改用与可见数字有差别的JSON-LD评分；可能合并不同规格评价。

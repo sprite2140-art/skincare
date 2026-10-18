@@ -5,7 +5,7 @@ import { unmatchedKeyActives } from './keyActives';
 import { SOURCE_LEVELS, expandIngredients, onlyFragranceFunctions, type AllergenEntry, type CosingEntry, type ExplanationEntry, type IngredientLists } from './cosing';
 import { ingredientFrequency } from './frequency';
 import {
-  BRAND_CLAIM_STATUSES, CATEGORIES, PRODUCT_SUBTYPES, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
+  BRAND_CLAIM_STATUSES, CATEGORIES, PRODUCT_SUBTYPES, RETAIL_PLATFORMS, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
   REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
 } from './types';
 import type { Category, City, ExchangeRate, Ingredient, Product, ReferenceWater, WaterRecord } from './types';
@@ -162,7 +162,26 @@ export function validateData(
       if (url && !/^https?:\/\//.test(url)) err(F_PRD, key, `${field} 不是 http(s) 链接：${url}`);
     }
     // 图片必须写明来源和使用许可，否则页面不展示（用占位图）
-    if (p.imageUrl && (!p.imageSource || !p.imageLicense)) warn(F_PRD, key, 'image_url 缺少 image_source 或 image_license，页面将使用占位图');
+    if (p.imageUrl && (!p.imageSource || !p.imageLicense || !p.imageLicenseUrl || !p.imageAttribution)) {
+      warn(F_PRD, key, 'image_url 缺少 image_source、image_license、image_license_url 或 image_attribution，页面将使用占位图');
+    }
+    // 零售商评分与购买链接
+    for (const r of p.ratings) {
+      const F = 'retail_ratings.csv';
+      oneOf(F, key, 'platform', r.platform, RETAIL_PLATFORMS);
+      if (!(r.rating >= 0 && r.rating <= 5)) err(F, key, `rating 应在 0–5 之间：${r.rating}`);
+      if (!/^https?:\/\//.test(r.url)) err(F, key, `${r.platform} 缺少产品页链接 url`);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(r.checkedOn)) err(F, key, `${r.platform} 缺少核对日期 checked_on`);
+      if (r.ratingCount === null && !r.ratingCountDisplay) warn(F, key, `${r.platform} 没有评价数，页面不显示这条评分`);
+    }
+    const seenPlatforms = new Set<string>();
+    for (const l of p.purchaseLinks) {
+      const F = 'purchase_links.csv';
+      oneOf(F, key, 'platform', l.platform, RETAIL_PLATFORMS);
+      if (!/^https?:\/\//.test(l.url)) err(F, key, `${l.platform} 的 url 不是 http(s) 链接`);
+      if (seenPlatforms.has(l.platform)) warn(F, key, `${l.platform} 有多条购买链接`);
+      seenPlatforms.add(l.platform);
+    }
     if (!p.purchaseUrl) warn(F_PRD, key, '缺少 purchase_url（购买链接）');
     if (p.sizeMl !== null && !(p.sizeMl > 0)) err(F_PRD, key, `size_ml 应为正数：${p.sizeMl}`);
     for (const url of p.sourceUrls) {

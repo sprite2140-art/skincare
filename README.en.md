@@ -56,4 +56,5 @@ v0.1 covers scalp and hair (shampoo, conditioner, sets) for US users, with Chine
 
 ## License
 
-Code: MIT. Data compiled by the author: CC BY 4.0. Third-party data keeps its original license.
+- Code: MIT, see [LICENSE](LICENSE).
+- Data compiled by the authors: CC BY 4.0. Third-party data (CosIng, EU regulations, Federal Reserve exchange rates, Open Beauty Facts images and others) follows its original terms and is credited. See [DATA_LICENSE.md](DATA_LICENSE.md).

@@ -13,6 +13,16 @@
 
 ## 记录
 
+### 2026-10-18（Claude Code：许可证、打分按购买范围分配发丝效果、卡片重新设计、零售商评分 / 多平台购买链接 / 开放授权图片；新 PR）
+- 完成：
+  1. **许可**：新增 LICENSE（代码 MIT）和 DATA_LICENSE.md（作者整理的数据 CC BY 4.0；CosIng、欧盟法规、美联储汇率、Open Beauty Facts 图片、品牌原文、零售商评分等按原来源条款并注明出处），中英文 README 链接。
+  2. **隐私页**：补充"托管服务商可能保留标准的访问日志"。CIR 来源（PMID 12396676）作者已核对，DATA_SCHEMA.md 已注明。
+  3. **打分**：选洗护搭配（或"帮我判断"建议洗护搭配）时，发丝效果只分配给护发素，洗发水只匹配头皮需求和清爽洁净、蓬松、去黄、去橙、产品残留；只买洗发水时发丝效果权重 0.5。不计分的维度显示"不适用"或"数据缺失"，不显示空刻度条。
+  4. **卡片**：主要显示适合等级（很适合 / 适合 / 一般），分数移到详情；推荐理由改为一句话（如"含去屑成分吡硫鎓锌"），依据类型在详情；标签统一样式、最多两个；测试数据提示只在页面顶部；购买按钮改为实心；占位图按品类（按压瓶 / 软管 / 罐）用不同图标和柔和底色；图片加载失败时退回占位图。
+  5. **数据**：data/retail_ratings.csv（41 条，评价数少于 50 不显示，注明可能有赠品试用评价，只展示不计分）；data/purchase_links.csv（63 条，按品牌官网 → Ulta → Sephora → Target → Amazon 固定顺序）；products.csv 新增 image_license_url、image_attribution，导入 CO-US-005、CO-US-009 两张 Open Beauty Facts 图片（CC BY-SA 3.0，详情显示署名和许可）。
+- 验证：测试 172 个全部通过；类型检查、数据校验（0 错误）、构建通过；390px 浏览器检查卡片、详情、图片署名、洗护搭配，无横向滚动（开发环境访问不到 Open Beauty Facts 图片，已退回占位图）。
+- 待作者确认：LICENSE 版权人写的是仓库账号名 sprite2140-art；Cloudflare Web Analytics 是否开启。
+
 ### 2026-10-18（Claude Code：螯合剂清单扩充、匹配与覆盖表调整、美国色素别名、上线前准备；新 PR）
 - 完成：
   1. **螯合剂清单** 增加 EDTA、HEDTA、Trisodium HEDTA、Trisodium EDTA、Calcium Disodium EDTA、Dipotassium EDTA、Diammonium EDTA，共 17 个；新增 source_level 列（cir / peer_reviewed / cosing）。EDTA 及其盐类 9 个的来源为 CIR 安全评估（PubMed 12396676），其余 8 个暂为 CosIng 条目页。

@@ -153,7 +153,7 @@ describe('本轮新增的产品列', () => {
       .toEqual([expect.stringContaining('测试来源链接')]);
     const warnings = validateData(real.ingredients, [{ ...p, imageUrl: 'https://img.example/a.jpg' }], real.cities, real.exchangeRates)
       .filter((i) => i.level === 'warning').map((i) => i.message);
-    expect(warnings).toContain('image_url 缺少 image_source 或 image_license，页面将使用占位图');
+    expect(warnings).toContain('image_url 缺少 image_source、image_license、image_license_url 或 image_attribution，页面将使用占位图');
   });
 
   it('"INCI 名/俗名"写法用斜杠前的部分匹配，本身带斜杠的 INCI 名不拆', () => {

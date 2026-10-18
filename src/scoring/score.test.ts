@@ -211,7 +211,7 @@ const sample: Product = {
   inciList: ['Aqua', 'Sodium Laureth Sulfate', 'Glycerin', 'Piroctone Olamine', 'Parfum'], inciNameUnverified: [], keyActives: [],
   keyActivesDisclosed: true,
   inciListOriginal: '', price: 12, currency: 'USD', sizeMl: null, availableInCn: 'unknown', transparency: 'medium',
-  sourceUrls: [], purchaseUrl: '', pairedProductIds: [], imageUrl: '', imageSource: '', imageLicense: '', reviewedOn: '',
+  sourceUrls: [], purchaseUrl: '', pairedProductIds: [], imageUrl: '', imageSource: '', imageLicense: '', imageLicenseUrl: '', imageAttribution: '', reviewedOn: '', ratings: [], purchaseLinks: [],
 };
 // 默认用免洗型品类，刺激风险不减半；需要冲洗型时显式传 category: 'shampoo'
 const product = (id: string, inciList: string[], extra: Partial<Product> = {}): Product => ({

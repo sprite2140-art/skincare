@@ -73,6 +73,15 @@ export const BUILDUP_WEIGHT = 1;
  */
 export const MISSING_EVIDENCE_CAP_LEVEL = 'C' as const;
 
+/**
+ * 洗发水自己负责的发丝 / 效果需求（头皮需求之外）：清爽洁净、蓬松、去黄、去橙、产品残留。
+ * 其余发丝效果（柔顺、滋润、毛躁、打结、光泽、褪色，以及受损、卷度）：
+ * - 选洗护搭配时只分配给护发素，洗发水不匹配；
+ * - 只买洗发水时仍参与洗发水匹配，权重为 SHAMPOO_HAIR_EFFECT_WEIGHT。
+ */
+export const SHAMPOO_OWN_HAIR_TARGETS = ['clarifying', 'flat_hair', 'tone_yellow', 'tone_orange', 'buildup'] as const;
+export const SHAMPOO_HAIR_EFFECT_WEIGHT = 0.5;
+
 /** 洗发水侧重头皮与清洁：头皮相关困扰的权重；发丝状态和期望效果权重为 1 */
 export const SHAMPOO_SCALP_WEIGHT = 2;
 

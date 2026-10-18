@@ -151,13 +151,28 @@ describe('头发问卷映射', () => {
 });
 
 describe('转换为打分输入', () => {
-  it('洗发水侧重头皮：头皮困扰权重 2，发丝 1；护发素只看发丝', () => {
-    const a = answers({ scalp: { concerns: ['dandruff'] }, hair: { goals: ['smooth'] } });
+  it('选洗护搭配：发丝效果只分配给护发素，洗发水只匹配头皮需求和清爽、蓬松、去黄去橙、产品残留', () => {
+    const a = answers({
+      base: { scope: 'set' },
+      scalp: { concerns: ['dandruff'], styling: 'daily' },
+      hair: { conditions: ['dry', 'colored', 'tangling'], goals: ['clean', 'volume', 'tone_yellow'] },
+    });
     const sh = toScoringProfile(a, 'shampoo', ctx);
-    expect(sh.concerns).toEqual(['dandruff', 'frizz', 'tangling']);
-    expect(sh.targetWeights).toEqual({ dandruff: 2, frizz: 1, tangling: 1 });
+    expect([...sh.concerns].sort()).toEqual(['buildup', 'clarifying', 'dandruff', 'flat_hair', 'tone_yellow'].sort());
+    expect(sh.targetWeights).toMatchObject({ dandruff: 2, clarifying: 1, flat_hair: 1, tone_yellow: 1 });
     const co = toScoringProfile(a, 'conditioner', ctx);
-    expect(co.concerns).toEqual(['frizz', 'tangling']);
+    expect(co.concerns).toEqual(expect.arrayContaining(['dryness', 'color_fade', 'damage', 'tangling']));
+    expect(sh.concerns).not.toContain('dryness');
+    expect(sh.concerns).not.toContain('tangling');
+  });
+
+  it('只买洗发水：头皮困扰权重 2，发丝效果 0.5，洗发水自己的效果（如蓬松）1；护发素只看发丝', () => {
+    const a = answers({ base: { scope: 'shampoo' }, scalp: { concerns: ['dandruff'] }, hair: { goals: ['smooth', 'volume'] } });
+    const sh = toScoringProfile(a, 'shampoo', ctx);
+    expect(sh.concerns).toEqual(['dandruff', 'frizz', 'tangling', 'flat_hair']);
+    expect(sh.targetWeights).toEqual({ dandruff: 2, frizz: 0.5, tangling: 0.5, flat_hair: 1 });
+    const co = toScoringProfile(a, 'conditioner', ctx);
+    expect(co.concerns).toEqual(['frizz', 'tangling', 'flat_hair']);
     expect(co.sensitive).toBe(false);
   });
 

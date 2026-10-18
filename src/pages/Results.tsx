@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { budgetCaps, cities, exchangeRates, ingredientIndex, products } from '../data/load';
 import { COSING_RETRIEVED_ON, COSING_SOURCE } from '../data/cosing';
 import { translateCosingFunctions } from '../data/cosingFunctions';
+import { MIN_RATING_COUNT, buyLinks, ratingCountText, visibleRatings } from '../data/retail';
 import type { Category, Product, Region, Target } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
@@ -90,8 +91,8 @@ function IngredientChip({ name, status }: { name: string; status: IngredientStat
 
 function DimensionRow({ k, d }: { k: DimensionKey; d: Dimension }) {
   const { t, tx } = useI18n();
-  // 刺激风险分数高表示风险低，换成更直观的说法
-  // 证据强度低档显示"证据弱"；不计分的维度区分"不计分"（不适用）和"数据缺失"
+  // 刺激风险分数高表示风险低，换成更直观的说法；证据强度低档显示"证据弱"
+  // 不计分的维度不显示空刻度条：不适用（如水质不硬）显示"不适用"，数据缺失显示"数据缺失"
   const levelKey = d.level === null
     ? `dimState.${d.state ?? 'missing'}`
     : k === 'irritation' || k === 'evidence' ? `${k}.${d.level}` : `level.${d.level}`;
@@ -100,9 +101,11 @@ function DimensionRow({ k, d }: { k: DimensionKey; d: Dimension }) {
     <li className="dim">
       <div className="dim-row">
         <span className="dim-name">{t(`dim.${k}` as Key)}</span>
-        <span className="meter" aria-hidden="true">
-          {[1, 2, 3, 4].map((i) => <i key={i} className={i <= bars ? 'on' : ''} />)}
-        </span>
+        {d.level !== null ? (
+          <span className="meter" aria-hidden="true">
+            {[1, 2, 3, 4].map((i) => <i key={i} className={i <= bars ? 'on' : ''} />)}
+          </span>
+        ) : <span />}
         <span className={`dim-level ${d.level ?? 'none'}`}>{t(levelKey as Key)}</span>
       </div>
       <p className="dim-reason">{tx(d.reason)}</p>
@@ -110,27 +113,65 @@ function DimensionRow({ k, d }: { k: DimensionKey; d: Dimension }) {
   );
 }
 
-/** 产品图：只有写明来源和使用许可的图片才展示，否则用统一占位图 */
+/** 占位图：按品类用不同的简洁图标和柔和底色 */
+function PlaceholderIcon({ kind }: { kind: 'shampoo' | 'conditioner' | 'cowash' | 'other' }) {
+  switch (kind) {
+    case 'shampoo': // 按压瓶
+      return (
+        <svg viewBox="0 0 48 64" aria-hidden="true">
+          <path d="M20 6h10M25 6v6M19 12h12v6H19z" />
+          <rect x="12" y="18" width="24" height="40" rx="7" />
+          <path d="M18 34c4 3 8 3 12 0" />
+        </svg>
+      );
+    case 'conditioner': // 软管
+      return (
+        <svg viewBox="0 0 48 64" aria-hidden="true">
+          <path d="M14 8h20l-3 40H17z" />
+          <rect x="18" y="48" width="12" height="8" rx="2" />
+          <path d="M18 22h12" />
+        </svg>
+      );
+    case 'cowash': // 罐
+      return (
+        <svg viewBox="0 0 48 64" aria-hidden="true">
+          <rect x="10" y="20" width="28" height="8" rx="3" />
+          <rect x="12" y="28" width="24" height="24" rx="5" />
+          <path d="M18 40h12" />
+        </svg>
+      );
+    default:
+      return (
+        <svg viewBox="0 0 48 64" aria-hidden="true">
+          <rect x="17" y="6" width="14" height="8" rx="2" />
+          <rect x="11" y="14" width="26" height="44" rx="7" />
+        </svg>
+      );
+  }
+}
+
+/** 产品图：只展示写明来源、开放许可和署名的图片（如 Open Beauty Facts），否则用占位图 */
 function ProductImage({ p }: { p: Product }) {
   const { t } = useI18n();
-  if (p.imageUrl && p.imageSource && p.imageLicense) {
+  // 图片加载失败时退回占位图
+  const [failed, setFailed] = useState(false);
+  if (!failed && p.imageUrl && p.imageSource && p.imageLicense && p.imageLicenseUrl && p.imageAttribution) {
     return (
       <figure className="pimg">
-        <img src={p.imageUrl} alt={`${p.brand} ${p.nameEn}`} loading="lazy" />
+        <img src={p.imageUrl} alt={`${p.brand} ${p.nameEn}`} loading="lazy" onError={() => setFailed(true)} />
       </figure>
     );
   }
+  const kind = p.subtype === 'co_wash' ? 'cowash' : p.category === 'shampoo' || p.category === 'conditioner' ? p.category : 'other';
   return (
-    <figure className="pimg placeholder" aria-label={t('results.noImage')}>
-      <svg viewBox="0 0 48 72" aria-hidden="true">
-        <rect x="17" y="4" width="14" height="9" rx="2" />
-        <rect x="9" y="13" width="30" height="55" rx="7" />
-        <line x1="15" y1="34" x2="33" y2="34" />
-        <line x1="15" y1="40" x2="28" y2="40" />
-      </svg>
+    <figure className={`pimg placeholder ${kind}`} aria-label={t('results.noImage')}>
+      <PlaceholderIcon kind={kind} />
     </figure>
   );
 }
+
+/** 卡片上最多显示的标签数 */
+const MAX_CARD_TAGS = 2;
 
 function productName(p: Product, lang: string) {
   return lang === 'zh' ? p.nameZh || p.nameEn : p.nameEn || p.nameZh;
@@ -217,6 +258,15 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
   const reasons = r.excluded ? [] : recommendReasons(r, profile, scentGoal);
   const otherNotices = r.notices.filter((n) => n.code !== 'test_data');
   const f = r.fragrance;
+  const { primary, others } = buyLinks(p);
+  const ratings = visibleRatings(p);
+  // 标签统一样式、最多两个：co-wash > 无香 > 第一个奖项
+  const tags = [
+    p.subtype ? t(`subtype.${p.subtype}` as Key) : null,
+    f.status === 'labeled_free' ? t('scentTag.labeled_free') : null,
+    f.status === 'none_found' && f.unknownCount === 0 ? t('scentTag.none_found') : null,
+    p.awards[0] ? `${p.awards[0].source} ${p.awards[0].year}` : null,
+  ].filter((x): x is string => !!x).slice(0, MAX_CARD_TAGS);
   return (
     <article className={r.excluded ? 'product excluded' : 'product'}>
       <div className="product-top">
@@ -225,48 +275,28 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
           <div className="brand">{p.brand}</div>
           <h3 className="name">{productName(p, lang)}</h3>
           {lang === 'zh' && p.nameZh && p.nameEn && <div className="small muted">{p.nameEn}</div>}
-          {p.subtype && (
-            <div className="tags" style={{ marginTop: 6 }}>
-              <span className="tag subtype">{t(`subtype.${p.subtype}` as Key)}</span>
-            </div>
-          )}
           <div className="meta">
             <span>
               {p.price !== null ? formatMoney(p.price, p.currency, false) : t('results.noPrice')}
               {p.sizeMl !== null ? ` · ${t('results.size', { n: p.sizeMl })}` : ''}
             </span>
             {otherRegion && <span>{t('results.region')} {p.region} · {t('results.otherRegion')}</span>}
-            {r.usesDraftData && <span className="flag">{t('results.testData')}</span>}
           </div>
-          {/* 无香：标注无香和成分表中未发现加香成分是同一香味层级，卡片上分别标注 */}
-          {f.status !== 'contains' && (
-            <div className="tags" style={{ marginTop: 8 }}>
-              <span className="tag scent">
-                {f.status === 'none_found' && f.unknownCount > 0
-                  ? t('scentTag.none_found_unknown', { n: f.unknownCount })
-                  : t(`scentTag.${f.status}` as Key)}
-              </span>
-            </div>
-          )}
-          {p.awards.length > 0 && (
-            <div className="tags" style={{ marginTop: 8 }}>
-              {p.awards.map((a, i) => <span key={i} className="tag award">{a.source} {a.year}</span>)}
-            </div>
+          {tags.length > 0 && (
+            <div className="tags">{tags.map((x, i) => <span key={i} className="tag">{x}</span>)}</div>
           )}
         </div>
         {r.score !== null && !compact && (r.noNeeds ? (
           // 没有选需求：不显示总分和适合等级，只显示温和度
           r.dimensions.irritation.level && (
-            <div className="score gentle">
-              <div className="num">{t(`gentle.${r.dimensions.irritation.level}` as Key)}</div>
-              <div className="of">{t('results.gentle')}</div>
+            <div className={`fitbadge gentle ${r.dimensions.irritation.level}`}>
+              <span className="fit-label">{t('results.gentle')}</span>
+              <strong>{t(`gentle.${r.dimensions.irritation.level}` as Key)}</strong>
             </div>
           )
-        ) : (
-          <div className="score">
-            <div className="num">{r.score}</div>
-            <div className="of">{t('results.score')}</div>
-            {r.fitLevel && <div className={`fit ${r.fitLevel}`}>{t(`fit.${r.fitLevel}` as Key)}</div>}
+        ) : r.fitLevel && (
+          <div className={`fitbadge ${r.fitLevel}`}>
+            <strong>{t(`fit.${r.fitLevel}` as Key)}</strong>
           </div>
         ))}
       </div>
@@ -291,17 +321,32 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
 
       {!compact && (
         <div className="buy">
-          {p.purchaseUrl ? (
-            <a className="btn btn-block" href={p.purchaseUrl} target="_blank" rel="noreferrer nofollow">{t('results.buy')}</a>
+          {primary ? (
+            <a className="btn btn-primary btn-block" href={primary} target="_blank" rel="noreferrer nofollow">{t('results.buy')}</a>
           ) : (
             <span className="small muted">{t('results.noBuy')}</span>
+          )}
+          {others.length > 0 && (
+            <p className="small muted buy-others">
+              {t('results.otherStores')}：
+              {others.map((l, i) => (
+                <span key={l.platform + i}>
+                  {i > 0 && ' · '}
+                  <a href={l.url} target="_blank" rel="noreferrer nofollow">{t(`platform.${l.platform}` as Key)}</a>
+                </span>
+              ))}
+            </p>
           )}
         </div>
       )}
 
       <details className="more">
         <summary>{t('results.details')}</summary>
+        {r.score !== null && !r.noNeeds && (
+          <p className="small detail-score">{t('results.scoreLine', { n: r.score })}{r.evidenceCapped ? ` · ${t('results.capped')}` : ''}</p>
+        )}
         {r.score !== null && <ul className="dims">{DIMENSIONS.map((k) => <DimensionRow key={k} k={k} d={r.dimensions[k]} />)}</ul>}
+        {reasons.length > 0 && <p className="small muted">{t('results.reasonBasis')}</p>}
         <BasisBlock p={p} />
         {p.pairedProductIds.length > 0 && (
           <p className="small muted" style={{ marginTop: 12 }}>
@@ -312,6 +357,21 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
                 return name.toLowerCase().startsWith(x!.brand.toLowerCase()) ? name : `${x!.brand} ${name}`;
               }).join('；')}
           </p>
+        )}
+        {ratings.length > 0 && (
+          <div className="flags">
+            <span className="label">{t('results.ratings')}</span>
+            <ul className="ratings">
+              {ratings.map((x) => (
+                <li key={x.platform}>
+                  <a href={x.url} target="_blank" rel="noreferrer nofollow">{t(`platform.${x.platform}` as Key)}</a>
+                  {' '}★ {x.rating} · {t('results.ratingCount', { n: ratingCountText(x) })}
+                  <span className="muted"> · {t('results.checkedOn', { d: x.checkedOn })}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="small muted">{t('results.ratingsNote', { n: MIN_RATING_COUNT })}</p>
+          </div>
         )}
         <div className="flags">
           <span className="label">{t('results.fragrance')}</span>
@@ -357,6 +417,12 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
           <p className="small" style={{ marginTop: 6 }}>{t((p.subtype ? `usage.${p.subtype}` : `usage.${p.category}`) as Key)}</p>
           <p className="small muted">{t('usage.followLabel')}</p>
         </div>
+        {p.imageUrl && p.imageAttribution && (
+          <p className="small muted" style={{ marginTop: 12 }}>
+            {t('results.imageCredit')}：{p.imageAttribution} · <a href={p.imageSource} target="_blank" rel="noreferrer">{t('results.imageSource')}</a>
+            {' · '}<a href={p.imageLicenseUrl} target="_blank" rel="noreferrer">{p.imageLicense}</a>
+          </p>
+        )}
         <p className="small muted" style={{ marginTop: 12 }}>
           {t('results.transparency')}：{t(`transparency.${p.transparency}` as Key)}
           {p.sourceUrls[0] && <> · <a href={p.sourceUrls[0]} target="_blank" rel="noreferrer">{t('results.dataSource')}</a></>}
@@ -517,7 +583,8 @@ export default function Results() {
                     >
                       {slot.options.map((o) => (
                         <option key={o.product.productId} value={o.product.productId}>
-                          {o.product.brand} · {o.product.nameEn}{o.product.subtype ? ` (${t(`subtype.${o.product.subtype}` as Key)})` : ''} · {o.price.usd !== null ? usdLabel(o.price.usd) : t('results.noPrice')} · {o.score}
+                          {o.product.brand} · {o.product.nameEn}{o.product.subtype ? ` (${t(`subtype.${o.product.subtype}` as Key)})` : ''} · {o.price.usd !== null ? usdLabel(o.price.usd) : t('results.noPrice')}
+                          {o.fitLevel ? ` · ${t(`fit.${o.fitLevel}` as Key)}` : ''}
                           {otherChosen(slot.category)?.pairedProductIds.includes(o.product.productId) ? ` · ${t('set.sameSeriesTag')}` : ''}
                         </option>
                       ))}

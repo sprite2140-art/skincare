@@ -368,3 +368,26 @@ details.more[open] summary::after { content: '−'; }
 .about-list { padding-left: 1.2em; margin: 0; display: grid; gap: 8px; font-size: var(--fs-small); line-height: 1.6; }
 .footer { max-width: var(--maxw); margin: 48px auto 0; padding: 20px var(--gutter) 32px; border-top: 1px solid var(--line); font-size: var(--fs-small); color: var(--muted); }
 .footer a { color: inherit; }
+
+/* ---------- 卡片：适合等级、统一标签、占位图、购买 ---------- */
+.product .tags { margin-top: 10px; gap: 6px; }
+.product .tag { font-size: 12px; padding: 2px 9px; background: var(--tint); border-color: transparent; color: var(--ink-2); }
+.fitbadge { text-align: right; white-space: nowrap; }
+.fitbadge strong { display: inline-block; font-size: var(--fs-small); font-weight: 500; padding: 4px 10px; border-radius: 999px; }
+.fitbadge.high strong { background: color-mix(in srgb, var(--good) 14%, var(--surface)); color: var(--good); }
+.fitbadge.medium strong { background: color-mix(in srgb, var(--mid) 14%, var(--surface)); color: var(--mid); }
+.fitbadge.low strong { background: var(--tint); color: var(--muted); }
+.fitbadge.gentle .fit-label { display: block; font-size: var(--fs-label); color: var(--muted); margin-bottom: 4px; }
+.pimg.placeholder { border: 0; }
+.pimg.placeholder.shampoo { background: color-mix(in srgb, var(--good) 10%, var(--surface)); }
+.pimg.placeholder.conditioner { background: color-mix(in srgb, var(--mid) 10%, var(--surface)); }
+.pimg.placeholder.cowash { background: color-mix(in srgb, var(--bad) 8%, var(--surface)); }
+.pimg.placeholder svg { width: 34px; height: 46px; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.pimg.placeholder.shampoo svg { stroke: var(--good); }
+.pimg.placeholder.conditioner svg { stroke: var(--mid); }
+.pimg.placeholder.cowash svg { stroke: var(--bad); }
+.buy-others { margin-top: 8px; }
+.detail-score { margin-top: 12px; }
+.ratings { list-style: none; padding: 0; margin: 8px 0 6px; font-size: var(--fs-small); display: grid; gap: 4px; }
+.product .tag { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; border-radius: 6px; }
+.pimg.placeholder svg { width: 40px; height: 54px; }

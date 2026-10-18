@@ -2,8 +2,9 @@
 
 import Papa from 'papaparse';
 import { cleanInciName } from './ingredientIndex';
+import { RETAIL_PLATFORMS } from './types';
 import type {
-  Award, BrandClaimStatus, ProductSubtype, City, WaterRecord, ReferenceWater, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
+  PurchaseLink, RetailPlatform, RetailRating, Award, BrandClaimStatus, ProductSubtype, City, WaterRecord, ReferenceWater, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
   UsageType, WaterHardness, Zone,
 } from './types';
@@ -141,9 +142,48 @@ export function parseProducts(text: string): Product[] {
     imageUrl: r.image_url ?? '',
     imageSource: r.image_source ?? '',
     imageLicense: r.image_license ?? '',
+    imageLicenseUrl: r.image_license_url ?? '',
+    imageAttribution: r.image_attribution ?? '',
+    ratings: [],
+    purchaseLinks: [],
     reviewedOn: r.reviewed_on ?? '',
     };
   });
+}
+
+export function parseRetailRatings(text: string): RetailRating[] {
+  return parseCsv(text).map((r) => ({
+    productId: r.product_id ?? '',
+    platform: r.platform as RetailPlatform,
+    rating: Number(r.rating),
+    ratingCount: parseNumber(r.rating_count),
+    ratingCountDisplay: r.rating_count_display ?? '',
+    countLabel: r.count_label ?? '',
+    checkedOn: r.checked_on ?? '',
+    url: r.url ?? '',
+    note: r.note ?? '',
+  }));
+}
+
+export function parsePurchaseLinks(text: string): PurchaseLink[] {
+  return parseCsv(text).map((r) => ({
+    productId: r.product_id ?? '',
+    platform: r.platform as RetailPlatform,
+    url: r.url ?? '',
+    status: r.status ?? '',
+    checkedOn: r.checked_on ?? '',
+    note: r.note ?? '',
+  }));
+}
+
+/** 把评分和购买链接挂到产品上；购买链接按 RETAIL_PLATFORMS 的固定顺序 */
+export function attachRetail(products: Product[], ratings: RetailRating[], links: PurchaseLink[]): Product[] {
+  const order = (p: RetailPlatform) => RETAIL_PLATFORMS.indexOf(p);
+  return products.map((p) => ({
+    ...p,
+    ratings: ratings.filter((r) => r.productId === p.productId).sort((a, b) => order(a.platform) - order(b.platform)),
+    purchaseLinks: links.filter((l) => l.productId === p.productId).sort((a, b) => order(a.platform) - order(b.platform)),
+  }));
 }
 
 export function parseExchangeRates(text: string): ExchangeRate[] {
