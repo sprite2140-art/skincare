@@ -81,6 +81,10 @@ export function recommendReasons(r: ProductScore, profile: ScoringProfile, scent
   } else if (r.dimensions.environment.score === 100) {
     out.push(r.dimensions.environment.reason);
   }
-  if (out.length === 0) out.push({ zh: '没有针对你所选需求的依据', en: 'Nothing supports the needs you chose' });
+  if (out.length === 0) {
+    out.push(profile.concerns.length === 0
+      ? { zh: '你没有选择具体需求，按温和程度和价格排序', en: 'No specific needs chosen; sorted by gentleness and price' }
+      : { zh: '没有针对你所选需求的依据', en: 'Nothing supports the needs you chose' });
+  }
   return out.slice(0, 2);
 }

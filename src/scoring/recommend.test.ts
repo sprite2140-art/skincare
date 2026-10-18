@@ -432,6 +432,17 @@ describe('卡片理由用普通人能看懂的一句话', () => {
   });
 });
 
+describe('没有选需求时的兜底理由', () => {
+  it('温和度不高、也没有其他理由时，不说"没有针对你所选需求的依据"', () => {
+    const prof = toScoringProfile(answers({ scalp: { washFrequency: 'daily' } }), 'shampoo', ctx);
+    expect(prof.concerns).toEqual([]);
+    const harsh = { ...real.products[0], productId: 'T-HARSH', usageType: 'leave_on' as const, inciList: ['Water', 'Sodium Lauryl Sulfate', 'Fragrance', 'Isopropyl Alcohol'], inciNameUnverified: [] };
+    const r = scoreProduct(harsh, prof, data);
+    expect(r.dimensions.irritation.level).not.toBe('high');
+    expect(recommendReasons(r, prof, false)[0].zh).toBe('你没有选择具体需求，按温和程度和价格排序');
+  });
+});
+
 describe('证据缺失的说明', () => {
   it('只靠没有证据等级的成分匹配时，说明里不说成"只有品牌宣称或资料分类"', () => {
     const clean = toScoringProfile(answers({ scalp: { styling: 'daily' } }), 'shampoo', ctx);

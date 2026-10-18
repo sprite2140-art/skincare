@@ -371,14 +371,15 @@ export function isRoutine(scope: PurchaseScope | null, hair: HairAnswers): boole
 export function toScoringProfile(
   answers: Answers,
   category: Category,
-  ctx: { cities: City[]; exchangeRates: ExchangeRate[]; inUseProducts?: Product[] },
+  ctx: { cities: City[]; exchangeRates: ExchangeRate[]; inUseProducts?: Product[]; routine?: boolean },
 ): ScoringProfile {
   const { base, scalp, hair } = answers;
   const forScalp = category === 'shampoo' || category === 'scalp_care';
   const scalpT: Target[] = forScalp ? scalpTargets(scalp) : [];
   const own = (t: Target) => (SHAMPOO_OWN_HAIR_TARGETS as readonly Target[]).includes(t);
   // 洗发水：选洗护搭配时发丝效果只分配给护发素；只买洗发水时发丝效果权重降低
-  const routine = isRoutine(base.scope, hair);
+  // 结果页按当前显示的视图传入（洗护搭配 / 单品列表）；没传时按问卷的购买范围
+  const routine = ctx.routine ?? isRoutine(base.scope, hair);
   const hairT = hairTargets(hair).filter((t) => category !== 'shampoo' || !routine || own(t));
   const targetWeights: Partial<Record<Target, number>> = {};
   for (const t of hairT) targetWeights[t] = category === 'shampoo' && !own(t) ? SHAMPOO_HAIR_EFFECT_WEIGHT : 1;

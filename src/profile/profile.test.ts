@@ -164,6 +164,12 @@ describe('转换为打分输入', () => {
     expect(co.concerns).toEqual(expect.arrayContaining(['dryness', 'color_fade', 'damage', 'tangling']));
     expect(sh.concerns).not.toContain('dryness');
     expect(sh.concerns).not.toContain('tangling');
+    // 结果页按显示的视图传入：选了洗护搭配、但打开洗发水标签时按单买（发丝效果权重 0.5）
+    const single = toScoringProfile(a, 'shampoo', { ...ctx, routine: false });
+    expect(single.targetWeights).toMatchObject({ dryness: 0.5, tangling: 0.5 });
+    // 选了只买洗发水、但打开洗护搭配标签时按搭配
+    const asSet = toScoringProfile({ ...a, base: { ...a.base, scope: 'shampoo' } }, 'shampoo', { ...ctx, routine: true });
+    expect(asSet.concerns).not.toContain('dryness');
   });
 
   it('只买洗发水：头皮困扰权重 2，发丝效果 0.5，洗发水自己的效果（如蓬松）1；护发素只看发丝', () => {

@@ -270,7 +270,7 @@ function ProductCard({ r, market, profile, scentGoal, compact }: {
   return (
     <article className={r.excluded ? 'product excluded' : 'product'}>
       <div className="product-top">
-        <ProductImage p={p} />
+        <ProductImage key={p.productId} p={p} />
         <div className="product-main">
           <div className="brand">{p.brand}</div>
           <h3 className="name">{productName(p, lang)}</h3>
@@ -457,23 +457,27 @@ export default function Results() {
   const market = marketForCity(city);
   const scentGoal = hair.goals.includes('scent');
 
-  const data = useMemo(() => {
+  // 单品列表（洗发水 / 护发素标签）按单买打分；洗护搭配标签按搭配打分（发丝效果只分给护发素），
+  // 两者分开计算，切换标签时与显示的视图一致
+  const score = (routineMode: boolean) => {
     const out = {} as Record<ListCategory, { ranked: ProductScore[]; total: number; hidden: number; profile: ScoringProfile }>;
     for (const cat of LIST_CATEGORIES) {
       const all = products.filter((x) => x.category === cat);
       const { shown, hiddenCount } = filterByMarket(all, market, showOthers);
-      const scoring = toScoringProfile(answers, cat, { cities, exchangeRates });
+      const scoring = toScoringProfile(answers, cat, { cities, exchangeRates, routine: routineMode });
       const ranked = rankProducts(shown, cat, scoring, { index: ingredientIndex, exchangeRates, budgetCaps, allowDraft: TEST_MODE_DRAFT_SCORING });
       out[cat] = { ranked, total: all.length, hidden: hiddenCount, profile: scoring };
     }
     return out;
-    // answers 来自 profile，profile 变化时重新计算
-  }, [profile, market, showOthers]);
+  };
+  // answers 来自 profile，profile 变化时重新计算
+  const data = useMemo(() => score(false), [profile, market, showOthers]);
+  const setData = useMemo(() => score(true), [profile, market, showOthers]);
 
   const setCap = base.budgetMode === 'set' ? moneyToUsd(base.setBudget, exchangeRates) : null;
   const routine = useMemo(
-    () => buildRoutine(['shampoo', 'conditioner'], { shampoo: data.shampoo.ranked, conditioner: data.conditioner.ranked }, setCap),
-    [data, setCap],
+    () => buildRoutine(['shampoo', 'conditioner'], { shampoo: setData.shampoo.ranked, conditioner: setData.conditioner.ranked }, setCap),
+    [setData, setCap],
   );
   const alerts = scalpMedicalAlerts(scalp);
   const notes = scalpInfoNotes(scalp);
@@ -572,7 +576,7 @@ export default function Results() {
             {removed && <p className="small muted">{t('set.removed')}</p>}
             {item && !removed && (
               <>
-                <ProductCard r={item} market={market} profile={data[slot.category as ListCategory].profile} scentGoal={scentGoal} />
+                <ProductCard r={item} market={market} profile={setData[slot.category as ListCategory].profile} scentGoal={scentGoal} />
                 {slot.options.length > 1 && (
                   <label className="replace">
                     <span className="small muted">{t('set.replace')}</span>
@@ -650,7 +654,9 @@ export default function Results() {
             {t('results.testBanner')}
           </div>
         )}
-        {(view === 'set' ? data.shampoo.profile : data[view].profile).concerns.length === 0 && (
+        {(view === 'set'
+          ? setData.shampoo.profile.concerns.length === 0 && setData.conditioner.profile.concerns.length === 0
+          : data[view].profile.concerns.length === 0) && (
           <p className="small muted">{t('results.noNeeds')}</p>
         )}
         {!profile?.scalp && <p className="small muted">{t('results.noProfile')}</p>}
