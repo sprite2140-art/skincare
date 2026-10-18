@@ -66,7 +66,7 @@ describe('场景 1：没有头皮困扰，只想柔顺、好闻，预算 $15', (
       expect(reasons.length).toBeLessThanOrEqual(2);
     }
     const scented = ok.find((r) => r.fragrance.status === 'contains')!;
-    expect(recommendReasons(scented, profile, true).map((x) => x.zh)).toContain('含香精；气味和留香因人而异，需要自己试');
+    expect(recommendReasons(scented, profile, true).map((x) => x.zh)).toContain('含香精，气味和留香因人而异，建议自己闻一闻');
   });
 });
 
@@ -106,8 +106,8 @@ describe('场景 2：头皮屑、瘙痒 7 分，无香优先', () => {
   it('理由说明香味情况，未知成分明确标注，不保证无致敏原', () => {
     const r = ok[0];
     const text = recommendReasons(r, profile, false).map((x) => x.zh).join(' / ');
-    expect(text).toMatch(/成分表未发现已知加香成分|含香精/);
-    if (r.fragrance.unknownCount > 0) expect(text).toContain('暂无数据，无法完全确认');
+    expect(text).toMatch(/标注无香|成分表中没有发现加香成分|含香精/);
+    if (r.fragrance.unknownCount > 0) expect(text).toContain(`${r.fragrance.unknownCount} 个成分暂无数据`);
   });
 
   it('香精、香料致敏原和精油分开识别', () => {
@@ -123,10 +123,10 @@ describe('场景 2：头皮屑、瘙痒 7 分，无香优先', () => {
     const r = scoreProduct(oil, profile, data);
     expect(r.fragrance).toMatchObject({ status: 'contains', fragrance: [] });
     const texts = recommendReasons(r, profile, false).map((x) => x.zh).join(' / ');
-    expect(texts).toContain('含精油（Mentha Piperita Oil）');
+    expect(texts).toContain('含精油');
     expect(texts).not.toContain('含香精（）');
     const scent = toScoringProfile(answers({ hair: { goals: ['scent'] } }), 'shampoo', ctx);
-    expect(recommendReasons(scoreProduct(oil, scent, data), scent, true).map((x) => x.zh)).toContain('含精油；气味和留香因人而异，需要自己试');
+    expect(recommendReasons(scoreProduct(oil, scent, data), scent, true).map((x) => x.zh)).toContain('含精油，气味和留香因人而异，建议自己闻一闻');
   });
 
   it('标注 fragrance-free 且未发现加香成分的排在最前（层级 0）', () => {
@@ -145,11 +145,13 @@ describe('场景 3：染烫受损，选洗护搭配，自填总预算', () => {
   const cap = moneyToUsd(a.base.setBudget, real.exchangeRates);
   const lists = { shampoo: recommend(a, 'shampoo').ranked, conditioner: recommend(a, 'conditioner').ranked };
 
-  it('洗发水 + 护发素都在总预算内，按发丝状态为护发素打分', () => {
+  it('洗发水 + 护发素都在总预算内；发丝状态只分配给护发素', () => {
     const routine = buildRoutine(['shampoo', 'conditioner'], lists, cap);
     expect(routine.slots.map((s) => s.status)).toEqual(['ok', 'ok']);
     expect(routine.totalUsd!).toBeLessThanOrEqual(40);
-    expect(routine.slots[0].chosen!.needMatches.map((m) => m.target)).toEqual(['color_fade', 'damage']);
+    // 没有头皮需求：洗发水没有需求可匹配，按温和程度和价格
+    expect(routine.slots[0].chosen!.noNeeds).toBe(true);
+    expect(routine.slots[1].chosen!.needMatches.map((m) => m.target)).toEqual(expect.arrayContaining(['color_fade', 'damage']));
     expect(routine.slots[1].chosen!.product.category).toBe('conditioner');
   });
 
@@ -195,8 +197,11 @@ describe('场景 4：跳过城市和所有可跳过的题', () => {
 });
 
 describe('场景 5：无图片、品类无数据、无符合条件商品', () => {
-  it('没有写明使用许可的图片：产品都没有可展示的图片（页面用占位图）', () => {
-    expect(real.products.every((p) => !(p.imageUrl && p.imageSource && p.imageLicense))).toBe(true);
+  it('图片必须写明来源、许可和署名；其余产品用占位图', () => {
+    const withImage = real.products.filter((p) => p.imageUrl);
+    expect(withImage.map((p) => p.productId)).toEqual(['CO-US-005', 'CO-US-009']);
+    expect(withImage.every((p) => p.imageSource && p.imageLicense === 'CC BY-SA 3.0' && p.imageLicenseUrl && p.imageAttribution)).toBe(true);
+    expect(withImage.every((p) => p.imageUrl.startsWith('https://images.openbeautyfacts.org/'))).toBe(true);
   });
 
   it('品类没有数据时（如发膜）返回空列表', () => {
@@ -223,13 +228,13 @@ describe('产品定位的来源标注', () => {
     expect(r.dimensions.evidence.score).toBeNull();
     expect(r.dimensions.evidence.state).toBe('missing');
     expect(r.dimensions.evidence.reason.zh).toContain('暂无成分或测试证据');
-    expect(recommendReasons(r, prof, false)[0].zh).toBe('产品定位针对光泽（依据：资料分类）');
+    expect(recommendReasons(r, prof, false)[0].zh).toBe('定位为针对光泽的产品');
   });
 
   it('品牌原文（brand_text）才显示为"品牌宣称"，计分相同', () => {
     const r = scoreProduct({ ...base, claimSource: 'brand_text' }, prof, data);
     expect(r.dimensions.need.score).toBe(70);
-    expect(recommendReasons(r, prof, false)[0].zh).toBe('产品定位针对光泽（依据：品牌宣称）');
+    expect(recommendReasons(r, prof, false)[0].zh).toBe('品牌说明针对光泽');
   });
 
   it('"日常清洁"对应清爽洁净；去黄、去橙分开记录', () => {
@@ -260,7 +265,7 @@ describe('产品定位的来源标注', () => {
     const onlyBrand = { ...co, claimedBenefits: [], keyActives: ['Nothing Matching'] };
     const r2 = scoreProduct(onlyBrand, prof, data);
     expect(r2.needMatches.find((x) => x.target === 'flat_hair')).toMatchObject({ credit: 0.7, bases: ['brand_claim'] });
-    expect(recommendReasons(r2, prof, false)[0].zh).toBe('品牌宣称针对扁塌（依据：品牌宣称）');
+    expect(recommendReasons(r2, prof, false)[0].zh).toBe('品牌说明针对扁塌');
   });
 });
 
@@ -276,7 +281,7 @@ describe('效果依据', () => {
     const tested = scoreProduct(withClaims({ testedClaims: [{ target: 'shine', description: 't', year: '2025', url: 'https://x.example' }] }), prof, data);
     expect(tested.dimensions.need.score).toBe(100);
     expect(tested.dimensions.evidence.score).toBe(100);
-    expect(recommendReasons(tested, prof, false)[0].zh).toContain('依据：成品测试');
+    expect(recommendReasons(tested, prof, false)[0].zh).toBe('有产品测试支持改善光泽');
   });
 
   it('螯合剂（清单）只对应"产品残留"（常用造型产品的用户），非主打按 30%，不按数量加分；不对应"清爽洁净"', () => {
@@ -414,6 +419,27 @@ describe('数据覆盖统计（npm run coverage）', () => {
     const r = shampoosWithPairedConditioner(real.products);
     expect(r.ids).toEqual(expect.arrayContaining(['SH-US-042', 'SH-US-053', 'SH-US-059']));
     expect(r.paired).toBe(r.ids.length);
+  });
+});
+
+describe('卡片理由用普通人能看懂的一句话', () => {
+  it('主打成分写成"含{作用}成分{名称}"，不在卡片上写依据类型', () => {
+    const prof = toScoringProfile(answers({ scalp: { concerns: ['dandruff'] } }), 'shampoo', ctx);
+    const p = { ...real.products[0], productId: 'T-ZPT', keyActives: ['Pyrithione Zinc'], inciList: ['Water', 'Pyrithione Zinc'], inciNameUnverified: [], claimedBenefits: [] };
+    const first = recommendReasons(scoreProduct(p, prof, data), prof, false)[0].zh;
+    expect(first).toBe('含去屑成分吡硫鎓锌');
+    expect(first).not.toContain('依据');
+  });
+});
+
+describe('没有选需求时的兜底理由', () => {
+  it('温和度不高、也没有其他理由时，不说"没有针对你所选需求的依据"', () => {
+    const prof = toScoringProfile(answers({ scalp: { washFrequency: 'daily' } }), 'shampoo', ctx);
+    expect(prof.concerns).toEqual([]);
+    const harsh = { ...real.products[0], productId: 'T-HARSH', usageType: 'leave_on' as const, inciList: ['Water', 'Sodium Lauryl Sulfate', 'Fragrance', 'Isopropyl Alcohol'], inciNameUnverified: [] };
+    const r = scoreProduct(harsh, prof, data);
+    expect(r.dimensions.irritation.level).not.toBe('high');
+    expect(recommendReasons(r, prof, false)[0].zh).toBe('你没有选择具体需求，按温和程度和价格排序');
   });
 });
 

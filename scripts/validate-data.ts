@@ -1,11 +1,22 @@
 // npm run validate-data：检查 data/ 下的 CSV。有 error 时退出码为 1。
 
+import { readFileSync } from 'node:fs';
 import { loadDataFromDisk } from '../src/data/node';
+import { parsePurchaseLinks, parseRetailRatings } from '../src/data/parse';
+
+const readData = (name: string) => readFileSync(new URL(`../data/${name}`, import.meta.url), 'utf8');
 import { validateData } from '../src/data/validate';
 import { computeBudgetCaps } from '../src/scoring/budget';
 
 const { ingredients, products, cities, exchangeRates, cosing, allergens, water, referenceWater, explanations, lists } = loadDataFromDisk();
 const issues = validateData(ingredients, products, cities, exchangeRates, { cosing, allergens, water, referenceWater, explanations, lists });
+// 评分和购买链接文件里的 product_id 必须在产品库中
+{
+  const ids = new Set(products.map((p) => p.productId));
+  for (const [file, rows] of [['retail_ratings.csv', parseRetailRatings(readData('retail_ratings.csv'))], ['purchase_links.csv', parsePurchaseLinks(readData('purchase_links.csv'))]] as const) {
+    for (const r of rows) if (!ids.has(r.productId)) issues.push({ level: 'error', file, key: r.productId, message: 'product_id 不在 products.csv' });
+  }
+}
 const errors = issues.filter((i) => i.level === 'error');
 const warnings = issues.filter((i) => i.level === 'warning');
 

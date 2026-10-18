@@ -194,7 +194,14 @@ export interface Product {
   imageUrl: string;
   imageSource: string;
   imageLicense: string;
+  /** 图片许可证链接和署名（开放授权图片必须展示） */
+  imageLicenseUrl: string;
+  imageAttribution: string;
   reviewedOn: string;
+  /** 零售商评分（data/retail_ratings.csv），只展示，不计分 */
+  ratings: RetailRating[];
+  /** 各平台购买链接（data/purchase_links.csv），按 RETAIL_PLATFORMS 的固定顺序 */
+  purchaseLinks: PurchaseLink[];
 }
 
 export interface ExchangeRate {
@@ -292,3 +299,36 @@ export interface City {
   water: WaterRecord[];
   reviewStatus: ReviewStatus;
 }
+
+/** 零售平台，也是购买链接的固定显示顺序：品牌官网 → Ulta → Sephora → Target → Amazon */
+export const RETAIL_PLATFORMS = ['brand', 'ulta', 'sephora', 'target', 'amazon'] as const;
+export type RetailPlatform = (typeof RETAIL_PLATFORMS)[number];
+
+/** 一条零售商评分（data/retail_ratings.csv）。只展示，不计入任何分数 */
+export interface RetailRating {
+  productId: string;
+  platform: RetailPlatform;
+  /** 星级，0–5 */
+  rating: number;
+  /** 精确评价数；页面只显示缩写（如 5.5K）时为 null */
+  ratingCount: number | null;
+  /** 页面上显示的评价数原文 */
+  ratingCountDisplay: string;
+  /** 评价数的口径（Reviews / ratings / page header count 等） */
+  countLabel: string;
+  checkedOn: string;
+  url: string;
+  note: string;
+}
+
+/** 一条购买链接（data/purchase_links.csv） */
+export interface PurchaseLink {
+  productId: string;
+  platform: RetailPlatform;
+  url: string;
+  /** in_stock / purchasable / listed / official_store_listed_pdp_blocked 等 */
+  status: string;
+  checkedOn: string;
+  note: string;
+}
+

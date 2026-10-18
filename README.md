@@ -48,4 +48,5 @@ v0.1：头皮与头发（洗发水、护发素、洗护搭配），面向美国�
 
 ## 许可
 
-代码：MIT。作者整理的数据：CC BY 4.0。第三方数据按其原许可。
+- 代码：MIT，见 [LICENSE](LICENSE)。
+- 作者整理的数据：CC BY 4.0；CosIng、欧盟法规、美联储汇率、Open Beauty Facts 图片等第三方数据按原来源条款并注明出处。详见 [DATA_LICENSE.md](DATA_LICENSE.md)。

@@ -2,7 +2,7 @@
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { parseCities, parseExchangeRates, parseIngredients, parseProducts, parseReferenceWater, parseWaterRecords } from './parse';
+import { parseCities, parseExchangeRates, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
 import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseIngredientList } from './cosing';
 import { buildIngredientIndex } from './ingredientIndex';
 
@@ -31,7 +31,7 @@ export function loadDataFromDisk() {
     /** 成分库 + CosIng + 致敏原清单，用于匹配产品成分 */
     allIngredients,
     ingredientIndex: buildIngredientIndex(allIngredients),
-    products: parseProducts(read('products.csv')),
+    products: attachRetail(parseProducts(read('products.csv')), parseRetailRatings(read('retail_ratings.csv')), parsePurchaseLinks(read('purchase_links.csv'))),
     water: parseWaterRecords(read('water_hardness.csv')),
     referenceWater: parseReferenceWater(read('water_hardness_reference.csv')),
     cities: parseCities(read('cities.csv'), parseWaterRecords(read('water_hardness.csv'))),

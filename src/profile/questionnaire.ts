@@ -2,7 +2,7 @@
 
 import type { Category, City, ExchangeRate, Product, RiskTag, Target } from '../data/types';
 import type { BudgetChoice } from '../scoring/budget';
-import { BUILDUP_WEIGHT, SHAMPOO_SCALP_WEIGHT } from '../scoring/config';
+import { BUILDUP_WEIGHT, SHAMPOO_HAIR_EFFECT_WEIGHT, SHAMPOO_OWN_HAIR_TARGETS, SHAMPOO_SCALP_WEIGHT } from '../scoring/config';
 import type { Text } from '../scoring/labels';
 import { toUsd } from '../scoring/price';
 import type { FragrancePref, ScoringProfile, SpecialStatus, WashFrequency } from '../scoring/score';
@@ -360,17 +360,29 @@ export interface Answers {
  * - 两者都遵守想避开的成分（硬性过滤）。
  * 按整套设预算时，单品不按档位筛选（总价在搭配时检查）。
  */
+/** 是否按洗护搭配推荐：选了"洗护搭配"，或"帮我判断"建议洗发水 + 护发素 */
+export function isRoutine(scope: PurchaseScope | null, hair: HairAnswers): boolean {
+  if (scope === 'set') return true;
+  if (scope !== 'help') return false;
+  const cats = adviseCare(hair).categories;
+  return cats.includes('shampoo') && cats.includes('conditioner');
+}
+
 export function toScoringProfile(
   answers: Answers,
   category: Category,
-  ctx: { cities: City[]; exchangeRates: ExchangeRate[]; inUseProducts?: Product[] },
+  ctx: { cities: City[]; exchangeRates: ExchangeRate[]; inUseProducts?: Product[]; routine?: boolean },
 ): ScoringProfile {
   const { base, scalp, hair } = answers;
   const forScalp = category === 'shampoo' || category === 'scalp_care';
   const scalpT: Target[] = forScalp ? scalpTargets(scalp) : [];
-  const hairT = hairTargets(hair);
+  const own = (t: Target) => (SHAMPOO_OWN_HAIR_TARGETS as readonly Target[]).includes(t);
+  // 洗发水：选洗护搭配时发丝效果只分配给护发素；只买洗发水时发丝效果权重降低
+  // 结果页按当前显示的视图传入（洗护搭配 / 单品列表）；没传时按问卷的购买范围
+  const routine = ctx.routine ?? isRoutine(base.scope, hair);
+  const hairT = hairTargets(hair).filter((t) => category !== 'shampoo' || !routine || own(t));
   const targetWeights: Partial<Record<Target, number>> = {};
-  for (const t of hairT) targetWeights[t] = 1;
+  for (const t of hairT) targetWeights[t] = category === 'shampoo' && !own(t) ? SHAMPOO_HAIR_EFFECT_WEIGHT : 1;
   for (const t of scalpT) targetWeights[t] = SHAMPOO_SCALP_WEIGHT;
   // 常用造型产品（每周 3 次以上）：洗发水增加"产品残留"需求，由螯合剂清单匹配
   if (forScalp && frequentStyling(scalp) && !scalpT.includes('buildup')) {

@@ -73,7 +73,7 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | source_url | 成分表来源链接，可有多个，用分号分隔 | https://a.example;https://b.example |
 | purchase_url | 购买链接（零售商或品牌产品页）。本轮取 source_url 中与 channels 对应的零售商产品页 | https://www.ulta.com/p/… |
 | paired_product_ids | 同系列的其他品类产品 ID，分号分隔，双向记录（洗发水记护发素、护发素记洗发水）。只用于显示"同系列"，不代表必须成套购买，搭配不限定同系列 | CO-US-001 |
-| image_url / image_source / image_license | 产品图链接、来源、使用许可。**三项都填写时页面才展示图片**，否则用统一占位图；不得使用没有明确许可的图片 | |
+| image_url / image_source / image_license / image_license_url / image_attribution | 产品图链接、来源记录页、许可名称、许可链接、署名。**五项都填写时页面才展示图片**（详情中显示署名、来源和许可链接），否则用按品类区分的占位图。优先使用 Open Beauty Facts 等开放授权来源；**不抓取零售商网站的图片**。目前 CO-US-005、CO-US-009 两张来自 Open Beauty Facts（CC BY-SA 3.0），可能是旧包装，不用于证明当前配方 | |
 | reviewed_on | 核对日期 | |
 
 ### 主打成分匹配
@@ -159,11 +159,41 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 - 2026-10-17：Disodium EDTA、Tetrasodium EDTA、Tetrasodium Glutamate Diacetate（GLDA）、Trisodium Ethylenediamine Disuccinate、Trisodium Dicarboxymethyl Alaninate（MGDA）、Tetrasodium Iminodisuccinate、Sodium Phytate、Phytic Acid、Etidronic Acid、Pentasodium Pentetate；
 - 2026-10-18：EDTA、HEDTA、Trisodium HEDTA、Trisodium EDTA、Calcium Disodium EDTA、Dipotassium EDTA、Diammonium EDTA。
 
-EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the safety assessment of EDTA, calcium disodium EDTA, diammonium EDTA, dipotassium EDTA, disodium EDTA, TEA-EDTA, tetrasodium EDTA, tripotassium EDTA, trisodium EDTA, HEDTA, and trisodium HEDTA. Int J Toxicol 2002;21 Suppl 2:95–142，PubMed 12396676），source_level = cir；其余 8 个暂用 CosIng 条目页（source_level = cosing）。本开发环境无法访问 PubMed 和 ec.europa.eu，链接未能逐个打开核对。
+EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the safety assessment of EDTA, calcium disodium EDTA, diammonium EDTA, dipotassium EDTA, disodium EDTA, TEA-EDTA, tetrasodium EDTA, tripotassium EDTA, trisodium EDTA, HEDTA, and trisodium HEDTA. Int J Toxicol 2002;21 Suppl 2:95–142，PubMed 12396676），source_level = cir；其余 8 个暂用 CosIng 条目页（source_level = cosing）。CIR 来源已由作者于 2026-10-18 核对（标题列出 HEDTA 和 Trisodium HEDTA）；CosIng 条目页链接未能在开发环境中逐个打开核对。
 
 ## fragrance_ingredients.csv（加香成分清单）
 
 加香判断规则 (c) 用的清单：inci_name、basis（列入依据，目前都是 cosing_perfuming_only = CosIng 只登记了香料功能）、cosing_ref、source_url、added_on。2026-10-17 由原规则"CosIng 功能只有香料类"在产品中识别出的 12 个成分转入，判断结果与原规则相同。新产品中出现 CosIng 只登记了香料功能、但不在清单上的成分时，`npm run validate-data` 会提示，由人工决定是否加入。
+
+## retail_ratings.csv（零售商评分）
+
+每行是一个产品在一个平台的评分，一个产品可以有多行。**只展示，不计入任何分数。**
+
+| 字段 | 含义 |
+|---|---|
+| product_id | 对应 products.csv |
+| platform | ulta / sephora / target / amazon（与 purchase_links 共用平台取值，还有 brand） |
+| rating | 星级 0–5，取页面可见值 |
+| rating_count | 精确评价数；页面只显示缩写（如 5.5K）时留空，不推算 |
+| rating_count_display | 页面显示的原文（如 1,346、5.5K、(6,395)） |
+| count_label | 评价数口径：Reviews（Ulta）、header review link（Sephora）、page header count（Target）、ratings（Amazon，含无文字的星级评价） |
+| checked_on / url / note | 核对日期、产品页、口径和卖家说明 |
+
+页面规则（`src/data/retail.ts`）：评价数少于 50 的不显示（只有缩写时按缩写判断门槛，显示原文）；按平台固定顺序列在详情里，注明"评分只作参考，不计入适配分；部分评价可能来自赠品试用；不同规格、香型可能合并统计"。不计算跨平台平均分。
+
+当前数据：美国洗护零售元数据第 1 批（SH-US-001—010、CO-US-001—010），2026-10-17 核对，41 条（Ulta 18、Sephora 4、Target 18、Amazon 1）。
+
+## purchase_links.csv（多平台购买链接）
+
+| 字段 | 含义 |
+|---|---|
+| product_id | 对应 products.csv |
+| platform | brand（品牌官网）/ ulta / sephora / target / amazon |
+| url | 平台上的产品页（不用搜索结果页） |
+| status | in_stock / purchasable / listed / official_store_listed_pdp_blocked（品牌店目录已确认，详情页和库存未确认）等，空白不等于不销售 |
+| checked_on / note | 核对日期、说明（如 Target Plus 第三方卖家） |
+
+页面按固定顺序显示：品牌官网 → Ulta → Sephora → Target → Amazon（`RETAIL_PLATFORMS`）。主购买按钮用 products.csv 的 purchase_url，其余链接列为"其他购买渠道"。当前 20 款、63 条链接。
 
 ## exchange_rates.csv（固定汇率表）
 
