@@ -176,6 +176,14 @@ describe('场景 3：染烫受损，选洗护搭配，自填总预算', () => {
     expect(routineTotal([sh.chosen, co.options.find((o) => o.product.productId === 'CO-T-1')!])).toBeCloseTo(sh.chosen!.price.usd! + 35);
   });
 
+  it('选组合时先比适合等级（含上限），再比总分', () => {
+    const base = lists.conditioner[0];
+    const capped = { ...base, product: { ...base.product, productId: 'CO-T-CAP' }, fitLevel: 'low' as const, score: 95, price: { ...base.price, usd: 5 } };
+    const met = { ...base, product: { ...base.product, productId: 'CO-T-MET' }, fitLevel: 'medium' as const, score: 70, price: { ...base.price, usd: 5 } };
+    const routine = buildRoutine(['conditioner'], { conditioner: [capped, met] }, cap);
+    expect(routine.slots[0].chosen!.product.productId).toBe('CO-T-MET');
+  });
+
   it('总预算内找不到组合时明确返回 no_match，不放宽条件', () => {
     const routine = buildRoutine(['shampoo'], lists, 1);
     expect(routine.noMatch).toBe(true);
@@ -226,9 +234,8 @@ describe('产品定位的来源标注', () => {
     const r = scoreProduct({ ...base, claimSource: 'data_classification' }, prof, data);
     expect(r.dimensions.need.score).toBe(70);
     expect(r.dimensions.need.reason.zh).toBe('针对光泽：资料分类');
-    expect(r.dimensions.evidence.score).toBeNull();
-    expect(r.dimensions.evidence.state).toBe('missing');
-    expect(r.dimensions.evidence.reason.zh).toContain('暂无成分或测试证据');
+    expect(r.dimensions.evidence.score).toBe(40);
+    expect(r.dimensions.evidence.reason.zh).toContain('光泽暂无证据，按最低等级');
     expect(recommendReasons(r, prof, false)[0].zh).toBe('定位为针对光泽的产品');
     expect(recommendReasons(r, prof, false)[0].basis).toBe('classification');
   });
@@ -276,11 +283,10 @@ describe('效果依据', () => {
   const withClaims = (claims: Partial<Product>) => ({ ...real.products[1], productId: 'T-CLAIM', inciList: ['Water', 'Glycerin'], inciNameUnverified: [], ...claims });
   const prof = toScoringProfile(answers({ hair: { goals: ['shine'] } }), 'shampoo', ctx);
 
-  it('品牌宣称 0.7、成品测试 1；只有品牌宣称时证据强度不计分（数据缺失），成品测试记 100', () => {
+  it('品牌宣称 0.7、成品测试 1；只有品牌宣称时证据强度按最低等级（C，40）计，成品测试记 100', () => {
     const claim = scoreProduct(withClaims({ claimedBenefits: ['shine'] }), prof, data);
     expect(claim.dimensions.need.score).toBe(70);
-    expect(claim.dimensions.evidence.score).toBeNull();
-    expect(claim.dimensions.evidence.state).toBe('missing');
+    expect(claim.dimensions.evidence.score).toBe(40);
     const tested = scoreProduct(withClaims({ testedClaims: [{ target: 'shine', description: 't', year: '2025', url: 'https://x.example' }] }), prof, data);
     expect(tested.dimensions.need.score).toBe(100);
     expect(tested.dimensions.evidence.score).toBe(100);
@@ -457,13 +463,13 @@ describe('没有选需求时的兜底理由', () => {
 });
 
 describe('证据缺失的说明', () => {
-  it('只靠没有证据等级的成分匹配时，说明里不说成"只有品牌宣称或资料分类"', () => {
+  it('只靠没有证据等级的成分匹配时，也写"暂无证据，按最低等级计"，并给出数值', () => {
     const clean = { ...toScoringProfile(answers({}), 'shampoo', ctx), concerns: ['buildup' as const], needs: undefined };
     const p = { ...real.products[1], productId: 'T-UNRATED', keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA'], inciNameUnverified: [], claimedBenefits: [], testedClaims: [] };
     const r = scoreProduct(p, clean, data);
     expect(r.dimensions.need.score).toBeGreaterThan(0);
-    expect(r.dimensions.evidence.state).toBe('missing');
-    expect(r.dimensions.evidence.reason.zh).toContain('尚无证据等级的成分');
+    expect(r.dimensions.evidence.score).toBe(40);
+    expect(r.dimensions.evidence.reason.zh).toContain('暂无证据，按最低等级（C 级，40 分）计');
   });
 });
 

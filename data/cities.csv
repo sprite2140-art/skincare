@@ -1,31 +1,31 @@
-city,country,review_status
-New York,US,draft
-Los Angeles,US,draft
-San Francisco,US,draft
-San Jose,US,draft
-Seattle,US,draft
-Boston,US,draft
-Chicago,US,draft
-Houston,US,draft
-Dallas,US,draft
-Austin,US,draft
-Philadelphia,US,draft
-Washington,US,draft
-Atlanta,US,draft
-Miami,US,draft
-Phoenix,US,draft
-San Diego,US,draft
-Las Vegas,US,draft
-Denver,US,draft
-Portland,US,draft
-Irvine,US,draft
-Minneapolis,US,draft
-Detroit,US,draft
-Tokyo,JP,draft
-Osaka,JP,draft
-Seoul,KR,draft
-Busan,KR,draft
-Beijing,CN,draft
-Shanghai,CN,draft
-Guangzhou,CN,draft
-Shenzhen,CN,draft
+city,city_zh,country,review_status
+New York,纽约,US,draft
+Los Angeles,洛杉矶,US,draft
+San Francisco,旧金山,US,draft
+San Jose,圣何塞,US,draft
+Seattle,西雅图,US,draft
+Boston,波士顿,US,draft
+Chicago,芝加哥,US,draft
+Houston,休斯敦,US,draft
+Dallas,达拉斯,US,draft
+Austin,奥斯汀,US,draft
+Philadelphia,费城,US,draft
+Washington,华盛顿,US,draft
+Atlanta,亚特兰大,US,draft
+Miami,迈阿密,US,draft
+Phoenix,菲尼克斯,US,draft
+San Diego,圣迭戈,US,draft
+Las Vegas,拉斯维加斯,US,draft
+Denver,丹佛,US,draft
+Portland,波特兰,US,draft
+Irvine,尔湾,US,draft
+Minneapolis,明尼阿波利斯,US,draft
+Detroit,底特律,US,draft
+Tokyo,东京,JP,draft
+Osaka,大阪,JP,draft
+Seoul,首尔,KR,draft
+Busan,釜山,KR,draft
+Beijing,北京,CN,draft
+Shanghai,上海,CN,draft
+Guangzhou,广州,CN,draft
+Shenzhen,深圳,CN,draft

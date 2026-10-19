@@ -66,10 +66,10 @@ export const TESTED_EVIDENCE_SCORE = 100;
  */
 export const CHELATOR_TARGETS: string[] = ['buildup'];
 /**
- * 证据缺失（只有品牌宣称或资料分类）时，总分上限按"这些需求的证据按 C 级计"算出的总分：
- * 最多与 C 级证据的产品打平，不反超，也不额外扣分。
+ * 证据缺失（只有品牌宣称、资料分类或尚无证据等级的成分，或没有依据）的需求，证据强度按最低等级（C 级）计分，
+ * 页面写"暂无证据，按最低等级计"。
  */
-export const MISSING_EVIDENCE_CAP_LEVEL = 'C' as const;
+export const MISSING_EVIDENCE_LEVEL = 'C' as const;
 
 /**
  * 洗发水自己负责的发丝 / 效果需求（头皮需求之外）：清爽洁净、蓬松、去黄、去橙、产品残留。

@@ -6,6 +6,7 @@ import { referenceWater } from '../data/load';
 import type { City, ReferenceWater, WaterRecord } from '../data/types';
 import { USGS_BANDS, displayScope, formatPeriod, summarizeCityWater } from '../data/water';
 import { useI18n, type Key } from '../i18n';
+import { cityName } from '../profile/questionnaire';
 
 /** 刻度条右端（mg/L）；更高的数值画在最右端 */
 const SCALE_MAX = 360;
@@ -146,7 +147,7 @@ export default function WaterInfo({ city }: { city: City }) {
     : null;
   return (
     <div className="infobox" aria-live="polite">
-      <div className="label">{t('quiz.water.title', { city: city.city })}</div>
+      <div className="label">{t('quiz.water.title', { city: cityName(city, lang) })}</div>
       <p className="water-line">
         <strong>{known ? t(`water.${city.waterHardness}` as Key) : t('quiz.water.none')}</strong>
         {value && <> · {value}</>}
@@ -159,7 +160,7 @@ export default function WaterInfo({ city }: { city: City }) {
       </p>
       <WaterScale low={sum?.low ?? null} high={sum?.high ?? null} refs={refs} />
       <p className="small muted wscale-legend">
-        {sum && <><span className="key-you" aria-hidden="true" />{t('quiz.water.you', { city: city.city })}　</>}
+        {sum && <><span className="key-you" aria-hidden="true" />{t('quiz.water.you', { city: cityName(city, lang) })}　</>}
         <span className="key-ref" aria-hidden="true" />
         {t('quiz.water.refs')}：{refs.map((r) => `${refName(r, lang)} ${Math.round(r.value!)}`).join(' · ')}
       </p>
@@ -168,7 +169,7 @@ export default function WaterInfo({ city }: { city: City }) {
         {city.waterHardness === 'varies' && <p style={{ marginTop: 8 }}>{t('quiz.water.variesNote')}</p>}
         {city.water.length > 0 && (
           <>
-            <div className="label" style={{ marginTop: 10 }}>{t('quiz.water.records', { city: city.city, n: city.water.length })}</div>
+            <div className="label" style={{ marginTop: 10 }}>{t('quiz.water.records', { city: cityName(city, lang), n: city.water.length })}</div>
             <ul className="water-records">{city.water.map((r) => <WaterRecordRow key={r.regionId} r={r} />)}</ul>
           </>
         )}

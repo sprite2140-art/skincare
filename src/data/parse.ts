@@ -268,6 +268,7 @@ export function parseCities(text: string, water: WaterRecord[] = []): City[] {
     const records = water.filter((w) => w.city === r.city && w.country === r.country);
     return {
       city: r.city ?? '',
+      cityZh: r.city_zh ?? '',
       country: r.country ?? '',
       // 旧格式的 cities.csv 直接写了 water_hardness，没有分区记录时沿用
       waterHardness: records.length > 0 ? summarizeHardness(records) : ((r.water_hardness || 'unknown') as WaterHardness),

@@ -1,10 +1,11 @@
 // 数据覆盖统计：问卷里每个可选需求 × 价格上限有多少款可推荐的产品，其中多少款无香。
 // 用于发现数据缺口，由 `npm run coverage` 生成 docs/COVERAGE.md。
 //
-// "可推荐"的口径：
+// 口径：
 // - 只看默认市场（美国）的产品；
 // - 用只含这一个需求、只选这一个价格上限的最简档案打分，没有被硬性过滤排除；
-// - 需求匹配分大于 0，即至少有一项依据（成品测试、资料分类、品牌宣称或成分功能）。
+// - "满足"：这一项需求有满分依据（主打成分或成品测试）。一项需求都没满足的产品适合等级最高为"一般"，
+//   所以格子按满足数统计、标红；只有部分依据（资料分类、品牌宣称、非主打成分）的另外列出。
 // 价格上限与问卷一致：按品类价格的 25% / 50% / 75% 分位数，每列包含更便宜的产品（累计），另加不限。
 
 import type { Product } from '../data/types';
@@ -41,8 +42,13 @@ export function coverageGroups(category: string) {
 }
 
 export interface CoverageCell {
+  /** 这一项需求"满足"的产品数（能达到"适合"及以上） */
   count: number;
+  /** 只有部分依据的产品数（适合等级最高为"一般"） */
+  partial: number;
+  /** 满足的产品中无香的数量 */
   fragranceFree: number;
+  /** 满足的产品 */
   productIds: string[];
 }
 
@@ -65,15 +71,18 @@ function minimalProfile(need: NeedChoice, category: string, budget: BudgetChoice
 }
 
 export function coverageCell(products: Product[], category: string, need: NeedChoice, budget: BudgetChoice, data: ScoringData): CoverageCell {
-  const ok = products
+  const scored = products
     .filter((p) => p.category === category && inMarket(p, DEFAULT_MARKET))
     .map((p) => scoreProduct(p, minimalProfile(need, category, budget), data))
     .filter((r) => !r.excluded && !r.lowMatch && (r.dimensions.need.score ?? 0) > 0);
+  // 满足：这一项需求有满分依据（主打成分或成品测试），才能达到"适合"及以上；只有部分依据的最高为"一般"
+  const met = scored.filter((r) => r.needMatches.some((m) => m.credit >= 1));
   return {
-    count: ok.length,
+    count: met.length,
+    partial: scored.length - met.length,
     // 无香：有无香声明，或成分表中没有发现加香成分和精油
-    fragranceFree: ok.filter((r) => fragranceTier(r.fragrance) === 0).length,
-    productIds: ok.map((r) => r.product.productId),
+    fragranceFree: met.filter((r) => fragranceTier(r.fragrance) === 0).length,
+    productIds: met.map((r) => r.product.productId),
   };
 }
 

@@ -295,6 +295,8 @@ export interface ReferenceWater {
 
 export interface City {
   city: string;
+  /** 中文名，中文界面显示；没有时显示英文名 */
+  cityZh: string;
   country: string;
   /** 由该城市的水硬度记录汇总得出，见 summarizeHardness() */
   waterHardness: WaterHardness;

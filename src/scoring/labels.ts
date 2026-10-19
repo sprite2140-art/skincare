@@ -46,6 +46,13 @@ export const RISK_TAG_LABELS: Record<RiskTag, Text> = {
   rx_caution: { zh: '与处方皮肤药需注意的成分', en: 'ingredients to watch with prescription skin drugs' },
 };
 
+/** 中文与英文字母、数字之间加空格（中文界面的排版规则）；已有空格的不重复加 */
+export function spaceCjk(s: string): string {
+  return s
+    .replace(/([\u3400-\u9fff])([A-Za-z0-9])/g, '$1 $2')
+    .replace(/([A-Za-z0-9%])([\u3400-\u9fff])/g, '$1 $2');
+}
+
 export function ingredientName(ing: Ingredient | null, raw: string): Text {
   if (!ing) return { zh: raw, en: raw };
   return { zh: ing.nameZh || ing.inciName, en: ing.inciName };

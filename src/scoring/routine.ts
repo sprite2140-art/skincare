@@ -28,8 +28,11 @@ const eligible = (list: ProductScore[]) => list.filter((r) => !r.excluded && r.s
 /**
  * lists：各品类已排序的打分结果（已应用单品预算和成分排除）。
  * totalCapUsd：整套预算上限；null 表示不限。设了上限时，价格未知的产品不参与组合。
- * 在预算内选总分最高的组合，同分取总价低的。
+ * 在预算内选组合，与单品列表的排序一致：先比适合等级（各单品等级相加），再比总分，同分取总价低的。
  */
+/** 适合等级换算成可相加的点数（已含"一项需求都没满足时最高为一般"的上限）；没有需求时为 0 */
+const FIT_POINTS = { high: 2, medium: 1, low: 0, none: 0 } as const;
+
 export function buildRoutine(
   categories: Category[],
   lists: Partial<Record<Category, ProductScore[]>>,
@@ -43,21 +46,23 @@ export function buildRoutine(
   const withData = pools.filter((p) => p.ok.length > 0);
 
   let best: ProductScore[] | null = null;
+  let bestFit = -1;
   let bestScore = -1;
   let bestPrice = Infinity;
-  const walk = (i: number, picked: ProductScore[], price: number, score: number) => {
+  const walk = (i: number, picked: ProductScore[], price: number, fit: number, score: number) => {
     if (totalCapUsd !== null && price > totalCapUsd + 1e-9) return;
     if (i === withData.length) {
-      if (score > bestScore || (score === bestScore && price < bestPrice)) {
+      if (fit > bestFit || (fit === bestFit && (score > bestScore || (score === bestScore && price < bestPrice)))) {
         best = picked;
+        bestFit = fit;
         bestScore = score;
         bestPrice = price;
       }
       return;
     }
-    for (const r of withData[i].ok) walk(i + 1, [...picked, r], price + (r.price.usd ?? 0), score + (r.score ?? 0));
+    for (const r of withData[i].ok) walk(i + 1, [...picked, r], price + (r.price.usd ?? 0), fit + FIT_POINTS[r.fitLevel ?? 'none'], score + (r.score ?? 0));
   };
-  if (withData.length > 0) walk(0, [], 0, 0);
+  if (withData.length > 0) walk(0, [], 0, 0, 0);
 
   const chosenList: ProductScore[] = best ?? [];
   const slots: RoutineSlot[] = pools.map((p) => {
