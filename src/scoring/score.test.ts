@@ -498,7 +498,7 @@ describe('硬性过滤', () => {
   });
 });
 
-describe('预算（按品类三分位，USD）', () => {
+describe('预算（按品类四分位上限，USD）', () => {
   const item = (id: string, price: number, currency = 'USD', category = 'shampoo') =>
     product(id, ['Aqua'], { category, price, currency });
   // 洗发水 USD 价格 10 / 20 / 30 / 40：33% 分位 = 19.9，67% 分位 = 30.1
@@ -524,29 +524,23 @@ describe('预算（按品类三分位，USD）', () => {
     expect(computeBudgetCaps([...catalog, item('E', 999, 'EUR')], real.exchangeRates).shampoo!.sampleSize).toBe(4);
   });
 
-  it('价格区间：不含下界、含上界；区间外的产品排除；不限不排除', () => {
+  it('价格上限：含等于；每档包含更便宜的产品；超过上限的排除；不限不排除', () => {
     const ok = (p: Product, budget: BudgetChoice) => !scoreProduct(p, profile({ budget }), withCaps).excluded;
     expect(ok(item('A', 10), 'q1')).toBe(true);
     expect(ok(item('A', 17.5), 'q1')).toBe(true);
     expect(ok(item('B', 20), 'q1')).toBe(false);
-    expect(ok(item('A', 17.5), 'q2')).toBe(false);
-    expect(ok(item('B', 20), 'q2')).toBe(true);
+    expect(ok(item('A', 10), 'q2')).toBe(true);
     expect(ok(item('B', 25), 'q2')).toBe(true);
-    expect(ok(item('C', 30), 'q3')).toBe(true);
+    expect(ok(item('A', 10), 'q3')).toBe(true);
+    expect(ok(item('C', 32.5), 'q3')).toBe(true);
     expect(ok(item('D', 40), 'q3')).toBe(false);
-    expect(ok(item('D', 40), 'q4')).toBe(true);
-    expect(ok(item('A', 10), 'q4')).toBe(false);
     expect(ok(item('D', 40), 'none')).toBe(true);
     const r = scoreProduct(item('B', 20), profile({ budget: 'q1' }), withCaps);
     expect(r.exclusions[0]).toMatchObject({ code: 'over_budget' });
     expect(r.exclusions[0].text.zh).toBe('价格 20 USD，超出你选的预算上限（约 17.50 USD）');
-    const low = scoreProduct(item('A', 10), profile({ budget: 'q4' }), withCaps);
-    expect(low.exclusions[0]).toMatchObject({ code: 'below_budget' });
-    expect(low.exclusions[0].text.zh).toBe('价格 10 USD，低于你选的价格区间（约 32.50 USD 以上）');
     const jp = scoreProduct(item('J', 4000, 'JPY'), profile({ budget: 'q1' }), withCaps);
     expect(jp.price).toEqual({ amount: 4000, currency: 'JPY', usd: expect.closeTo(4000 / 158.34, 6) });
     expect(jp.exclusions[0].text.zh).toBe('价格 4000 JPY（约 25.26 USD），超出你选的预算上限（约 17.50 USD）');
-    // 自填上限：只有上限
     expect(scoreProduct(item('A', 10), profile({ budget: 'custom', customBudgetUsd: 12 }), withCaps).excluded).toBe(false);
   });
 
@@ -560,21 +554,21 @@ describe('预算（按品类三分位，USD）', () => {
     }
   });
 
-  it('问卷选项只显示算出的价格区间（不起名字），换算成用户当地货币', () => {
+  it('问卷选项为"$X 以内"（不起名字），换算成用户当地货币', () => {
     const rates = real.exchangeRates;
     const labels = (currency: string) => budgetOptions(caps.shampoo, currency, rates).map((o) => o.label.zh);
-    expect(labels('USD')).toEqual(['≤ $18', '$18–25', '$25–33', '$33 以上', '不限']);
-    expect(budgetOptions(caps.shampoo, 'USD', rates).map((o) => o.label.en)).toEqual(['≤ $18', '$18–25', '$25–33', 'Over $33', 'No limit']);
+    expect(labels('USD')).toEqual(['$18 以内', '$25 以内', '$33 以内', '不限']);
+    expect(budgetOptions(caps.shampoo, 'USD', rates).map((o) => o.label.en)).toEqual(['Up to $18', 'Up to $25', 'Up to $33', 'No limit']);
     // 17.5 × 6.692 ≈ 117，25 × 6.692 ≈ 167，32.5 × 6.692 ≈ 217
-    expect(labels('CNY')).toEqual(['≤ ¥117', '¥117–167', '¥167–217', '¥217 以上', '不限']);
-    expect(labels('EUR')).toEqual(['≤ $18', '$18–25', '$25–33', '$33 以上', '不限']);
+    expect(labels('CNY')).toEqual(['¥117 以内', '¥167 以内', '¥217 以内', '不限']);
+    expect(labels('EUR')).toEqual(['$18 以内', '$25 以内', '$33 以内', '不限']);
     expect(budgetOptions(undefined, 'CNY', rates).map((o) => o.choice)).toEqual(['none']);
-    // 区间是否为空按 USD 原值判断：取整后相同但原值不同时保留，并改用不取整的金额显示
+    expect(budgetOptions(caps.shampoo, 'CNY', rates).map((o) => o.choice)).toEqual(['q1', 'q2', 'q3', 'none']);
+    // 取整后相同但原值不同：保留，改用不取整的金额显示
     const close = { q1: 10.2, q2: 10.4, q3: 30, sampleSize: 9 };
-    expect(budgetOptions(close, 'USD', rates).map((o) => o.label.zh)).toEqual(['≤ $10.20', '$10.20–10.40', '$10.40–30', '$30 以上', '不限']);
-    // 原值相等的区间为空，去掉
-    expect(budgetOptions({ q1: 10, q2: 10, q3: 30, sampleSize: 9 }, 'USD', rates).map((o) => o.choice)).toEqual(['q1', 'q3', 'q4', 'none']);
-    expect(budgetOptions(caps.shampoo, 'CNY', rates).map((o) => o.choice)).toEqual(['q1', 'q2', 'q3', 'q4', 'none']);
+    expect(budgetOptions(close, 'USD', rates).map((o) => o.label.zh)).toEqual(['$10.20 以内', '$10.40 以内', '$30 以内', '不限']);
+    // 原值相同的上限只保留一个
+    expect(budgetOptions({ q1: 10, q2: 10, q3: 30, sampleSize: 9 }, 'USD', rates).map((o) => o.choice)).toEqual(['q1', 'q3', 'none']);
     expect(formatMoney(1650, 'JPY', false)).toBe('¥1,650');
     expect(formatMoney(12.5, 'USD', false)).toBe('$12.50');
     expect(formatMoney(12, 'USD', false)).toBe('$12');

@@ -1,4 +1,4 @@
-// npm run coverage：统计洗发水、护发素在各需求 × 预算档位下可推荐的产品数量（含无香数量），
+// npm run coverage：统计洗发水、护发素在各需求 × 价格上限下可推荐的产品数量（含无香数量），
 // 以及有同系列护发素的洗发水数量，写入 docs/COVERAGE.md。每次数据更新后重新运行。
 // 口径见 src/scoring/coverage.ts。
 
@@ -26,15 +26,14 @@ const usd = (n: number) => `$${n.toFixed(2)}`;
 function budgetLabel(category: string, b: BudgetChoice) {
   const caps = budgetCaps[category];
   if (b === 'none') return '不限';
-  if (!caps) return b;
-  if (b === 'q1') return `≤ ${usd(caps.q1)}`;
-  if (b === 'q2') return `${usd(caps.q1)}–${usd(caps.q2)}`;
-  if (b === 'q3') return `${usd(caps.q2)}–${usd(caps.q3)}`;
-  return `${usd(caps.q3)} 以上`;
+  if (!caps || b === 'custom') return b;
+  return `${usd(caps[b])} 以内`;
 }
 
 const out: string[] = [];
-const gaps: string[] = [];
+let gapCount = 0;
+/** 按需求列出缺口：每个需求一行，列出少于 MIN_PER_CELL 款的价格上限和款数 */
+const gapsByNeed: string[] = [];
 out.push(
   '# 数据覆盖表',
   '',
@@ -45,8 +44,8 @@ out.push(
   '',
   '## 口径',
   '',
-  '- **行**：问卷里用户可以明确选择的需求（头皮困扰、期望效果），每个选项一行；发丝状态、出油时间、发红、造型产品频率等题目不推导需求，不统计。头皮困扰只统计洗发水（护发素不针对头皮）；护发素不统计"清爽洁净"；"香味好闻"不对应需求，不统计。一个选项对应多个效果时（如"柔顺"对应毛躁和打结），按其中依据最好的一个计。',
-  '- **列**：问卷的四个价格区间。界线按各品类产品价格的 25% / 50% / 75% 分位数自动计算，每个区间不含下界、含上界；"不限"为全部。',
+  '- **行**：问卷里用户可以明确选择的需求（头皮困扰、期望效果），每个选项一行；其他题目不推导需求。头皮困扰只统计洗发水（护发素不针对头皮）；护发素不统计"清爽洁净"和"去除造型产品残留"（只分配给洗发水）；修护受损、护色、去黄、去橙、去除造型产品残留在问卷中有出现条件，这里都统计；"香味好闻"不对应需求，不统计。一个选项对应多个效果时（如"柔顺"对应毛躁和打结），按其中依据最好的一个计。',
+  '- **列**：问卷的三个价格上限。上限按各品类产品价格的 25% / 50% / 75% 分位数自动计算，等于上限的产品保留；每列包含更便宜的产品（累计），"不限"为全部。',
   '- **可推荐**：美国市场的产品，用只含这一个需求、只选这一个价格区间的最简档案打分，没有被硬性过滤排除，且需求匹配分大于 0（至少有一项依据：成品测试、资料分类、品牌宣称或成分功能）。',
   '- **无香**：有无香声明，或成分表中没有发现香精、香料致敏原、只登记香料功能的成分和精油。',
   `- 🔴 标出少于 ${MIN_PER_CELL} 款的格子。格子写法：可推荐数（其中无香数）。`,
@@ -60,13 +59,16 @@ for (const cat of CATEGORIES) {
   for (const g of coverageGroups(cat.key)) {
     out.push(`| **${GROUP_LABELS[g.key]}** |${COVERAGE_BUDGETS.map(() => ' ').join('|')}|`);
     for (const n of g.needs) {
+      const lows: string[] = [];
       const cells = COVERAGE_BUDGETS.map((b) => {
         const c = coverageCell(d.products, cat.key, n, b, data);
         const low = c.count < MIN_PER_CELL;
-        if (low) gaps.push(`${cat.zh} · ${n.label.zh} · ${budgetLabel(cat.key, b)}：${c.count} 款`);
+        if (low) lows.push(`${budgetLabel(cat.key, b)} ${c.count} 款`);
         return `${low ? '🔴 ' : ''}${c.count}（${c.fragranceFree}）`;
       });
       out.push(`| ${n.label.zh} | ${cells.join(' | ')} |`);
+      gapCount += lows.length;
+      if (lows.length) gapsByNeed.push(`${cat.zh} · ${n.label.zh}：${lows.join('、')}`);
     }
   }
   out.push('');
@@ -80,12 +82,12 @@ out.push(
   '',
   `有同系列护发素的洗发水：${pairs.ids.join('、') || '无'}`,
   '',
-  `## 少于 ${MIN_PER_CELL} 款的格子（共 ${gaps.length} 个）`,
+  `## 少于 ${MIN_PER_CELL} 款的格子（共 ${gapCount} 个，按需求列出）`,
   '',
-  ...(gaps.length ? gaps.map((g) => `- ${g}`) : ['无']),
+  ...(gapsByNeed.length ? gapsByNeed.map((g) => `- ${g}`) : ['无']),
   '',
 );
 
 const target = fileURLToPath(new URL('../docs/COVERAGE.md', import.meta.url));
 writeFileSync(target, out.join('\n'));
-console.log(`已写入 docs/COVERAGE.md：少于 ${MIN_PER_CELL} 款的格子 ${gaps.length} 个；有同系列护发素的洗发水 ${pairs.paired}/${pairs.total}`);
+console.log(`已写入 docs/COVERAGE.md：少于 ${MIN_PER_CELL} 款的格子 ${gapCount} 个；有同系列护发素的洗发水 ${pairs.paired}/${pairs.total}`);

@@ -64,7 +64,7 @@ function migrate(data: unknown): ProfileStore {
     const profiles = d.profiles.map((p) => {
       const blank = newProfile(p.name, p.id);
       const base = { ...blank.base, ...p.base };
-      // 旧的预算档（p33 / p67，累计上限）已改为四分位价格区间，去掉后需要重新选择
+      // 旧的预算档（p33 / p67）和前一版的区间（q4）已不对应现在的四分位上限，去掉后需要重新选择
       base.budgets = Object.fromEntries(Object.entries(base.budgets ?? {}).filter(([, v]) => isBudgetChoice(v)));
       return { ...blank, ...p, base, hair: p.hair ? { ...EMPTY_HAIR, ...p.hair } : null };
     });

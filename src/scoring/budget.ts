@@ -1,19 +1,19 @@
-// 预算：每个品类按产品库价格（统一换算成 USD）的四分位数分四个价格区间，界线由数据自动计算。
+// 预算：每个品类按产品库价格（统一换算成 USD）的四分位数给出三个价格上限，界线由数据自动计算。
 //
-// - 区间 1：≤ 25% 分位数；区间 2：25%–50% 分位数；区间 3：50%–75% 分位数；区间 4：75% 分位数以上。
-//   每个区间不含下界、含上界（区间 1 没有下界，区间 4 没有上界）。
+// - 三个上限依次为 25% / 50% / 75% 分位数；选项为"$X 以内 / $Y 以内 / $Z 以内 / 不限"，每档包含更便宜的产品，
+//   等于上限的产品保留。
 // - 分位数用线性插值（与 Excel PERCENTILE.INC、numpy 默认方法相同）。
-// - 只统计有价格且币种在汇率表中的产品；不足 MIN_PRICED_PRODUCTS 个时该品类不提供价格区间。
-// - 用户档案保存的是"第几个区间"而不是金额，数据更新后界线自动跟着变。
-// - 选项只显示价格区间，不给区间起名字。
+// - 只统计有价格且币种在汇率表中的产品；不足 MIN_PRICED_PRODUCTS 个时该品类不提供价格上限选项。
+// - 用户档案保存的是"第几个上限"而不是金额，数据更新后界线自动跟着变。
+// - 选项只显示金额，不给档位起名字。
 
 import type { ExchangeRate, Product } from '../data/types';
 import type { Text } from './labels';
 import { fromUsd, priceInfo, roundForDisplay } from './price';
 
-/** 四个价格区间 / 不限 / 自填上限 */
-export type BudgetChoice = 'q1' | 'q2' | 'q3' | 'q4' | 'none' | 'custom';
-export const BUDGET_QUARTILES = ['q1', 'q2', 'q3', 'q4'] as const;
+/** 三个价格上限（25% / 50% / 75% 分位数）/ 不限 / 自填上限 */
+export type BudgetChoice = 'q1' | 'q2' | 'q3' | 'none' | 'custom';
+export const BUDGET_QUARTILES = ['q1', 'q2', 'q3'] as const;
 
 export interface BudgetCaps {
   /** 25% / 50% / 75% 分位数（USD） */
@@ -24,11 +24,7 @@ export interface BudgetCaps {
   sampleSize: number;
 }
 
-/** 价格区间（USD）：min 不含（null 为没有下界），max 含（null 为没有上界） */
-export interface BudgetRange {
-  min: number | null;
-  max: number | null;
-}
+
 
 export type BudgetCapsByCategory = Partial<Record<string, BudgetCaps>>;
 
@@ -60,25 +56,14 @@ export function computeBudgetCaps(products: Product[], rates: ExchangeRate[]): B
   return caps;
 }
 
-/** 用户所选区间对应的价格范围（USD）；null 表示不限。自填时为 0 到 customUsd */
-export function rangeFor(choice: BudgetChoice, caps: BudgetCaps | undefined, customUsd: number | null = null): BudgetRange | null {
-  if (choice === 'custom') return customUsd !== null && customUsd > 0 ? { min: null, max: customUsd } : null;
+/** 用户所选档位对应的价格上限（USD，含等于）；null 表示不限。自填时用 customUsd */
+export function capFor(choice: BudgetChoice, caps: BudgetCaps | undefined, customUsd: number | null = null): number | null {
+  if (choice === 'custom') return customUsd !== null && customUsd > 0 ? customUsd : null;
   if (choice === 'none' || !caps) return null;
-  switch (choice) {
-    case 'q1': return { min: null, max: caps.q1 };
-    case 'q2': return { min: caps.q1, max: caps.q2 };
-    case 'q3': return { min: caps.q2, max: caps.q3 };
-    case 'q4': return { min: caps.q3, max: null };
-  }
+  return caps[choice];
 }
 
-/** 价格是否在区间内：不含下界、含上界 */
-export function inRange(usd: number, range: BudgetRange | null): boolean {
-  if (!range) return true;
-  return (range.min === null || usd > range.min) && (range.max === null || usd <= range.max);
-}
-
-/** 旧档案保存的预算档（p33 / p67，累计上限）已不对应新的区间，迁移时去掉，需要重新选择 */
+/** 旧档案保存的预算档（p33 / p67）和前一版的区间（q4）已不对应现在的上限，迁移时去掉，需要重新选择 */
 export function isBudgetChoice(v: unknown): v is BudgetChoice {
   return v === 'none' || v === 'custom' || (BUDGET_QUARTILES as readonly unknown[]).includes(v);
 }
@@ -101,17 +86,16 @@ export interface BudgetOption {
 }
 
 /**
- * 问卷选项，例如"≤ $15 / $15–30 / $30–60 / $60 以上 / 不限"：显示该品类算出的价格区间，换算成用户当地货币。
- * 该品类价格数据不足时只有"不限"。区间是否为空按 USD 原值判断（相邻界线相等时去掉该区间）；
- * 取整后相邻界线显示相同时，改用不取整的金额显示，保证每个选项的文字不同。
+ * 问卷选项，例如"$15 以内 / $30 以内 / $60 以内 / 不限"：显示该品类算出的上限，换算成用户当地货币。
+ * 该品类价格数据不足时只有"不限"。相邻上限原值相同时只保留一个；取整后显示相同但原值不同时，
+ * 改用不取整的金额显示，保证每个选项的文字不同。
  */
 export function budgetOptions(caps: BudgetCaps | undefined, currency: string, rates: ExchangeRate[]): BudgetOption[] {
   const none: BudgetOption = { choice: 'none', label: { zh: '不限', en: 'No limit' } };
   if (!caps) return [none];
-  const local = (usd: number) => fromUsd(usd, currency, rates);
-  const cur = local(caps.q1) === null ? 'USD' : currency;
-  const amount = (usd: number) => local(usd) ?? usd;
-  const bounds = [caps.q1, caps.q2, caps.q3];
+  const cur = fromUsd(caps.q1, currency, rates) === null ? 'USD' : currency;
+  const amount = (usd: number) => fromUsd(usd, cur, rates) ?? usd;
+  const bounds = BUDGET_QUARTILES.map((q) => caps[q]);
   const rounded = bounds.map((b) => formatMoney(amount(b), cur));
   const collide = rounded.some((x, i) => i > 0 && x === rounded[i - 1] && bounds[i] !== bounds[i - 1]);
   // 不取整：美元等保留两位小数，日元、韩元取整到个位
@@ -119,12 +103,11 @@ export function budgetOptions(caps: BudgetCaps | undefined, currency: string, ra
     const v = amount(usd);
     return formatMoney(cur === 'JPY' || cur === 'KRW' ? Math.round(v) : Math.round(v * 100) / 100, cur, false);
   };
-  const [b1, b2, b3] = bounds.map((b, i) => (collide ? precise(b) : rounded[i]));
-  // 区间内后一个数字不带货币符号（$15–30）
-  const bare = (text: string) => text.replace(/^[^\d]+/, '');
-  const options: BudgetOption[] = [{ choice: 'q1', label: { zh: `≤ ${b1}`, en: `≤ ${b1}` } }];
-  if (caps.q2 > caps.q1) options.push({ choice: 'q2', label: { zh: `${b1}–${bare(b2)}`, en: `${b1}–${bare(b2)}` } });
-  if (caps.q3 > caps.q2) options.push({ choice: 'q3', label: { zh: `${b2}–${bare(b3)}`, en: `${b2}–${bare(b3)}` } });
-  options.push({ choice: 'q4', label: { zh: `${b3} 以上`, en: `Over ${b3}` } });
+  const options: BudgetOption[] = [];
+  BUDGET_QUARTILES.forEach((q, i) => {
+    if (i > 0 && bounds[i] === bounds[i - 1]) return;
+    const text = collide ? precise(bounds[i]) : rounded[i];
+    options.push({ choice: q, label: { zh: `${text} 以内`, en: `Up to ${text}` } });
+  });
   return [...options, none];
 }

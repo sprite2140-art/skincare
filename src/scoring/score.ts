@@ -18,13 +18,13 @@ import { matchesKeyActive, productKeyActiveTerms, type KeyActiveTerm } from '../
 import { fragranceInfo, fragranceTier, type FragranceInfo } from './fragrance';
 import { RISK_TAG_LABELS, TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
 import { priceInfo, type PriceInfo } from './price';
-import { inRange, rangeFor, type BudgetCapsByCategory, type BudgetChoice, type BudgetRange } from './budget';
+import { capFor, type BudgetCapsByCategory, type BudgetChoice } from './budget';
 
 /** 打分用到的数据 */
 export interface ScoringData {
   index: IngredientIndex;
   exchangeRates: ExchangeRate[];
-  /** 各品类预算价格区间界线，由 computeBudgetCaps() 从产品库计算 */
+  /** 各品类预算价格上限界线，由 computeBudgetCaps() 从产品库计算 */
   budgetCaps: BudgetCapsByCategory;
   /** 测试模式：允许 draft 成分参与打分。正式上线前必须关闭，见 config.ts 的 TEST_MODE_DRAFT_SCORING */
   allowDraft?: boolean;
@@ -62,7 +62,7 @@ export interface ScoringProfile {
   avoidIngredients: string[];
   /** 想避开的成分类型，如 fragrance */
   avoidTags: RiskTag[];
-  /** 该品类的价格区间：四分位区间 1–4 / 不限 / 自填上限 */
+  /** 该品类的价格上限：三个四分位上限 / 不限 / 自填上限 */
   budget: BudgetChoice;
   /** budget 为 custom 时的上限（USD） */
   customBudgetUsd?: number | null;
@@ -266,7 +266,7 @@ const unverifiedSuffix = (unverified: boolean): Text =>
 
 function hardFilters(
   product: Product, items: Resolved[], profile: ScoringProfile, index: IngredientIndex, price: PriceInfo,
-  range: BudgetRange | null,
+  capUsd: number | null,
 ): Flag[] {
   const out: Flag[] = [];
 
@@ -325,24 +325,18 @@ function hardFilters(
     });
   }
 
-  // 单件价格区间：换算成 USD 比较
-  if (price.status === 'ok' && range && !inRange(price.usd, range)) {
+  // 单件价格上限：换算成 USD 比较，等于上限的保留
+  if (price.status === 'ok' && capUsd !== null && price.usd > capUsd) {
     const local = `${product.price} ${product.currency}`;
     const usd = product.currency === 'USD' ? '' : `（约 ${price.usd.toFixed(2)} USD）`;
     const usdEn = product.currency === 'USD' ? '' : ` (about ${price.usd.toFixed(2)} USD)`;
-    const over = range.max !== null && price.usd > range.max;
     out.push({
-      code: over ? 'over_budget' : 'below_budget',
+      code: 'over_budget',
       unverified: false,
-      text: over
-        ? {
-          zh: `价格 ${local}${usd}，超出你选的预算上限（约 ${range.max!.toFixed(2)} USD）`,
-          en: `Price ${local}${usdEn} is over your budget limit (about ${range.max!.toFixed(2)} USD)`,
-        }
-        : {
-          zh: `价格 ${local}${usd}，低于你选的价格区间（约 ${range.min!.toFixed(2)} USD 以上）`,
-          en: `Price ${local}${usdEn} is below your price range (over about ${range.min!.toFixed(2)} USD)`,
-        },
+      text: {
+        zh: `价格 ${local}${usd}，超出你选的预算上限（约 ${capUsd.toFixed(2)} USD）`,
+        en: `Price ${local}${usdEn} is over your budget limit (about ${capUsd.toFixed(2)} USD)`,
+      },
     });
   }
 
@@ -764,8 +758,8 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   const unverifiedIngredients = items.filter((r) => !r.nameUnverified && r.ingredient && !isVerified(r)).map((r) => r.raw);
 
   const caps = data.budgetCaps[product.category];
-  const range = rangeFor(profile.budget, caps, profile.customBudgetUsd ?? null);
-  const exclusions = hardFilters(product, items, profile, index, price, range);
+  const capUsd = capFor(profile.budget, caps, profile.customBudgetUsd ?? null);
+  const exclusions = hardFilters(product, items, profile, index, price, capUsd);
   const conflicts = checkConflicts(items, profile, index);
   for (const c of conflicts.filter((c) => c.severity === 'severe')) {
     exclusions.push({ code: 'severe_conflict', unverified: c.unverified, text: c.text });
@@ -811,9 +805,9 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       text: { zh: '测试数据，尚未核对：打分用到了未经人工核对的成分数据', en: 'Test data, not yet verified: scoring used ingredient data that has not been reviewed' },
     });
   }
-  const budgetLimited = profile.budget === 'custom' ? range !== null : profile.budget !== 'none';
+  const budgetLimited = profile.budget === 'custom' ? capUsd !== null : profile.budget !== 'none';
   if (budgetLimited && price.status !== 'ok') {
-    // 价格未知或无法换算的产品不参与预算价格区间计算，也只在"不限"档出现
+    // 价格未知或无法换算的产品不参与预算价格上限计算，也只在"不限"档出现
     const why = price.status === 'no_price'
       ? { zh: '价格未知', en: 'Price unknown' }
       : { zh: `汇率表中没有 ${product.currency}`, en: `No exchange rate for ${product.currency}` };
@@ -826,7 +820,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     notices.push({
       code: 'budget_unchecked',
       unverified: false,
-      text: { zh: '该品类有价格的产品太少，还没有预算价格区间，未做预算筛选', en: 'Too few priced products in this category to set budget ranges; budget not checked' },
+      text: { zh: '该品类有价格的产品太少，还没有预算价格上限，未做预算筛选', en: 'Too few priced products in this category to set budget limits; budget not checked' },
     });
   }
 

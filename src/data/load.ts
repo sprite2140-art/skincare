@@ -30,5 +30,5 @@ export const ingredientIndex = buildIngredientIndex(expandIngredients(ingredient
   chelators: parseIngredientList(chelatorsCsv),
   fragrances: parseIngredientList(fragrancesCsv),
 }));
-// 预算价格区间界线：每次构建时按当前产品库自动重新计算
+// 预算价格上限界线：每次构建时按当前产品库自动重新计算
 export const budgetCaps = computeBudgetCaps(products, exchangeRates);

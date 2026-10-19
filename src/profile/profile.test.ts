@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  EMPTY_HAIR, adviseCare, hairNeeds, hairTargets, isSensitiveScalp, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, scalpNeeds, scalpTargets, scopeCategories,
+  EMPTY_HAIR, adviseCare, goalAvailable, hairNeeds, hairTargets, isSensitiveScalp, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, scalpNeeds, scalpTargets, scopeCategories,
   migrateHair, migrateScalp, toScoringProfile, toneGoalAvailable,
   type Answers, type BaseAnswers, type HairAnswers, type ScalpAnswers,
 } from './questionnaire';
@@ -35,6 +35,15 @@ describe('头皮问卷映射', () => {
     expect(scalpTargets({ ...noScalp, concerns: ['itch'], itchScore: 9 })).toEqual(['scalp_itch']);
     expect(scalpTargets({ ...noScalp, discomfort: ['burning'], discomfortFrequency: 'often' })).toEqual([]);
     expect(scalpNeeds({ ...noScalp, concerns: ['dry_tight'] })).toEqual([{ id: 'dry_tight', label: { zh: '头皮干、紧绷', en: 'Dry, tight scalp' }, targets: ['dry_scalp'] }]);
+  });
+
+  it('新增"容易出油""头皮敏感、容易刺激"：选中即为控油、敏感头皮需求；选了头皮敏感时刺激扣分也加倍', () => {
+    expect(scalpTargets({ ...noScalp, concerns: ['oily', 'sensitive'] })).toEqual(['scalp_oil', 'sensitive_scalp']);
+    expect(scalpNeeds({ ...noScalp, concerns: ['oily'] })[0]).toMatchObject({ id: 'oily', label: { zh: '容易出油' } });
+    expect(isSensitiveScalp({ ...noScalp, concerns: ['sensitive'] })).toBe(true);
+    const p = toScoringProfile(answers({ scalp: { concerns: ['oily', 'sensitive'], oilTiming: 'same_day' } }), 'shampoo', ctx);
+    expect(p.needs!.map((n) => [n.id, n.weight])).toEqual([['oily', 2], ['sensitive', 2]]);
+    expect(p.sensitive).toBe(true);
   });
 
   it('瘙痒 4 分及以上（或没填分数）视为敏感头皮（只影响温和度，不是需求）', () => {
@@ -131,6 +140,22 @@ describe('头发问卷映射', () => {
     expect(hairTargets({ ...EMPTY_HAIR, goals: ['smooth', 'scent'] })).toEqual(['frizz', 'tangling']);
     expect(hairNeeds({ ...EMPTY_HAIR, goals: ['smooth', 'scent'] })).toEqual([{ id: 'smooth', label: { zh: '柔顺', en: 'Smooth' }, targets: ['frizz', 'tangling'] }]);
     expect(hairTargets({ ...EMPTY_HAIR, goals: ['volume', 'shine', 'curl', 'clean'] })).toEqual(['flat_hair', 'shine', 'curl_definition']);
+  });
+
+  it('"修护受损""护色"与去黄 / 去橙一样只在染或烫漂时可选；"去除造型产品残留"只在造型产品每周 3 次以上时可选', () => {
+    const colored = { ...EMPTY_HAIR, conditions: ['colored' as const], goals: ['repair' as const, 'color_care' as const] };
+    expect(hairNeeds(colored).map((n) => [n.id, n.targets])).toEqual([['repair', ['damage']], ['color_care', ['color_fade']]]);
+    expect(hairNeeds({ ...colored, conditions: ['dry'] })).toEqual([]);
+    expect(goalAvailable('repair', { conditions: ['permed_bleached'] }, null)).toBe(true);
+    const buildup = { ...EMPTY_HAIR, goals: ['buildup' as const] };
+    expect(hairNeeds(buildup, { styling: 'weekly_3_plus' })).toEqual([{ id: 'buildup', label: { zh: '去除造型产品残留', en: 'Remove styling product buildup' }, targets: ['buildup'] }]);
+    expect(hairNeeds(buildup, { styling: 'weekly_1_2' })).toEqual([]);
+    expect(hairNeeds(buildup, null)).toEqual([]);
+    // 只分配给洗发水；只买护发素时不问造型频率，也不可选
+    const a = answers({ base: { scope: 'shampoo' }, scalp: { styling: 'daily' }, hair: { goals: ['buildup'] } });
+    expect(toScoringProfile(a, 'shampoo', ctx).needs!.map((n) => [n.id, n.weight])).toEqual([['buildup', 1]]);
+    expect(toScoringProfile(a, 'conditioner', ctx).needs).toEqual([]);
+    expect(toScoringProfile({ ...a, base: { ...a.base, scope: 'conditioner' } }, 'conditioner', ctx).needs).toEqual([]);
   });
 
   it('旧档案的合并"去黄 / 去橙"迁移为两项，仍不超过 3 项', () => {
@@ -234,8 +259,8 @@ describe('本地档案存储', () => {
 
   it('旧档案（没有头发答案和新预算字段）读取时补齐默认值', () => {
     const s = memory();
-    // 旧的预算档（p33 / p67）已改为四分位价格区间，读取时去掉，需要重新选择
-    const old = { id: 'me', name: '我', base: { cityKey: null, budgets: { shampoo: 'p33', conditioner: 'custom' }, specialStatus: 'none', avoid: [], avoidIngredients: [] }, scalp: null, inUseProductIds: [], updatedAt: '' };
+    // 旧的预算档（p33 / p67）和前一版的区间（q4）已不对应现在的上限，读取时去掉，需要重新选择
+    const old = { id: 'me', name: '我', base: { cityKey: null, budgets: { shampoo: 'p33', conditioner: 'custom', scalp_care: 'q4' }, specialStatus: 'none', avoid: [], avoidIngredients: [] }, scalp: null, inUseProductIds: [], updatedAt: '' };
     s.data.set(STORAGE_KEY, JSON.stringify({ version: 1, activeId: 'me', profiles: [old] }));
     const p = activeProfile(loadStore(s))!;
     expect(p.base).toMatchObject({ budgets: { conditioner: 'custom' }, budgetMode: 'item', customBudgets: {}, setBudget: null, scope: null });
