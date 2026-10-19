@@ -1,10 +1,11 @@
 // 产品卡片（洗发水、护发素及以后的品类通用）。
 // 原则：卡片展示"用户需要知道什么"，不展示"系统是怎么判断的"；判断方法统一放在数据说明页（/data）。
 //
+// 详情以"用户的需求"为主线，每条信息只出现一次。
 // 收起：产品图、品牌、名称、价格与规格、评分（评价数最多的平台）、适合等级（没选需求时为温和度）、
-//       最多 2 个标签、最多 2 条推荐理由、"在 [平台] 购买" + "详情"。
-// 展开：为什么推荐给你 → 在哪买 → 关键成分 → 香味与温和度 → 怎么用 → 同系列 · 数据说明；
-//       评分明细收在最后一层折叠里。
+//       最多 2 个标签（奖项只在这里出现）、最多 2 条理由（与详情①的写法一致）、"在 [平台] 购买" + "详情"。
+// 展开：① 结论 + 需求统计 → ② 需求对照 → ③ 需要注意 → ④ 在哪买 → ⑤ 成分 → ⑥ 怎么用 → ⑦ 评分明细（折叠）
+//       → 同系列 · 数据说明。
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -12,18 +13,15 @@ import { ingredientIndex, products } from '../data/load';
 import { COSING_RETRIEVED_ON, COSING_SOURCE } from '../data/cosing';
 import { translateCosingFunctions } from '../data/cosingFunctions';
 import { ratingCountText } from '../data/retail';
-import type { Product, Region } from '../data/types';
+import type { Ingredient, Product, Region } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { formatMoney } from '../scoring/budget';
-import { hasAntiDandruffActive, irritantKinds, keyIngredients, primaryStore, storeRows, topRating, type StoreRow } from '../scoring/cardData';
-import type { DimensionKey } from '../scoring/config';
-import { joinNames } from '../scoring/labels';
+import {
+  cautionItems, hasAntiDandruffActive, keyIngredients, needRows, needSummary, primaryStore, scoreBreakdown, storeRows, topRating, type StoreRow,
+} from '../scoring/cardData';
 import { inMarket } from '../scoring/market';
-import { detailReasons, recommendReasons } from '../scoring/reasons';
-import { ingredientStatuses, type Dimension, type IngredientStatus, type ProductScore, type ScoringProfile } from '../scoring/score';
-import { MIN_RATING_COUNT } from '../data/retail';
-
-const DIMENSIONS: DimensionKey[] = ['need', 'irritation', 'evidence', 'environment'];
+import { recommendReasons, type Reason } from '../scoring/reasons';
+import { ingredientStatuses, type IngredientStatus, type ProductScore, type ScoringProfile } from '../scoring/score';
 /** 卡片上最多显示的标签数 */
 const MAX_CARD_TAGS = 2;
 
@@ -31,7 +29,25 @@ export function productName(p: Product, lang: string) {
   return lang === 'zh' ? p.nameZh || p.nameEn : p.nameEn || p.nameZh;
 }
 
-/** 成分标签：中文界面显示中文名，英文 INCI 名在点开后的解释里；英文界面反之。所有成分同一样式 */
+/**
+ * 成分名：中文界面显示中文名；没有中文名的显示 INCI 名，并用统一的"无中文名"样式（斜体）标出。
+ * 英文界面都显示 INCI 名。
+ */
+function IngNames({ list }: { list: Ingredient[] }) {
+  const { lang } = useI18n();
+  return (
+    <>
+      {list.map((ing, i) => (
+        <span key={ing.inciName}>
+          {i > 0 && (lang === 'zh' ? '、' : ', ')}
+          {lang === 'zh' && !ing.nameZh ? <span className="no-zh">{ing.inciName}</span> : lang === 'zh' ? ing.nameZh : ing.inciName}
+        </span>
+      ))}
+    </>
+  );
+}
+
+/** 成分标签：中文界面显示中文名，英文 INCI 名在点开后的解释里；英文界面反之。没有中文名的成分用"无中文名"样式 */
 function IngredientChip({ name, status }: { name: string; status: IngredientStatus }) {
   const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
@@ -52,7 +68,7 @@ function IngredientChip({ name, status }: { name: string; status: IngredientStat
   const fns = ing?.cosingFunctions?.length ? translateCosingFunctions(ing.cosingFunctions, lang) : [];
   return (
     <span className="ing">
-      <button type="button" className="ing-chip" aria-expanded={open} onClick={() => setOpen(!open)}>{display}</button>
+      <button type="button" className={lang === 'zh' && !ing?.nameZh ? 'ing-chip no-zh' : 'ing-chip'} aria-expanded={open} onClick={() => setOpen(!open)}>{display}</button>
       {open && (
         <span ref={popRef} className="ing-pop" role="dialog" aria-label={display}>
           <strong>{display}</strong>
@@ -153,21 +169,6 @@ function storeName(row: Pick<StoreRow, 'platform' | 'host'>, t: (k: Key) => stri
   return row.platform === 'other' ? row.host : t(`platform.${row.platform}` as Key);
 }
 
-/** 评分明细里的一个维度（不显示"不计分""不适用""数据缺失"的维度） */
-function DimensionRow({ k, d }: { k: DimensionKey; d: Dimension }) {
-  const { t, tx } = useI18n();
-  const levelKey = k === 'irritation' || k === 'evidence' ? `${k}.${d.level}` : `level.${d.level}`;
-  return (
-    <li className="dim">
-      <div className="dim-row">
-        <span className="dim-name">{t(`dim.${k}` as Key)}</span>
-        <span className={`dim-level ${d.level}`}>{t(levelKey as Key)}</span>
-      </div>
-      <p className="dim-reason">{tx(d.reason)}</p>
-    </li>
-  );
-}
-
 export default function ProductCard({ r, market, profile, scentGoal, compact }: {
   r: ProductScore; market: Region; profile: ScoringProfile; scentGoal: boolean; compact?: boolean;
 }) {
@@ -225,7 +226,7 @@ export default function ProductCard({ r, market, profile, scentGoal, compact }: 
           <ul>{r.exclusions.map((x, i) => <li key={i}>{tx(x.text)}</li>)}</ul>
         </div>
       )}
-      {reasons.length > 0 && <ul className="reasons">{reasons.map((x, i) => <li key={i}>{tx(x)}</li>)}</ul>}
+      {reasons.length > 0 && <ul className="list reasons">{reasons.map((x, i) => <li key={i}>{tx(x)}</li>)}</ul>}
       {r.conflicts.length > 0 && (
         <div className="flags">
           <span className="label">{t('results.conflicts')}</span>
@@ -244,54 +245,94 @@ export default function ProductCard({ r, market, profile, scentGoal, compact }: 
         </button>
       </div>
 
-      {open && <CardDetails r={r} profile={profile} scentGoal={scentGoal} rows={rows} />}
+      {open && <CardDetails r={r} profile={profile} reasons={reasons} rows={rows} />}
     </article>
   );
 }
 
-function CardDetails({ r, profile, scentGoal, rows }: { r: ProductScore; profile: ScoringProfile; scentGoal: boolean; rows: StoreRow[] }) {
+function CardDetails({ r, profile, reasons, rows }: { r: ProductScore; profile: ScoringProfile; reasons: Reason[]; rows: StoreRow[] }) {
   const { t, tx, lang } = useI18n();
   const p = r.product;
   const f = r.fragrance;
-  const why = detailReasons(r, profile, scentGoal);
+  const needs = needRows(r);
+  const sum = needSummary(needs);
+  const cautions = cautionItems(r, profile);
   const keys = keyIngredients(p, ingredientIndex, profile.concerns);
   const all = ingredientStatuses(p, ingredientIndex);
   const checked = [...new Set(p.ratings.map((x) => x.checkedOn).filter(Boolean))].sort().at(-1);
-  const kinds = irritantKinds(p, ingredientIndex, profile.washFrequency === 'daily' && !profile.frequentStyling);
-  const scored = DIMENSIONS.filter((k) => r.dimensions[k].score !== null);
-  const notices = r.notices.filter((n) => n.code !== 'test_data' && n.code !== 'key_actives_missing');
+  const notices = r.notices.filter((n) => n.code === 'pregnancy_notice' || n.code === 'rx_notice');
+  const missing = r.notices.find((n) => n.code === 'missing_data');
   const bc = p.brandClaims;
   const quote = bc.status === 'brand_page_quote' || lang !== 'zh' ? bc.quote || bc.text : bc.text;
+  const showQuote = !!quote && needs.some((x) => x.basis === 'brand_claim');
   const paired = p.pairedProductIds.map((id) => products.find((x) => x.productId === id)).filter((x): x is Product => !!x);
-  const ingName = (raw: string) => {
-    const ing = ingredientIndex.get(raw);
-    return lang === 'zh' && ing?.nameZh ? ing.nameZh : raw;
-  };
+  const bd = scoreBreakdown(r);
+  const sep = lang === 'zh' ? '；' : '; ';
+  const head = r.noNeeds
+    ? r.dimensions.irritation.level && `${t('results.gentle')}${lang === 'zh' ? '' : ' '}${t(`gentle.${r.dimensions.irritation.level}` as Key)}`
+    : r.fitLevel && t(`fit.${r.fitLevel}` as Key);
+  const pct = (x: number) => `${Math.round(x * 100)}%`;
 
   return (
     <div className="card-details">
-      {/* 1. 为什么推荐给你 */}
+      {/* ① 结论 + 需求统计 */}
       <section>
-        <h4 className="sec-title">{t('card.why')}</h4>
-        <ul className="why">
-          {why.map((x, i) => (
-            <li key={i}>
-              <span>{tx(x)}</span>
-              {x.basis && <span className="basis-tag">{t(`basisTag.${x.basis}` as Key)}</span>}
-            </li>
-          ))}
-          {!r.excluded && p.awards.map((a, i) => (
-            <li key={`a${i}`}>
-              <span>
-                {a.url ? <a href={a.url} target="_blank" rel="noreferrer">{a.source} {a.year}</a> : `${a.source} ${a.year}`}：{a.title}
-              </span>
-              <span className="basis-tag">{t('basisTag.award')}</span>
-            </li>
-          ))}
-        </ul>
+        {!r.excluded && head && reasons.length > 0 && (
+          <p className="lead">{head}{lang === 'zh' ? '：' : ': '}{reasons.map((x) => tx(x)).join(sep)}{lang === 'zh' ? '。' : '.'}</p>
+        )}
+        {sum.total > 0 && <p>{t('card.needCount', { n: sum.total, met: sum.met, partial: sum.partial, none: sum.none })}</p>}
       </section>
 
-      {/* 2. 在哪买 */}
+      {/* ② 需求对照：每个已选需求一行 */}
+      {needs.length > 0 && (
+        <section>
+          <h4 className="sec-title">{t('card.needTable')}</h4>
+          <ul className="list need-rows">
+            {needs.map((x) => (
+              <li key={x.id} className="need-row">
+                <span className="need-name">{tx(x.label)}</span>
+                <span className={`need-result ${x.result}`}>{t(`card.result.${x.result}` as Key)}</span>
+                <span className="need-basis">
+                  {x.evidence ? tx(x.evidence) : '—'}
+                  {x.basis && <span className="basis-tag">{t(`basisTag.${x.basis}` as Key)}</span>}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {showQuote && (
+            <p className="note">
+              {t('basis.brandClaim')}：“{quote.split('\n').map((x) => x.trim()).filter(Boolean).join(' / ')}”
+              {bc.sourceUrl && <> · <a href={bc.sourceUrl} target="_blank" rel="noreferrer">{t('results.source')}</a></>}
+            </p>
+          )}
+        </section>
+      )}
+
+      {/* ③ 需要注意：风险成分只在这里列一次，说明与温和度的扣分一致 */}
+      <section>
+        <h4 className="sec-title">{t('card.cautions')}</h4>
+        <ul className="list">
+          {r.dimensions.irritation.level && (
+            <li>
+              {t('results.gentle')}：{t(`gentle.${r.dimensions.irritation.level}` as Key)}
+              {cautions.length === 0 && <>{' · '}{f.unknownCount > 0 ? t('card.noIrritantsUnknown', { n: f.unknownCount }) : t('card.noIrritants')}</>}
+            </li>
+          )}
+          {f.status !== 'contains' && (
+            <li>{f.status === 'labeled_free' ? t('card.scent.labeled_free') : f.unknownCount > 0 ? t('card.scent.none_found_unknown', { n: f.unknownCount }) : t('card.scent.none_found')}</li>
+          )}
+          {cautions.map((c, i) => (
+            <li key={i}>
+              {tx(c.label)} · <IngNames list={c.ingredients} />
+              <div className="note">{tx(c.note)}</div>
+            </li>
+          ))}
+          {notices.map((n, i) => <li key={`n${i}`}>{firstSentence(tx(n.text))}</li>)}
+        </ul>
+        {missing && <p className="note">{tx(missing.text)}</p>}
+      </section>
+
+      {/* ④ 在哪买：评分和评价数只在这里出现；没有评分的平台只显示平台名 */}
       {rows.length > 0 && (
         <section>
           <h4 className="sec-title">{t('card.where')}</h4>
@@ -301,9 +342,7 @@ function CardDetails({ r, profile, scentGoal, rows }: { r: ProductScore; profile
                 <a className="store-row" href={row.url} target="_blank" rel="noreferrer nofollow">
                   <span className="store-name">{storeName(row, t)}</span>
                   <span className="store-rating">
-                    {row.rating
-                      ? <>★ {row.rating.rating.toFixed(1)} · {t('results.ratingCount', { n: ratingCountText(row.rating) })}</>
-                      : row.lowCount ? t('card.lowRating', { n: MIN_RATING_COUNT }) : t('card.noRating')}
+                    {row.rating && <>★ {row.rating.rating.toFixed(1)} · {t('results.ratingCount', { n: ratingCountText(row.rating) })}</>}
                   </span>
                   <ExternalIcon />
                 </a>
@@ -313,7 +352,7 @@ function CardDetails({ r, profile, scentGoal, rows }: { r: ProductScore; profile
           {p.brandClaims.status === 'version_mismatch' && p.purchaseLinks.some((l) => l.platform === 'brand') && (
             <p className="note">{t('card.brandMismatch')}</p>
           )}
-          {checked && (
+          {checked && rows.some((x) => x.rating) && (
             <p className="note">
               <Link to="/data#ratings">{t('card.ratingFoot', { d: checked })}</Link>
             </p>
@@ -321,80 +360,67 @@ function CardDetails({ r, profile, scentGoal, rows }: { r: ProductScore; profile
         </section>
       )}
 
-      {/* 3. 关键成分 */}
+      {/* ⑤ 成分：关键成分 → 全部成分（折叠）→ 包装原文 */}
       <section>
-        <h4 className="sec-title">{t('card.keyIngs')}</h4>
+        <h4 className="sec-title">{t('card.ingredients')}</h4>
         {keys.length > 0 ? (
-          <ul className="keyings">
-            {keys.map((k) => <li key={k.ingredient.inciName}><span className="muted">{tx(k.role)}</span> · {ingName(k.raw)}</li>)}
+          <ul className="list">
+            {keys.map((k) => <li key={k.ingredient.inciName}><span className="muted">{tx(k.role)}</span> · <IngNames list={[k.ingredient]} /></li>)}
           </ul>
         ) : <p className="note">{t('card.noKeyIngs')}</p>}
         <details className="sub">
           <summary>{t('card.allIngs', { n: all.length })}</summary>
+          {lang === 'zh' && <p className="note">{t('card.noZhLegend')}</p>}
           <div className="ings">
-            {all.map((s, i) => <IngredientChip key={`${s.name}-${i}`} name={s.name} status={s.status} />)}
+            {all.map((x, i) => <IngredientChip key={`${x.name}-${i}`} name={x.name} status={x.status} />)}
           </div>
           {p.inciListOriginal && <p className="note">{t('results.original')}：{p.inciListOriginal}</p>}
         </details>
       </section>
 
-      {/* 4. 香味与温和度 */}
-      <section>
-        <h4 className="sec-title">{t('card.scentGentle')}</h4>
-        <dl className="kv">
-          <div>
-            <dt>{t('card.scent')}</dt>
-            <dd>
-              {f.status === 'labeled_free' && t('card.scent.labeled_free')}
-              {f.status === 'none_found' && (f.unknownCount > 0 ? t('card.scent.none_found_unknown', { n: f.unknownCount }) : t('card.scent.none_found'))}
-              {f.status === 'contains' && [
-                f.fragrance.length > 0 && t('card.scent.contains', { list: f.fragrance.map(ingName).slice(0, 3).join(lang === 'zh' ? '、' : ', ') }),
-                f.essentialOils.length > 0 && t('card.scent.oils', { list: f.essentialOils.map(ingName).slice(0, 3).join(lang === 'zh' ? '、' : ', ') }),
-              ].filter(Boolean).join(lang === 'zh' ? '；' : '; ')}
-            </dd>
-          </div>
-          {r.dimensions.irritation.level && (
-            <div>
-              <dt>{t('results.gentle')}</dt>
-              <dd>
-                {t(`gentle.${r.dimensions.irritation.level}` as Key)}
-                {' · '}
-                {kinds.length > 0
-                  ? t('card.contains', { list: tx(joinNames(kinds)) })
-                  : f.unknownCount > 0 ? t('card.noIrritantsUnknown', { n: f.unknownCount }) : t('card.noIrritants')}
-              </dd>
-            </div>
-          )}
-          {notices.map((n, i) => (
-            // 只显示提示的第一句，成分解释在成分弹窗里
-            <div key={i}><dt>{t('card.notice')}</dt><dd>{firstSentence(tx(n.text))}</dd></div>
-          ))}
-        </dl>
-      </section>
-
-      {/* 5. 怎么用：只有含去屑有效成分的产品才显示去屑说明 */}
+      {/* ⑥ 怎么用：只有含去屑有效成分的洗发水才显示去屑说明 */}
       <section>
         <h4 className="sec-title">{t('card.usage')}</h4>
         <p>{t((p.subtype ? `usage.${p.subtype}` : `usage.${p.category}`) as Key)}</p>
         {p.category === 'shampoo' && !p.subtype && hasAntiDandruffActive(p, ingredientIndex) && <p>{t('usage.antiDandruff')}</p>}
       </section>
 
-      {/* 评分明细：最后一层折叠，只列计分的维度 */}
+      {/* ⑦ 评分明细（折叠）：得分、实际权重、贡献；不计分的维度灰显并写原因 */}
       {r.score !== null && (
         <details className="sub">
           <summary>{t('card.scoreDetail')}</summary>
-          {!r.noNeeds && <p className="note">{t('results.scoreLine', { n: r.score })}</p>}
-          <ul className="dims">{scored.map((k) => <DimensionRow key={k} k={k} d={r.dimensions[k]} />)}</ul>
-          {quote && (
-            <p className="note">
-              {t('basis.brandClaim')}：“{quote.split('\n').map((x) => x.trim()).filter(Boolean).join(' / ')}”
-              {bc.sourceUrl && <> · <a href={bc.sourceUrl} target="_blank" rel="noreferrer">{t('results.source')}</a></>}
-            </p>
-          )}
+          <table className="bd">
+            <thead>
+              <tr><th>{t('card.bd.dim')}</th><th>{t('card.bd.score')}</th><th>{t('card.bd.weight')}</th><th>{t('card.bd.contrib')}</th></tr>
+            </thead>
+            <tbody>
+              {bd.rows.map((x) => x.score !== null ? (
+                <tr key={x.key}>
+                  <td>{t(`dim.${x.key}` as Key)}</td>
+                  <td>{Math.round(x.score)}</td>
+                  <td>{pct(x.weight!)}</td>
+                  <td>{x.contribution!.toFixed(1)}</td>
+                </tr>
+              ) : (
+                <tr key={x.key} className="off">
+                  <td>{t(`dim.${x.key}` as Key)}</td>
+                  <td colSpan={3}>{tx(x.dimension.reason)}</td>
+                </tr>
+              ))}
+              {!r.noNeeds && (
+                <tr className="bd-total"><td>{t('card.bd.total')}</td><td colSpan={2} /><td>{bd.total}</td></tr>
+              )}
+            </tbody>
+          </table>
+          {!r.noNeeds && r.evidenceCapped && bd.sum !== null && <p className="note">{t('card.bd.capped', { sum: bd.sum.toFixed(1), total: bd.total ?? '' })}</p>}
+          {bd.rows.filter((x) => x.score !== null && (x.key === 'evidence' || x.key === 'environment')).map((x) => (
+            <p key={x.key} className="note">{t(`dim.${x.key}` as Key)}：{tx(x.dimension.reason)}</p>
+          ))}
+          <p className="note">{r.noNeeds ? t('card.bd.noNeeds') : t('card.bd.fitMap')}</p>
         </details>
       )}
 
-      {/* 6. 底部：同系列 · 数据说明 */}
+      {/* 底部：同系列 · 数据说明 */}
       <p className="card-foot">
         {paired.length > 0 && (
           <>

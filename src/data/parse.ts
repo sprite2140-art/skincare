@@ -4,7 +4,7 @@ import Papa from 'papaparse';
 import { cleanInciName } from './ingredientIndex';
 import { RETAIL_PLATFORMS } from './types';
 import type {
-  PurchaseLink, RetailPlatform, RetailRating, Award, BrandClaimStatus, ProductSubtype, City, WaterRecord, ReferenceWater, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
+  InclusionBasisType, PurchaseLink, RetailPlatform, RetailRating, Award, BrandClaimStatus, ProductSubtype, City, WaterRecord, ReferenceWater, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
   UsageType, WaterHardness, Zone,
 } from './types';
@@ -113,6 +113,7 @@ export function parseProducts(text: string): Product[] {
     formulaNote: r.formula_note ?? '',
     channels: splitList(r.channels),
     inclusionBasis: r.inclusion_basis ?? '',
+    inclusionBasisType: (r.inclusion_basis_type || null) as InclusionBasisType | null,
     awards: parseAwards(r.awards),
     claimedBenefits: splitList(r.claimed_benefits) as Target[],
     claimSource: (r.claim_source || null) as ClaimSource | null,

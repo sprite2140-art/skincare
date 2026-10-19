@@ -41,7 +41,7 @@ npm install
 npm run dev                  # local preview
 npm test                     # tests
 npm run validate-data        # check the CSV files in data/
-npm run coverage             # regenerate docs/COVERAGE.md (needs × budget tiers); run after every data update
+npm run coverage             # regenerate docs/COVERAGE.md (needs × price ranges); run after every data update
 npm run ingredient-review    # regenerate docs/INGREDIENT_REVIEW.md (ingredients that affect scoring)
 npm run ingredient-frequency # ingredient frequency across products
 npm run import-cosing -- <file>  # build data/cosing_ingredients.csv from a CosIng export

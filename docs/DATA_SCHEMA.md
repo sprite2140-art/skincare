@@ -54,6 +54,7 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |
 | inclusion_basis | 入库依据（榜单/奖项），原文 | |
+| inclusion_basis_type | 入库依据类型：retailer_bestseller（零售商畅销榜 / 按畅销排序，如 Ulta、Sephora、Walgreens）/ department_store_bestseller（百货 / 买手渠道畅销榜：Nordstrom、Neiman Marcus、Saks Fifth Avenue、Bergdorf Goodman、Bluemercury）/ beauty_award（美容大奖，如 Allure Best of Beauty、Cosmopolitan、NewBeauty）。可留空（依据待核验时）。**只决定产品能否入库，不参与打分。** 2026-10-19 按 inclusion_basis 原文回填：80 款 retailer_bestseller、18 款 beauty_award、9 款留空 | retailer_bestseller |
 | awards | 榜单与奖项，结果页显示为标签。每项格式 `来源\|年份\|名称\|链接`，多项用分号分隔；来源和 4 位年份必填 | Allure Best of Beauty\|2025\|敏感肌洗护组合获奖\|https://… |
 | claimed_benefits | 产品定位针对的困扰或效果，取 targets 的值，分号分隔。不从成分推断 | dandruff;sensitive_scalp |
 | claim_source | claimed_benefits 的来源：brand_text（产品页的品牌原文）/ data_classification（资料整理时的分类）。页面分别显示"品牌宣称"和"资料分类"，都按产品定位 0.7 计分。本轮 47 款美国产品来自资料中的"需求"字段，是整理时的分类，全部填 data_classification；"日常清洁"对应 clarifying，"去黄 / 去橙"拆为 tone_yellow / tone_orange。2026-10-17 第 1 批扩充（20 款）的资料里 claim_source 写的是 brand_text，但资料说明写明 claimed_benefits 是项目的需求映射、不是品牌原话，导入时改为 data_classification；紫色洗发水（SH-US-057）的 tone_correction 记为 tone_yellow | data_classification |
@@ -113,17 +114,18 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 
 卸妆和去角质的填法：卸妆油、卸妆膏、磨砂膏、含酸洁面填 rinse_off；卸妆水、酸类爽肤水和精华填 leave_on。
 
-### 预算档位（自动计算，不用手填）
+### 预算价格区间（自动计算，不用手填）
 
-预算题按品类分别提供三个选项，界线由产品库价格自动算出：
+预算题按品类分别提供四个价格区间和"不限"，界线由产品库价格自动算出：
 
 1. 取该品类所有有价格的产品，用 exchange_rates.csv 把价格统一换算成 USD。
-2. 第一档上限 = 这些价格的 33% 分位数，第二档上限 = 67% 分位数，第三档 = 不限。分位数用线性插值（与 Excel 的 PERCENTILE.INC 相同）。
-3. 有价格的产品少于 3 个的品类，暂不提供预算档位，只有"不限"。
-4. 问卷选项显示算出的具体上限，并换算成用户所在地货币，例如"≤ ¥80 / ≤ ¥200 / 不限"（约数取整：1000 以上取整到百位，其余取整到个位）；筛选时用 USD 精确值比较，等于上限的产品保留。
-5. 没有价格（或币种不在汇率表）的产品不参与分位数计算；用户选了第一档或第二档时不显示它们，只在"不限"档出现。
-6. 问卷也可以自填上限（单品），或在洗护搭配时"按整套"自填总预算；金额按用户所在地货币保存，比较时换算成 USD。没有符合条件的商品时页面明确提示，不自动放宽条件。
-7. 每次产品数据或汇率更新后，界线在构建时自动重新计算；用户档案保存的是"第几档"，不是金额，所以不用重填。`npm run validate-data` 会打印当前各品类的界线。
+2. 界线为这些价格的 25% / 50% / 75% 分位数（四分位数），分成四个区间：≤ 25% 分位、25%–50%、50%–75%、75% 分位以上。每个区间不含下界、含上界。分位数用线性插值（与 Excel 的 PERCENTILE.INC 相同）。
+3. 有价格的产品少于 3 个的品类，暂不提供价格区间，只有"不限"。
+4. 问卷选项只显示算出的价格区间，换算成用户所在地货币，例如"≤ $11 / $11–20 / $20–30 / $30 以上 / 不限"（约数取整：1000 以上取整到百位，其余取整到个位）；筛选时用 USD 精确值比较。选项不起名字，问卷、结果页和代码注释里都不用带评价意味的价格词。
+5. 选了某个区间后，价格高于上界或低于（等于）下界的产品都排除，原因分别写"超出你选的预算上限"和"低于你选的价格区间"。
+6. 没有价格（或币种不在汇率表）的产品不参与分位数计算；选了任一区间时不显示它们，只在"不限"中出现。
+7. 问卷也可以自填上限（单品，只有上限），或在洗护搭配时"按整套"自填总预算；金额按用户所在地货币保存，比较时换算成 USD。没有符合条件的商品时页面明确提示，不自动放宽条件。
+8. 每次产品数据或汇率更新后，界线在构建时自动重新计算；用户档案保存的是"第几个区间"（q1–q4），不是金额，所以不用重填。旧档案保存的三档（p33 / p67）在读取时去掉，需要重新选择。`npm run validate-data` 会打印当前各品类的界线。
 
 ## cosing_ingredients.csv 与 eu_fragrance_allergens.csv（欧盟成分基础分类）
 
@@ -172,7 +174,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | 字段 | 含义 |
 |---|---|
 | product_id | 对应 products.csv |
-| platform | ulta / sephora / target / amazon（与 purchase_links 共用平台取值，还有 brand） |
+| platform | ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks / bergdorf_goodman / bluemercury（与 purchase_links 共用平台取值，还有 brand） |
 | rating | 星级 0–5，取页面可见值 |
 | rating_count | 精确评价数；页面只显示缩写（如 5.5K）时留空，不推算 |
 | rating_count_display | 页面显示的原文（如 1,346、5.5K、(6,395)） |
@@ -188,12 +190,12 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | 字段 | 含义 |
 |---|---|
 | product_id | 对应 products.csv |
-| platform | brand（品牌官网）/ ulta / sephora / target / amazon |
+| platform | brand（品牌官网）/ ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks（Saks Fifth Avenue）/ bergdorf_goodman / bluemercury |
 | url | 平台上的产品页（不用搜索结果页） |
 | status | in_stock / purchasable / listed / official_store_listed_pdp_blocked（品牌店目录已确认，详情页和库存未确认）等，空白不等于不销售 |
 | checked_on / note | 核对日期、说明（如 Target Plus 第三方卖家） |
 
-页面按固定顺序显示：品牌官网 → Ulta → Sephora → Target → Amazon（`RETAIL_PLATFORMS`）。主购买按钮用 products.csv 的 purchase_url，其余链接列为"其他购买渠道"。当前 20 款、63 条链接。
+页面详情"在哪买"按固定顺序每个平台一行：品牌官网 → Ulta → Sephora → Target → Amazon → Nordstrom → Neiman Marcus → Saks Fifth Avenue → Bergdorf Goodman → Bluemercury（`RETAIL_PLATFORMS`）→ 其他网站。平台由链接域名识别（`RETAIL_PLATFORM_DOMAINS`）。收起状态的主购买按钮默认指向评价数最多的平台，没有评分时用 products.csv 的 purchase_url。当前 20 款、63 条链接。
 
 ## exchange_rates.csv（固定汇率表）
 

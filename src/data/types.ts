@@ -156,6 +156,8 @@ export interface Product {
   formulaNote: string;
   channels: string[];
   inclusionBasis: string;
+  /** 入库依据的类型（只决定能否入库，不参与打分）；没有分类时为 null */
+  inclusionBasisType: InclusionBasisType | null;
   awards: Award[];
   /** 产品定位针对的困扰 / 效果 */
   claimedBenefits: Target[];
@@ -300,8 +302,36 @@ export interface City {
   reviewStatus: ReviewStatus;
 }
 
-/** 零售平台，也是购买链接的固定显示顺序：品牌官网 → Ulta → Sephora → Target → Amazon */
-export const RETAIL_PLATFORMS = ['brand', 'ulta', 'sephora', 'target', 'amazon'] as const;
+/**
+ * 入库依据类型（products.csv 的 inclusion_basis_type）。只决定产品能否入库，不参与打分：
+ * retailer_bestseller = 零售商畅销榜 / 按畅销排序（Ulta、Sephora、Walgreens 等）；
+ * department_store_bestseller = 百货 / 买手渠道畅销榜（Nordstrom、Neiman Marcus、Saks、Bergdorf Goodman、Bluemercury）；
+ * beauty_award = 美容大奖（Allure Best of Beauty、Cosmopolitan、NewBeauty 等）。
+ */
+export const INCLUSION_BASIS_TYPES = ['retailer_bestseller', 'department_store_bestseller', 'beauty_award'] as const;
+export type InclusionBasisType = (typeof INCLUSION_BASIS_TYPES)[number];
+
+/**
+ * 零售平台，也是购买链接的固定显示顺序：品牌官网 → Ulta → Sephora → Target → Amazon →
+ * 百货 / 买手渠道（Nordstrom → Neiman Marcus → Saks Fifth Avenue → Bergdorf Goodman → Bluemercury）；
+ * 其他网站排在最后
+ */
+export const RETAIL_PLATFORMS = [
+  'brand', 'ulta', 'sephora', 'target', 'amazon',
+  'nordstrom', 'neiman_marcus', 'saks', 'bergdorf_goodman', 'bluemercury',
+] as const;
+/** 各零售平台的网站域名（品牌官网除外），用于从链接判断平台 */
+export const RETAIL_PLATFORM_DOMAINS: Record<Exclude<RetailPlatform, 'brand'>, string> = {
+  ulta: 'ulta.com',
+  sephora: 'sephora.com',
+  target: 'target.com',
+  amazon: 'amazon.com',
+  nordstrom: 'nordstrom.com',
+  neiman_marcus: 'neimanmarcus.com',
+  saks: 'saksfifthavenue.com',
+  bergdorf_goodman: 'bergdorfgoodman.com',
+  bluemercury: 'bluemercury.com',
+};
 export type RetailPlatform = (typeof RETAIL_PLATFORMS)[number];
 
 /** 一条零售商评分（data/retail_ratings.csv）。只展示，不计入任何分数 */

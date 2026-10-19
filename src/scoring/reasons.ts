@@ -1,5 +1,6 @@
 // 推荐理由：每款产品最多两条，按固定规则从打分明细中挑选，不调用 AI。
-// 卡片上的理由用一句普通人能看懂的话；依据类型（成品测试 / 品牌宣称 / 资料分类 / 成分功能）放在详情里。
+// 卡片收起时列出这两条，详情第一行的结论用同样的写法；依据类型（成品测试 / 品牌宣称 / 资料分类 / 成分表）
+// 在详情的需求对照里用小标签标注。
 // 不推断实际柔顺程度或留香时长。
 
 import { TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
@@ -36,8 +37,8 @@ export type Reason = Text & { basis?: ReasonBasis };
 /** 一句普通人能看懂的话；依据类型只在详情中用小标签标注 */
 function needReason(m: NeedMatch, product: Product): Reason {
   const c = positioningLabel(m, product);
-  const t = TARGET_LABELS[m.target];
-  const a = ACTION[m.target] ?? t;
+  const t = m.label;
+  const a = ACTION[m.target] ?? TARGET_LABELS[m.target];
   if (m.bases.includes('tested')) {
     return { zh: `有产品测试支持改善${t.zh}`, en: `A product test supports it for ${t.en}`, basis: 'tested' };
   }
@@ -100,17 +101,3 @@ export function recommendReasons(r: ProductScore, profile: ScoringProfile, scent
   }
   return out.slice(0, 2);
 }
-
-/** 详情"为什么推荐给你"：所有有依据的需求，加香味或温和度一条 */
-export function detailReasons(r: ProductScore, profile: ScoringProfile, scentGoal: boolean): Reason[] {
-  if (r.excluded) return [];
-  const needs = [...r.needMatches]
-    .filter((m) => m.credit > 0)
-    .sort((a, b) => b.weight * b.credit - a.weight * a.credit || b.credit - a.credit)
-    .map((m) => needReason(m, r.product));
-  const extra = profile.fragrancePref === 'free_first' || r.fragrance.status !== 'contains' ? fragranceReason(r)
-    : r.dimensions.irritation.level === 'high' ? gentleReason(r) : null;
-  const out = extra ? [...needs, extra] : needs;
-  return out.length > 0 ? out : recommendReasons(r, profile, scentGoal);
-}
-

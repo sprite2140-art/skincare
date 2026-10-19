@@ -35,7 +35,7 @@ export const ENVIRONMENT_SCORES = {
 /** 高 / 中 / 低 的分界 */
 export const LEVEL_THRESHOLDS = { high: 70, medium: 40 } as const;
 
-/** 预算档位由产品价格的分位数自动计算，见 budget.ts */
+/** 预算价格区间由产品价格的分位数自动计算，见 budget.ts */
 
 /** 冲洗型产品（usage_type = rinse_off）刺激风险扣分乘以此系数 */
 export const RINSE_OFF_MULTIPLIER = 0.5;
@@ -61,12 +61,10 @@ export const BRAND_CLAIM_CREDIT = 0.7;
 export const TESTED_EVIDENCE_SCORE = 100;
 
 /**
- * 螯合剂（data/chelators.csv 清单上的成分）对应的需求：只对应"产品残留"（常用造型产品的用户），
- * 另在环境适配中用于硬水。不对应"清爽洁净"。CosIng 登记功能不参与判断。
+ * 螯合剂（data/chelators.csv 清单上的成分）对应的需求："产品残留"（问卷目前没有这个选项，
+ * 造型产品频率不再推导需求），另在环境适配中用于硬水。不对应"清爽洁净"。CosIng 登记功能不参与判断。
  */
 export const CHELATOR_TARGETS: string[] = ['buildup'];
-/** 常用造型产品（每周 3 次以上）的用户，洗发水增加"产品残留"需求，权重为此值 */
-export const BUILDUP_WEIGHT = 1;
 /**
  * 证据缺失（只有品牌宣称或资料分类）时，总分上限按"这些需求的证据按 C 级计"算出的总分：
  * 最多与 C 级证据的产品打平，不反超，也不额外扣分。

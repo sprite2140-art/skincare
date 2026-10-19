@@ -8,7 +8,6 @@ import { loadDataFromDisk } from '../src/data/node';
 import { computeBudgetCaps, type BudgetChoice } from '../src/scoring/budget';
 import { TEST_MODE_DRAFT_SCORING } from '../src/scoring/config';
 import { COVERAGE_BUDGETS, coverageCell, coverageGroups, shampoosWithPairedConditioner } from '../src/scoring/coverage';
-import { TARGET_LABELS } from '../src/scoring/labels';
 import type { ScoringData } from '../src/scoring/score';
 
 /** 少于此数的格子标红 */
@@ -17,7 +16,7 @@ const CATEGORIES = [
   { key: 'shampoo', zh: '洗发水' },
   { key: 'conditioner', zh: '护发素' },
 ] as const;
-const GROUP_LABELS = { scalp: '头皮困扰', hair: '发丝状态', goals: '期望效果' } as const;
+const GROUP_LABELS = { scalp: '头皮困扰', goals: '期望效果' } as const;
 
 const d = loadDataFromDisk();
 const budgetCaps = computeBudgetCaps(d.products, d.exchangeRates);
@@ -28,7 +27,10 @@ function budgetLabel(category: string, b: BudgetChoice) {
   const caps = budgetCaps[category];
   if (b === 'none') return '不限';
   if (!caps) return b;
-  return b === 'p33' ? `第一档（≤ ${usd(caps.p33)}）` : `第二档（≤ ${usd(caps.p67)}）`;
+  if (b === 'q1') return `≤ ${usd(caps.q1)}`;
+  if (b === 'q2') return `${usd(caps.q1)}–${usd(caps.q2)}`;
+  if (b === 'q3') return `${usd(caps.q2)}–${usd(caps.q3)}`;
+  return `${usd(caps.q3)} 以上`;
 }
 
 const out: string[] = [];
@@ -43,9 +45,9 @@ out.push(
   '',
   '## 口径',
   '',
-  '- **行**：问卷里的需求。头皮困扰只统计洗发水（护发素不针对头皮）；洗发水不统计"打结"，护发素不统计"清爽洁净"；头皮发红按"敏感头皮"匹配，不单独统计；"香味好闻"不对应需求，不统计。"产品残留"只有常用造型产品的用户才有。',
-  '- **列**：问卷的三个预算档位。档位界线按各品类产品价格的 33% / 67% 分位数自动计算；第二档包含第一档的产品，"不限"为全部。',
-  '- **可推荐**：美国市场的产品，用只含这一个需求、只选这一档预算的最简档案打分，没有被硬性过滤排除，且需求匹配分大于 0（至少有一项依据：成品测试、资料分类、品牌宣称或成分功能）。',
+  '- **行**：问卷里用户可以明确选择的需求（头皮困扰、期望效果），每个选项一行；发丝状态、出油时间、发红、造型产品频率等题目不推导需求，不统计。头皮困扰只统计洗发水（护发素不针对头皮）；护发素不统计"清爽洁净"；"香味好闻"不对应需求，不统计。一个选项对应多个效果时（如"柔顺"对应毛躁和打结），按其中依据最好的一个计。',
+  '- **列**：问卷的四个价格区间。界线按各品类产品价格的 25% / 50% / 75% 分位数自动计算，每个区间不含下界、含上界；"不限"为全部。',
+  '- **可推荐**：美国市场的产品，用只含这一个需求、只选这一个价格区间的最简档案打分，没有被硬性过滤排除，且需求匹配分大于 0（至少有一项依据：成品测试、资料分类、品牌宣称或成分功能）。',
   '- **无香**：有无香声明，或成分表中没有发现香精、香料致敏原、只登记香料功能的成分和精油。',
   `- 🔴 标出少于 ${MIN_PER_CELL} 款的格子。格子写法：可推荐数（其中无香数）。`,
   '',
@@ -57,14 +59,14 @@ for (const cat of CATEGORIES) {
   out.push(`|---|${COVERAGE_BUDGETS.map(() => '---:').join('|')}|`);
   for (const g of coverageGroups(cat.key)) {
     out.push(`| **${GROUP_LABELS[g.key]}** |${COVERAGE_BUDGETS.map(() => ' ').join('|')}|`);
-    for (const t of g.targets) {
+    for (const n of g.needs) {
       const cells = COVERAGE_BUDGETS.map((b) => {
-        const c = coverageCell(d.products, cat.key, t, b, data);
+        const c = coverageCell(d.products, cat.key, n, b, data);
         const low = c.count < MIN_PER_CELL;
-        if (low) gaps.push(`${cat.zh} · ${TARGET_LABELS[t].zh} · ${budgetLabel(cat.key, b)}：${c.count} 款`);
+        if (low) gaps.push(`${cat.zh} · ${n.label.zh} · ${budgetLabel(cat.key, b)}：${c.count} 款`);
         return `${low ? '🔴 ' : ''}${c.count}（${c.fragranceFree}）`;
       });
-      out.push(`| ${TARGET_LABELS[t].zh} | ${cells.join(' | ')} |`);
+      out.push(`| ${n.label.zh} | ${cells.join(' | ')} |`);
     }
   }
   out.push('');

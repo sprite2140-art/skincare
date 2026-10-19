@@ -80,7 +80,8 @@ describe('场景 2：头皮屑、瘙痒 7 分，无香优先', () => {
   it('建议就医，按敏感头皮处理（刺激扣分加倍）', () => {
     expect(scalpMedicalAlerts(a.scalp).map((x) => x.code)).toEqual(['itch_severe']);
     expect(profile.sensitive).toBe(true);
-    expect(profile.concerns).toEqual(['dandruff', 'scalp_itch', 'sensitive_scalp']);
+    // 瘙痒分数只用于判断敏感（刺激扣分加倍）和就医提示，不推导"敏感头皮"需求
+    expect(profile.concerns).toEqual(['dandruff', 'scalp_itch']);
   });
 
   it('推荐列表排序：适合等级 → 香味层级（无香优先）→ 综合分；需求匹配为 0 的放到"不太匹配"', () => {
@@ -140,18 +141,18 @@ describe('场景 2：头皮屑、瘙痒 7 分，无香优先', () => {
 describe('场景 3：染烫受损，选洗护搭配，自填总预算', () => {
   const a = answers({
     base: { scope: 'set', budgetMode: 'set', setBudget: { amount: 40, currency: 'USD' } },
-    hair: { conditions: ['colored', 'permed_bleached'] },
+    hair: { conditions: ['colored', 'permed_bleached'], goals: ['moisture', 'smooth'] },
   });
   const cap = moneyToUsd(a.base.setBudget, real.exchangeRates);
   const lists = { shampoo: recommend(a, 'shampoo').ranked, conditioner: recommend(a, 'conditioner').ranked };
 
-  it('洗发水 + 护发素都在总预算内；发丝状态只分配给护发素', () => {
+  it('洗发水 + 护发素都在总预算内；发丝效果只分配给护发素，发丝状态不推导需求', () => {
     const routine = buildRoutine(['shampoo', 'conditioner'], lists, cap);
     expect(routine.slots.map((s) => s.status)).toEqual(['ok', 'ok']);
     expect(routine.totalUsd!).toBeLessThanOrEqual(40);
     // 没有头皮需求：洗发水没有需求可匹配，按温和程度和价格
     expect(routine.slots[0].chosen!.noNeeds).toBe(true);
-    expect(routine.slots[1].chosen!.needMatches.map((m) => m.target)).toEqual(expect.arrayContaining(['color_fade', 'damage']));
+    expect(routine.slots[1].chosen!.needMatches.map((m) => m.id)).toEqual(['moisture', 'smooth']);
     expect(routine.slots[1].chosen!.product.category).toBe('conditioner');
   });
 
@@ -267,7 +268,7 @@ describe('产品定位的来源标注', () => {
     const onlyBrand = { ...co, claimedBenefits: [], keyActives: ['Nothing Matching'] };
     const r2 = scoreProduct(onlyBrand, prof, data);
     expect(r2.needMatches.find((x) => x.target === 'flat_hair')).toMatchObject({ credit: 0.7, bases: ['brand_claim'] });
-    expect(recommendReasons(r2, prof, false)[0].zh).toBe('品牌说明针对扁塌');
+    expect(recommendReasons(r2, prof, false)[0].zh).toBe('品牌说明针对蓬松'); // 用用户选的需求名（蓬松），不用内部的 target 名（扁塌）
   });
 });
 
@@ -289,15 +290,15 @@ describe('效果依据', () => {
   it('螯合剂（清单）只对应"产品残留"（常用造型产品的用户），非主打按 30%，不按数量加分；不对应"清爽洁净"', () => {
     const clean = toScoringProfile(answers({ hair: { goals: ['clean'] } }), 'shampoo', ctx);
     expect(scoreProduct(withClaims({ keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA'] }), clean, data).dimensions.need.score).toBe(0);
-    const styling = toScoringProfile(answers({ scalp: { styling: 'weekly_3_plus' } }), 'shampoo', ctx);
-    expect(styling.concerns).toEqual(['buildup']);
+    // 问卷不再由造型产品频率推导"产品残留"；这里直接用含该需求的档案验证匹配规则
+    expect(toScoringProfile(answers({ scalp: { styling: 'weekly_3_plus' } }), 'shampoo', ctx).concerns).toEqual([]);
+    const styling = { ...clean, concerns: ['buildup' as const], needs: undefined, targetWeights: {} };
     const one = scoreProduct(withClaims({ keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA'] }), styling, data);
     const two = scoreProduct(withClaims({ keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA', 'Sodium Phytate'] }), styling, data);
     expect(one.dimensions.need.score).toBe(30);
     expect(two.dimensions.need.score).toBe(30);
     // 柠檬酸在 CosIng 登记了螯合功能，但不在清单上，不算
     expect(scoreProduct(withClaims({ keyActives: ['Glycerin'], inciList: ['Water', 'Citric Acid'] }), styling, data).dimensions.need.score).toBe(0);
-    // 护发素不加"产品残留"
     expect(toScoringProfile(answers({ scalp: { styling: 'daily' } }), 'conditioner', ctx).concerns).toEqual([]);
   });
 });
@@ -342,7 +343,8 @@ describe('护发素数据', () => {
   it('护发素只按发丝状态和期望效果打分，不看头皮困扰', () => {
     const a = answers({ scalp: { concerns: ['dandruff'] }, hair: { conditions: ['tangling'], goals: ['smooth'] } });
     const r = recommend(a, 'conditioner');
-    expect(r.profile.concerns).toEqual(['tangling', 'frizz']);
+    expect(r.profile.concerns).toEqual(['frizz', 'tangling']);
+    expect(r.ok[0].needMatches.map((m) => m.id)).toEqual(['smooth']);
     expect(r.ok.length).toBeGreaterThan(0);
     expect(r.ok[0].needMatches.every((m) => m.target !== 'dandruff')).toBe(true);
   });
@@ -401,20 +403,24 @@ describe('美国洗护扩充第 1 批（2026-10-17）', () => {
 });
 
 describe('数据覆盖统计（npm run coverage）', () => {
-  it('格子只计美国市场、未被排除、需求匹配大于 0 的产品；第二档包含第一档', () => {
-    const low = coverageCell(real.products, 'shampoo', 'dandruff', 'p33', data);
-    const mid = coverageCell(real.products, 'shampoo', 'dandruff', 'p67', data);
-    expect(low.productIds.every((id) => mid.productIds.includes(id))).toBe(true);
-    expect(mid.productIds.every((id) => id.startsWith('SH-US'))).toBe(true);
-    expect(mid.fragranceFree).toBeLessThanOrEqual(mid.count);
-    // 护发素不统计头皮困扰
-    expect(coverageGroups('conditioner').map((g) => g.key)).toEqual(['hair', 'goals']);
-    // 洗发水不统计打结，护发素不统计清爽洁净，头皮发红不单独统计
-    const all = (c: string) => coverageGroups(c).flatMap((g) => g.targets);
-    expect(all('shampoo')).not.toContain('tangling');
-    expect(all('shampoo')).not.toContain('scalp_redness');
-    expect(all('conditioner')).not.toContain('clarifying');
-    expect(all('conditioner')).toContain('tangling');
+  it('格子只计美国市场、未被排除、需求匹配大于 0 的产品；四个价格区间互不重叠，合起来等于不限中有价格的产品', () => {
+    const dandruff = coverageGroups('shampoo')[0].needs.find((n) => n.id === 'dandruff')!;
+    const cells = (['q1', 'q2', 'q3', 'q4'] as const).map((b) => coverageCell(real.products, 'shampoo', dandruff, b, data));
+    const all = coverageCell(real.products, 'shampoo', dandruff, 'none', data);
+    const ids = cells.flatMap((c) => c.productIds);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids.every((id) => all.productIds.includes(id))).toBe(true);
+    expect(all.productIds.every((id) => id.startsWith('SH-US'))).toBe(true);
+    expect(all.fragranceFree).toBeLessThanOrEqual(all.count);
+  });
+
+  it('行是用户可以明确选择的需求：头皮困扰只统计洗发水，护发素不统计清爽洁净，发丝状态不推导需求', () => {
+    expect(coverageGroups('conditioner').map((g) => g.key)).toEqual(['goals']);
+    const ids = (c: string) => coverageGroups(c).flatMap((g) => g.needs.map((n) => n.id));
+    expect(ids('shampoo')).toEqual(['dandruff', 'itch', 'dry_tight', 'hair_loss', 'smooth', 'moisture', 'less_frizz', 'clean', 'volume', 'shine', 'curl', 'tone_yellow', 'tone_orange']);
+    expect(ids('conditioner')).not.toContain('clean');
+    // "柔顺"一行，对应毛躁和打结
+    expect(coverageGroups('shampoo')[1].needs.find((n) => n.id === 'smooth')!.targets).toEqual(['frizz', 'tangling']);
   });
 
   it('有同系列护发素的洗发水', () => {
@@ -447,7 +453,7 @@ describe('没有选需求时的兜底理由', () => {
 
 describe('证据缺失的说明', () => {
   it('只靠没有证据等级的成分匹配时，说明里不说成"只有品牌宣称或资料分类"', () => {
-    const clean = toScoringProfile(answers({ scalp: { styling: 'daily' } }), 'shampoo', ctx);
+    const clean = { ...toScoringProfile(answers({}), 'shampoo', ctx), concerns: ['buildup' as const], needs: undefined };
     const p = { ...real.products[1], productId: 'T-UNRATED', keyActives: ['Glycerin'], inciList: ['Water', 'Disodium EDTA'], inciNameUnverified: [], claimedBenefits: [], testedClaims: [] };
     const r = scoreProduct(p, clean, data);
     expect(r.dimensions.need.score).toBeGreaterThan(0);

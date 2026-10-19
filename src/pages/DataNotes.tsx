@@ -7,13 +7,13 @@ import { MIN_RATING_COUNT } from '../data/retail';
 import { TEST_MODE_DRAFT_SCORING } from '../scoring/config';
 
 const SECTIONS: { id: string; items: string[] }[] = [
-  { id: 'fit', items: ['1', '2', '3', '4'] },
+  { id: 'fit', items: ['1', '2', '3', '4', '5', '6'] },
   { id: 'basis', items: ['tested', 'ingredients', 'brand_claim', 'classification', 'award'] },
-  { id: 'ingredients', items: ['1', '2', '3'] },
+  { id: 'ingredients', items: ['1', '2', '3', '4'] },
   { id: 'fragrance', items: ['1', '2', '3'] },
-  { id: 'gentle', items: ['1', '2'] },
+  { id: 'gentle', items: ['1', '2', '3'] },
   { id: 'ratings', items: ['1', '2', '3', '4'] },
-  { id: 'products', items: ['1', '2', '3'] },
+  { id: 'products', items: ['1', '2', '3', '4', '5'] },
 ];
 
 export default function DataNotes() {

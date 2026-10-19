@@ -31,6 +31,6 @@ console.log(
 );
 const caps = computeBudgetCaps(products, exchangeRates);
 for (const [category, c] of Object.entries(caps)) {
-  if (c) console.log(`预算档位 ${category}：≤ ${c.p33.toFixed(2)} USD / ≤ ${c.p67.toFixed(2)} USD / 不限（${c.sampleSize} 个有价格的产品）`);
+  if (c) console.log(`价格区间 ${category}：≤ ${c.q1.toFixed(2)} / ${c.q1.toFixed(2)}–${c.q2.toFixed(2)} / ${c.q2.toFixed(2)}–${c.q3.toFixed(2)} / > ${c.q3.toFixed(2)} USD（${c.sampleSize} 个有价格的产品）`);
 }
 process.exit(errors.length > 0 ? 1 : 0);
