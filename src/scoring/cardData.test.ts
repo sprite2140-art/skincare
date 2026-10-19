@@ -94,7 +94,22 @@ describe('卡片：需求对照、需要注意、评分明细', () => {
       else expect(x.basis).not.toBeNull();
     }
     const sum = needSummary(rows);
-    expect(sum.met + sum.partial + sum.none).toBe(3);
+    expect(sum.met + sum.partial + sum.none + sum.conditioner).toBe(3);
+  });
+
+  it('洗发水的需求分两组：头皮与清洁、发丝效果；发丝效果没有依据时写"主要看护发素"，不计入无依据；护发素不分组', () => {
+    const profile = toScoringProfile(answers({ concerns: ['dandruff'] }, { goals: ['smooth', 'volume'] }), 'shampoo', ctx);
+    const rows = needRows(scoreProduct(byId('SH-US-001'), profile, data));
+    expect(rows.map((x) => [x.id, x.group])).toEqual([['dandruff', 'scalp'], ['smooth', 'hair'], ['volume', 'scalp']]);
+    const smooth = rows.find((x) => x.id === 'smooth')!;
+    if (smooth.result === 'none') {
+      expect(smooth.conditionerNote).toBe(true);
+      expect(needSummary(rows).conditioner).toBe(1);
+    }
+    expect(rows.find((x) => x.id === 'dandruff')!.conditionerNote).toBe(false);
+    const co = toScoringProfile({ ...answers({}, { goals: ['smooth'] }), base: { ...newProfile('我', 'me').base, scope: 'conditioner' as const } }, 'conditioner', ctx);
+    const coRows = needRows(scoreProduct(real.products.find((p) => p.category === 'conditioner')!, co, data));
+    expect(coRows.every((x) => x.group === null && !x.conditionerNote)).toBe(true);
   });
 
   it('需要注意：按温和度的扣分列出风险成分；冲洗型减半写明；强清洁力表活不扣分时说明原因', () => {
@@ -126,15 +141,15 @@ describe('卡片：需求对照、需要注意、评分明细', () => {
     expect(r.irritation.hits.filter((h) => h.unverified).every((h) => h.deduction === 0 && !h.counted)).toBe(true);
   });
 
-  it('评分明细：实际权重为重新归一化后的值，贡献合计等于总分（未封顶时）', () => {
+  it('评分明细：实际权重为重新归一化后的值，贡献合计等于总分', () => {
     const profile = toScoringProfile(answers({ concerns: ['dandruff'] }), 'shampoo', ctx);
     const r = scoreProduct(byId('SH-US-001'), profile, data);
     const bd = scoreBreakdown(r);
     const scored = bd.rows.filter((x) => x.score !== null);
     expect(scored.reduce((n, x) => n + x.weight!, 0)).toBeCloseTo(1, 10);
     expect(bd.rows.find((x) => x.key === 'environment')).toMatchObject({ score: null, weight: null, contribution: null });
-    if (!r.evidenceCapped) expect(Math.round(bd.sum!)).toBe(r.score);
-    else expect(r.score!).toBeLessThanOrEqual(Math.round(bd.sum!));
+    // 证据缺失按最低等级计分，不再封顶：贡献合计（四舍五入）等于总分
+    expect(Math.round(bd.sum!)).toBe(r.score);
   });
 });
 

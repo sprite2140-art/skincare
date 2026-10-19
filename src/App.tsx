@@ -7,6 +7,7 @@ import Results from './pages/Results';
 import ProfilePage from './pages/ProfilePage';
 import About from './pages/About';
 import DataNotes from './pages/DataNotes';
+import DesignQA from './pages/DesignQA';
 
 function Home() {
   const { t } = useI18n();
@@ -74,6 +75,8 @@ export default function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/about" element={<About />} />
         <Route path="/data" element={<DataNotes />} />
+        {/* 设计自查页，不在导航中 */}
+        <Route path="/qa" element={<DesignQA />} />
       </Routes>
       <footer className="footer">
         <Link to="/data">{t('footer.data')}</Link>

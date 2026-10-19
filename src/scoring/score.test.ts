@@ -79,8 +79,8 @@ describe('data/ 真实数据', () => {
     const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), strict);
     expect(r.dimensions.need.score).toBe(70);
     expect(r.dimensions.need.reason.zh).toBe('针对头皮屑：资料分类');
-    expect(r.dimensions.evidence.score).toBeNull(); // 只有资料分类：数据缺失，不计入
-    expect(r.dimensions.evidence.reason.zh).toContain('暂无成分或测试证据');
+    expect(r.dimensions.evidence.score).toBe(40); // 只有资料分类：暂无证据，按最低等级（C）计
+    expect(r.dimensions.evidence.reason.zh).toBe('头皮屑暂无证据，按最低等级（C 级，40 分）计');
     expect(r.unverifiedIngredients).toContain('Pyrithione Zinc');
     expect(r.unverifiedIngredients).not.toContain('Water'); // Aqua 是基础成分
     expect(r.usesDraftData).toBe(false);
@@ -136,7 +136,7 @@ describe('按市场筛选', () => {
   const shampoos = real.products.filter((p) => p.category === 'shampoo');
   const ids = (ps: Product[]) => ps.map((p) => p.productId);
   const cityIn = (country: string): City => ({
-    city: 'X', country, waterHardness: 'unknown', water: [], reviewStatus: 'draft',
+    city: 'X', cityZh: '', country, waterHardness: 'unknown', water: [], reviewStatus: 'draft',
   });
 
   it('默认市场取档案城市所在国家，只显示该市场的版本', () => {
@@ -219,7 +219,7 @@ const product = (id: string, inciList: string[], extra: Partial<Product> = {}): 
 });
 const leaveOnSample = product('LEAVE-ON', sample.inciList);
 const city = (waterHardness: City['waterHardness'], reviewStatus: City['reviewStatus'] = 'verified'): City => ({
-  city: 'Testville', country: 'US', waterHardness, water: [], reviewStatus,
+  city: 'Testville', cityZh: '测试城', country: 'US', waterHardness, water: [], reviewStatus,
 });
 
 describe('需求匹配', () => {
@@ -406,12 +406,15 @@ describe('证据强度', () => {
     // 头皮屑 A=100、头皮油 B=70，平均加权 = 85
     const r = scoreProduct(q, profile({ concerns: ['dandruff', 'scalp_oil'] }), data);
     expect(r.dimensions.evidence.score).toBe(85);
-    expect(r.dimensions.evidence.reason.zh).toBe('依据：吡罗克酮乙醇胺盐 A 级、Test Oil Control B 级');
+    expect(r.dimensions.evidence.reason.zh).toBe('吡罗克酮乙醇胺盐 A 级、Test Oil Control B 级');
   });
 
-  it('没有匹配成分时不计分', () => {
+  it('没有匹配成分时按最低等级（C）计，仍然计分；没有选需求时不计分', () => {
     const r = scoreProduct(sample, profile({ concerns: ['scalp_oil'] }), data);
-    expect(r.dimensions.evidence.score).toBeNull();
+    expect(r.dimensions.evidence.score).toBe(40);
+    expect(r.dimensions.evidence.state).toBeUndefined();
+    const none = scoreProduct(sample, profile({ concerns: [] }), data);
+    expect(none.dimensions.evidence).toMatchObject({ score: null, state: 'not_scored' });
   });
 });
 
@@ -422,6 +425,10 @@ describe('环境适配', () => {
     const fnOnly = product('P12b', ['Aqua', 'Test Function Chelator']);
     expect(scoreProduct(fnOnly, profile({ city: city('hard') }), data).dimensions.environment.score).toBe(50);
     expect(scoreProduct(sample, profile({ city: city('hard') }), data).dimensions.environment.score).toBe(50);
+    // 中文说明用中文城市名
+    const env = scoreProduct(sample, profile({ city: city('hard') }), data).dimensions.environment.reason;
+    expect(env.zh).toBe('测试城水偏硬，这款不含已核对的螯合剂');
+    expect(env.en).toContain('Testville');
   });
   it('未设城市、水硬度未知、城市数据未核对、软水：不计分并说明原因', () => {
     for (const c of [null, city('unknown'), city('hard', 'draft'), city('soft')]) {
@@ -652,28 +659,32 @@ describe('排序', () => {
   });
 });
 
-describe('证据缺失时总分封顶', () => {
+describe('证据缺失按最低等级计', () => {
   // 两款都只针对头皮痒：一款有 C 级成分，一款只有资料分类（需求匹配 0.7）
   const cLevel = product('CAP-C', ['Aqua', 'Test Itch Relief'], { keyActives: ['Test Itch Relief'] });
   const claimOnly = product('CAP-CLAIM', ['Aqua', 'Glycerin'], { claimedBenefits: ['scalp_itch'], claimSource: 'data_classification', keyActives: ['Glycerin'] });
   const prof = profile({ concerns: ['scalp_itch'] });
 
-  it('只有资料分类的产品最多与 C 级证据产品打平，不反超', () => {
+  it('只有资料分类的产品，证据强度按 C 级（40）计分，与 C 级证据产品相同，不反超', () => {
     const c = scoreProduct(cLevel, prof, data);
     const claim = scoreProduct(claimOnly, prof, data);
     expect(c.dimensions.evidence.score).toBe(40);
-    expect(claim.dimensions.evidence.score).toBeNull();
-    // 不封顶时：(70*0.5 + 100*0.25) / 0.75 = 80；封顶按证据 40：(70*0.5 + 100*0.25 + 40*0.15) / 0.9 = 73
+    expect(claim.dimensions.evidence.score).toBe(40);
+    // (70*0.5 + 100*0.25 + 40*0.15) / 0.9 = 73
     expect(claim.score).toBe(73);
-    expect(claim.evidenceCapped).toBe(true);
-    expect(claim.dimensions.evidence.reason.zh).toContain('总分上限按证据弱');
+    expect(claim.score).toBe(weightedTotal(claim.dimensions));
     expect(claim.score!).toBeLessThanOrEqual(c.score!);
   });
+});
 
-  it('封顶后的分数正好等于"证据按 C 级计"的结果，不额外扣分', () => {
-    const r = scoreProduct(claimOnly, prof, data);
-    const asC = weightedTotal({ ...r.dimensions, evidence: { ...r.dimensions.evidence, score: 40 } });
-    expect(r.score).toBe(asC);
+describe('适合等级上限', () => {
+  it('一项需求都没有满足（只有部分或无依据）时，适合等级最高为"一般"', () => {
+    const claimOnly = product('CAP-CLAIM', ['Aqua', 'Glycerin'], { claimedBenefits: ['scalp_itch'], claimSource: 'data_classification', keyActives: ['Glycerin'] });
+    const r = scoreProduct(claimOnly, profile({ concerns: ['scalp_itch'] }), data);
+    expect(r.score!).toBeGreaterThanOrEqual(70);
+    expect(r).toMatchObject({ fitLevel: 'low', fitCapped: true });
+    const met = scoreProduct(product('MET', ['Aqua', 'Test Itch Relief'], { keyActives: ['Test Itch Relief'] }), profile({ concerns: ['scalp_itch'] }), data);
+    expect(met.fitCapped).toBe(false);
   });
 });
 

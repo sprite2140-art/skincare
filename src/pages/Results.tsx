@@ -8,7 +8,7 @@ import type { Category } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import {
-  EMPTY_HAIR, adviseCare, cityKey, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, toScoringProfile, type Answers, type ScalpAnswers,
+  EMPTY_HAIR, adviseCare, cityKey, cityName, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, toScoringProfile, type Answers, type ScalpAnswers,
 } from '../profile/questionnaire';
 import { newProfile } from '../profile/storage';
 import { formatMoney } from '../scoring/budget';
@@ -31,7 +31,7 @@ function usdLabel(usd: number) {
 }
 
 export default function Results() {
-  const { t, tx } = useI18n();
+  const { t, tx, lang } = useI18n();
   const { profile } = useProfiles();
   const p = profile ?? newProfile('');
   const answers: Answers = { base: p.base, scalp: p.scalp ?? EMPTY_SCALP, hair: p.hair ?? EMPTY_HAIR };
@@ -215,7 +215,7 @@ export default function Results() {
         <div className="label">{t('results.kicker')}</div>
         <h1 className="h1" style={{ marginTop: 8 }}>{t(`results.title.${view}` as Key)}</h1>
         <div className="chips">
-          <span className="tag">{city ? city.city : t('results.noCity')}</span>
+          <span className="tag">{city ? cityName(city, lang) : t('results.noCity')}</span>
           <span className="tag">{t('results.marketTag', { market })}</span>
           {profile && <span className="tag">{profile.name}</span>}
           <Link className="tag" to="/quiz">{t('results.editQuiz')}</Link>

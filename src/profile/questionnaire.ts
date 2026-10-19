@@ -394,6 +394,11 @@ export function adviseCare(hair: HairAnswers): CareAdvice {
 
 // ---------- 转换为打分输入 ----------
 
+/** 城市显示名：中文界面用中文名（没有时用英文名） */
+export function cityName(c: Pick<City, 'city' | 'cityZh'>, lang: string): string {
+  return lang === 'zh' && c.cityZh ? c.cityZh : c.city;
+}
+
 export function cityKey(c: City): string {
   return `${c.city}, ${c.country}`;
 }

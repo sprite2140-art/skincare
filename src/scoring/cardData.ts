@@ -4,7 +4,7 @@
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import { RETAIL_PLATFORMS, RETAIL_PLATFORM_DOMAINS, type Ingredient, type Product, type RetailPlatform, type RetailRating, type Target } from '../data/types';
 import { ratingCountForThreshold, visibleRatings } from '../data/retail';
-import { WEIGHTS, type DimensionKey } from './config';
+import { SHAMPOO_OWN_HAIR_TARGETS, WEIGHTS, type DimensionKey } from './config';
 import { RISK_TAG_LABELS, TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
 import type { ReasonBasis } from './reasons';
 import type { Dimension, ProductScore, ScoringProfile } from './score';
@@ -140,10 +140,21 @@ export function hasAntiDandruffActive(p: Product, index: IngredientIndex): boole
 /** 满足（依据满分）/ 部分满足（只有产品定位、品牌宣称或非主打成分）/ 无依据 */
 export type NeedResult = 'met' | 'partial' | 'none';
 
+/**
+ * 洗发水的需求对照分两组：头皮与清洁（头皮困扰和洗发水自己负责的效果）、发丝效果（主要看护发素，
+ * 计分权重 SHAMPOO_HAIR_EFFECT_WEIGHT）。其他品类不分组（null）。
+ */
+export type NeedGroup = 'scalp' | 'hair' | null;
+
+const SCALP_TARGETS: Target[] = ['dandruff', 'scalp_itch', 'dry_scalp', 'scalp_oil', 'sensitive_scalp', 'hair_loss', 'scalp_redness'];
+
 export interface NeedRow {
   id: string;
   label: Text;
   result: NeedResult;
+  group: NeedGroup;
+  /** 洗发水的发丝效果没有依据：页面写"主要看护发素"，不写"无依据"（计分不变） */
+  conditionerNote: boolean;
   /** 依据类型，用于小标签；无依据时为 null */
   basis: ReasonBasis | null;
   /** 依据的说法：成分名、"产品定位"等；无依据时为 null */
@@ -174,16 +185,20 @@ export function needRows(r: ProductScore): NeedRow[] {
       const n = names(m.ingredients);
       evidence = { zh: `${n.zh}（非主打）`, en: `${n.en} (not a key ingredient)` };
     }
-    return { id: m.id, label: m.label, result, basis, evidence };
+    const own = (t: Target) => SCALP_TARGETS.includes(t) || (SHAMPOO_OWN_HAIR_TARGETS as readonly Target[]).includes(t);
+    const group: NeedGroup = r.product.category !== 'shampoo' ? null : m.targets.some(own) ? 'scalp' : 'hair';
+    return { id: m.id, label: m.label, result, group, conditionerNote: group === 'hair' && result === 'none', basis, evidence };
   });
 }
 
+/** 需求统计；洗发水的发丝效果没有依据时计入"主要看护发素"，不计入"无依据" */
 export function needSummary(rows: NeedRow[]) {
   return {
     total: rows.length,
     met: rows.filter((x) => x.result === 'met').length,
     partial: rows.filter((x) => x.result === 'partial').length,
-    none: rows.filter((x) => x.result === 'none').length,
+    none: rows.filter((x) => x.result === 'none' && !x.conditionerNote).length,
+    conditioner: rows.filter((x) => x.conditionerNote).length,
   };
 }
 
@@ -244,7 +259,7 @@ export interface BreakdownRow {
   dimension: Dimension;
 }
 
-/** 每个维度的得分、实际权重和贡献；不计分的维度不参与归一化。evidenceCapped 时总分低于贡献之和 */
+/** 每个维度的得分、实际权重和贡献；不计分的维度不参与归一化，数字列显示"—"，原因写在表格下方 */
 export function scoreBreakdown(r: ProductScore): { rows: BreakdownRow[]; sum: number | null; total: number | null } {
   const keys = Object.keys(WEIGHTS) as DimensionKey[];
   const wSum = keys.reduce((n, k) => n + (r.dimensions[k].score !== null ? WEIGHTS[k] : 0), 0);

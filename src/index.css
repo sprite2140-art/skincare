@@ -15,6 +15,8 @@
   --tint: #efede8;
   --good: #1f5c4a;
   --mid: #8a6416;
+  /* "部分"状态的橙色（白底对比度约 5:1） */
+  --partial: #b04f00;
   --bad: #9c2b23;
   --alert-bg: #fbefed;
   --test-bg: #fbf5e6;
@@ -50,6 +52,7 @@
     --tint: #232220;
     --good: #7fc2a8;
     --mid: #e0b45a;
+    --partial: #f0a060;
     --bad: #f09a90;
     --alert-bg: #2e1d1b;
     --test-bg: #2b2516;
@@ -402,21 +405,40 @@ details.more[open] summary::after { content: '−'; }
 /* 分区标题：加粗，比正文（14px）大一级 */
 .sec-title { font-size: var(--fs-body); font-weight: 600; margin: 0 0 10px; color: var(--ink); }
 /* 需求对照：需求名 · 结果 · 依据 */
-.need-row { display: grid; grid-template-columns: minmax(4.5em, auto) auto 1fr; gap: 4px 10px; align-items: baseline; }
-.need-name { color: var(--ink); }
-.need-result { font-weight: 500; }
-.need-result.met { color: var(--good); }
-.need-result.partial { color: var(--ink-2); }
-.need-result.none { color: var(--muted); }
-.need-basis { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 8px; min-width: 0; }
-/* 评分明细表 */
-.bd { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
-.bd th, .bd td { text-align: right; padding: 6px 0 6px 8px; border-bottom: 1px solid var(--line); }
-.bd th:first-child, .bd td:first-child { text-align: left; padding-left: 0; }
-.bd th { font-weight: 500; color: var(--ink-2); }
-.bd tr.off td { color: var(--muted); }
-.bd tr.off td + td { text-align: left; }
-.bd tr.bd-total td { font-weight: 600; border-bottom: 0; }
+/* 状态：文字和颜色一一对应（满足 = 绿，部分 = 橙，无依据 = 灰）；全站共用 */
+.status { font-weight: 500; white-space: nowrap; }
+.status-met { color: var(--good); }
+.status-partial { color: var(--partial); }
+.status-none { color: var(--muted); }
+/* 不是状态的说明（如"主要看护发素"）：正文颜色，不占用状态色 */
+.status-note { color: var(--ink-2); font-weight: 400; white-space: normal; }
+/* 表格：需求对照和评分明细共用一种样式 */
+.tbl { width: 100%; border-collapse: collapse; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.tbl th, .tbl td { text-align: left; vertical-align: baseline; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); }
+.tbl th:last-child, .tbl td:last-child { padding-right: 0; }
+.tbl thead th { font-weight: 500; color: var(--ink-2); white-space: nowrap; }
+.tbl .num { text-align: right; white-space: nowrap; }
+.tbl .tbl-name { white-space: nowrap; color: var(--ink); }
+.tbl tr.off td { color: var(--muted); }
+.tbl tr.tbl-total td { font-weight: 600; border-bottom: 0; }
+.tbl tr.tbl-group th { font-weight: 600; color: var(--ink); padding-top: 12px; }
+.tbl-basis { color: var(--ink-2); }
+/* 表格和产品名：中文优先在标点和空格处换行，不把词语折断；放不下时才在字间换行 */
+.tbl td, .tbl th { word-break: keep-all; overflow-wrap: break-word; }
+.product .name { word-break: keep-all; overflow-wrap: anywhere; }
+.need-tbl { table-layout: fixed; }
+.need-tbl th:nth-child(1) { width: 27%; }
+.need-tbl th:nth-child(2) { width: 33%; }
+.card-foot a { white-space: nowrap; }
+.basis-tag, .tag { white-space: nowrap; }
+.tbl-basis .basis-tag { margin-left: 6px; }
+.bd-notes { margin-top: 10px; }
+/* 窄屏：评分明细的数字列缩小，维度名不折行 */
+@media (max-width: 420px) {
+  .tbl.bd .num { font-size: var(--fs-label); padding-right: 6px; }
+  .tbl.bd .num:last-child { padding-right: 0; }
+  .need-tbl .tbl-name { white-space: normal; }
+}
 /* 没有中文名的成分：中文界面显示 INCI 名，统一用斜体标出 */
 .no-zh { font-style: italic; }
 .basis-tag { flex: none; font-size: 13px; color: var(--ink-2); background: var(--tint); border-radius: 6px; padding: 1px 8px; }

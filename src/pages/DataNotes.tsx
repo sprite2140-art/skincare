@@ -7,7 +7,7 @@ import { MIN_RATING_COUNT } from '../data/retail';
 import { TEST_MODE_DRAFT_SCORING } from '../scoring/config';
 
 const SECTIONS: { id: string; items: string[] }[] = [
-  { id: 'fit', items: ['1', '2', '3', '4', '5', '6'] },
+  { id: 'fit', items: ['1', '2', '3', '4', '5', '6', '7', '8'] },
   { id: 'basis', items: ['tested', 'ingredients', 'brand_claim', 'classification', 'award'] },
   { id: 'ingredients', items: ['1', '2', '3', '4'] },
   { id: 'fragrance', items: ['1', '2', '3'] },

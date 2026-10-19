@@ -1,8 +1,9 @@
 // 轻量中英文切换：两个 JSON 字典 + 一个 hook。语言偏好存在本地。
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
-import zh from './zh.json';
+import { spaceCjk } from '../scoring/labels';
 import en from './en.json';
+import zh from './zh.json';
 
 export type Lang = 'zh' | 'en';
 export type Key = keyof typeof zh;
@@ -40,12 +41,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       // 忽略
     }
   }, []);
+  // 中文界面：中文与英文、数字之间统一加空格（包括插入的产品名、成分名等）
+  const fmt = useCallback((s: string) => (lang === 'zh' ? spaceCjk(s) : s), [lang]);
   const t = useCallback(
     (key: Key, vars?: Record<string, string | number>) =>
-      dicts[lang][key].replace(/\{(\w+)\}/g, (_, v: string) => String(vars?.[v] ?? `{${v}}`)),
-    [lang],
+      fmt(dicts[lang][key].replace(/\{(\w+)\}/g, (_, v: string) => String(vars?.[v] ?? `{${v}}`))),
+    [lang, fmt],
   );
-  const tx = useCallback((text: { zh: string; en: string }) => text[lang], [lang]);
+  const tx = useCallback((text: { zh: string; en: string }) => fmt(text[lang]), [lang, fmt]);
   const value = useMemo(() => ({ lang, setLang, t, tx }), [lang, setLang, t, tx]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

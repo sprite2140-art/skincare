@@ -8,7 +8,7 @@ import type { Category } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import {
-  EMPTY_HAIR, MAX_GOALS, cityKey, goalAvailable, migrateHair, migrateScalp, scopeCategories,
+  EMPTY_HAIR, MAX_GOALS, cityKey, cityName, goalAvailable, migrateHair, migrateScalp, scopeCategories,
   type Discomfort, type DiscomfortFrequency, type HairLength, type HairLossAmount, type Redness, type StylingUse, type ThinningArea, type AvoidOption, type BaseAnswers, type BudgetMode, type CarePref,
   type ConditionerStatus, type DandruffType, type HairAnswers, type HairCondition, type HairGoal,
   type HairTexture, type HairThickness, type Money, type PurchaseScope, type ScalpAnswers, type ScalpConcern, type ScalpOilTiming,
@@ -112,7 +112,7 @@ function MoneyInput({ value, currency, label, onChange }: { value: Money | null 
 }
 
 export default function Quiz() {
-  const { t, tx } = useI18n();
+  const { t, tx, lang } = useI18n();
   const { profile, save } = useProfiles();
   const navigate = useNavigate();
   const startRef = useRef(profile ?? newProfile(t('profile.defaultName')));
@@ -271,7 +271,7 @@ export default function Quiz() {
           <select className="select" aria-label={t('quiz.city')} value={base.cityKey ?? ''} onChange={(e) => setBase({ ...base, cityKey: e.target.value || null })}>
             <option value="">{t('quiz.cityNone')}</option>
             <optgroup label={t('quiz.cityGroupUS')}>
-              {cities.filter((c) => c.country === 'US').map((c) => <option key={cityKey(c)} value={cityKey(c)}>{c.city}</option>)}
+              {cities.filter((c) => c.country === 'US').map((c) => <option key={cityKey(c)} value={cityKey(c)}>{cityName(c, lang)}</option>)}
             </optgroup>
             <optgroup label={t('quiz.cityGroupOther')}>
               {cities.filter((c) => c.country !== 'US').map((c) => <option key={cityKey(c)} value={cityKey(c)}>{cityKey(c)}</option>)}
