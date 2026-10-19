@@ -2,10 +2,10 @@
 
 import type { Category, City, ExchangeRate, Product, RiskTag, Target } from '../data/types';
 import type { BudgetChoice } from '../scoring/budget';
-import { BUILDUP_WEIGHT, SHAMPOO_HAIR_EFFECT_WEIGHT, SHAMPOO_OWN_HAIR_TARGETS, SHAMPOO_SCALP_WEIGHT } from '../scoring/config';
+import { SHAMPOO_HAIR_EFFECT_WEIGHT, SHAMPOO_OWN_HAIR_TARGETS, SHAMPOO_SCALP_WEIGHT } from '../scoring/config';
 import type { Text } from '../scoring/labels';
 import { toUsd } from '../scoring/price';
-import type { FragrancePref, ScoringProfile, SpecialStatus, WashFrequency } from '../scoring/score';
+import type { FragrancePref, NeedSpec, ScoringProfile, SpecialStatus, WashFrequency } from '../scoring/score';
 
 export type AvoidOption = 'fragrance' | 'alcohol' | 'essential_oil';
 
@@ -25,9 +25,9 @@ export interface BaseAnswers {
   cityKey: string | null; // "城市, 国家"，对应 cities.csv
   scope: PurchaseScope | null;
   budgetMode: BudgetMode;
-  /** 各品类的预算档位，未选的品类视为不限 */
+  /** 各品类的预算价格上限，未选的品类视为不限 */
   budgets: Partial<Record<Category, BudgetChoice>>;
-  /** 档位为 custom 时的自填上限 */
+  /** 预算为 custom 时的自填上限 */
   customBudgets: Partial<Record<Category, Money>>;
   /** 按整套时的总预算；null 表示不限 */
   setBudget: Money | null;
@@ -41,7 +41,7 @@ export interface BaseAnswers {
 // 旧档案中的取值（one_two_days、three_plus_days、redness、red_recurring、hairLossLevel）仍能读取。
 
 export type ScalpOilTiming = 'same_day' | 'next_day' | 'three_four_days' | 'five_plus_days' | 'one_two_days' | 'three_plus_days';
-export type ScalpConcern = 'dandruff' | 'itch' | 'dry_tight' | 'hair_loss' | 'redness';
+export type ScalpConcern = 'dandruff' | 'itch' | 'dry_tight' | 'hair_loss' | 'oily' | 'sensitive' | 'redness';
 /** 头皮屑是什么样的？（选了头皮屑才问）red_recurring 为旧选项 */
 export type DandruffType = 'dry_fine' | 'oily_large' | 'thick_scaly' | 'red_recurring';
 /** 洗头后第 2–3 天头皮屑大概有多少，1–4 级 */
@@ -94,43 +94,71 @@ export const ITCH_SENSITIVE_MIN = 4;
 export const ITCH_MEDICAL_MIN = 7;
 
 /** 头皮困扰是多选不排序 */
-const SCALP_CONCERN_TARGETS: Record<ScalpConcern, Target> = {
+const SCALP_CONCERN_TARGETS: Record<Exclude<ScalpConcern, 'redness'>, Target> = {
   dandruff: 'dandruff',
   itch: 'scalp_itch',
   dry_tight: 'dry_scalp',
   hair_loss: 'hair_loss',
-  // 头皮发红不单独匹配产品，按"敏感头皮"匹配；就医提示仍按发红题判断（见 scalpMedicalAlerts）
-  redness: 'sensitive_scalp',
+  oily: 'scalp_oil',
+  sensitive: 'sensitive_scalp',
 };
 
-/** 敏感头皮：瘙痒 4 分及以上（选了痒但没填分数时偏保守也算）、用产品后有不适、头皮经常发红 */
+/**
+ * 敏感头皮（刺激风险扣分加倍）：选了"头皮敏感、容易刺激"、瘙痒 4 分及以上（选了痒但没填分数时偏保守也算）、
+ * 用产品后有不适、头皮经常发红。只有选了"头皮敏感"才是需求，其他情况只影响温和度。
+ */
 export function isSensitiveScalp(a: ScalpAnswers): boolean {
+  const chosen = a.concerns.includes('sensitive');
   const itch = a.concerns.includes('itch') && (a.itchScore == null || a.itchScore >= ITCH_SENSITIVE_MIN);
   const discomfort = (a.discomfort ?? []).length > 0;
   const redness = a.redness === 'often' || a.redness === 'spreading';
-  return itch || discomfort || redness;
+  return chosen || itch || discomfort || redness;
 }
 
+/** 头皮困扰选项的名称（结果页需求对照用） */
+const SCALP_CONCERN_LABELS: Record<Exclude<ScalpConcern, 'redness'>, Text> = {
+  dandruff: { zh: '头皮屑', en: 'Dandruff' },
+  itch: { zh: '痒', en: 'Itching' },
+  dry_tight: { zh: '头皮干、紧绷', en: 'Dry, tight scalp' },
+  hair_loss: { zh: '掉发', en: 'Hair loss' },
+  oily: { zh: '容易出油', en: 'Oily scalp' },
+  sensitive: { zh: '头皮敏感、容易刺激', en: 'Sensitive, easily irritated scalp' },
+};
+
+/** 一个用户选项对应的需求（还没有权重） */
+export interface NeedChoice {
+  id: string;
+  label: Text;
+  targets: Target[];
+}
+
+export function scalpNeeds(a: ScalpAnswers): NeedChoice[] {
+  const out: NeedChoice[] = [];
+  for (const c of a.concerns) {
+    if (c === 'redness' || out.some((n) => n.id === c)) continue;
+    out.push({ id: c, label: SCALP_CONCERN_LABELS[c], targets: [SCALP_CONCERN_TARGETS[c]] });
+  }
+  return out;
+}
+
+/**
+ * 头皮困扰对应的需求：只计用户在"头皮有哪些困扰"中明确选择的项。
+ * 出油时间、头皮屑类型、发红、瘙痒程度、不适、造型产品频率等题目只用于就医提示、温和度和搭配建议，
+ * 不再推导出额外的需求（不计分、不显示）。
+ */
 export function scalpTargets(a: ScalpAnswers): Target[] {
   const targets: Target[] = [];
-  const add = (t: Target) => {
-    if (!targets.includes(t)) targets.push(t);
-  };
   for (const c of a.concerns) {
-    // 旧档案的"发红"困扰：已回答新的发红题时以新答案为准
-    if (c === 'redness' && a.redness != null) continue;
-    add(SCALP_CONCERN_TARGETS[c]);
+    // 旧档案的"发红"困扰已迁移到发红题，不作为需求
+    if (c === 'redness') continue;
+    const t = SCALP_CONCERN_TARGETS[c];
+    if (!targets.includes(t)) targets.push(t);
   }
-  if (a.concerns.includes('dandruff') && a.dandruffType === 'oily_large') add('scalp_oil');
-  if (a.redness && a.redness !== 'none') add('sensitive_scalp');
-  if (a.oilTiming === 'same_day' || a.oilTiming === 'next_day') add('scalp_oil');
-  if (a.oilTiming === 'five_plus_days') add('dry_scalp');
-  if (isSensitiveScalp(a)) add('sensitive_scalp');
   return targets;
 }
 
 /** 常用造型产品（每周 3 次以上） */
-export function frequentStyling(a: ScalpAnswers): boolean {
+export function frequentStyling(a: Pick<ScalpAnswers, 'styling'>): boolean {
   return a.styling === 'weekly_3_plus' || a.styling === 'daily';
 }
 
@@ -141,7 +169,10 @@ export type HairTexture = 'straight' | 'wavy' | 'curly' | 'coily';
 export type HairCondition = 'dry' | 'tangling' | 'colored' | 'permed_bleached' | 'breakage' | 'heat';
 /** 期望效果，最多选 3 项 */
 /** tone 为旧选项（去黄 / 去橙合在一起），新档案分为 tone_yellow 和 tone_orange */
-export type HairGoal = 'smooth' | 'moisture' | 'less_frizz' | 'clean' | 'volume' | 'shine' | 'curl' | 'scent' | 'tone_yellow' | 'tone_orange' | 'tone';
+/** repair、color_care 与去黄 / 去橙一样，只在发丝状态选了染或烫漂时出现；buildup 只在造型产品每周 3 次以上时出现 */
+export type HairGoal =
+  | 'smooth' | 'moisture' | 'less_frizz' | 'clean' | 'volume' | 'shine' | 'curl' | 'scent'
+  | 'tone_yellow' | 'tone_orange' | 'tone' | 'repair' | 'color_care' | 'buildup';
 export const MAX_GOALS = 3;
 /** 是否已有满意的护发素 */
 export type ConditionerStatus = 'satisfied' | 'not_satisfied' | 'none';
@@ -162,15 +193,6 @@ export const EMPTY_HAIR: HairAnswers = {
   thickness: null, texture: null, conditions: [], goals: [], fragrancePref: null, hasConditioner: null, carePref: null,
 };
 
-const CONDITION_TARGETS: Record<HairCondition, Target[]> = {
-  dry: ['dryness'],
-  tangling: ['tangling'],
-  colored: ['color_fade', 'damage'],
-  permed_bleached: ['damage'],
-  breakage: ['damage'],
-  heat: ['damage'],
-};
-
 /** "香味好闻"没有对应的困扰：不按成分推断气味和留香，只在理由中说明是否含香精 */
 const GOAL_TARGETS: Record<HairGoal, Target[]> = {
   smooth: ['frizz', 'tangling'],
@@ -184,9 +206,14 @@ const GOAL_TARGETS: Record<HairGoal, Target[]> = {
   tone_yellow: ['tone_yellow'],
   tone_orange: ['tone_orange'],
   tone: ['tone_yellow', 'tone_orange'],
+  repair: ['damage'],
+  color_care: ['color_fade'],
+  buildup: ['buildup'],
 };
 
 export const TONE_GOALS: HairGoal[] = ['tone_yellow', 'tone_orange', 'tone'];
+/** 只在发丝状态选了染或烫漂时出现的期望效果 */
+export const COLOR_TREATED_GOALS: HairGoal[] = [...TONE_GOALS, 'repair', 'color_care'];
 
 /** 旧档案迁移：合并的"去黄 / 去橙"（tone）拆为去黄、去橙两项，仍不超过 MAX_GOALS 项 */
 export function migrateHair(h: HairAnswers): HairAnswers {
@@ -198,21 +225,50 @@ export function migrateHair(h: HairAnswers): HairAnswers {
   return { ...h, goals: goals.slice(0, MAX_GOALS) };
 }
 
-/** "去黄""去橙"只在发丝状态选了染或烫漂时出现 */
+/** "去黄""去橙""修护受损""护色"只在发丝状态选了染或烫漂时出现 */
 export function toneGoalAvailable(hair: Pick<HairAnswers, 'conditions'>): boolean {
   return hair.conditions.includes('colored') || hair.conditions.includes('permed_bleached');
 }
 
-export function hairTargets(a: HairAnswers): Target[] {
-  const targets: Target[] = [];
-  const add = (t: Target) => {
-    if (!targets.includes(t)) targets.push(t);
-  };
-  for (const c of a.conditions) CONDITION_TARGETS[c].forEach(add);
+/** 某个期望效果在当前答案下是否可选；styling 为造型产品频率（只买护发素时不问，视为不可选"去除造型产品残留"） */
+export function goalAvailable(g: HairGoal, hair: Pick<HairAnswers, 'conditions'>, scalp: Pick<ScalpAnswers, 'styling'> | null): boolean {
+  if (COLOR_TREATED_GOALS.includes(g)) return toneGoalAvailable(hair);
+  if (g === 'buildup') return !!scalp && frequentStyling(scalp);
+  return true;
+}
+
+const GOAL_LABELS: Record<HairGoal, Text> = {
+  smooth: { zh: '柔顺', en: 'Smooth' },
+  moisture: { zh: '滋润', en: 'Moisture' },
+  less_frizz: { zh: '减少毛躁', en: 'Less frizz' },
+  clean: { zh: '清爽洁净', en: 'Fresh and clean' },
+  volume: { zh: '蓬松', en: 'Volume' },
+  shine: { zh: '光泽', en: 'Shine' },
+  curl: { zh: '卷度清晰', en: 'Defined curls' },
+  scent: { zh: '香味好闻', en: 'Nice scent' },
+  tone_yellow: { zh: '去黄', en: 'Tone out yellow' },
+  tone_orange: { zh: '去橙', en: 'Tone out orange' },
+  tone: { zh: '去黄 / 去橙', en: 'Tone out yellow / orange' },
+  repair: { zh: '修护受损', en: 'Repair damage' },
+  color_care: { zh: '护色', en: 'Color care' },
+  buildup: { zh: '去除造型产品残留', en: 'Remove styling product buildup' },
+};
+
+/** 期望效果对应的需求，每个选项一个；"香味好闻"没有对应的需求；当前答案下不可选的效果不计 */
+export function hairNeeds(a: HairAnswers, scalp: Pick<ScalpAnswers, 'styling'> | null = null): NeedChoice[] {
+  const out: NeedChoice[] = [];
   for (const g of a.goals.slice(0, MAX_GOALS)) {
-    if (TONE_GOALS.includes(g) && !toneGoalAvailable(a)) continue;
-    GOAL_TARGETS[g].forEach(add);
+    if (!goalAvailable(g, a, scalp)) continue;
+    if (GOAL_TARGETS[g].length === 0 || out.some((n) => n.id === g)) continue;
+    out.push({ id: g, label: GOAL_LABELS[g], targets: GOAL_TARGETS[g] });
   }
+  return out;
+}
+
+/** 期望效果对应的需求：只计用户明确选择的期望效果；发丝状态（干涩、染烫等）不推导需求 */
+export function hairTargets(a: HairAnswers, scalp: Pick<ScalpAnswers, 'styling'> | null = null): Target[] {
+  const targets: Target[] = [];
+  for (const n of hairNeeds(a, scalp)) for (const t of n.targets) if (!targets.includes(t)) targets.push(t);
   return targets;
 }
 
@@ -355,10 +411,11 @@ export interface Answers {
 
 /**
  * 某个品类的打分输入：
- * - 洗发水侧重头皮与清洁：头皮困扰权重 SHAMPOO_SCALP_WEIGHT，发丝状态和期望效果权重 1；
- * - 护发素等发丝产品只看发丝状态和期望效果；
+ * - 需求只来自用户明确选择的头皮困扰和期望效果，每个选项一个需求（见 scalpNeeds / hairNeeds）；
+ * - 洗发水侧重头皮与清洁：头皮困扰权重 SHAMPOO_SCALP_WEIGHT，期望效果权重 1（或 SHAMPOO_HAIR_EFFECT_WEIGHT）；
+ * - 护发素等发丝产品只看期望效果；
  * - 两者都遵守想避开的成分（硬性过滤）。
- * 按整套设预算时，单品不按档位筛选（总价在搭配时检查）。
+ * 按整套设预算时，单品不按价格上限筛选（总价在搭配时检查）。
  */
 /** 是否按洗护搭配推荐：选了"洗护搭配"，或"帮我判断"建议洗发水 + 护发素 */
 export function isRoutine(scope: PurchaseScope | null, hair: HairAnswers): boolean {
@@ -375,26 +432,34 @@ export function toScoringProfile(
 ): ScoringProfile {
   const { base, scalp, hair } = answers;
   const forScalp = category === 'shampoo' || category === 'scalp_care';
-  const scalpT: Target[] = forScalp ? scalpTargets(scalp) : [];
   const own = (t: Target) => (SHAMPOO_OWN_HAIR_TARGETS as readonly Target[]).includes(t);
-  // 洗发水：选洗护搭配时发丝效果只分配给护发素；只买洗发水时发丝效果权重降低
+  // 洗发水：选洗护搭配时发丝效果只分配给护发素（只保留洗发水自己负责的效果）；只买洗发水时发丝效果权重降低
   // 结果页按当前显示的视图传入（洗护搭配 / 单品列表）；没传时按问卷的购买范围
   const routine = ctx.routine ?? isRoutine(base.scope, hair);
-  const hairT = hairTargets(hair).filter((t) => category !== 'shampoo' || !routine || own(t));
-  const targetWeights: Partial<Record<Target, number>> = {};
-  for (const t of hairT) targetWeights[t] = category === 'shampoo' && !own(t) ? SHAMPOO_HAIR_EFFECT_WEIGHT : 1;
-  for (const t of scalpT) targetWeights[t] = SHAMPOO_SCALP_WEIGHT;
-  // 常用造型产品（每周 3 次以上）：洗发水增加"产品残留"需求，由螯合剂清单匹配
-  if (forScalp && frequentStyling(scalp) && !scalpT.includes('buildup')) {
-    scalpT.push('buildup');
-    targetWeights.buildup = BUILDUP_WEIGHT;
+  const needs: NeedSpec[] = [];
+  if (forScalp) for (const n of scalpNeeds(scalp)) needs.push({ ...n, weight: SHAMPOO_SCALP_WEIGHT });
+  // "去除造型产品残留"只看造型频率题（只买护发素时不问）；只分配给洗发水，护发素不匹配
+  for (const n of hairNeeds(hair, base.scope === 'conditioner' ? null : scalp)) {
+    if (n.id === 'buildup' && category !== 'shampoo') continue;
+    if (category !== 'shampoo') {
+      needs.push({ ...n, weight: 1 });
+      continue;
+    }
+    const ownTargets = n.targets.filter(own);
+    if (routine) {
+      if (ownTargets.length > 0) needs.push({ ...n, targets: ownTargets, weight: 1 });
+    } else {
+      needs.push({ ...n, weight: ownTargets.length === n.targets.length ? 1 : SHAMPOO_HAIR_EFFECT_WEIGHT });
+    }
   }
+  const concerns: Target[] = [];
+  for (const n of needs) for (const t of n.targets) if (!concerns.includes(t)) concerns.push(t);
   const itemBudget = base.budgetMode === 'item';
   const budget = itemBudget ? base.budgets[category] ?? 'none' : 'none';
   return {
-    concerns: [...scalpT, ...hairT.filter((t) => !scalpT.includes(t))],
+    concerns,
     concernsRanked: false,
-    targetWeights,
+    needs,
     sensitive: forScalp && isSensitiveScalp(scalp),
     specialStatus: base.specialStatus,
     // 用户填写的想避开的成分 / 成分类型在打分中走硬性过滤，直接排除

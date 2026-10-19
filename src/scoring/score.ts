@@ -17,14 +17,14 @@ import {
 import { matchesKeyActive, productKeyActiveTerms, type KeyActiveTerm } from '../data/keyActives';
 import { fragranceInfo, fragranceTier, type FragranceInfo } from './fragrance';
 import { RISK_TAG_LABELS, TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
-import { priceInfo, withinBudget, type PriceInfo } from './price';
+import { priceInfo, type PriceInfo } from './price';
 import { capFor, type BudgetCapsByCategory, type BudgetChoice } from './budget';
 
 /** 打分用到的数据 */
 export interface ScoringData {
   index: IngredientIndex;
   exchangeRates: ExchangeRate[];
-  /** 各品类预算档位界线，由 computeBudgetCaps() 从产品库计算 */
+  /** 各品类预算价格上限界线，由 computeBudgetCaps() 从产品库计算 */
   budgetCaps: BudgetCapsByCategory;
   /** 测试模式：允许 draft 成分参与打分。正式上线前必须关闭，见 config.ts 的 TEST_MODE_DRAFT_SCORING */
   allowDraft?: boolean;
@@ -35,9 +35,22 @@ export type WashFrequency = 'daily' | 'every_other_day' | 'twice_weekly_or_less'
 /** 香味偏好：无香优先 / 接受香味 / 无所谓 */
 export type FragrancePref = 'free_first' | 'ok' | 'any';
 
+/**
+ * 用户明确选择的一个需求（一项头皮困扰或一项期望效果）。一个选项可能对应多个 targets
+ * （如"柔顺"对应毛躁和打结），按其中依据最好的一个计分，结果页每个需求一行。
+ */
+export interface NeedSpec {
+  id: string;
+  label: Text;
+  targets: Target[];
+  weight: number;
+}
+
 export interface ScoringProfile {
-  /** 用户的困扰和期望效果，已映射到 targets 取值 */
+  /** 用户的困扰和期望效果，已映射到 targets 取值（needs 中所有 targets 的并集） */
   concerns: Target[];
+  /** 按用户选项分组的需求；没有时每个 concern 单独作为一个需求 */
+  needs?: NeedSpec[];
   /** 各困扰的权重；未写的按 concernsRanked 规则计算（洗发水侧重头皮，护发素只看发丝） */
   targetWeights?: Partial<Record<Target, number>>;
   /** true：按重要程度排序（面部）；false：多选不排序（头皮、头发），平均加权 */
@@ -49,7 +62,7 @@ export interface ScoringProfile {
   avoidIngredients: string[];
   /** 想避开的成分类型，如 fragrance */
   avoidTags: RiskTag[];
-  /** 该品类的预算档位：第一档 / 第二档 / 不限 / 自填 */
+  /** 该品类的价格上限：三个四分位上限 / 不限 / 自填上限 */
   budget: BudgetChoice;
   /** budget 为 custom 时的上限（USD） */
   customBudgetUsd?: number | null;
@@ -92,6 +105,24 @@ export interface ConflictWarning {
   text: Text;
 }
 
+/** 温和度（刺激风险）的扣分明细，页面"需要注意"按这里列出，与温和度结论一致 */
+export interface IrritantHit {
+  tag: RiskTag;
+  ingredients: Ingredient[];
+  /** 实际扣分（已按冲洗型减半、敏感加倍）；不扣分时为 0 */
+  deduction: number;
+  /** 是否计入温和度（强清洁力表活只在每天洗头且不常用造型产品时计入；未核对的成分在正式模式下不计入） */
+  counted: boolean;
+  /** 依据的成分还没核对，未参与打分（只展示） */
+  unverified: boolean;
+}
+
+export interface IrritationDetail {
+  hits: IrritantHit[];
+  rinseOff: boolean;
+  sensitive: boolean;
+}
+
 export interface ProductScore {
   product: Product;
   excluded: boolean;
@@ -119,6 +150,8 @@ export interface ProductScore {
   usesDraftData: boolean;
   /** 需求匹配的明细，供推荐理由使用 */
   needMatches: NeedMatch[];
+  /** 温和度扣分明细 */
+  irritation: IrritationDetail;
   fragrance: FragranceInfo;
   /** 展示用当地价格；usd 用于预算比较 */
   price: { amount: number | null; currency: string; usd: number | null };
@@ -170,6 +203,13 @@ export function ingredientStatuses(product: Product, index: IngredientIndex): { 
     name: r.raw,
     status: r.nameUnverified ? 'name_unverified' : !r.ingredient ? 'unknown' : isVerified(r) ? 'verified' : 'draft',
   }));
+}
+
+/** 打分用的需求列表：问卷给出的 needs，或由 concerns + 权重得到（每个 target 一个需求） */
+export function needSpecs(profile: Pick<ScoringProfile, 'concerns' | 'concernsRanked' | 'targetWeights' | 'needs'>): NeedSpec[] {
+  if (profile.needs) return profile.needs.filter((n) => n.weight > 0 && n.targets.length > 0);
+  return [...concernWeights(profile.concerns, profile.concernsRanked, profile.targetWeights)]
+    .map(([t, w]) => ({ id: t, label: TARGET_LABELS[t], targets: [t], weight: w }));
 }
 
 export function concernWeights(
@@ -285,8 +325,8 @@ function hardFilters(
     });
   }
 
-  // 单件预算上限：换算成 USD 比较
-  if (price.status === 'ok' && capUsd !== null && !withinBudget(price.usd, capUsd)) {
+  // 单件价格上限：换算成 USD 比较，等于上限的保留
+  if (price.status === 'ok' && capUsd !== null && price.usd > capUsd) {
     const local = `${product.price} ${product.currency}`;
     const usd = product.currency === 'USD' ? '' : `（约 ${price.usd.toFixed(2)} USD）`;
     const usdEn = product.currency === 'USD' ? '' : ` (about ${price.usd.toFixed(2)} USD)`;
@@ -376,6 +416,11 @@ export function positioningLabel(m: Pick<NeedMatch, 'bases'>, product: Pick<Prod
 }
 
 export interface NeedMatch {
+  /** 需求（用户选项）的 id 和名称 */
+  id: string;
+  label: Text;
+  targets: Target[];
+  /** 依据最好的那个 target */
   target: Target;
   weight: number;
   /** 0–1 */
@@ -397,45 +442,58 @@ function ingredientTargets(i: Ingredient, target: Target): boolean {
  * 成品测试 1；主打成分覆盖 1；品牌宣称（产品定位）BRAND_CLAIM_CREDIT；只有非主打成分覆盖 NON_KEY_ACTIVE_CREDIT。
  * keyTerms 为 null（产品还没填写主打成分）时，有效成分都按满分计。
  */
+function matchTarget(
+  product: Product,
+  verified: (Resolved & { ingredient: Ingredient })[],
+  target: Target,
+  isKey: (r: Resolved & { ingredient: Ingredient }) => boolean,
+) {
+  const hits = verified.filter((r) => ingredientTargets(r.ingredient, target));
+  const unique = (list: (Resolved & { ingredient: Ingredient })[]) =>
+    list.map((r) => r.ingredient).filter((ing, i, arr) => arr.indexOf(ing) === i);
+  const ingredients = unique(hits);
+  const keyIngredients = unique(hits.filter(isKey));
+  const bases: NeedBasis[] = [];
+  let credit = 0;
+  if (product.testedClaims.some((c) => c.target === target)) {
+    bases.push('tested');
+    credit = Math.max(credit, TESTED_CLAIM_CREDIT);
+  }
+  if (product.brandClaims.targets.includes(target)) {
+    bases.push('brand_claim');
+    credit = Math.max(credit, BRAND_CLAIM_CREDIT);
+  }
+  if (product.claimedBenefits.includes(target)) {
+    bases.push('claim');
+    credit = Math.max(credit, BRAND_CLAIM_CREDIT);
+  }
+  if (keyIngredients.length > 0) {
+    bases.push('key_active');
+    credit = Math.max(credit, 1);
+  } else if (ingredients.length > 0) {
+    bases.push('ingredient');
+    credit = Math.max(credit, NON_KEY_ACTIVE_CREDIT);
+  }
+  return { target, credit, bases, ingredients, keyIngredients };
+}
+
 function scoreNeed(
   product: Product,
   verified: (Resolved & { ingredient: Ingredient })[],
-  weights: Map<Target, number>,
+  specs: NeedSpec[],
   keyTerms: KeyActiveTerm[] | null,
 ) {
   const isKey = (r: Resolved & { ingredient: Ingredient }) => keyTerms === null || matchesKeyActive(r.raw, r.ingredient, keyTerms);
   const needMatches: NeedMatch[] = [];
-  for (const [target, weight] of weights) {
-    const hits = verified.filter((r) => ingredientTargets(r.ingredient, target));
-    const unique = (list: (Resolved & { ingredient: Ingredient })[]) =>
-      list.map((r) => r.ingredient).filter((ing, i, arr) => arr.indexOf(ing) === i);
-    const ingredients = unique(hits);
-    const keyIngredients = unique(hits.filter(isKey));
-    const bases: NeedBasis[] = [];
-    let credit = 0;
-    if (product.testedClaims.some((c) => c.target === target)) {
-      bases.push('tested');
-      credit = Math.max(credit, TESTED_CLAIM_CREDIT);
-    }
-    if (product.brandClaims.targets.includes(target)) {
-      bases.push('brand_claim');
-      credit = Math.max(credit, BRAND_CLAIM_CREDIT);
-    }
-    if (product.claimedBenefits.includes(target)) {
-      bases.push('claim');
-      credit = Math.max(credit, BRAND_CLAIM_CREDIT);
-    }
-    if (keyIngredients.length > 0) {
-      bases.push('key_active');
-      credit = Math.max(credit, 1);
-    } else if (ingredients.length > 0) {
-      bases.push('ingredient');
-      credit = Math.max(credit, NON_KEY_ACTIVE_CREDIT);
-    }
-    needMatches.push({ target, weight, credit, bases, ingredients, keyIngredients });
+  for (const spec of specs) {
+    // 一个需求对应多个 target 时，取依据最好的一个（同分时依据种类多的优先）
+    const best = spec.targets
+      .map((t) => matchTarget(product, verified, t, isKey))
+      .sort((a, b) => b.credit - a.credit || b.bases.length - a.bases.length)[0];
+    needMatches.push({ id: spec.id, label: spec.label, targets: spec.targets, weight: spec.weight, ...best });
   }
 
-  if (weights.size === 0) {
+  if (specs.length === 0) {
     return {
       needMatches,
       dim: dimension('need', null, { zh: '你没有选择困扰或期望效果，此项不计分', en: 'No concerns or goals selected, so this is not scored' }),
@@ -450,7 +508,7 @@ function scoreNeed(
   for (const m of needMatches) {
     total += m.weight;
     covered += m.weight * m.credit;
-    const label = TARGET_LABELS[m.target];
+    const label = m.label;
     const partsZh: string[] = [];
     const partsEn: string[] = [];
     if (m.bases.includes('tested')) {
@@ -506,7 +564,7 @@ function scoreEvidence(needMatches: NeedMatch[], product: Product): { dim: Dimen
     const best = m.ingredients
       .filter((i) => i.evidenceLevel !== null)
       .sort((a, b) => EVIDENCE_SCORES[b.evidenceLevel!] - EVIDENCE_SCORES[a.evidenceLevel!])[0];
-    const t = TARGET_LABELS[m.target];
+    const t = m.label;
     let score: number | null = null;
     if (m.bases.includes('tested')) {
       score = TESTED_EVIDENCE_SCORE;
@@ -533,7 +591,7 @@ function scoreEvidence(needMatches: NeedMatch[], product: Product): { dim: Dimen
   let capW = total;
   let capSum = sum;
   for (const m of needMatches) {
-    if (missingEn.includes(TARGET_LABELS[m.target].en)) {
+    if (missingEn.includes(m.label.en)) {
       capW += m.weight;
       capSum += m.weight * EVIDENCE_SCORES[MISSING_EVIDENCE_CAP_LEVEL];
     }
@@ -576,19 +634,35 @@ function scoreIrritation(
   verified: (Resolved & { ingredient: Ingredient })[],
   profile: ScoringProfile,
   product: Product,
-): Dimension {
+  known: (Resolved & { ingredient: Ingredient })[],
+): { dim: Dimension; detail: IrritationDetail } {
   // 使用方式未知时按免洗处理（不减半），偏保守
   const rinseOff = usageTypeOf(product) === 'rinse_off';
   const mult = (profile.sensitive ? SENSITIVE_MULTIPLIER : 1) * (rinseOff ? RINSE_OFF_MULTIPLIER : 1);
   let deduction = 0;
   const found: Text[] = [];
+  const hitsOut: IrritantHit[] = [];
 
-  const tags: RiskTag[] = [...IRRITANT_TAGS];
-  if (profile.washFrequency === 'daily' && !profile.frequentStyling) tags.push('strong_cleanser');
-  for (const tag of tags) {
+  // 强清洁力表活只在每天洗头且不常用造型产品时扣分；不扣分时也记下来，页面说明原因
+  const cleanserCounts = profile.washFrequency === 'daily' && !profile.frequentStyling;
+  for (const tag of [...IRRITANT_TAGS, 'strong_cleanser'] as RiskTag[]) {
     const hits = verified.filter((r) => r.ingredient.riskTags.includes(tag));
-    if (hits.length === 0) continue;
-    deduction += (tag === 'strong_cleanser' ? STRONG_CLEANSER_DEDUCTION : IRRITANT_DEDUCTION) * mult;
+    const uniq = (list: (Resolved & { ingredient: Ingredient })[]) =>
+      list.map((r) => r.ingredient).filter((ing, i, arr) => arr.indexOf(ing) === i);
+    if (hits.length === 0) {
+      // 成分库里有、但还没核对（正式模式下不参与打分）的风险成分：仍在页面列出，注明未计入温和度
+      const draft = known.filter((r) => r.ingredient.riskTags.includes(tag));
+      if (draft.length > 0) hitsOut.push({ tag, ingredients: uniq(draft), deduction: 0, counted: false, unverified: true });
+      continue;
+    }
+    const ingredients = uniq(hits);
+    if (tag === 'strong_cleanser' && !cleanserCounts) {
+      hitsOut.push({ tag, ingredients, deduction: 0, counted: false, unverified: false });
+      continue;
+    }
+    const d = (tag === 'strong_cleanser' ? STRONG_CLEANSER_DEDUCTION : IRRITANT_DEDUCTION) * mult;
+    deduction += d;
+    hitsOut.push({ tag, ingredients, deduction: d, counted: true, unverified: false });
     const names = joinNames(hits.map((r) => ingredientName(r.ingredient, r.raw)));
     const why = tag === 'strong_cleanser' ? { zh: '，你每天洗头', en: ', and you wash daily' } : { zh: '', en: '' };
     found.push({
@@ -598,11 +672,15 @@ function scoreIrritation(
   }
 
   const score = Math.max(0, 100 - deduction);
+  const detail: IrritationDetail = { hits: hitsOut, rinseOff, sensitive: profile.sensitive };
   if (found.length === 0) {
-    return dimension('irritation', score, {
-      zh: '有数据的成分中没有常见刺激成分',
-      en: 'No common irritants among ingredients with data',
-    });
+    return {
+      dim: dimension('irritation', score, {
+        zh: '有数据的成分中没有常见刺激成分',
+        en: 'No common irritants among ingredients with data',
+      }),
+      detail,
+    };
   }
   const list = joinNames(found);
   const sens = profile.sensitive
@@ -611,10 +689,13 @@ function scoreIrritation(
   const rinse = rinseOff
     ? { zh: '；冲洗型产品停留时间短，扣分减半', en: '; halved because it is rinsed off' }
     : { zh: '', en: '' };
-  return dimension('irritation', score, {
-    zh: `含${list.zh}${sens.zh}${rinse.zh}`,
-    en: `Contains ${list.en}${sens.en}${rinse.en}`,
-  });
+  return {
+    dim: dimension('irritation', score, {
+      zh: `含${list.zh}${sens.zh}${rinse.zh}`,
+      en: `Contains ${list.en}${sens.en}${rinse.en}`,
+    }),
+    detail,
+  };
 }
 
 function scoreEnvironment(verified: (Resolved & { ingredient: Ingredient })[], city: City | null, allowDraft: boolean): Dimension {
@@ -726,7 +807,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   }
   const budgetLimited = profile.budget === 'custom' ? capUsd !== null : profile.budget !== 'none';
   if (budgetLimited && price.status !== 'ok') {
-    // 价格未知或无法换算的产品不参与预算档位计算，也只在"不限"档出现
+    // 价格未知或无法换算的产品不参与预算价格上限计算，也只在"不限"档出现
     const why = price.status === 'no_price'
       ? { zh: '价格未知', en: 'Price unknown' }
       : { zh: `汇率表中没有 ${product.currency}`, en: `No exchange rate for ${product.currency}` };
@@ -739,14 +820,15 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     notices.push({
       code: 'budget_unchecked',
       unverified: false,
-      text: { zh: '该品类有价格的产品太少，还没有预算档位，未做预算筛选', en: 'Too few priced products in this category to set budget ranges; budget not checked' },
+      text: { zh: '该品类有价格的产品太少，还没有预算价格上限，未做预算筛选', en: 'Too few priced products in this category to set budget limits; budget not checked' },
     });
   }
 
-  const weights = concernWeights(profile.concerns, profile.concernsRanked, profile.targetWeights);
+  const specs = needSpecs(profile);
   const noData: Text = { zh: '没有可用的成分数据，无法评分', en: 'No usable ingredient data, cannot score' };
   let dimensions: Record<DimensionKey, Dimension>;
   let needMatches: NeedMatch[] = [];
+  let irritation: IrritationDetail = { hits: [], rinseOff: usageTypeOf(product) === 'rinse_off', sensitive: profile.sensitive };
   let evidenceCap: number | null = null;
   if (verified.length === 0) {
     dimensions = {
@@ -756,13 +838,15 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       environment: dimension('environment', null, noData),
     };
   } else {
-    const need = scoreNeed(product, verified, weights, productKeyActiveTerms(product));
+    const need = scoreNeed(product, verified, specs, productKeyActiveTerms(product));
     needMatches = need.needMatches;
     const evidence = scoreEvidence(needMatches, product);
     evidenceCap = evidence.capScore;
+    const irr = scoreIrritation(verified, profile, product, items.filter((r): r is Resolved & { ingredient: Ingredient } => !r.nameUnverified && r.ingredient !== null));
+    irritation = irr.detail;
     dimensions = {
       need: need.dim,
-      irritation: scoreIrritation(verified, profile, product),
+      irritation: irr.dim,
       evidence: evidence.dim,
       environment: scoreEnvironment(verified, profile.city, !!data.allowDraft),
     };
@@ -804,6 +888,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     unverifiedIngredients,
     usesDraftData,
     needMatches,
+    irritation,
     fragrance: fragranceInfo(product, index),
     price: { amount: product.price, currency: product.currency, usd: price.usd },
     transparency: product.transparency,

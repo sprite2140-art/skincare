@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { loadDataFromDisk } from '../data/node';
 import type { Product } from '../data/types';
-import { hasAntiDandruffActive, irritantKinds, keyIngredients, platformOf, primaryStore, storeRows, topRating } from './cardData';
+import { EMPTY_HAIR, toScoringProfile, type HairAnswers, type ScalpAnswers } from '../profile/questionnaire';
+import { newProfile } from '../profile/storage';
+import { computeBudgetCaps } from './budget';
+import {
+  cautionItems, hasAntiDandruffActive, keyIngredients, needRows, needSummary, platformOf, primaryStore, scoreBreakdown, storeRows, topRating,
+} from './cardData';
+import { scoreProduct } from './score';
 
 const real = loadDataFromDisk();
 const index = real.ingredientIndex;
@@ -49,17 +55,15 @@ describe('卡片：评分行与购买渠道', () => {
   });
 });
 
-describe('卡片：关键成分与温和度', () => {
-  it('最多 5 个；顺序为针对需求的有效成分 → 螯合剂 → 需要注意的成分；香精不写成"香精 · 香精"', () => {
+describe('卡片：关键成分', () => {
+  it('最多 5 个，只列有效成分和螯合剂（风险成分只在"需要注意"里列）；针对需求的有效成分在前', () => {
     const k = keyIngredients(byId('SH-US-048'), index, ['dandruff']);
     expect(k.length).toBeLessThanOrEqual(5);
     expect(k[0]).toMatchObject({ kind: 'active', role: { zh: '去屑' } });
-    const kinds = k.map((x) => x.kind);
-    expect(kinds).toEqual([...kinds].sort((a, b) => ['active', 'chelator', 'caution'].indexOf(a) - ['active', 'chelator', 'caution'].indexOf(b)));
-    expect(kinds).toContain('chelator');
-    const frag = k.find((x) => x.ingredient.riskTags.includes('fragrance') && !x.ingredient.euAllergen);
-    expect(frag?.role.zh).toBe('加香');
-    expect(keyIngredients(byId('SH-US-048'), index, ['dandruff'], 2)).toHaveLength(2);
+    expect(k.map((x) => x.kind)).toContain('chelator');
+    expect(k.every((x) => x.kind === 'active' || x.kind === 'chelator')).toBe(true);
+    expect(k.some((x) => x.ingredient.riskTags.includes('fragrance'))).toBe(false);
+    expect(keyIngredients(byId('SH-US-048'), index, ['dandruff'], 1)).toHaveLength(1);
   });
 
   it('只有含去屑有效成分的产品才显示去屑用法', () => {
@@ -67,11 +71,70 @@ describe('卡片：关键成分与温和度', () => {
     const plain = real.products.find((p) => p.category === 'conditioner' && !hasAntiDandruffActive(p, index));
     expect(plain).toBeDefined();
   });
+});
 
-  it('强清洁力表活只在计入温和度时列出', () => {
+describe('卡片：需求对照、需要注意、评分明细', () => {
+  const data = { index, exchangeRates: real.exchangeRates, budgetCaps: computeBudgetCaps(real.products, real.exchangeRates), allowDraft: true };
+  const ctx = { cities: real.cities, exchangeRates: real.exchangeRates };
+  const answers = (scalp: Partial<ScalpAnswers>, hair: Partial<HairAnswers> = {}, wash: ScalpAnswers['washFrequency'] = null) => ({
+    base: { ...newProfile('我', 'me').base, scope: 'shampoo' as const },
+    scalp: { concerns: [], oilTiming: null, washFrequency: wash, ...scalp },
+    hair: { ...EMPTY_HAIR, ...hair },
+  });
+
+  it('每个已选需求一行：满足 / 部分 / 无依据，带依据类型；"柔顺"只占一行', () => {
+    const profile = toScoringProfile(answers({ concerns: ['dandruff'] }, { goals: ['smooth', 'volume'] }), 'shampoo', ctx);
+    const r = scoreProduct(byId('SH-US-001'), profile, data);
+    const rows = needRows(r);
+    expect(rows.map((x) => x.id)).toEqual(['dandruff', 'smooth', 'volume']);
+    expect(rows[0]).toMatchObject({ result: 'met', basis: 'ingredients' });
+    expect(rows[0].evidence!.zh).toContain('吡硫鎓锌');
+    for (const x of rows) {
+      if (x.result === 'none') expect(x).toMatchObject({ basis: null, evidence: null });
+      else expect(x.basis).not.toBeNull();
+    }
+    const sum = needSummary(rows);
+    expect(sum.met + sum.partial + sum.none).toBe(3);
+  });
+
+  it('需要注意：按温和度的扣分列出风险成分；冲洗型减半写明；强清洁力表活不扣分时说明原因', () => {
     const p = byId('SH-US-048');
-    expect(irritantKinds(p, index, false).map((x) => x.zh)).not.toContain('强清洁力表活');
-    expect(irritantKinds(p, index, true).map((x) => x.zh)).toContain('强清洁力表活');
+    const notDaily = toScoringProfile(answers({ concerns: ['dandruff'] }, {}, 'every_other_day'), 'shampoo', ctx);
+    const r = scoreProduct(p, notDaily, data);
+    const items = cautionItems(r, notDaily);
+    const frag = items.find((x) => x.label.zh === '香精 / 香料')!;
+    expect(frag.note.zh).toMatch(/^温和度扣 [\d.]+ 分（冲洗型产品，香精 \/ 香料扣分减半）$/);
+    const cleanser = items.find((x) => x.label.zh === '强清洁力表活')!;
+    expect(cleanser.note.zh).toBe('你不是每天洗头，不扣分');
+    // 扣分合计与温和度得分一致，不互相矛盾
+    const total = r.irritation.hits.reduce((n, h) => n + h.deduction, 0);
+    expect(r.dimensions.irritation.score).toBe(Math.round(Math.max(0, 100 - total)));
+    const daily = toScoringProfile(answers({ concerns: ['dandruff'] }, {}, 'daily'), 'shampoo', ctx);
+    expect(cautionItems(scoreProduct(p, daily, data), daily).find((x) => x.label.zh === '强清洁力表活')!.note.zh).toMatch(/^温和度扣/);
+  });
+
+  it('正式模式（不用未核对数据打分）下，未核对的风险成分仍列在"需要注意"，注明未计入温和度', () => {
+    const strict = { ...data, allowDraft: false };
+    const profile = toScoringProfile(answers({ concerns: ['dandruff'] }), 'shampoo', ctx);
+    const p = real.products.find((x) => scoreProduct(x, profile, strict).fragrance.status === 'contains'
+      && scoreProduct(x, profile, strict).irritation.hits.some((h) => h.unverified))!;
+    expect(p).toBeDefined();
+    const r = scoreProduct(p, profile, strict);
+    const items = cautionItems(r, profile);
+    expect(items.length).toBeGreaterThan(0);
+    expect(items.some((x) => x.note.zh === '成分数据未核对，暂未计入温和度')).toBe(true);
+    expect(r.irritation.hits.filter((h) => h.unverified).every((h) => h.deduction === 0 && !h.counted)).toBe(true);
+  });
+
+  it('评分明细：实际权重为重新归一化后的值，贡献合计等于总分（未封顶时）', () => {
+    const profile = toScoringProfile(answers({ concerns: ['dandruff'] }), 'shampoo', ctx);
+    const r = scoreProduct(byId('SH-US-001'), profile, data);
+    const bd = scoreBreakdown(r);
+    const scored = bd.rows.filter((x) => x.score !== null);
+    expect(scored.reduce((n, x) => n + x.weight!, 0)).toBeCloseTo(1, 10);
+    expect(bd.rows.find((x) => x.key === 'environment')).toMatchObject({ score: null, weight: null, contribution: null });
+    if (!r.evidenceCapped) expect(Math.round(bd.sum!)).toBe(r.score);
+    else expect(r.score!).toBeLessThanOrEqual(Math.round(bd.sum!));
   });
 });
 
@@ -83,5 +146,32 @@ describe('卡片：在售版本与品牌页不一致', () => {
     const rows = storeRows(p);
     expect(rows.some((r) => r.platform === 'brand' || r.url.includes('lorealparisusa.com'))).toBe(false);
     expect(primaryStore(p)?.platform).not.toBe('brand');
+  });
+});
+
+describe('百货 / 买手渠道', () => {
+  it('从链接识别 Nordstrom、Neiman Marcus、Saks Fifth Avenue、Bergdorf Goodman、Bluemercury', () => {
+    expect(platformOf('https://www.nordstrom.com/s/x').platform).toBe('nordstrom');
+    expect(platformOf('https://www.neimanmarcus.com/p/x').platform).toBe('neiman_marcus');
+    expect(platformOf('https://www.saksfifthavenue.com/product/x').platform).toBe('saks');
+    expect(platformOf('https://www.bergdorfgoodman.com/p/x').platform).toBe('bergdorf_goodman');
+    expect(platformOf('https://bluemercury.com/products/x').platform).toBe('bluemercury');
+  });
+
+  it('顺序：品牌官网 → Ulta → Sephora → Target → Amazon → 百货（按固定顺序）→ 其他', () => {
+    const base = byId('SH-US-001');
+    const link = (platform: Product['purchaseLinks'][number]['platform'], url: string) => ({ productId: base.productId, platform, url, status: '', checkedOn: '', note: '' });
+    const p: Product = {
+      ...base,
+      purchaseUrl: 'https://www.walgreens.com/x',
+      purchaseLinks: [
+        link('bluemercury', 'https://bluemercury.com/x'),
+        link('nordstrom', 'https://www.nordstrom.com/x'),
+        link('amazon', 'https://www.amazon.com/x'),
+        link('saks', 'https://www.saksfifthavenue.com/x'),
+        link('brand', 'https://brand.example/x'),
+      ],
+    };
+    expect(storeRows(p).map((r) => r.platform)).toEqual(['brand', 'amazon', 'nordstrom', 'saks', 'bluemercury', 'other']);
   });
 });

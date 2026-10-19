@@ -253,10 +253,13 @@ button.tag { cursor: pointer; }
 .pimg img { width: 100%; height: 100%; object-fit: contain; }
 .pimg.placeholder svg { width: 32px; height: 48px; fill: none; stroke: var(--muted); stroke-width: 1.5; }
 .tag.award { font-size: 13px; padding: 2px 8px; background: var(--tint); border-color: transparent; }
-.reasons { margin: 16px 0 0; padding: 0; list-style: none; font-size: var(--fs-small); color: var(--ink-2); }
-.reasons li { padding-left: 16px; position: relative; }
-.reasons li + li { margin-top: 6px; }
-.reasons li::before { content: ''; position: absolute; left: 0; top: 0.65em; width: 6px; height: 1px; background: var(--ink); }
+/* 列表统一样式：收起状态的理由和详情里的列表相同 */
+.list { margin: 0; padding: 0; list-style: none; font-size: var(--fs-small); color: var(--ink-2); }
+.list > li { padding-left: 16px; position: relative; }
+.list > li + li { margin-top: 6px; }
+.list > li::before { content: ''; position: absolute; left: 0; top: 0.65em; width: 6px; height: 1px; background: var(--ink); }
+.list .note { margin-top: 2px !important; }
+.reasons { margin-top: 16px; }
 .buy { margin-top: 16px; }
 .buy .btn { min-height: 44px; }
 .product .brand { font-size: var(--fs-label); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
@@ -267,19 +270,6 @@ button.tag { cursor: pointer; }
 .score .num { font-size: 40px; line-height: 1; font-weight: 500; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .score .of { font-size: var(--fs-label); color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
 
-.dims { list-style: none; padding: 0; margin: 20px 0 0; border-top: 1px solid var(--line); }
-.dim { padding: 12px 0; border-bottom: 1px solid var(--line); }
-.dim-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; }
-.dim-name { font-size: var(--fs-small); font-weight: 500; }
-.meter { display: grid; grid-template-columns: repeat(4, 14px); gap: 3px; }
-.meter i { height: 4px; background: var(--line); }
-.meter i.on { background: var(--ink); }
-.dim-level { font-size: var(--fs-label); letter-spacing: 0.08em; text-transform: uppercase; min-width: 4.5em; text-align: right; }
-.dim-level.high { color: var(--good); }
-.dim-level.medium { color: var(--ink-2); }
-.dim-level.low { color: var(--ink-2); }
-.dim-level.none { color: var(--muted); }
-.dim-reason { margin-top: 6px; font-size: var(--fs-small); color: var(--ink-2); }
 
 .flags { margin-top: 16px; font-size: var(--fs-small); }
 .flags ul { margin: 6px 0 0; padding-left: 1.1em; color: var(--ink-2); }
@@ -298,6 +288,7 @@ details.more[open] summary::after { content: '−'; }
   border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 4px 10px;
   font-size: 14px; cursor: pointer;
 }
+.ing-chip.no-zh { font-style: italic; }
 .ing-pop {
   position: absolute; z-index: 10; top: calc(100% + 6px); left: 0; width: min(300px, 80vw);
   display: flex; flex-direction: column; gap: 6px; padding: 14px; font-size: var(--fs-small);
@@ -408,9 +399,26 @@ details.more[open] summary::after { content: '−'; }
 .card-details section { padding: 16px 0; border-bottom: 1px solid var(--line); font-size: var(--fs-small); }
 .card-details section p { margin: 0; }
 .card-details section p + p { margin-top: 6px; }
-.sec-title { font-size: var(--fs-small); font-weight: 500; margin: 0 0 10px; }
-.why { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.why li { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+/* 分区标题：加粗，比正文（14px）大一级 */
+.sec-title { font-size: var(--fs-body); font-weight: 600; margin: 0 0 10px; color: var(--ink); }
+/* 需求对照：需求名 · 结果 · 依据 */
+.need-row { display: grid; grid-template-columns: minmax(4.5em, auto) auto 1fr; gap: 4px 10px; align-items: baseline; }
+.need-name { color: var(--ink); }
+.need-result { font-weight: 500; }
+.need-result.met { color: var(--good); }
+.need-result.partial { color: var(--ink-2); }
+.need-result.none { color: var(--muted); }
+.need-basis { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 8px; min-width: 0; }
+/* 评分明细表 */
+.bd { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.bd th, .bd td { text-align: right; padding: 6px 0 6px 8px; border-bottom: 1px solid var(--line); }
+.bd th:first-child, .bd td:first-child { text-align: left; padding-left: 0; }
+.bd th { font-weight: 500; color: var(--ink-2); }
+.bd tr.off td { color: var(--muted); }
+.bd tr.off td + td { text-align: left; }
+.bd tr.bd-total td { font-weight: 600; border-bottom: 0; }
+/* 没有中文名的成分：中文界面显示 INCI 名，统一用斜体标出 */
+.no-zh { font-style: italic; }
 .basis-tag { flex: none; font-size: 13px; color: var(--ink-2); background: var(--tint); border-radius: 6px; padding: 1px 8px; }
 .stores { list-style: none; margin: 0; padding: 0; }
 .stores li + li { border-top: 1px solid var(--line); }
@@ -421,12 +429,6 @@ details.more[open] summary::after { content: '−'; }
 .ext { width: 16px; height: 16px; fill: none; stroke: var(--ink-2); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .note { font-size: 13px; color: var(--muted); margin-top: 8px !important; }
 .note a { color: inherit; }
-.keyings { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.keyings .muted { color: var(--ink-2); }
-.kv { margin: 0; display: grid; gap: 8px; }
-.kv > div { display: grid; grid-template-columns: 4.5em 1fr; gap: 8px; }
-.kv dt { color: var(--ink-2); }
-.kv dd { margin: 0; }
 details.sub { margin-top: 12px; }
 details.sub > summary { cursor: pointer; font-size: var(--fs-small); color: var(--ink); }
 .card-details > details.sub { padding: 14px 0; border-bottom: 1px solid var(--line); margin: 0; }

@@ -26,11 +26,6 @@ export function priceInfo(product: Product, rates: ExchangeRate[]): PriceInfo {
   return usd === null ? { status: 'no_rate', usd: null } : { status: 'ok', usd };
 }
 
-/** 上限含等于；cap 为 null 表示不限 */
-export function withinBudget(usd: number, cap: number | null): boolean {
-  return cap === null || usd <= cap;
-}
-
 /** 展示用取整：1000 以上取整到百位，其余取整到个位 */
 export function roundForDisplay(amount: number): number {
   return amount >= 1000 ? Math.round(amount / 100) * 100 : Math.round(amount);

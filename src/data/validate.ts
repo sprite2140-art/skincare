@@ -5,7 +5,7 @@ import { unmatchedKeyActives } from './keyActives';
 import { SOURCE_LEVELS, expandIngredients, onlyFragranceFunctions, type AllergenEntry, type CosingEntry, type ExplanationEntry, type IngredientLists } from './cosing';
 import { ingredientFrequency } from './frequency';
 import {
-  BRAND_CLAIM_STATUSES, CATEGORIES, PRODUCT_SUBTYPES, RETAIL_PLATFORMS, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
+  BRAND_CLAIM_STATUSES, CATEGORIES, INCLUSION_BASIS_TYPES, PRODUCT_SUBTYPES, RETAIL_PLATFORMS, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
   REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
 } from './types';
 import type { Category, City, ExchangeRate, Ingredient, Product, ReferenceWater, WaterRecord } from './types';
@@ -121,6 +121,7 @@ export function validateData(
       err(F_PRD, key, `品类 ${p.category} 没有默认使用方式，usage_type 必须填写 rinse_off 或 leave_on`);
     }
     oneOf(F_PRD, key, 'region', p.region, REGIONS);
+    if (p.inclusionBasisType !== null) oneOf(F_PRD, key, 'inclusion_basis_type', p.inclusionBasisType, INCLUSION_BASIS_TYPES);
     oneOf(F_PRD, key, 'available_in_cn', p.availableInCn, CN_AVAILABILITY);
     oneOf(F_PRD, key, 'transparency', p.transparency, TRANSPARENCY);
     if (p.inciList.length === 0) err(F_PRD, key, 'inci_list 为空');

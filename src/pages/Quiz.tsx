@@ -8,7 +8,7 @@ import type { Category } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import {
-  EMPTY_HAIR, MAX_GOALS, TONE_GOALS, cityKey, migrateHair, migrateScalp, scopeCategories, toneGoalAvailable,
+  EMPTY_HAIR, MAX_GOALS, cityKey, goalAvailable, migrateHair, migrateScalp, scopeCategories,
   type Discomfort, type DiscomfortFrequency, type HairLength, type HairLossAmount, type Redness, type StylingUse, type ThinningArea, type AvoidOption, type BaseAnswers, type BudgetMode, type CarePref,
   type ConditionerStatus, type DandruffType, type HairAnswers, type HairCondition, type HairGoal,
   type HairTexture, type HairThickness, type Money, type PurchaseScope, type ScalpAnswers, type ScalpConcern, type ScalpOilTiming,
@@ -25,9 +25,12 @@ const EMPTY_SCALP: ScalpAnswers = {
 };
 const AUTO_ADVANCE_MS = 220;
 
-/** 取消染、烫漂后，"去黄 / 去橙"不再可选，从已选效果中去掉，避免占用 3 项名额 */
-function withoutUnavailableTone(h: HairAnswers): HairAnswers {
-  return toneGoalAvailable(h) ? h : { ...h, goals: h.goals.filter((g) => !TONE_GOALS.includes(g)) };
+/**
+ * 当前答案下不可选的期望效果（取消染、烫漂后的去黄 / 去橙 / 修护受损 / 护色；造型产品不到每周 3 次时的
+ * 去除造型产品残留）从已选效果中去掉，避免占用 3 项名额
+ */
+function withoutUnavailableGoals(h: HairAnswers, scalp: ScalpAnswers | null): HairAnswers {
+  return { ...h, goals: h.goals.filter((g) => goalAvailable(g, h, scalp)) };
 }
 
 type StepId =
@@ -134,7 +137,9 @@ export default function Quiz() {
   // 只买护发素时不问头皮
   // 细问只在选了对应困扰时出现
   const scalpSteps: StepId[] = base.scope === 'conditioner' ? [] : [
-    'oil', 'concerns',
+    'concerns',
+    // 出油时间只在选了"容易出油"时追问
+    ...(scalp.concerns.includes('oily') ? (['oil'] as StepId[]) : []),
     ...(scalp.concerns.includes('dandruff') ? (['dandruff', 'dandruffAmount'] as StepId[]) : []),
     ...(scalp.concerns.includes('itch') ? (['itch'] as StepId[]) : []),
     'discomfort', 'redness',
@@ -154,6 +159,7 @@ export default function Quiz() {
   const finish = () => {
     const cleanedScalp: ScalpAnswers = {
       ...scalp,
+      oilTiming: scalp.concerns.includes('oily') ? scalp.oilTiming : null,
       dandruffType: scalp.concerns.includes('dandruff') ? scalp.dandruffType : null,
       dandruffAmount: scalp.concerns.includes('dandruff') ? scalp.dandruffAmount : null,
       itchScore: scalp.concerns.includes('itch') ? scalp.itchScore : null,
@@ -164,8 +170,8 @@ export default function Quiz() {
       // 回答了新的掉发量题后，不再保留旧版追问
       hairLossLevel: scalp.concerns.includes('hair_loss') && scalp.hairLossAmount == null ? scalp.hairLossLevel : null,
     };
-    // "去黄 / 去橙"只在选了染或烫漂时有效
-    const cleanedHair: HairAnswers = withoutUnavailableTone(hair);
+    // 去黄 / 去橙 / 修护受损 / 护色只在选了染或烫漂时有效，去除造型产品残留只在常用造型产品时有效
+    const cleanedHair: HairAnswers = withoutUnavailableGoals(hair, base.scope === 'conditioner' ? null : cleanedScalp);
     // 只有一个品类时预算一定按单品
     const cleanedBase: BaseAnswers = { ...base, budgetMode: multiCategory ? base.budgetMode : 'item' };
     save({ ...start, base: cleanedBase, scalp: cleanedScalp, hair: cleanedHair });
@@ -294,7 +300,7 @@ export default function Quiz() {
           <h1 className="h1">{t('quiz.concerns')}</h1>
           <p className="hint">{t('quiz.multiHint')}</p>
           <Multi<ScalpConcern>
-            options={['dandruff', 'itch', 'dry_tight', 'hair_loss']}
+            options={['dandruff', 'itch', 'dry_tight', 'oily', 'sensitive', 'hair_loss']}
             value={scalp.concerns}
             label={(v) => t(`quiz.concern.${v}` as Key)}
             onChange={(v) => setScalp((s) => ({ ...s, concerns: v, noConcerns: false }))}
@@ -550,13 +556,13 @@ export default function Quiz() {
             value={hair.conditions}
             label={(v) => t(`quiz.condition.${v}` as Key)}
             onChange={(v) => {
-              setHair((h) => withoutUnavailableTone({ ...h, conditions: v }));
+              setHair((h) => withoutUnavailableGoals({ ...h, conditions: v }, base.scope === 'conditioner' ? null : scalp));
               setConditionsNone(false);
             }}
             noneLabel={t('quiz.condition.none')}
             noneOn={conditionsNone}
             onNone={() => {
-              setHair((h) => withoutUnavailableTone({ ...h, conditions: [] }));
+              setHair((h) => withoutUnavailableGoals({ ...h, conditions: [] }, base.scope === 'conditioner' ? null : scalp));
               setConditionsNone(true);
             }}
           />
@@ -569,10 +575,10 @@ export default function Quiz() {
           <h1 className="h1">{t('quiz.goals')}</h1>
           <p className="hint">{t('quiz.goalsHint', { n: MAX_GOALS })}</p>
           <Multi<HairGoal>
-            options={[
+            options={([
               'smooth', 'moisture', 'less_frizz', 'clean', 'volume', 'shine', 'curl',
-              ...(toneGoalAvailable(hair) ? (['tone_yellow', 'tone_orange'] as HairGoal[]) : []), 'scent',
-            ]}
+              'repair', 'color_care', 'tone_yellow', 'tone_orange', 'buildup', 'scent',
+            ] as HairGoal[]).filter((g) => goalAvailable(g, hair, base.scope === 'conditioner' ? null : scalp))}
             value={hair.goals}
             label={(v) => t(`quiz.goal.${v}` as Key)}
             onChange={(v) => setHairField('goals', v.slice(0, MAX_GOALS))}

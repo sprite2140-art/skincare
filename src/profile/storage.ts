@@ -1,6 +1,7 @@
 // 用户档案只存在浏览器本地（localStorage），不上传。
 // 格式带版本号，以后改字段时在 migrate() 里升级旧数据。
 
+import { isBudgetChoice } from '../scoring/budget';
 import { EMPTY_HAIR, type BaseAnswers, type HairAnswers, type ScalpAnswers } from './questionnaire';
 
 export const STORAGE_KEY = 'skincare.profiles';
@@ -62,7 +63,10 @@ function migrate(data: unknown): ProfileStore {
     // 补齐后来新增的字段，旧档案也能直接用
     const profiles = d.profiles.map((p) => {
       const blank = newProfile(p.name, p.id);
-      return { ...blank, ...p, base: { ...blank.base, ...p.base }, hair: p.hair ? { ...EMPTY_HAIR, ...p.hair } : null };
+      const base = { ...blank.base, ...p.base };
+      // 旧的预算档（p33 / p67）和前一版的区间（q4）已不对应现在的四分位上限，去掉后需要重新选择
+      base.budgets = Object.fromEntries(Object.entries(base.budgets ?? {}).filter(([, v]) => isBudgetChoice(v)));
+      return { ...blank, ...p, base, hair: p.hair ? { ...EMPTY_HAIR, ...p.hair } : null };
     });
     return { version: STORE_VERSION, activeId: d.activeId ?? null, profiles };
   }

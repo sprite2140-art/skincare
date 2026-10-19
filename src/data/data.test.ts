@@ -140,6 +140,16 @@ describe('本轮新增的产品列', () => {
     expect(errorsOf({ products: [p] })).toEqual([]);
   });
 
+  it('inclusion_basis_type：零售商畅销榜 / 百货畅销榜 / 美容大奖，可留空；只决定能否入库，不参与打分', () => {
+    const [q] = parseProducts('product_id,brand,category,inclusion_basis,inclusion_basis_type,inci_list\nX,B,shampoo,Nordstrom Best Sellers,department_store_bestseller,Water\n');
+    expect(q.inclusionBasisType).toBe('department_store_bestseller');
+    expect(p.inclusionBasisType).toBeNull();
+    for (const t of ['retailer_bestseller', 'department_store_bestseller', 'beauty_award'] as const) {
+      expect(errorsOf({ products: [{ ...p, inclusionBasisType: t }] })).toEqual([]);
+    }
+    expect(errorsOf({ products: [{ ...p, inclusionBasisType: 'tiktok' as never }] })).toEqual([expect.stringContaining('inclusion_basis_type')]);
+  });
+
   it('旧格式（没有新列）仍能解析，取默认值', () => {
     expect(sample.productId).toBe('SH-US-001');
     const [old] = parseProducts('product_id,brand,category,inci_list\nX,B,shampoo,Water\n');
