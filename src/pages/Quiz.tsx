@@ -274,7 +274,7 @@ export default function Quiz() {
               {cities.filter((c) => c.country === 'US').map((c) => <option key={cityKey(c)} value={cityKey(c)}>{cityName(c, lang)}</option>)}
             </optgroup>
             <optgroup label={t('quiz.cityGroupOther')}>
-              {cities.filter((c) => c.country !== 'US').map((c) => <option key={cityKey(c)} value={cityKey(c)}>{cityKey(c)}</option>)}
+              {cities.filter((c) => c.country !== 'US').map((c) => <option key={cityKey(c)} value={cityKey(c)}>{cityName(c, lang)}</option>)}
             </optgroup>
           </select>
           {city && <WaterInfo city={city} />}

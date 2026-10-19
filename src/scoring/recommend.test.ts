@@ -176,6 +176,14 @@ describe('场景 3：染烫受损，选洗护搭配，自填总预算', () => {
     expect(routineTotal([sh.chosen, co.options.find((o) => o.product.productId === 'CO-T-1')!])).toBeCloseTo(sh.chosen!.price.usd! + 35);
   });
 
+  it('选组合时先比适合等级（含上限），再比总分', () => {
+    const base = lists.conditioner[0];
+    const capped = { ...base, product: { ...base.product, productId: 'CO-T-CAP' }, fitLevel: 'low' as const, score: 95, price: { ...base.price, usd: 5 } };
+    const met = { ...base, product: { ...base.product, productId: 'CO-T-MET' }, fitLevel: 'medium' as const, score: 70, price: { ...base.price, usd: 5 } };
+    const routine = buildRoutine(['conditioner'], { conditioner: [capped, met] }, cap);
+    expect(routine.slots[0].chosen!.product.productId).toBe('CO-T-MET');
+  });
+
   it('总预算内找不到组合时明确返回 no_match，不放宽条件', () => {
     const routine = buildRoutine(['shampoo'], lists, 1);
     expect(routine.noMatch).toBe(true);
