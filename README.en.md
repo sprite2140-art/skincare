@@ -52,7 +52,7 @@ Stack: Vite + React + TypeScript. The site reads `data/*.csv` at build time. It 
 
 ## Status
 
-v0.1 covers scalp and hair (shampoo, conditioner, sets) for US users, with Chinese and English interfaces. Pre-launch ingredient review is in progress. The disclaimer and privacy notes are on the site's /about page.
+v0.1 covers scalp and hair (shampoo, conditioner, sets) for US users, with Chinese and English interfaces. Pre-launch ingredient review is in progress. The disclaimer and privacy notes are on the site's /about page; how scores and data are judged is explained on /data.
 
 ## License
 

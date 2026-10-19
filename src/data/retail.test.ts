@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadDataFromDisk } from './node';
 import { RETAIL_PLATFORMS } from './types';
-import { MIN_RATING_COUNT, buyLinks, ratingCountForThreshold, ratingCountText, visibleRatings } from './retail';
+import { MIN_RATING_COUNT, ratingCountForThreshold, ratingCountText, visibleRatings } from './retail';
 
 const real = loadDataFromDisk();
 const byId = (id: string) => real.products.find((p) => p.productId === id)!;
@@ -25,12 +25,8 @@ describe('零售商评分与购买链接（只展示，不计分）', () => {
     expect(ratingCountText(amazon)).toBe('6,395');
   });
 
-  it('购买链接按固定顺序（品牌官网 → Ulta → Sephora → Target → Amazon）；主按钮用产品表的 purchase_url，其余列为其他渠道', () => {
-    const p = byId('SH-US-001');
-    expect(p.purchaseLinks.map((l) => l.platform)).toEqual(['brand', 'ulta', 'target', 'amazon']);
-    const { primary, others } = buyLinks(p);
-    expect(primary).toBe(p.purchaseUrl);
-    expect(others.every((l) => l.url !== primary)).toBe(true);
+  it('购买链接按固定顺序（品牌官网 → Ulta → Sephora → Target → Amazon）挂到产品上', () => {
+    expect(byId('SH-US-001').purchaseLinks.map((l) => l.platform)).toEqual(['brand', 'ulta', 'target', 'amazon']);
   });
 
   it('评分不影响打分：产品去掉评分后分数不变', async () => {

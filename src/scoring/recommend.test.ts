@@ -229,12 +229,14 @@ describe('产品定位的来源标注', () => {
     expect(r.dimensions.evidence.state).toBe('missing');
     expect(r.dimensions.evidence.reason.zh).toContain('暂无成分或测试证据');
     expect(recommendReasons(r, prof, false)[0].zh).toBe('定位为针对光泽的产品');
+    expect(recommendReasons(r, prof, false)[0].basis).toBe('classification');
   });
 
   it('品牌原文（brand_text）才显示为"品牌宣称"，计分相同', () => {
     const r = scoreProduct({ ...base, claimSource: 'brand_text' }, prof, data);
     expect(r.dimensions.need.score).toBe(70);
     expect(recommendReasons(r, prof, false)[0].zh).toBe('品牌说明针对光泽');
+    expect(recommendReasons(r, prof, false)[0].basis).toBe('brand_claim');
   });
 
   it('"日常清洁"对应清爽洁净；去黄、去橙分开记录', () => {
@@ -451,5 +453,16 @@ describe('证据缺失的说明', () => {
     expect(r.dimensions.need.score).toBeGreaterThan(0);
     expect(r.dimensions.evidence.state).toBe('missing');
     expect(r.dimensions.evidence.reason.zh).toContain('尚无证据等级的成分');
+  });
+});
+
+describe('温和理由：有成分暂无数据时不下"不含"的结论', () => {
+  it('不含加香成分、刺激风险满分，但有成分暂无数据 → "常见刺激成分少"', () => {
+    const { profile, ok } = recommend(answers({ base: { scope: 'conditioner' } }), 'conditioner');
+    const withUnknown = ok.find((r) => r.fragrance.status !== 'contains' && r.fragrance.unknownCount > 0 && r.dimensions.irritation.score === 100);
+    expect(withUnknown).toBeDefined();
+    expect(recommendReasons(withUnknown!, profile, false).map((x) => x.zh)).not.toContain('不含香精和常见刺激成分');
+    const clean = ok.find((r) => r.fragrance.status !== 'contains' && r.fragrance.unknownCount === 0 && r.dimensions.irritation.score === 100);
+    if (clean) expect(recommendReasons(clean, profile, false).map((x) => x.zh)).toContain('不含香精和常见刺激成分');
   });
 });
