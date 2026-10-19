@@ -43,12 +43,12 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 
 | 字段 | 含义 | 示例 |
 |---|---|---|
-| product_id | 唯一编号：品类-地区-序号 | SH-US-001 |
+| product_id | 唯一编号：品类-地区-序号。面部品类的前缀见下方"面部产品"，序号 3 位，校验会检查 | SH-US-001 |
 | brand | 品牌 | |
 | name_en / name_zh | 产品名 | |
 | zone | face / scalp / hair / body | scalp |
 | category | 品类编号（取值见下） | shampoo |
-| usage_type | 使用方式：rinse_off（冲洗型）/ leave_on（免洗型）。留空则用品类默认值；卸妆、去角质必须填写 | |
+| usage_type | 使用方式：rinse_off（冲洗型）/ leave_on（免洗型）。留空则用品类默认值；卸妆、去角质、面膜必须填写 | |
 | subtype | 细分类型，普通产品留空。co_wash = 清洁型护发素：代替洗发水使用，category 必须为 shampoo（清洁步骤），页面显示"Co-wash · 清洁型护发素"标签和单独的使用说明，不能当作洗后护发素 | co_wash |
 | region | US / JP / KR / CN | US |
 | formula_note | 配方版本说明 | 美国版 |
@@ -76,6 +76,56 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | paired_product_ids | 同系列的其他品类产品 ID，分号分隔，双向记录（洗发水记护发素、护发素记洗发水）。只用于显示"同系列"，不代表必须成套购买，搭配不限定同系列 | CO-US-001 |
 | image_url / image_source / image_license / image_license_url / image_attribution | 产品图链接、来源记录页、许可名称、许可链接、署名。**五项都填写时页面才展示图片**（详情中显示署名、来源和许可链接），否则用按品类区分的占位图。优先使用 Open Beauty Facts 等开放授权来源；**不抓取零售商网站的图片**。目前 CO-US-005、CO-US-009 两张来自 Open Beauty Facts（CC BY-SA 3.0），可能是旧包装，不用于证明当前配方 | |
 | reviewed_on | 核对日期 | |
+| skin_type_claim … face_step_note | 面部属性，共 10 列，接在 reviewed_on 之后，见下方"面部产品" | |
+
+### 面部产品（2026-10-19 起）
+
+**品类与编号**：面部品类的 zone 必须为 face，product_id 前缀按品类：
+
+| 前缀 | 品类 | category | usage_type 默认值 |
+|---|---|---|---|
+| CL | 洁面 | cleanser | rinse_off |
+| MO | 保湿 | moisturizer | leave_on |
+| SU | 防晒 | sunscreen | leave_on |
+| SE | 精华 / 功效 | serum | leave_on |
+| EX | 去角质 | exfoliator | 必须逐个填写 |
+| ST | 点涂 | spot_treatment | leave_on |
+| EY | 眼霜 | eye_cream | leave_on |
+| FO | 面油 | face_oil | leave_on |
+| MA | 面膜 | mask | 必须逐个填写 |
+
+卸妆（makeup_remover）、化妆水（toner）暂不在第一阶段，前缀未定。
+
+**10 列面部属性**（products.csv 在 reviewed_on 之后，列名如下）。洗护产品和旧数据没有这些列或为空，不报错；空值按下表的默认值处理。体验和用法只填品牌原文，不从成分推测。
+
+| 字段 | 取值 | 留空 |
+|---|---|---|
+| skin_type_claim | 品牌标注的适用肤质：oily / dry / combination / normal / sensitive / all，分号分隔 | 未标注 |
+| texture | gel / lotion / cream / balm / oil / foam / liquid / stick | 未知 |
+| spf | 正数，**只有 sunscreen 填写**（其他品类填了报错；防晒没填给提示） | 未知 |
+| broad_spectrum | yes / no / unknown（广谱防晒标注，只用于防晒） | unknown |
+| water_resistance | 40 / 80 / none / unknown（防水分钟数，只用于防晒） | unknown |
+| active_concentrations | 品牌公开的有效成分浓度，每项 `INCI\|浓度\|链接`，分号分隔；三项都必填，浓度含数字（如 2%），链接为出处。INCI 在 inci_list 中找不到时给提示 | 未公开 |
+| use_time | am / pm / both / unknown（品牌说明的使用时间） | unknown |
+| use_frequency | 品牌原文的使用频率，如 "Use 2–3 times a week" | — |
+| non_comedogenic_claim | yes / no / unknown；填 yes 时出处为 brand_claims_source_url（必填） | unknown |
+| face_step_note | 品牌原文的使用步骤说明，如 "Apply after cleansing" | — |
+
+**面部需求代码**：acne（痘痘）、oil（出油）、dryness（干燥）、redness（泛红）、pigmentation（色沉）、aging（初老）、pores（毛孔）。面部产品的 claimed_benefits、brand_claim_targets、tested_claims 只能用这些代码。
+
+brand_claim_targets 对应表（面部）：
+
+| 品牌原文 | 代码 |
+|---|---|
+| Hydrating / Moisturizing | dryness |
+| Acne / Blemish / Breakouts | acne |
+| Oil control / Mattifying | oil |
+| Soothing / Calming / Redness | redness |
+| Brightening / Dark spots | pigmentation |
+| Anti-aging / Firming / Wrinkles | aging |
+| Pores / Refining | pores |
+
+原文（brand_claims_quote）出现这些说法、但 brand_claim_targets 没有对应代码时，`npm run validate-data` 给提示，由人工确认（代码 `src/data/face.ts` 的 FACE_CLAIM_KEYWORDS）。
 
 ### 主打成分匹配
 
@@ -99,7 +149,7 @@ key_actives 按品牌原文保存，打分时这样对应到成分表（代码 `
 
 category 取值：
 
-- 面部：makeup_remover（卸妆）, cleanser（洁面）, toner（化妆水）, serum（精华）, moisturizer（面霜）, sunscreen（防晒）, exfoliator（去角质）
+- 面部：makeup_remover（卸妆）, cleanser（洁面）, toner（化妆水）, serum（精华 / 功效）, moisturizer（保湿）, sunscreen（防晒）, exfoliator（去角质）, spot_treatment（点涂）, eye_cream（眼霜）, face_oil（面油）, mask（面膜）
 - 头皮：shampoo（洗发水）, scalp_care（头皮护理）
 - 头发：conditioner（护发素）, hair_mask（发膜）, leave_in（免洗护发乳）, hair_oil（护发油）。本轮页面实现洗发水和护发素；发膜、免洗护发乳、护发精油已预留品类和使用方式
 - 身体：body_wash（沐浴露）, body_lotion（身体乳）, body_scrub（身体去角质）
@@ -109,10 +159,10 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 | 默认值 | 品类 |
 |---|---|
 | rinse_off | cleanser, shampoo, conditioner, hair_mask, body_wash, body_scrub |
-| leave_on | toner, serum, moisturizer, sunscreen, scalp_care, leave_in, hair_oil, body_lotion |
-| 无默认值，必须逐个填写 | makeup_remover, exfoliator |
+| leave_on | toner, serum, moisturizer, sunscreen, spot_treatment, eye_cream, face_oil, scalp_care, leave_in, hair_oil, body_lotion |
+| 无默认值，必须逐个填写 | makeup_remover, exfoliator, mask |
 
-卸妆和去角质的填法：卸妆油、卸妆膏、磨砂膏、含酸洁面填 rinse_off；卸妆水、酸类爽肤水和精华填 leave_on。
+卸妆、去角质和面膜的填法：卸妆油、卸妆膏、磨砂膏、含酸洁面、需要洗掉的面膜填 rinse_off；卸妆水、酸类爽肤水和精华、免洗（睡眠）面膜填 leave_on。
 
 ### 预算价格上限（自动计算，不用手填）
 
@@ -174,7 +224,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | 字段 | 含义 |
 |---|---|
 | product_id | 对应 products.csv |
-| platform | ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks / bergdorf_goodman / bluemercury（与 purchase_links 共用平台取值，还有 brand） |
+| platform | ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks / bergdorf_goodman / bluemercury（与 purchase_links 共用平台取值，还有 brand）。也接受 neimanmarcus、bergdorf、bergdorfgoodman、saksfifthavenue 的写法，读取时统一为左边的代码 |
 | rating | 星级 0–5，取页面可见值 |
 | rating_count | 精确评价数；页面只显示缩写（如 5.5K）时留空，不推算 |
 | rating_count_display | 页面显示的原文（如 1,346、5.5K、(6,395)） |
@@ -190,7 +240,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | 字段 | 含义 |
 |---|---|
 | product_id | 对应 products.csv |
-| platform | brand（品牌官网）/ ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks（Saks Fifth Avenue）/ bergdorf_goodman / bluemercury |
+| platform | brand（品牌官网）/ ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks（Saks Fifth Avenue）/ bergdorf_goodman / bluemercury。也接受 neimanmarcus、bergdorf、bergdorfgoodman、saksfifthavenue 的写法，读取时统一为左边的代码 |
 | url | 平台上的产品页（不用搜索结果页） |
 | status | in_stock / purchasable / listed / official_store_listed_pdp_blocked（品牌店目录已确认，详情页和库存未确认）等，空白不等于不销售 |
 | checked_on / note | 核对日期、说明（如 Target Plus 第三方卖家） |

@@ -4,6 +4,7 @@ import { buildIngredientIndex, normalizeName } from './ingredientIndex';
 import { unmatchedKeyActives } from './keyActives';
 import { SOURCE_LEVELS, expandIngredients, onlyFragranceFunctions, type AllergenEntry, type CosingEntry, type ExplanationEntry, type IngredientLists } from './cosing';
 import { ingredientFrequency } from './frequency';
+import { validateFaceProduct } from './face';
 import {
   BRAND_CLAIM_STATUSES, CATEGORIES, INCLUSION_BASIS_TYPES, PRODUCT_SUBTYPES, RETAIL_PLATFORMS, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
   REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
@@ -183,6 +184,7 @@ export function validateData(
       if (seenPlatforms.has(l.platform)) warn(F, key, `${l.platform} 有多条购买链接`);
       seenPlatforms.add(l.platform);
     }
+    validateFaceProduct(p, (n) => index.get(n), (m) => err(F_PRD, key, m), (m) => warn(F_PRD, key, m));
     if (!p.purchaseUrl) warn(F_PRD, key, '缺少 purchase_url（购买链接）');
     if (p.sizeMl !== null && !(p.sizeMl > 0)) err(F_PRD, key, `size_ml 应为正数：${p.sizeMl}`);
     for (const url of p.sourceUrls) {

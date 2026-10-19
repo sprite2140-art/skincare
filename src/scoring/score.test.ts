@@ -614,10 +614,10 @@ describe('使用方式 usage_type', () => {
   it('数据校验：卸妆、去角质未填 usage_type 报错，取值非法报错', () => {
     const msgs = (p: Product) =>
       validateData(real.ingredients, [p], real.cities, real.exchangeRates).filter((i) => i.level === 'error').map((i) => i.message);
-    expect(msgs({ ...sample, category: 'exfoliator', usageType: null })).toEqual([
+    expect(msgs({ ...sample, productId: 'EX-US-001', zone: 'face', category: 'exfoliator', usageType: null })).toEqual([
       expect.stringContaining('品类 exfoliator 没有默认使用方式'),
     ]);
-    expect(msgs({ ...sample, category: 'makeup_remover', usageType: 'rinse_off' })).toEqual([]);
+    expect(msgs({ ...sample, zone: 'face', category: 'makeup_remover', usageType: 'rinse_off' })).toEqual([]);
     expect(msgs({ ...sample, usageType: 'wash' as Product['usageType'] })).toEqual([expect.stringContaining('usage_type 取值 "wash"')]);
     expect(msgs({ ...sample, usageType: null })).toEqual([]);
   });
