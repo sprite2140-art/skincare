@@ -29,9 +29,14 @@ export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
 export const CONFLICT_SEVERITIES = ['mild', 'severe'] as const;
 export type ConflictSeverity = (typeof CONFLICT_SEVERITIES)[number];
 
+/** 面部需求代码（targets 的面部部分） */
+export const FACE_TARGETS = ['acne', 'oil', 'dryness', 'redness', 'pigmentation', 'aging', 'pores'] as const;
+export type FaceTarget = (typeof FACE_TARGETS)[number];
+
 /** 品类编号（products.csv 的 category） */
 export const CATEGORIES = [
   'makeup_remover', 'cleanser', 'toner', 'serum', 'moisturizer', 'sunscreen', 'exfoliator',
+  'spot_treatment', 'eye_cream', 'face_oil', 'mask',
   'shampoo', 'scalp_care',
   'conditioner', 'hair_mask', 'leave_in', 'hair_oil',
   'body_wash', 'body_lotion', 'body_scrub',
@@ -141,6 +146,70 @@ export interface Ingredient {
   cosingFunctions?: string[];
 }
 
+/** 面部品类（zone 必须为 face） */
+export const FACE_CATEGORIES = [
+  'makeup_remover', 'cleanser', 'toner', 'serum', 'moisturizer', 'sunscreen', 'exfoliator',
+  'spot_treatment', 'eye_cream', 'face_oil', 'mask',
+] as const satisfies readonly Category[];
+
+/** 面部品类的 product_id 前缀（品类-地区-序号，如 CL-US-001）；卸妆、化妆水暂未定前缀 */
+export const FACE_ID_PREFIXES: Partial<Record<Category, string>> = {
+  cleanser: 'CL',
+  moisturizer: 'MO',
+  sunscreen: 'SU',
+  serum: 'SE',
+  exfoliator: 'EX',
+  spot_treatment: 'ST',
+  eye_cream: 'EY',
+  face_oil: 'FO',
+  mask: 'MA',
+};
+
+export const SKIN_TYPE_CLAIMS = ['oily', 'dry', 'combination', 'normal', 'sensitive', 'all'] as const;
+export type SkinTypeClaim = (typeof SKIN_TYPE_CLAIMS)[number];
+
+export const TEXTURES = ['gel', 'lotion', 'cream', 'balm', 'oil', 'foam', 'liquid', 'stick'] as const;
+export type Texture = (typeof TEXTURES)[number];
+
+export const YES_NO_UNKNOWN = ['yes', 'no', 'unknown'] as const;
+export type YesNoUnknown = (typeof YES_NO_UNKNOWN)[number];
+
+/** 防水时长（分钟），按美国 FDA 防晒标签的 40 / 80 分钟 */
+export const WATER_RESISTANCE = ['40', '80', 'none', 'unknown'] as const;
+export type WaterResistance = (typeof WATER_RESISTANCE)[number];
+
+export const USE_TIMES = ['am', 'pm', 'both', 'unknown'] as const;
+export type UseTime = (typeof USE_TIMES)[number];
+
+/** active_concentrations 的一项：品牌公开的有效成分浓度 */
+export interface ActiveConcentration {
+  inci: string;
+  /** 按原文，如 2%、0.3% */
+  concentration: string;
+  url: string;
+}
+
+/**
+ * 面部产品的属性（products.csv 在 reviewed_on 之后的 10 列）。旧数据没有这些列或为空时取默认值，不报错。
+ * 体验和用法按品牌原文，不从成分推断。
+ */
+export interface FaceAttributes {
+  skinTypeClaim: SkinTypeClaim[];
+  texture: Texture | null;
+  /** 只有 sunscreen 填写；填了但不是数字时为 NaN（由校验报错） */
+  spf: number | null;
+  broadSpectrum: YesNoUnknown;
+  waterResistance: WaterResistance;
+  activeConcentrations: ActiveConcentration[];
+  useTime: UseTime;
+  /** 品牌原文 */
+  useFrequency: string;
+  /** yes 时出处为 brand_claims_source_url */
+  nonComedogenicClaim: YesNoUnknown;
+  /** 品牌原文 */
+  faceStepNote: string;
+}
+
 export interface Product {
   productId: string;
   brand: string;
@@ -200,6 +269,8 @@ export interface Product {
   imageLicenseUrl: string;
   imageAttribution: string;
   reviewedOn: string;
+  /** 面部属性；parseProducts 总会填写（洗护产品为默认值） */
+  face?: FaceAttributes;
   /** 零售商评分（data/retail_ratings.csv），只展示，不计分 */
   ratings: RetailRating[];
   /** 各平台购买链接（data/purchase_links.csv），按 RETAIL_PLATFORMS 的固定顺序 */
@@ -219,7 +290,7 @@ export const USAGE_TYPES = ['rinse_off', 'leave_on'] as const;
 export type UsageType = (typeof USAGE_TYPES)[number];
 
 /**
- * 各品类的默认使用方式。卸妆和去角质没有统一默认值，必须按单个产品填写：
+ * 各品类的默认使用方式。卸妆、去角质和面膜没有统一默认值，必须按单个产品填写：
  * 卸妆油、卸妆膏、磨砂膏、含酸洁面为 rinse_off；卸妆水、酸类爽肤水和精华为 leave_on。
  */
 export const CATEGORY_DEFAULT_USAGE: Record<Category, UsageType | null> = {
@@ -230,6 +301,10 @@ export const CATEGORY_DEFAULT_USAGE: Record<Category, UsageType | null> = {
   moisturizer: 'leave_on',
   sunscreen: 'leave_on',
   exfoliator: null,
+  spot_treatment: 'leave_on',
+  eye_cream: 'leave_on',
+  face_oil: 'leave_on',
+  mask: null,
   shampoo: 'rinse_off',
   scalp_care: 'leave_on',
   conditioner: 'rinse_off',

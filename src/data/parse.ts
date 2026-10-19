@@ -4,6 +4,7 @@ import Papa from 'papaparse';
 import { cleanInciName } from './ingredientIndex';
 import { RETAIL_PLATFORMS } from './types';
 import type {
+  ActiveConcentration, FaceAttributes, SkinTypeClaim, Texture, UseTime, WaterResistance, YesNoUnknown,
   InclusionBasisType, PurchaseLink, RetailPlatform, RetailRating, Award, BrandClaimStatus, ProductSubtype, City, WaterRecord, ReferenceWater, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
   UsageType, WaterHardness, Zone,
@@ -97,6 +98,42 @@ export function parseTestedClaims(value: string | undefined): TestedClaim[] {
 
 const NOT_DISCLOSED = 'not separately disclosed';
 
+/** active_concentrations：`INCI|浓度|链接`，多项用分号分隔 */
+export function parseActiveConcentrations(value: string | undefined): ActiveConcentration[] {
+  return splitList(value).map((entry) => {
+    const [inci = '', concentration = '', url = ''] = entry.split('|').map((s) => s.trim());
+    return { inci, concentration, url };
+  });
+}
+
+/** 面部属性的 10 列；旧数据没有这些列或为空时取默认值 */
+export function parseFaceAttributes(r: Row): FaceAttributes {
+  return {
+    skinTypeClaim: splitList(r.skin_type_claim).map((s) => s.toLowerCase()) as SkinTypeClaim[],
+    texture: (r.texture?.toLowerCase() || null) as Texture | null,
+    spf: r.spf ? Number(r.spf) : null,
+    broadSpectrum: (r.broad_spectrum?.toLowerCase() || 'unknown') as YesNoUnknown,
+    waterResistance: (r.water_resistance?.toLowerCase() || 'unknown') as WaterResistance,
+    activeConcentrations: parseActiveConcentrations(r.active_concentrations),
+    useTime: (r.use_time?.toLowerCase() || 'unknown') as UseTime,
+    useFrequency: r.use_frequency ?? '',
+    nonComedogenicClaim: (r.non_comedogenic_claim?.toLowerCase() || 'unknown') as YesNoUnknown,
+    faceStepNote: r.face_step_note ?? '',
+  };
+}
+
+/** 平台的其他写法 → 统一取值（数据模板里可能不带下划线或用简称） */
+const PLATFORM_ALIASES: Record<string, RetailPlatform> = {
+  neimanmarcus: 'neiman_marcus',
+  bergdorf: 'bergdorf_goodman',
+  bergdorfgoodman: 'bergdorf_goodman',
+  saksfifthavenue: 'saks',
+};
+export const normalizePlatform = (value: string | undefined): RetailPlatform => {
+  const v = (value ?? '').trim().toLowerCase();
+  return PLATFORM_ALIASES[v] ?? (v as RetailPlatform);
+};
+
 export function parseProducts(text: string): Product[] {
   return parseCsv(text).map((r) => {
     const inci = parseInciList(r.inci_list);
@@ -148,6 +185,7 @@ export function parseProducts(text: string): Product[] {
     ratings: [],
     purchaseLinks: [],
     reviewedOn: r.reviewed_on ?? '',
+    face: parseFaceAttributes(r),
     };
   });
 }
@@ -155,7 +193,7 @@ export function parseProducts(text: string): Product[] {
 export function parseRetailRatings(text: string): RetailRating[] {
   return parseCsv(text).map((r) => ({
     productId: r.product_id ?? '',
-    platform: r.platform as RetailPlatform,
+    platform: normalizePlatform(r.platform),
     rating: Number(r.rating),
     ratingCount: parseNumber(r.rating_count),
     ratingCountDisplay: r.rating_count_display ?? '',
@@ -169,7 +207,7 @@ export function parseRetailRatings(text: string): RetailRating[] {
 export function parsePurchaseLinks(text: string): PurchaseLink[] {
   return parseCsv(text).map((r) => ({
     productId: r.product_id ?? '',
-    platform: r.platform as RetailPlatform,
+    platform: normalizePlatform(r.platform),
     url: r.url ?? '',
     status: r.status ?? '',
     checkedOn: r.checked_on ?? '',

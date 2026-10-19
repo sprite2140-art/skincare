@@ -11,6 +11,24 @@
 | 页面代码 | 按页面分配，一个页面只由一方负责 |
 | 代码审查 | 交叉 |
 
+## 护肤（面部）
+
+由负责面部的会话维护，只记面部相关的进度；洗护进度见下方"记录"。
+
+**当前状态**：第 1 轮（数据格式和校验）已完成，待合并。问卷和打分尚未开始。
+
+**下一步**：第 1 轮合并后写 `docs/SKIN_QUIZ_DRAFT.md`（只写文档，经作者确认后再实现）。
+
+### 2026-10-19 第 1 轮：数据格式和校验
+- 完成：
+  1. products.csv 新增 10 列面部属性（skin_type_claim、texture、spf、broad_spectrum、water_resistance、active_concentrations、use_time、use_frequency、non_comedogenic_claim、face_step_note），格式写入 DATA_SCHEMA.md "面部产品"。旧数据没有这些列也不报错；产品表本身这次没有加列（避免与洗护数据改动冲突），第一批面部数据导入时一起加。
+  2. 新品类 spot_treatment、eye_cream、face_oil、mask（zone 必须为 face）；点涂、眼霜、面油默认免洗，面膜必须逐个填写使用方式。
+  3. 面部 ID 前缀 CL / MO / SU / SE / EX / ST / EY / FO / MA，校验检查格式（如 SU-US-001）。
+  4. 面部需求代码只能用 acne、oil、dryness、redness、pigmentation、aging、pores；brand_claim_targets 对应表写入文档，原文出现对应说法但没填代码时给提示。
+  5. 零售平台 nordstrom、neiman_marcus、saks、bergdorf_goodman、bluemercury 原本已有；另外接受 neimanmarcus、bergdorf 等写法，读取时统一。
+  6. 代码：新增 `src/data/face.ts`（面部校验）和 `src/data/face.test.ts`（13 个测试）；共用文件改动：types.ts（新增类型和品类）、parse.ts（读取新列、平台写法）、validate.ts（调用面部校验，2 行）、score.test.ts（一个旧测试的样例产品补上 zone = face 和 EX 编号）。洗护的问卷和打分逻辑没有改。
+  - 测试 204 个全部通过；类型检查、数据校验（0 错误）、构建均通过。
+
 ## 记录
 
 ### 2026-10-19（Claude Code：卡片一致性、"适合"等级规则、设计自查清单）
