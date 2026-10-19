@@ -8,8 +8,8 @@ const readData = (name: string) => readFileSync(new URL(`../data/${name}`, impor
 import { validateData } from '../src/data/validate';
 import { computeBudgetCaps } from '../src/scoring/budget';
 
-const { ingredients, products, cities, exchangeRates, cosing, allergens, water, referenceWater, explanations, lists } = loadDataFromDisk();
-const issues = validateData(ingredients, products, cities, exchangeRates, { cosing, allergens, water, referenceWater, explanations, lists });
+const { ingredients, products, cities, exchangeRates, cosing, allergens, water, referenceWater, explanations, lists, aliases } = loadDataFromDisk();
+const issues = validateData(ingredients, products, cities, exchangeRates, { cosing, allergens, water, referenceWater, explanations, lists, aliases });
 // 评分和购买链接文件里的 product_id 必须在产品库中
 {
   const ids = new Set(products.map((p) => p.productId));

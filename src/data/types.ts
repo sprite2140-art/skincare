@@ -73,9 +73,12 @@ export type ClaimSource = (typeof CLAIM_SOURCES)[number];
 /**
  * 品牌产品页的效果宣称（不是独立验证的效果）。
  * brand_page_summary = brand_claims 是品牌页的中文概括；brand_page_quote = brand_claims 是品牌页英文原文摘录；
- * version_mismatch = 在售版本与品牌页不一致，留空；not_collected = 尚未收集。
+ * version_mismatch = 打分用的成分表与品牌页的配方不一致（品牌官网卖的是另一版），brand_claims 留空，不列品牌官网；
+ * retail_mismatch = 成分表和品牌宣称都取自品牌官网，二者一致，只是零售商页面的成分表不同：保留品牌宣称（英文原文摘录）
+ *   和品牌官网链接，购买链接下方提示"在售批次可能不同，以包装为准"；
+ * not_collected = 尚未收集。
  */
-export const BRAND_CLAIM_STATUSES = ['brand_page_summary', 'brand_page_quote', 'version_mismatch', 'not_collected'] as const;
+export const BRAND_CLAIM_STATUSES = ['brand_page_summary', 'brand_page_quote', 'version_mismatch', 'retail_mismatch', 'not_collected'] as const;
 export type BrandClaimStatus = (typeof BRAND_CLAIM_STATUSES)[number];
 
 export interface BrandClaims {

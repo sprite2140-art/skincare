@@ -277,7 +277,7 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
   const notices = r.notices.filter((n) => n.code === 'pregnancy_notice' || n.code === 'rx_notice' || n.code === 'budget_unchecked');
   const missing = r.notices.find((n) => n.code === 'missing_data');
   const bc = p.brandClaims;
-  const quote = bc.status === 'brand_page_quote' || lang !== 'zh' ? bc.quote || bc.text : bc.text;
+  const quote = bc.status === 'brand_page_quote' || bc.status === 'retail_mismatch' || lang !== 'zh' ? bc.quote || bc.text : bc.text;
   const showQuote = !!quote && needs.some((x) => x.basis === 'brand_claim');
   const paired = p.pairedProductIds.map((id) => products.find((x) => x.productId === id)).filter((x): x is Product => !!x);
   const bd = scoreBreakdown(r);
@@ -380,6 +380,9 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
           </ul>
           {p.brandClaims.status === 'version_mismatch' && p.purchaseLinks.some((l) => l.platform === 'brand') && (
             <p className="note">{t('card.brandMismatch')}</p>
+          )}
+          {p.brandClaims.status === 'retail_mismatch' && rows.some((x) => x.platform !== 'brand') && (
+            <p className="note">{t('card.retailMismatch')}</p>
           )}
           {checked && rows.some((x) => x.rating) && (
             <p className="note">

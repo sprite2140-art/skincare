@@ -1,6 +1,6 @@
 // 数据校验：error 表示格式错误（CI 失败），warning 表示需要补充的数据（不阻断）。
 
-import { buildIngredientIndex, normalizeName } from './ingredientIndex';
+import { aliasMap, buildIngredientIndex, INCI_ALIAS_TYPES, normalizeName, resolveAlias, type InciAlias } from './ingredientIndex';
 import { unmatchedKeyActives } from './keyActives';
 import { SOURCE_LEVELS, expandIngredients, onlyFragranceFunctions, type AllergenEntry, type CosingEntry, type ExplanationEntry, type IngredientLists } from './cosing';
 import { ingredientFrequency } from './frequency';
@@ -29,7 +29,7 @@ export function validateData(
   cities: City[],
   exchangeRates: ExchangeRate[],
   /** CosIng 批量导入的成分和欧盟香料致敏原清单；用于匹配产品成分，不做成分库的格式检查 */
-  extra: { cosing?: CosingEntry[]; allergens?: AllergenEntry[]; water?: WaterRecord[]; referenceWater?: ReferenceWater[]; explanations?: ExplanationEntry[]; lists?: IngredientLists } = {},
+  extra: { cosing?: CosingEntry[]; allergens?: AllergenEntry[]; water?: WaterRecord[]; referenceWater?: ReferenceWater[]; explanations?: ExplanationEntry[]; lists?: IngredientLists; aliases?: InciAlias[] } = {},
 ): Issue[] {
   const issues: Issue[] = [];
   const err = (file: string, key: string, message: string) =>
@@ -81,7 +81,24 @@ export function validateData(
     if (ing.reviewedOn && !DATE_RE.test(ing.reviewedOn)) err(F_ING, key, `reviewed_on 应为 YYYY-MM-DD：${ing.reviewedOn}`);
   }
 
-  const index = buildIngredientIndex(expandIngredients(ingredients, extra.cosing ?? [], extra.allergens ?? [], extra.explanations ?? [], extra.lists ?? {}));
+  const all = expandIngredients(ingredients, extra.cosing ?? [], extra.allergens ?? [], extra.explanations ?? [], extra.lists ?? {});
+  const index = buildIngredientIndex(all, extra.aliases ?? []);
+
+  // inci_aliases.csv：只收对应关系明确、有出处的别名；INCI 名必须能在成分库或 CosIng 中找到
+  const F_ALIAS = 'inci_aliases.csv';
+  const plainIndex = buildIngredientIndex(all);
+  const seenAlias = new Set<string>();
+  for (const a of extra.aliases ?? []) {
+    const key = a.alias || '(缺 alias)';
+    const n = normalizeName(a.alias);
+    if (seenAlias.has(n)) err(F_ALIAS, key, '别名重复');
+    seenAlias.add(n);
+    oneOf(F_ALIAS, key, 'alias_type', a.aliasType, INCI_ALIAS_TYPES);
+    if (!/^https?:\/\//.test(a.sourceUrl)) err(F_ALIAS, key, '必须填写 source_url（对应关系的出处）');
+    if (!plainIndex.get(a.inci)) err(F_ALIAS, key, `INCI 名 "${a.inci}" 不在成分库，也不在 CosIng`);
+    const own = plainIndex.get(a.alias);
+    if (own) warn(F_ALIAS, key, `别名本身已能匹配到 "${own.inciName}"，别名表会改为匹配 "${a.inci}"，请确认`);
+  }
   if (extra.cosing && extra.cosing.length === 0) warn('cosing_ingredients.csv', '-', '尚未导入 CosIng 数据（npm run import-cosing -- <文件>），只用成分库和致敏原清单匹配');
   for (const ing of ingredients) {
     for (const c of ing.conflictsWith) {
@@ -149,8 +166,8 @@ export function validateData(
     if (bc.text && !/^https?:\/\//.test(bc.sourceUrl)) err(F_PRD, key, 'brand_claims 有内容时必须填写 brand_claims_source_url');
     for (const t of bc.targets) oneOf(F_PRD, key, 'brand_claim_targets', t, TARGETS);
     if (bc.targets.length > 0 && !bc.text) err(F_PRD, key, 'brand_claim_targets 有内容时必须有 brand_claims（品牌宣称原文概括）');
-    if (bc.text && bc.status !== 'brand_page_summary' && bc.status !== 'brand_page_quote') {
-      err(F_PRD, key, 'brand_claims 有内容时 brand_claims_status 应为 brand_page_summary（中文概括）或 brand_page_quote（原文摘录）');
+    if (bc.text && bc.status !== 'brand_page_summary' && bc.status !== 'brand_page_quote' && bc.status !== 'retail_mismatch') {
+      err(F_PRD, key, 'brand_claims 有内容时 brand_claims_status 应为 brand_page_summary（中文概括）、brand_page_quote（原文摘录）或 retail_mismatch（原文摘录，零售商成分表不同）');
     }
     if (p.subtype !== null) {
       oneOf(F_PRD, key, 'subtype', p.subtype, PRODUCT_SUBTYPES);
@@ -203,12 +220,14 @@ export function validateData(
   if (extra.cosing && extra.cosing.length > 0) {
     const cosingNames = new Set(extra.cosing.map((c) => normalizeName(c.inciName)));
     const libraryIndex = buildIngredientIndex(ingredients);
+    const aliases = aliasMap(extra.aliases ?? []);
     const missing = new Map<string, Set<string>>();
     for (const p of products) {
       for (const n of p.inciList) {
         // 成分库登记的别名也算（如美国写法 Fragrance ↔ 欧盟 Parfum、Pyrithione Zinc ↔ Zinc Pyrithione）
         const lib = libraryIndex.get(n);
-        const candidates = [n, ...(lib ? [lib.inciName, ...lib.aliases] : [])];
+        // 别名表（inci_aliases.csv）对应的 INCI 名也算
+        const candidates = [n, resolveAlias(n, aliases), ...(lib ? [lib.inciName, ...lib.aliases] : [])];
         if (candidates.some((c) => cosingNames.has(normalizeName(c)))) continue;
         const ids = missing.get(n) ?? new Set<string>();
         ids.add(p.productId);

@@ -45,7 +45,31 @@ export interface IngredientIndex {
   all: Ingredient[];
 }
 
-export function buildIngredientIndex(ingredients: Ingredient[]): IngredientIndex {
+/** 别名类型：美国药品标签写法、美国色素名、植物油的省略写法（只收 CosIng 中对应唯一的） */
+export const INCI_ALIAS_TYPES = ['us_drug_name', 'us_color_name', 'plant_oil_short'] as const;
+export type InciAliasType = (typeof INCI_ALIAS_TYPES)[number];
+
+/** data/inci_aliases.csv 的一行：产品成分表里的非 INCI 写法 → INCI 名。products.csv 的原文不改 */
+export interface InciAlias {
+  alias: string;
+  inci: string;
+  aliasType: InciAliasType;
+  sourceUrl: string;
+}
+
+/** 别名表：规范化后的别名 → 规范化后的 INCI 名 */
+export function aliasMap(aliases: InciAlias[]): Map<string, string> {
+  return new Map(aliases.map((a) => [normalizeName(a.alias), normalizeName(a.inci)]));
+}
+
+/** 产品成分名对应的规范化 INCI 名：先查别名表，查不到时返回自身 */
+export function resolveAlias(name: string, aliases: Map<string, string>): string {
+  const key = normalizeName(name);
+  return aliases.get(key) ?? key;
+}
+
+export function buildIngredientIndex(ingredients: Ingredient[], aliases: InciAlias[] = []): IngredientIndex {
+  const alias = aliasMap(aliases);
   const map = new Map<string, Ingredient>();
   for (const ing of ingredients) {
     for (const name of [ing.inciName, ...ing.aliases]) {
@@ -56,12 +80,13 @@ export function buildIngredientIndex(ingredients: Ingredient[]): IngredientIndex
   }
   return {
     get: (name) => {
-      const key = normalizeName(name);
+      // 先查别名表（如 Red 4 → CI 14700），再按名称查
+      const key = resolveAlias(name, alias);
       const hit = map.get(key);
       if (hit || !key.includes('/')) return hit;
       // "INCI 名/俗名"写法（如 Glycine Soja Oil/Soybean Oil）：整体查不到时，用斜杠前的部分查
       // 只用斜杠前的部分，避免 Hippophae Rhamnoides Fruit/Seed Oil 这类本身带斜杠的 INCI 名被拆错
-      return map.get(key.split('/')[0].trim());
+      return map.get(resolveAlias(key.split('/')[0].trim(), alias));
     },
     all: ingredients,
   };

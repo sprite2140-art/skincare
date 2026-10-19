@@ -142,9 +142,8 @@ describe('CosIng 功能翻译与常见成分通俗解释', () => {
     const exp = parseExplanations('inci_name,explain_zh,explain_en,review_status,drafted_on\nTest Emollient Ester,润泽,Softens,draft,2026-10-17\n');
     const index = buildIngredientIndex(expandIngredients(real.ingredients, parseCosingExport(EXPORT), [], exp));
     expect(index.get('Test Emollient Ester')).toMatchObject({ explainZh: '润泽', explainEn: 'Softens', reviewStatus: 'draft' });
-    // 只统计洗护产品；面部产品的常见成分解释另行补充
-    const hair = real.products.filter((p) => p.zone !== 'face');
-    const top = ingredientFrequency(hair, real.ingredientIndex).filter((r) => r.origin !== null).slice(0, 150);
+    // 洗护和面部产品一起统计
+    const top = ingredientFrequency(real.products, real.ingredientIndex).filter((r) => r.origin !== null).slice(0, 150);
     const missing = top.filter((r) => !real.ingredientIndex.get(r.name)?.explainZh).map((r) => r.name);
     expect(missing).toEqual([]);
   });
@@ -178,5 +177,34 @@ describe('本项目维护的判断清单', () => {
   it('只在 CosIng 中的成分不带 functions：CosIng 登记功能不参与打分', () => {
     expect(real.ingredientIndex.get('Citric Acid')).toMatchObject({ origin: 'cosing', functions: [] });
     expect(real.ingredientIndex.get('Citric Acid')!.cosingFunctions).toContain('chelating');
+  });
+});
+
+describe('别名表 inci_aliases.csv', () => {
+  it('匹配时先查别名表：美国药品标签写法、美国色素名对应到 INCI 名', () => {
+    const index = real.ingredientIndex;
+    expect(index.get('Polyoxyl 40 Stearate')?.inciName).toBe('PEG-40 STEARATE');
+    expect(index.get('Red 4')?.inciName).toBe('CI 14700');
+    expect(index.get('Ext. Violet 2')?.inciName).toBe('CI 60730');
+  });
+
+  it('每个别名都有出处，并对应到成分库或 CosIng 中的成分', () => {
+    const plain = buildIngredientIndex(real.allIngredients);
+    for (const a of real.aliases) {
+      expect(a.sourceUrl).toMatch(/^https?:\/\//);
+      expect(plain.get(a.inci)).toBeDefined();
+    }
+  });
+
+  it('对应关系不唯一的写法不收录，仍然匹配不上', () => {
+    const index = real.ingredientIndex;
+    // CosIng 中有 Peel / Seed 两种
+    expect(index.get('Citrus Paradisi Oil')).toBeUndefined();
+    // CI 77491 / 77492 / 77499 的统称
+    expect(index.get('Iron Oxides')).toBeUndefined();
+  });
+
+  it('不传别名表时行为不变', () => {
+    expect(buildIngredientIndex(real.allIngredients).get('Red 4')).toBeUndefined();
   });
 });

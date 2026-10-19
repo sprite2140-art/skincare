@@ -13,9 +13,10 @@ import allergensCsv from '../../data/eu_fragrance_allergens.csv?raw';
 import explanationsCsv from '../../data/ingredient_explanations.csv?raw';
 import chelatorsCsv from '../../data/chelators.csv?raw';
 import fragrancesCsv from '../../data/fragrance_ingredients.csv?raw';
+import aliasesCsv from '../../data/inci_aliases.csv?raw';
 // CosIng 全表很大，构建时只保留产品成分表中出现的成分（见 vite.config.ts）
 import cosingCsv from 'virtual:cosing-used';
-import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseIngredientList } from './cosing';
+import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseInciAliases, parseIngredientList } from './cosing';
 import { parseCities, parseExchangeRates, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
 import { buildIngredientIndex } from './ingredientIndex';
 import { computeBudgetCaps } from '../scoring/budget';
@@ -29,6 +30,6 @@ export const exchangeRates = parseExchangeRates(exchangeRatesCsv);
 export const ingredientIndex = buildIngredientIndex(expandIngredients(ingredients, parseCosingTable(cosingCsv), parseAllergens(allergensCsv), parseExplanations(explanationsCsv), {
   chelators: parseIngredientList(chelatorsCsv),
   fragrances: parseIngredientList(fragrancesCsv),
-}));
+}), parseInciAliases(aliasesCsv));
 // 预算价格上限界线：每次构建时按当前产品库自动重新计算
 export const budgetCaps = computeBudgetCaps(products, exchangeRates);
