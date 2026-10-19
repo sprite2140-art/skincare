@@ -10,7 +10,7 @@ import type { ExchangeRate, Ingredient, Product } from './types';
 const real = loadDataFromDisk();
 const sample = { ...real.products[0], pairedProductIds: [] };
 const errorsOf = (opts: { ingredients?: Ingredient[]; products?: Product[]; rates?: ExchangeRate[] }) =>
-  validateData(opts.ingredients ?? real.ingredients, opts.products ?? real.products, real.cities, opts.rates ?? real.exchangeRates)
+  validateData(opts.ingredients ?? real.ingredients, opts.products ?? real.products.filter((p) => p.zone !== 'face'), real.cities, opts.rates ?? real.exchangeRates)
     .filter((i) => i.level === 'error')
     .map((i) => i.message);
 

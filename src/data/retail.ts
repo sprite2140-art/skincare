@@ -16,7 +16,7 @@ export function ratingCountForThreshold(r: RetailRating): number | null {
 
 /** 页面上显示的评分：评价数达到门槛的，按平台固定顺序 */
 export function visibleRatings(p: Product): RetailRating[] {
-  return p.ratings.filter((r) => (ratingCountForThreshold(r) ?? 0) >= MIN_RATING_COUNT);
+  return p.ratings.filter((r) => Number.isFinite(r.rating) && (ratingCountForThreshold(r) ?? 0) >= MIN_RATING_COUNT);
 }
 
 /** 评价数的显示文字：保留页面原文（如 5.5K），去掉括号 */

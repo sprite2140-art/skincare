@@ -96,6 +96,8 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 
 卸妆（makeup_remover）、化妆水（toner）暂不在第一阶段，前缀未定。
 
+**当前数据**：美国洁面 40 款（CL-US-001—040，2026-10-19 导入，两批）。数据收集方的自查报告存在 `docs/data_batches/`。入库依据为 Ulta Face Wash 畅销排序的 34 款记为 retailer_bestseller，Nordstrom 畅销洁面专题的 6 款（CL-US-035—040）记为 department_store_bestseller。护肤还没有问卷和打分，面部产品不进入洗护结果页（`src/scoring/listProducts.ts`）。
+
 **10 列面部属性**（products.csv 在 reviewed_on 之后，列名如下）。洗护产品和旧数据没有这些列或为空，不报错；空值按下表的默认值处理。体验和用法只填品牌原文，不从成分推测。
 
 | 字段 | 取值 | 留空 |
@@ -225,7 +227,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 |---|---|
 | product_id | 对应 products.csv |
 | platform | ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks / bergdorf_goodman / bluemercury（与 purchase_links 共用平台取值，还有 brand）。也接受 neimanmarcus、bergdorf、bergdorfgoodman、saksfifthavenue 的写法，读取时统一为左边的代码 |
-| rating | 星级 0–5，取页面可见值 |
+| rating | 星级 0–5，取页面可见值。页面没有显示星级时留空（不填 0），这条评分不显示，校验只提示 |
 | rating_count | 精确评价数；页面只显示缩写（如 5.5K）时留空，不推算 |
 | rating_count_display | 页面显示的原文（如 1,346、5.5K、(6,395)） |
 | count_label | 评价数口径：Reviews（Ulta）、header review link（Sephora）、page header count（Target）、ratings（Amazon，含无文字的星级评价） |
@@ -233,7 +235,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 
 页面规则（`src/data/retail.ts`）：评价数少于 50 的不显示（只有缩写时按缩写判断门槛，显示原文）；按平台固定顺序列在详情里，注明"评分只作参考，不计入适配分；部分评价可能来自赠品试用；不同规格、香型可能合并统计"。不计算跨平台平均分。
 
-当前数据：美国洗护零售元数据第 1 批（SH-US-001—010、CO-US-001—010），2026-10-17 核对，41 条（Ulta 18、Sephora 4、Target 18、Amazon 1）。
+当前数据：美国洗护零售元数据第 1 批（SH-US-001—010、CO-US-001—010），2026-10-17 核对，41 条（Ulta 18、Sephora 4、Target 18、Amazon 1）。美国洁面 CL-US-001—040，2026-10-19 核对，54 条（Ulta 34、Target 11、Sephora 7、Bluemercury 1、Nordstrom 1），其中 8 条星级留空。
 
 ## purchase_links.csv（多平台购买链接）
 
@@ -245,7 +247,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | status | in_stock / purchasable / listed / official_store_listed_pdp_blocked（品牌店目录已确认，详情页和库存未确认）等，空白不等于不销售 |
 | checked_on / note | 核对日期、说明（如 Target Plus 第三方卖家） |
 
-页面详情"在哪买"按固定顺序每个平台一行：品牌官网 → Ulta → Sephora → Target → Amazon → Nordstrom → Neiman Marcus → Saks Fifth Avenue → Bergdorf Goodman → Bluemercury（`RETAIL_PLATFORMS`）→ 其他网站。平台由链接域名识别（`RETAIL_PLATFORM_DOMAINS`）。收起状态的主购买按钮默认指向评价数最多的平台，没有评分时用 products.csv 的 purchase_url。当前 20 款、63 条链接。
+页面详情"在哪买"按固定顺序每个平台一行：品牌官网 → Ulta → Sephora → Target → Amazon → Nordstrom → Neiman Marcus → Saks Fifth Avenue → Bergdorf Goodman → Bluemercury（`RETAIL_PLATFORMS`）→ 其他网站。平台由链接域名识别（`RETAIL_PLATFORM_DOMAINS`）。收起状态的主购买按钮默认指向评价数最多的平台，没有评分时用 products.csv 的 purchase_url。当前洗护 20 款、63 条链接；美国洁面 40 款、100 条链接（2026-10-19）。
 
 ## exchange_rates.csv（固定汇率表）
 

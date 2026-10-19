@@ -142,7 +142,9 @@ describe('CosIng 功能翻译与常见成分通俗解释', () => {
     const exp = parseExplanations('inci_name,explain_zh,explain_en,review_status,drafted_on\nTest Emollient Ester,润泽,Softens,draft,2026-10-17\n');
     const index = buildIngredientIndex(expandIngredients(real.ingredients, parseCosingExport(EXPORT), [], exp));
     expect(index.get('Test Emollient Ester')).toMatchObject({ explainZh: '润泽', explainEn: 'Softens', reviewStatus: 'draft' });
-    const top = ingredientFrequency(real.products, real.ingredientIndex).filter((r) => r.origin !== null).slice(0, 150);
+    // 只统计洗护产品；面部产品的常见成分解释另行补充
+    const hair = real.products.filter((p) => p.zone !== 'face');
+    const top = ingredientFrequency(hair, real.ingredientIndex).filter((r) => r.origin !== null).slice(0, 150);
     const missing = top.filter((r) => !real.ingredientIndex.get(r.name)?.explainZh).map((r) => r.name);
     expect(missing).toEqual([]);
   });

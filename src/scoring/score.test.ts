@@ -36,7 +36,7 @@ describe('data/ 真实数据', () => {
 
   it('CSV 能正确解析，名称已统一', () => {
     // 洗发水 70 款（美国 60、日韩中 10），护发素 37 款
-    expect(real.products).toHaveLength(107);
+    expect(real.products.filter((p) => p.zone !== 'face')).toHaveLength(107);
     expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(37);
     // 保留原有产品 ID
     for (const id of ['SH-US-001', 'SH-US-008', 'SH-JP-001', 'SH-KR-003', 'SH-CN-002']) expect(byId(id)).toBeDefined();

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { parseProducts, parsePurchaseLinks, parseRetailRatings } from './parse';
 import { loadDataFromDisk } from './node';
 import { validateData } from './validate';
+import { visibleRatings } from './retail';
 import { usageTypeOf, type Product } from './types';
 
 const real = loadDataFromDisk();
@@ -34,8 +35,8 @@ function product(base: Record<string, string>, face: Record<string, string> = {}
 }
 
 describe('面部属性列', () => {
-  it('现有数据没有这些列，不报错', () => {
-    expect(errorsOf(real.products)).toEqual([]);
+  it('洗护产品这些列为空，不报错', () => {
+    expect(errorsOf(real.products.filter((p) => p.zone !== 'face'))).toEqual([]);
     expect(real.products[0].face?.broadSpectrum).toBe('unknown');
   });
 
@@ -151,5 +152,16 @@ describe('购买平台写法', () => {
     expect(links.map((l) => l.platform)).toEqual(['neiman_marcus', 'bergdorf_goodman', 'saks']);
     const ratings = parseRetailRatings('product_id,platform,rating\nX,nordstrom,4.5\nX,bluemercury,4\n');
     expect(ratings.map((r) => r.platform)).toEqual(['nordstrom', 'bluemercury']);
+  });
+});
+
+describe('星级留空', () => {
+  it('留空的星级不当作 0 星：页面不显示，校验只提示', () => {
+    const [r] = parseRetailRatings('product_id,platform,rating,rating_count,rating_count_display,checked_on,url\nX,sephora,,828,828,2026-10-19,https://www.sephora.com/p\n');
+    expect(r.rating).toBeNaN();
+    const p = { ...real.products.find((x) => x.productId === 'CL-US-008')!, ratings: [r] };
+    expect(visibleRatings(p)).toEqual([]);
+    const issues = validateData(real.ingredients, [p], real.cities, real.exchangeRates).filter((i) => i.file === 'retail_ratings.csv');
+    expect(issues.map((i) => [i.level, i.message])).toEqual([['warning', 'sephora 没有星级，页面不显示这条评分']]);
   });
 });

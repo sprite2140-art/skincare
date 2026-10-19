@@ -194,7 +194,8 @@ export function parseRetailRatings(text: string): RetailRating[] {
   return parseCsv(text).map((r) => ({
     productId: r.product_id ?? '',
     platform: normalizePlatform(r.platform),
-    rating: Number(r.rating),
+    // 星级留空时为 NaN（页面不显示这条评分），不当作 0 星
+    rating: r.rating ? Number(r.rating) : NaN,
     ratingCount: parseNumber(r.rating_count),
     ratingCountDisplay: r.rating_count_display ?? '',
     countLabel: r.count_label ?? '',

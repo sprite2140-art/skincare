@@ -171,7 +171,8 @@ export function validateData(
     for (const r of p.ratings) {
       const F = 'retail_ratings.csv';
       oneOf(F, key, 'platform', r.platform, RETAIL_PLATFORMS);
-      if (!(r.rating >= 0 && r.rating <= 5)) err(F, key, `rating 应在 0–5 之间：${r.rating}`);
+      if (Number.isNaN(r.rating)) warn(F, key, `${r.platform} 没有星级，页面不显示这条评分`);
+      else if (!(r.rating >= 0 && r.rating <= 5)) err(F, key, `rating 应在 0–5 之间：${r.rating}`);
       if (!/^https?:\/\//.test(r.url)) err(F, key, `${r.platform} 缺少产品页链接 url`);
       if (!/^\d{4}-\d{2}-\d{2}$/.test(r.checkedOn)) err(F, key, `${r.platform} 缺少核对日期 checked_on`);
       if (r.ratingCount === null && !r.ratingCountDisplay) warn(F, key, `${r.platform} 没有评价数，页面不显示这条评分`);
