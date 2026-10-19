@@ -164,4 +164,11 @@ describe('星级留空', () => {
     const issues = validateData(real.ingredients, [p], real.cities, real.exchangeRates).filter((i) => i.file === 'retail_ratings.csv');
     expect(issues.map((i) => [i.level, i.message])).toEqual([['warning', 'sephora 没有星级，页面不显示这条评分']]);
   });
+
+  it('写了但无法解析的星级（如 unknown）报错，不当作留空', () => {
+    const [r] = parseRetailRatings('product_id,platform,rating,rating_count,rating_count_display,checked_on,url\nX,sephora,unknown,828,828,2026-10-19,https://www.sephora.com/p\n');
+    const p = { ...real.products.find((x) => x.productId === 'CL-US-008')!, ratings: [r] };
+    const issues = validateData(real.ingredients, [p], real.cities, real.exchangeRates).filter((i) => i.file === 'retail_ratings.csv');
+    expect(issues.map((i) => [i.level, i.message])).toEqual([['error', 'rating 应为 0–5 之间的数字：unknown']]);
+  });
 });

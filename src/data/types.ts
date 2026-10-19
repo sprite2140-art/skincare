@@ -418,8 +418,10 @@ export type RetailPlatform = (typeof RETAIL_PLATFORMS)[number];
 export interface RetailRating {
   productId: string;
   platform: RetailPlatform;
-  /** 星级，0–5 */
+  /** 星级，0–5；留空或无法解析时为 NaN（页面不显示这条评分） */
   rating: number;
+  /** 星级原文，用于校验区分"留空"（只提示）和"写错"（报错） */
+  ratingRaw: string;
   /** 精确评价数；页面只显示缩写（如 5.5K）时为 null */
   ratingCount: number | null;
   /** 页面上显示的评价数原文 */
