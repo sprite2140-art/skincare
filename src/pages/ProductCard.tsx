@@ -260,7 +260,7 @@ function CardDetails({ r, profile, reasons, rows }: { r: ProductScore; profile: 
   const keys = keyIngredients(p, ingredientIndex, profile.concerns);
   const all = ingredientStatuses(p, ingredientIndex);
   const checked = [...new Set(p.ratings.map((x) => x.checkedOn).filter(Boolean))].sort().at(-1);
-  const notices = r.notices.filter((n) => n.code === 'pregnancy_notice' || n.code === 'rx_notice');
+  const notices = r.notices.filter((n) => n.code === 'pregnancy_notice' || n.code === 'rx_notice' || n.code === 'budget_unchecked');
   const missing = r.notices.find((n) => n.code === 'missing_data');
   const bc = p.brandClaims;
   const quote = bc.status === 'brand_page_quote' || lang !== 'zh' ? bc.quote || bc.text : bc.text;

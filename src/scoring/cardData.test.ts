@@ -113,6 +113,19 @@ describe('卡片：需求对照、需要注意、评分明细', () => {
     expect(cautionItems(scoreProduct(p, daily, data), daily).find((x) => x.label.zh === '强清洁力表活')!.note.zh).toMatch(/^温和度扣/);
   });
 
+  it('正式模式（不用未核对数据打分）下，未核对的风险成分仍列在"需要注意"，注明未计入温和度', () => {
+    const strict = { ...data, allowDraft: false };
+    const profile = toScoringProfile(answers({ concerns: ['dandruff'] }), 'shampoo', ctx);
+    const p = real.products.find((x) => scoreProduct(x, profile, strict).fragrance.status === 'contains'
+      && scoreProduct(x, profile, strict).irritation.hits.some((h) => h.unverified))!;
+    expect(p).toBeDefined();
+    const r = scoreProduct(p, profile, strict);
+    const items = cautionItems(r, profile);
+    expect(items.length).toBeGreaterThan(0);
+    expect(items.some((x) => x.note.zh === '成分数据未核对，暂未计入温和度')).toBe(true);
+    expect(r.irritation.hits.filter((h) => h.unverified).every((h) => h.deduction === 0 && !h.counted)).toBe(true);
+  });
+
   it('评分明细：实际权重为重新归一化后的值，贡献合计等于总分（未封顶时）', () => {
     const profile = toScoringProfile(answers({ concerns: ['dandruff'] }), 'shampoo', ctx);
     const r = scoreProduct(byId('SH-US-001'), profile, data);

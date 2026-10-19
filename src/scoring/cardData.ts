@@ -203,6 +203,9 @@ export function cautionItems(r: ProductScore, profile: Pick<ScoringProfile, 'was
   const { hits, rinseOff, sensitive } = r.irritation;
   return hits.map((h) => {
     const label = h.tag === 'fragrance' ? { zh: '香精 / 香料', en: 'Fragrance' } : capitalize(RISK_TAG_LABELS[h.tag]);
+    if (h.unverified) {
+      return { label, ingredients: h.ingredients, note: { zh: '成分数据未核对，暂未计入温和度', en: 'Ingredient data not yet verified; not counted in gentleness yet' } };
+    }
     if (!h.counted) {
       const note = profile.frequentStyling
         ? { zh: '你常用造型产品，需要较强的清洁力，不扣分', en: 'You use styling products often and need stronger cleansing; no deduction' }

@@ -569,6 +569,11 @@ describe('预算（按品类三分位，USD）', () => {
     expect(labels('CNY')).toEqual(['≤ ¥117', '¥117–167', '¥167–217', '¥217 以上', '不限']);
     expect(labels('EUR')).toEqual(['≤ $18', '$18–25', '$25–33', '$33 以上', '不限']);
     expect(budgetOptions(undefined, 'CNY', rates).map((o) => o.choice)).toEqual(['none']);
+    // 区间是否为空按 USD 原值判断：取整后相同但原值不同时保留，并改用不取整的金额显示
+    const close = { q1: 10.2, q2: 10.4, q3: 30, sampleSize: 9 };
+    expect(budgetOptions(close, 'USD', rates).map((o) => o.label.zh)).toEqual(['≤ $10.20', '$10.20–10.40', '$10.40–30', '$30 以上', '不限']);
+    // 原值相等的区间为空，去掉
+    expect(budgetOptions({ q1: 10, q2: 10, q3: 30, sampleSize: 9 }, 'USD', rates).map((o) => o.choice)).toEqual(['q1', 'q3', 'q4', 'none']);
     expect(budgetOptions(caps.shampoo, 'CNY', rates).map((o) => o.choice)).toEqual(['q1', 'q2', 'q3', 'q4', 'none']);
     expect(formatMoney(1650, 'JPY', false)).toBe('¥1,650');
     expect(formatMoney(12.5, 'USD', false)).toBe('$12.50');

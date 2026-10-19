@@ -102,25 +102,29 @@ export interface BudgetOption {
 
 /**
  * 问卷选项，例如"≤ $15 / $15–30 / $30–60 / $60 以上 / 不限"：显示该品类算出的价格区间，换算成用户当地货币。
- * 该品类价格数据不足时只有"不限"。相邻界线相同（区间为空）时去掉该区间。
+ * 该品类价格数据不足时只有"不限"。区间是否为空按 USD 原值判断（相邻界线相等时去掉该区间）；
+ * 取整后相邻界线显示相同时，改用不取整的金额显示，保证每个选项的文字不同。
  */
 export function budgetOptions(caps: BudgetCaps | undefined, currency: string, rates: ExchangeRate[]): BudgetOption[] {
   const none: BudgetOption = { choice: 'none', label: { zh: '不限', en: 'No limit' } };
   if (!caps) return [none];
-  const toLocal = (usd: number) => {
-    const local = fromUsd(usd, currency, rates);
-    return local === null ? formatMoney(usd, 'USD') : formatMoney(local, currency);
+  const local = (usd: number) => fromUsd(usd, currency, rates);
+  const cur = local(caps.q1) === null ? 'USD' : currency;
+  const amount = (usd: number) => local(usd) ?? usd;
+  const bounds = [caps.q1, caps.q2, caps.q3];
+  const rounded = bounds.map((b) => formatMoney(amount(b), cur));
+  const collide = rounded.some((x, i) => i > 0 && x === rounded[i - 1] && bounds[i] !== bounds[i - 1]);
+  // 不取整：美元等保留两位小数，日元、韩元取整到个位
+  const precise = (usd: number) => {
+    const v = amount(usd);
+    return formatMoney(cur === 'JPY' || cur === 'KRW' ? Math.round(v) : Math.round(v * 100) / 100, cur, false);
   };
-  // 区间内显示的数字取整后，后一个数字不带货币符号（$15–30）
-  const bare = (usd: number) => toLocal(usd).replace(/^[^\d]+/, '');
-  const options: BudgetOption[] = [];
-  const add = (choice: BudgetChoice, zh: string, en: string) => {
-    if (!options.some((o) => o.label.zh === zh)) options.push({ choice, label: { zh, en } });
-  };
-  const lo = toLocal(caps.q1);
-  add('q1', `≤ ${lo}`, `≤ ${lo}`);
-  if (toLocal(caps.q2) !== lo) add('q2', `${lo}–${bare(caps.q2)}`, `${lo}–${bare(caps.q2)}`);
-  if (toLocal(caps.q3) !== toLocal(caps.q2)) add('q3', `${toLocal(caps.q2)}–${bare(caps.q3)}`, `${toLocal(caps.q2)}–${bare(caps.q3)}`);
-  add('q4', `${toLocal(caps.q3)} 以上`, `Over ${toLocal(caps.q3)}`);
+  const [b1, b2, b3] = bounds.map((b, i) => (collide ? precise(b) : rounded[i]));
+  // 区间内后一个数字不带货币符号（$15–30）
+  const bare = (text: string) => text.replace(/^[^\d]+/, '');
+  const options: BudgetOption[] = [{ choice: 'q1', label: { zh: `≤ ${b1}`, en: `≤ ${b1}` } }];
+  if (caps.q2 > caps.q1) options.push({ choice: 'q2', label: { zh: `${b1}–${bare(b2)}`, en: `${b1}–${bare(b2)}` } });
+  if (caps.q3 > caps.q2) options.push({ choice: 'q3', label: { zh: `${b2}–${bare(b3)}`, en: `${b2}–${bare(b3)}` } });
+  options.push({ choice: 'q4', label: { zh: `${b3} 以上`, en: `Over ${b3}` } });
   return [...options, none];
 }

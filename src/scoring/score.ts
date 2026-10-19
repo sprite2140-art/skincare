@@ -111,8 +111,10 @@ export interface IrritantHit {
   ingredients: Ingredient[];
   /** 实际扣分（已按冲洗型减半、敏感加倍）；不扣分时为 0 */
   deduction: number;
-  /** 是否计入温和度（强清洁力表活只在每天洗头且不常用造型产品时计入） */
+  /** 是否计入温和度（强清洁力表活只在每天洗头且不常用造型产品时计入；未核对的成分在正式模式下不计入） */
   counted: boolean;
+  /** 依据的成分还没核对，未参与打分（只展示） */
+  unverified: boolean;
 }
 
 export interface IrritationDetail {
@@ -638,6 +640,7 @@ function scoreIrritation(
   verified: (Resolved & { ingredient: Ingredient })[],
   profile: ScoringProfile,
   product: Product,
+  known: (Resolved & { ingredient: Ingredient })[],
 ): { dim: Dimension; detail: IrritationDetail } {
   // 使用方式未知时按免洗处理（不减半），偏保守
   const rinseOff = usageTypeOf(product) === 'rinse_off';
@@ -650,15 +653,22 @@ function scoreIrritation(
   const cleanserCounts = profile.washFrequency === 'daily' && !profile.frequentStyling;
   for (const tag of [...IRRITANT_TAGS, 'strong_cleanser'] as RiskTag[]) {
     const hits = verified.filter((r) => r.ingredient.riskTags.includes(tag));
-    if (hits.length === 0) continue;
-    const ingredients = hits.map((r) => r.ingredient).filter((ing, i, arr) => arr.indexOf(ing) === i);
+    const uniq = (list: (Resolved & { ingredient: Ingredient })[]) =>
+      list.map((r) => r.ingredient).filter((ing, i, arr) => arr.indexOf(ing) === i);
+    if (hits.length === 0) {
+      // 成分库里有、但还没核对（正式模式下不参与打分）的风险成分：仍在页面列出，注明未计入温和度
+      const draft = known.filter((r) => r.ingredient.riskTags.includes(tag));
+      if (draft.length > 0) hitsOut.push({ tag, ingredients: uniq(draft), deduction: 0, counted: false, unverified: true });
+      continue;
+    }
+    const ingredients = uniq(hits);
     if (tag === 'strong_cleanser' && !cleanserCounts) {
-      hitsOut.push({ tag, ingredients, deduction: 0, counted: false });
+      hitsOut.push({ tag, ingredients, deduction: 0, counted: false, unverified: false });
       continue;
     }
     const d = (tag === 'strong_cleanser' ? STRONG_CLEANSER_DEDUCTION : IRRITANT_DEDUCTION) * mult;
     deduction += d;
-    hitsOut.push({ tag, ingredients, deduction: d, counted: true });
+    hitsOut.push({ tag, ingredients, deduction: d, counted: true, unverified: false });
     const names = joinNames(hits.map((r) => ingredientName(r.ingredient, r.raw)));
     const why = tag === 'strong_cleanser' ? { zh: '，你每天洗头', en: ', and you wash daily' } : { zh: '', en: '' };
     found.push({
@@ -838,7 +848,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     needMatches = need.needMatches;
     const evidence = scoreEvidence(needMatches, product);
     evidenceCap = evidence.capScore;
-    const irr = scoreIrritation(verified, profile, product);
+    const irr = scoreIrritation(verified, profile, product, items.filter((r): r is Resolved & { ingredient: Ingredient } => !r.nameUnverified && r.ingredient !== null));
     irritation = irr.detail;
     dimensions = {
       need: need.dim,
