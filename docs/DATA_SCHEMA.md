@@ -14,7 +14,7 @@
 | targets | 针对的困扰（取值见下） | dandruff;scalp_itch |
 | effective_range | 有效浓度范围 | |
 | max_limit | 法规限量 | |
-| evidence_level | A / B / C | |
+| evidence_level | A / B / C，该成分各需求中最高的一级，**只用于展示**；打分按 evidence_by_target。定义见 SCORING.md "证据等级" | |
 | risk_tags | 风险标签（取值见下） | |
 | conflicts_with | 搭配冲突的成分，可在 INCI 名后加 `:severe` 标注严重冲突（严重冲突不推荐），不写视为 `mild`（只提醒） | Retinol:severe;Glycolic Acid |
 | explain_zh | 中文通俗解释（一两句） | |
@@ -37,7 +37,17 @@ risk_tags 取值：fragrance, essential_oil, alcohol, strong_acid, sensitizer, s
 - pregnancy_caution：孕期需注意。不计入刺激风险；对怀孕 / 备孕 / 哺乳用户排除，对其他人被动提示
 - rx_caution：与处方皮肤药需注意。对"正在用处方皮肤药"的用户排除
 
-verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 targets 的 verified 有效成分必须填写 evidence_level。`npm run validate-data` 会检查。
+另有三列接在 reviewed_on 之后（2026-10-20 起）：
+
+| 字段 | 含义 | 示例 |
+|---|---|---|
+| evidence_by_target | 每个需求单独的证据等级，`需求:等级`，分号分隔。需求必须在 targets 中，targets 里的每个需求都要写等级；evidence_level 必须是其中最高的一级。填了这一列的成分，打分时按需求读取等级；整列为空的旧条目沿用 evidence_level | dandruff:A;scalp_oil:C |
+| evidence_usage | 证据来自哪种使用方式的产品：leave_on / rinse_off，可留空。与产品的使用方式不同时降一级计算（A→B，B→C，C 不再降） | leave_on |
+| notes | 核对备注，只供核对，不在页面显示 | |
+
+verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后没有可引用的出处时，sources 可以为空，但必须在 notes 写明原因（校验给提示），这类需求按 C 级计，与暂无证据相同。有 targets 的 verified 有效成分必须填写 evidence_level 和 evidence_by_target。`npm run validate-data` 会检查。
+
+2026-10-20：洗护功效成分 30 个按查证结果写入 evidence_by_target、effective_range、sources（key_sources）、notes，标为 verified。核对方式：由 AI 依据公开文献查证，经第二个 AI 核对 PubMed 摘要，未经皮肤科医生审核。Sodium Salicylate、Tussilago Farfara Leaf Extract、Biotin 没有证据，删除了功效目标（targets 为空）。Caffeine 的 evidence_usage 为 leave_on（证据来自 0.2% 免洗液）。11 个成分查证后没有可引用的出处（见 notes）。
 
 ## products.csv（产品库）
 

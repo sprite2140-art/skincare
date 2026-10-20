@@ -68,7 +68,21 @@ export function parseIngredients(text: string): Ingredient[] {
     sources: splitList(r.sources),
     reviewStatus: r.review_status as ReviewStatus,
     reviewedOn: r.reviewed_on ?? '',
+    evidenceByTarget: parseEvidenceByTarget(r.evidence_by_target),
+    evidenceUsage: (r.evidence_usage || null) as UsageType | null,
+    notes: r.notes ?? '',
   }));
+}
+
+/** evidence_by_target：`dandruff:A;scalp_oil:C`。取值是否合法由 validate.ts 检查 */
+export function parseEvidenceByTarget(value: string | undefined): Partial<Record<Target, EvidenceLevel>> {
+  const out: Partial<Record<Target, EvidenceLevel>> = {};
+  for (const entry of splitList(value)) {
+    const idx = entry.lastIndexOf(':');
+    if (idx === -1) out[entry as Target] = '' as EvidenceLevel;
+    else out[entry.slice(0, idx).trim() as Target] = entry.slice(idx + 1).trim().toUpperCase() as EvidenceLevel;
+  }
+  return out;
 }
 
 /** 统一产品成分表写法，并记下带 [待核对] 标记的成分 */

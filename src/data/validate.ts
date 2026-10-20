@@ -5,11 +5,12 @@ import { unmatchedKeyActives } from './keyActives';
 import { SOURCE_LEVELS, expandIngredients, onlyFragranceFunctions, type AllergenEntry, type CosingEntry, type ExplanationEntry, type IngredientLists } from './cosing';
 import { ingredientFrequency } from './frequency';
 import { validateFaceProduct } from './face';
+import { highestLevel } from '../scoring/evidence';
 import {
   BRAND_CLAIM_STATUSES, CATEGORIES, INCLUSION_BASIS_TYPES, PRODUCT_SUBTYPES, RETAIL_PLATFORMS, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
   REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
 } from './types';
-import type { Category, City, ExchangeRate, Ingredient, Product, ReferenceWater, WaterRecord } from './types';
+import type { Category, Target, City, ExchangeRate, Ingredient, Product, ReferenceWater, WaterRecord } from './types';
 
 /** water_hardness.csv 的 hardness_class 取值（USGS 分级，以 CaCO3 计；跨两级的单独列出） */
 const WATER_CLASSES = ['soft', 'moderately_hard', 'hard', 'very_hard', 'hard_or_very_hard', 'moderately_hard_or_hard', 'unknown'] as const;
@@ -73,12 +74,31 @@ export function validateData(
 
     if (ing.reviewStatus === 'verified') {
       if (!ing.reviewedOn) err(F_ING, key, 'verified 成分缺少 reviewed_on');
-      if (ing.sources.length === 0) err(F_ING, key, 'verified 成分缺少 sources');
+      // 查证后没有找到可引用的研究时，sources 可以为空，但要在 notes 写明原因（这类需求按 C 级计，与暂无证据相同）
+      if (ing.sources.length === 0 && !ing.notes) err(F_ING, key, 'verified 成分缺少 sources（没有可引用的出处时在 notes 写明原因）');
+      else if (ing.sources.length === 0) warn(F_ING, key, `verified 成分没有出处，原因：${ing.notes}`);
       if (ing.category === 'active' && ing.targets.length > 0 && !ing.evidenceLevel) {
         err(F_ING, key, 'verified 有效成分缺少 evidence_level');
       }
+      if (ing.category === 'active' && ing.targets.length > 0 && Object.keys(ing.evidenceByTarget ?? {}).length === 0) {
+        err(F_ING, key, 'verified 有效成分缺少 evidence_by_target（每个需求单独的证据等级）');
+      }
     }
     if (ing.reviewedOn && !DATE_RE.test(ing.reviewedOn)) err(F_ING, key, `reviewed_on 应为 YYYY-MM-DD：${ing.reviewedOn}`);
+    // evidence_by_target：每个需求单独的证据等级；需求必须在 targets 中，evidence_level 为其中最高的一级
+    const byTarget = ing.evidenceByTarget ?? {};
+    for (const [t, level] of Object.entries(byTarget)) {
+      oneOf(F_ING, key, 'evidence_by_target 需求', t, TARGETS);
+      oneOf(F_ING, key, `evidence_by_target 中 ${t} 的等级`, level ?? '', EVIDENCE_LEVELS);
+      if (!ing.targets.includes(t as Target)) err(F_ING, key, `evidence_by_target 中的 ${t} 不在 targets 里`);
+    }
+    if (Object.keys(byTarget).length > 0) {
+      const missing = ing.targets.filter((t) => !(t in byTarget));
+      if (missing.length > 0) err(F_ING, key, `targets 中的 ${missing.join(' / ')} 没有在 evidence_by_target 写等级`);
+      const top = highestLevel(byTarget);
+      if (top && ing.evidenceLevel !== top) err(F_ING, key, `evidence_level 应为 evidence_by_target 中最高的一级 ${top}`);
+    }
+    if (ing.evidenceUsage) oneOf(F_ING, key, 'evidence_usage', ing.evidenceUsage, USAGE_TYPES);
   }
 
   const all = expandIngredients(ingredients, extra.cosing ?? [], extra.allergens ?? [], extra.explanations ?? [], extra.lists ?? {});
