@@ -8,7 +8,7 @@
 
 import { usageTypeOf } from '../data/types';
 import { evidenceFor, type TargetEvidence } from './evidence';
-import type { City, ExchangeRate, Ingredient, Product, RiskTag, Target, UsageType } from '../data/types';
+import type { Category, City, ExchangeRate, Ingredient, Product, RiskTag, Target, UsageType } from '../data/types';
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import {
   BRAND_CLAIM_CREDIT, CHELATOR_TARGETS, ENVIRONMENT_SCORES, EVIDENCE_SCORES, MISSING_EVIDENCE_LEVEL,
@@ -57,6 +57,11 @@ export interface ScoringProfile {
   targetWeights?: Partial<Record<Target, number>>;
   /** true：按重要程度排序（面部）；false：多选不排序（头皮、头发），平均加权 */
   concernsRanked: boolean;
+  /**
+   * 只计入与某一步相关的需求时（面部按步骤分配）：这一步的品类和用户一共选了几项。
+   * 卡片写"与洁面相关的需求：痘痘（你共选了 3 项）"，而不是"你选的 1 个需求"。
+   */
+  needScope?: { category: Category; selected: number };
   /** 敏感肌或头皮易痒 */
   sensitive: boolean;
   specialStatus: SpecialStatus;

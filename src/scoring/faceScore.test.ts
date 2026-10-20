@@ -88,6 +88,18 @@ describe('功效成分', () => {
     expect(cleanserCalm.irritation.hits.some((h) => h.tag === 'active_irritant')).toBe(false);
   });
 
+  it('含功效成分时温和度取决于耐受（卡片不显示等级），不含时照常', () => {
+    expect(run(saSerum, { concerns: ['pores'] }, 'treatment').faceExtras.toleranceDependent).toBe(true);
+    expect(run(cl, { concerns: ['oil'] }, 'cleanser').faceExtras.toleranceDependent).toBe(false);
+  });
+
+  it('只计入与这一步相关的需求时，记录步骤和用户一共选了几项', () => {
+    const face = answers({ concerns: ['acne', 'pigmentation', 'aging'] });
+    const step = buildFaceSteps(face, { statuses: [] }).find((x) => x.id === 'cleanser')!;
+    const profile = faceScoringProfile(face, step, { specialStatus: 'none', specialStatuses: [], avoidIngredients: [], avoidTags: [] });
+    expect(profile.needScope).toEqual({ category: 'cleanser', selected: 3 });
+  });
+
   it('所有人都提示"初次使用从低频开始，白天需要防晒"', () => {
     expect(run(saSerum, { concerns: ['pores'] }, 'treatment').notices.find((n) => n.code === 'active_start_slow')!.text.zh)
       .toBe('含水杨酸类：初次使用从低频开始（如隔天一次），白天需要防晒');

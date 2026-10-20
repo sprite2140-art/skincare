@@ -53,6 +53,11 @@ export interface FaceExtras {
   sunscreen: 'ok' | 'below' | 'incomplete' | null;
   /** 未调色的物理防晒（"隐藏可能泛白的未调色物理防晒"开关） */
   untintedMineral: boolean;
+  /**
+   * 含 A 醇类、过氧化苯甲酰、果酸、水杨酸类：温和与否取决于个人耐受，"需要注意"里不显示温和度等级，
+   * 改写"取决于耐受，见下方提示"（温和度分数照常计算）
+   */
+  toleranceDependent: boolean;
   /** 同等级内的排序加分项（只排序，不计分） */
   preferred: { waterResistant: boolean; nonComedogenic: boolean; skinType: boolean };
 }
@@ -73,6 +78,7 @@ export function faceScoringProfile(
     concerns: [...step.needs],
     needs,
     concernsRanked: true,
+    needScope: { category: step.category, selected: face.concerns.length },
     sensitive: isFaceSensitive(face),
     specialStatus: base.specialStatus,
     specialStatuses: base.specialStatuses,
@@ -283,6 +289,7 @@ export function scoreFaceProduct(product: Product, profile: ScoringProfile, data
       classes,
       sunscreen,
       untintedMineral: product.category === 'sunscreen' && isUntintedMineral(classes),
+      toleranceDependent: irritantClasses.length > 0,
       preferred: {
         waterResistant: product.category === 'sunscreen' && prefersWaterResistant(ctx.face) && (f?.waterResistance === '40' || f?.waterResistance === '80'),
         nonComedogenic: (ctx.face.concerns.includes('acne') || ctx.face.concerns.includes('oil')) && f?.nonComedogenicClaim === 'yes',

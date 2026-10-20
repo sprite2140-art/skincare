@@ -23,6 +23,7 @@ import { spaceCjk } from '../scoring/labels';
 import { inMarket } from '../scoring/market';
 import { recommendReasons } from '../scoring/reasons';
 import { ingredientStatuses, type IngredientStatus, type ProductScore, type ScoringProfile } from '../scoring/score';
+import type { FaceProductScore } from '../scoring/faceScore';
 /** 卡片上最多显示的标签数 */
 const MAX_CARD_TAGS = 2;
 
@@ -281,6 +282,8 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
   const all = ingredientStatuses(p, ingredientIndex);
   const checked = [...new Set(p.ratings.map((x) => x.checkedOn).filter(Boolean))].sort().at(-1);
   const notices = r.notices.filter((n) => CAUTION_NOTICE_CODES.includes(n.code));
+  // 含 A 醇类、过氧化苯甲酰、果酸、水杨酸类：温和度取决于耐受，不显示等级
+  const tolerance = 'faceExtras' in r && (r as FaceProductScore).faceExtras.toleranceDependent;
   const missing = r.notices.find((n) => n.code === 'missing_data');
   const bc = p.brandClaims;
   const quote = bc.status === 'brand_page_quote' || bc.status === 'retail_mismatch' || lang !== 'zh' ? bc.quote || bc.text : bc.text;
@@ -296,7 +299,14 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
       {sum.total > 0 && (
         <section>
           <p>
-            {t('card.needCount', { n: sum.total, met: sum.met, partial: sum.partial, none: sum.none })}
+            {profile.needScope
+              ? t('card.needCountScoped', {
+                step: t(`category.${profile.needScope.category}` as Key),
+                needs: needs.map((x) => tx(x.label)).join(lang === 'zh' ? '、' : ', '),
+                selected: profile.needScope.selected,
+                met: sum.met, partial: sum.partial, none: sum.none,
+              })
+              : t('card.needCount', { n: sum.total, met: sum.met, partial: sum.partial, none: sum.none })}
             {sum.conditioner > 0 && t('card.needCountConditioner', { n: sum.conditioner })}
           </p>
         </section>
@@ -349,8 +359,10 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
         <ul className="list">
           {r.dimensions.irritation.level && (
             <li>
-              {t('results.gentle')}：{t(`gentle.${r.dimensions.irritation.level}` as Key)}
-              {cautions.length === 0 && <>{' · '}{f.unknownCount > 0 ? t('card.noIrritantsUnknown', { n: f.unknownCount }) : t('card.noIrritants')}</>}
+              {tolerance
+                ? t('card.gentleTolerance')
+                : <>{t('results.gentle')}：{t(`gentle.${r.dimensions.irritation.level}` as Key)}</>}
+              {cautions.length === 0 && !tolerance && <>{' · '}{f.unknownCount > 0 ? t('card.noIrritantsUnknown', { n: f.unknownCount }) : t('card.noIrritants')}</>}
             </li>
           )}
           {f.status !== 'contains' && (
