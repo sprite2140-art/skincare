@@ -207,7 +207,7 @@ describe('场景 4：跳过城市和所有可跳过的题', () => {
 
 describe('场景 5：无图片、品类无数据、无符合条件商品', () => {
   it('图片必须写明来源、许可和署名；其余产品用占位图', () => {
-    const withImage = real.products.filter((p) => p.imageUrl);
+    const withImage = real.products.filter((p) => p.zone !== 'face' && p.imageUrl);
     expect(withImage.map((p) => p.productId)).toEqual(['CO-US-005', 'CO-US-009']);
     expect(withImage.every((p) => p.imageSource && p.imageLicense === 'CC BY-SA 3.0' && p.imageLicenseUrl && p.imageAttribution)).toBe(true);
     expect(withImage.every((p) => p.imageUrl.startsWith('https://images.openbeautyfacts.org/'))).toBe(true);

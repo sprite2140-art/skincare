@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parseCities, parseExchangeRates, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
-import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseIngredientList } from './cosing';
+import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseInciAliases, parseIngredientList } from './cosing';
 import { buildIngredientIndex } from './ingredientIndex';
 
 const dataDir = fileURLToPath(new URL('../../data/', import.meta.url));
@@ -18,6 +18,7 @@ export function loadDataFromDisk() {
     chelators: parseIngredientList(read('chelators.csv')),
     fragrances: parseIngredientList(read('fragrance_ingredients.csv')),
   };
+  const aliases = parseInciAliases(read('inci_aliases.csv'));
   const allIngredients = expandIngredients(ingredients, cosing, allergens, explanations, lists);
   return {
     /** 成分库 ingredients.csv 本身 */
@@ -28,9 +29,11 @@ export function loadDataFromDisk() {
     explanations,
     /** 本项目维护的判断清单：螯合剂、加香成分 */
     lists,
+    /** 非 INCI 写法 → INCI 名的别名表（inci_aliases.csv），匹配时先查 */
+    aliases,
     /** 成分库 + CosIng + 致敏原清单，用于匹配产品成分 */
     allIngredients,
-    ingredientIndex: buildIngredientIndex(allIngredients),
+    ingredientIndex: buildIngredientIndex(allIngredients, aliases),
     products: attachRetail(parseProducts(read('products.csv')), parseRetailRatings(read('retail_ratings.csv')), parsePurchaseLinks(read('purchase_links.csv'))),
     water: parseWaterRecords(read('water_hardness.csv')),
     referenceWater: parseReferenceWater(read('water_hardness_reference.csv')),

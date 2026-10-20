@@ -13,7 +13,7 @@ const SECTIONS: { id: string; items: string[] }[] = [
   { id: 'fragrance', items: ['1', '2', '3'] },
   { id: 'gentle', items: ['1', '2', '3'] },
   { id: 'ratings', items: ['1', '2', '3', '4'] },
-  { id: 'products', items: ['1', '2', '3', '4', '5'] },
+  { id: 'products', items: ['1', '2', '3', '4', '5', '6'] },
 ];
 
 export default function DataNotes() {

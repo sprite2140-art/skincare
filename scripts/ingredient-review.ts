@@ -9,7 +9,7 @@ import type { Ingredient } from '../src/data/types';
 import { IRRITANT_TAGS } from '../src/scoring/config';
 import { RISK_TAG_LABELS, TARGET_LABELS } from '../src/scoring/labels';
 
-const { products, ingredientIndex, lists } = loadDataFromDisk();
+const { products, ingredientIndex, lists, explanations } = loadDataFromDisk();
 
 /** 清单（螯合剂、加香）上的来源也列出 */
 const listSources = new Map<string, string>();
@@ -76,6 +76,15 @@ const rows = [...affected]
 const pending = rows.filter((r) => r.ing.reviewStatus !== 'verified');
 const noSource = rows.filter((r) => sourcesOf(r.ing).length === 0);
 
+/** 出现某成分的产品数（按成分条目合并不同写法） */
+const explainedCount = (name: string) => {
+  const ing = ingredientIndex.get(name);
+  return ing ? affected.get(ing)?.size ?? 0 : 0;
+};
+const draftExplanations = explanations
+  .filter((e) => e.reviewStatus !== 'verified')
+  .sort((a, b) => b.draftedOn.localeCompare(a.draftedOn) || explainedCount(b.inciName) - explainedCount(a.inciName) || a.inciName.localeCompare(b.inciName));
+
 const lines = [
   '# 成分核对表',
   '',
@@ -102,6 +111,14 @@ const lines = [
     ing.reviewStatus === 'verified' ? '已核对' : '未核对',
     ' ',
   ].join(' | ').replace(/^/, '| ').replace(/$/, ' |')),
+  '',
+  '## 通俗解释待核对',
+  '',
+  `data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 ${draftExplanations.length} 条（卡片上只在 CosIng 成分的说明里显示，标为未核对）。按起草日期从新到旧、再按出现的产品数排序。核对后把 review_status 改为 verified。`,
+  '',
+  '| 起草日期 | 产品数 | 成分 | 中文解释 | 英文解释 | 核对结果 |',
+  '|---|---:|---|---|---|---|',
+  ...draftExplanations.map((e) => `| ${e.draftedOn || '—'} | ${explainedCount(e.inciName)} | ${cell(e.inciName)} | ${cell(e.explainZh)} | ${cell(e.explainEn)} |   |`),
   '',
 ];
 writeFileSync(new URL('../docs/INGREDIENT_REVIEW.md', import.meta.url), lines.join('\n'));

@@ -23,7 +23,7 @@ export const FACE_CLAIM_KEYWORDS: { target: FaceTarget; pattern: RegExp; terms: 
 
 /** 品牌宣称原文中出现、但 brand_claim_targets 里没有的面部需求代码 */
 export function missingFaceClaimTargets(p: Product): { target: FaceTarget; terms: string }[] {
-  const text = p.brandClaims.quote || (p.brandClaims.status === 'brand_page_quote' ? p.brandClaims.text : '');
+  const text = p.brandClaims.quote || (p.brandClaims.status === 'brand_page_quote' || p.brandClaims.status === 'retail_mismatch' ? p.brandClaims.text : '');
   if (!text) return [];
   return FACE_CLAIM_KEYWORDS.filter((k) => k.pattern.test(text) && !p.brandClaims.targets.includes(k.target))
     .map(({ target, terms }) => ({ target, terms }));

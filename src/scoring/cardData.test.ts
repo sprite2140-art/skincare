@@ -162,6 +162,15 @@ describe('卡片：在售版本与品牌页不一致', () => {
     expect(rows.some((r) => r.platform === 'brand' || r.url.includes('lorealparisusa.com'))).toBe(false);
     expect(primaryStore(p)?.platform).not.toBe('brand');
   });
+
+  it('retail_mismatch 时保留品牌宣称和品牌官网链接（成分表取自品牌官网，只是零售商不同）', () => {
+    const p = byId('CL-US-001');
+    expect(p.brandClaims.status).toBe('retail_mismatch');
+    expect(p.brandClaims.text).not.toBe('');
+    const brandLinks = p.purchaseLinks.filter((l) => l.platform === 'brand');
+    expect(brandLinks.length).toBeGreaterThan(0);
+    expect(storeRows(p).some((r) => r.platform === 'brand')).toBe(true);
+  });
 });
 
 describe('百货 / 买手渠道', () => {

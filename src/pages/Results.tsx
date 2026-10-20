@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import ProductCard from './ProductCard';
 import { Link } from 'react-router-dom';
 import { budgetCaps, cities, exchangeRates, ingredientIndex, products } from '../data/load';
+import { LIST_CATEGORIES, productsForList, type ListCategory } from '../scoring/listProducts';
 import type { Category } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
@@ -20,9 +21,6 @@ import {
 } from '../scoring/score';
 
 const EMPTY_SCALP: ScalpAnswers = { oilTiming: null, concerns: [], washFrequency: null };
-/** 本轮实现的品类；发膜、免洗护发乳、护发精油已预留数据结构 */
-const LIST_CATEGORIES = ['shampoo', 'conditioner'] as const;
-type ListCategory = (typeof LIST_CATEGORIES)[number];
 type View = ListCategory | 'set';
 type SortBy = 'fit' | 'price';
 
@@ -56,7 +54,7 @@ export default function Results() {
   const score = (routineMode: boolean) => {
     const out = {} as Record<ListCategory, { ranked: ProductScore[]; total: number; hidden: number; profile: ScoringProfile }>;
     for (const cat of LIST_CATEGORIES) {
-      const all = products.filter((x) => x.category === cat);
+      const all = productsForList(products, cat);
       const { shown, hiddenCount } = filterByMarket(all, market, showOthers);
       const scoring = toScoringProfile(answers, cat, { cities, exchangeRates, routine: routineMode });
       const ranked = rankProducts(shown, cat, scoring, { index: ingredientIndex, exchangeRates, budgetCaps, allowDraft: TEST_MODE_DRAFT_SCORING });

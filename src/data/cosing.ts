@@ -14,7 +14,7 @@
 //   成分库和 CosIng 里都没有的，按清单补一个 draft 条目。
 
 import { parseCsv, splitList } from './parse';
-import { normalizeName } from './ingredientIndex';
+import { normalizeName, type InciAlias, type InciAliasType } from './ingredientIndex';
 import type { Ingredient, ReviewStatus } from './types';
 
 export interface CosingEntry {
@@ -162,6 +162,8 @@ export interface ExplanationEntry {
   explainZh: string;
   explainEn: string;
   reviewStatus: ReviewStatus;
+  /** 起草日期 YYYY-MM-DD */
+  draftedOn: string;
 }
 
 export function parseExplanations(text: string): ExplanationEntry[] {
@@ -170,6 +172,16 @@ export function parseExplanations(text: string): ExplanationEntry[] {
     explainZh: r.explain_zh ?? '',
     explainEn: r.explain_en ?? '',
     reviewStatus: (r.review_status || 'draft') as ReviewStatus,
+    draftedOn: r.drafted_on ?? '',
+  }));
+}
+
+export function parseInciAliases(text: string): InciAlias[] {
+  return parseCsv(text).map((r) => ({
+    alias: r.alias ?? '',
+    inci: r.inci ?? '',
+    aliasType: (r.alias_type ?? '') as InciAliasType,
+    sourceUrl: r.source_url ?? '',
   }));
 }
 

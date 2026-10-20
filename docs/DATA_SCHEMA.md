@@ -60,7 +60,7 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | claim_source | claimed_benefits 的来源：brand_text（产品页的品牌原文）/ data_classification（资料整理时的分类）。页面分别显示"品牌宣称"和"资料分类"，都按产品定位 0.7 计分。本轮 47 款美国产品来自资料中的"需求"字段，是整理时的分类，全部填 data_classification；"日常清洁"对应 clarifying，"去黄 / 去橙"拆为 tone_yellow / tone_orange。2026-10-17 第 1 批扩充（20 款）的资料里 claim_source 写的是 brand_text，但资料说明写明 claimed_benefits 是项目的需求映射、不是品牌原话，导入时改为 data_classification；紫色洗发水（SH-US-057）的 tone_correction 记为 tone_yellow | data_classification |
 | brand_claims / brand_claims_quote / brand_claims_source_url | 品牌产品页效果的中文概括、短原文和官方产品页。概括不是逐字翻译，也不是独立验证的效果；页面显示为"品牌宣称（产品页概括）"。目前只展示，不参与计分（计分仍用 claimed_benefits） | |
 | brand_claim_targets | 品牌产品页明确宣称的效果对应的困扰，分号分隔，按下表从 brand_claims_quote（英文原文）和 brand_claims（中文概括）对应；计分时按"品牌宣称"0.7 计，与资料分类相同，页面标注"品牌宣称"。对应表：Moisturizing / Hydrating → dryness；Detangling → tangling；Smoothing / Frizz Control → frizz；Repair / Strengthening / Anti-breakage → damage；Volume / Body → flat_hair；Curl Definition → curl_definition；Neutralizes Yellow → tone_yellow，Orange / Brassiness（棕发）→ tone_orange，金发的 Brassiness → tone_yellow | dryness;tangling |
-| brand_claims_status | brand_page_summary（brand_claims 是品牌页的中文概括）/ brand_page_quote（brand_claims 是品牌页英文原文摘录，与 brand_claims_quote 相同，页面只显示原文，不显示为"中文概括"）/ version_mismatch（在售版本与品牌页不一致，留空）/ not_collected（尚未收集）。brand_claims 有内容时必须为前两者之一并有出处。2026-10-17 第 1 批扩充（SH-US-048 起、CO-US-031 起）为 brand_page_quote | brand_page_summary |
+| brand_claims_status | brand_page_summary（brand_claims 是品牌页的中文概括）/ brand_page_quote（brand_claims 是品牌页英文原文摘录，与 brand_claims_quote 相同，页面只显示原文，不显示为"中文概括"）/ version_mismatch（打分用的成分表与品牌页的配方不一致，即品牌官网卖的是另一版：brand_claims 留空，页面不列品牌官网购买链接）/ retail_mismatch（成分表和品牌宣称都取自品牌官网，二者一致，只是零售商页面的成分表不同：brand_claims 填英文原文摘录、与 brand_claims_quote 相同，保留品牌官网购买链接，购买链接下方提示"零售商页面的成分表与品牌官网不同，在售批次可能不同，以包装为准"）/ not_collected（尚未收集）。两种 mismatch 的区别在于成分表跟哪一边一致：version_mismatch 跟零售商（或包装）一致、与品牌页不一致；retail_mismatch 跟品牌官网一致、与零售商不一致。brand_claims 有内容时必须为 brand_page_summary、brand_page_quote 或 retail_mismatch 之一并有出处。2026-10-17 第 1 批扩充（SH-US-048 起、CO-US-031 起）为 brand_page_quote | brand_page_summary |
 | tested_claims | 可靠的成品测试（第三方或公开方法），每项格式 `困扰\|测试说明\|年份\|链接`，链接必填。目前没有数据 | |
 | fragrance_free_claim | 产品是否明确标注 fragrance-free：yes / no / unknown。留空视为 unknown（未确认，不等于含香） | unknown |
 | fragrance_free_source_url | 无香声明出处；fragrance_free_claim = yes 时必填 | |
@@ -95,6 +95,8 @@ verified 成分必须填写 sources 和 reviewed_on（YYYY-MM-DD）；有 target
 | MA | 面膜 | mask | 必须逐个填写 |
 
 卸妆（makeup_remover）、化妆水（toner）暂不在第一阶段，前缀未定。
+
+**当前数据**：美国洁面 40 款（CL-US-001—040，2026-10-19 导入，两批）。数据收集方的自查报告存在 `docs/data_batches/`。入库依据为 Ulta Face Wash 畅销排序的 34 款记为 retailer_bestseller，Nordstrom 畅销洁面专题的 6 款（CL-US-035—040）记为 department_store_bestseller。护肤还没有问卷和打分，面部产品不进入洗护结果页（`src/scoring/listProducts.ts`）。
 
 **10 列面部属性**（products.csv 在 reviewed_on 之后，列名如下）。洗护产品和旧数据没有这些列或为空，不报错；空值按下表的默认值处理。体验和用法只填品牌原文，不从成分推测。
 
@@ -138,7 +140,7 @@ key_actives 按品牌原文保存，打分时这样对应到成分表（代码 `
 
 ### 成分名称统一
 
-解析 inci_list 时，对每个成分名做统一处理，再去成分库匹配：
+解析 inci_list 时，对每个成分名做统一处理，先查别名表 `data/inci_aliases.csv`（见下文），再去成分库和 CosIng 匹配：
 
 1. **去掉括号内的俗名**：`Rosmarinus Officinalis (Rosemary) Leaf Extract` → `Rosmarinus Officinalis Leaf Extract`；`Aqua (Water)` → `Aqua`。半角、全角括号都处理。
 2. **`[待核对]` 标记**：整理数据时拿不准成分名是否写对，可以在名称后加 `[待核对]`（半角、全角方括号都可以）。解析时去掉这个标记，并把该成分记为"名称未核对"：不参与打分，结果页显示为"暂无数据"。安全检查（特殊状态、想避开的成分、搭配冲突）仍会看它，并标注"未核对"。
@@ -225,7 +227,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 |---|---|
 | product_id | 对应 products.csv |
 | platform | ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks / bergdorf_goodman / bluemercury（与 purchase_links 共用平台取值，还有 brand）。也接受 neimanmarcus、bergdorf、bergdorfgoodman、saksfifthavenue 的写法，读取时统一为左边的代码 |
-| rating | 星级 0–5，取页面可见值 |
+| rating | 星级 0–5，取页面可见值。页面没有显示星级时留空（不填 0），这条评分不显示，校验只提示 |
 | rating_count | 精确评价数；页面只显示缩写（如 5.5K）时留空，不推算 |
 | rating_count_display | 页面显示的原文（如 1,346、5.5K、(6,395)） |
 | count_label | 评价数口径：Reviews（Ulta）、header review link（Sephora）、page header count（Target）、ratings（Amazon，含无文字的星级评价） |
@@ -233,7 +235,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 
 页面规则（`src/data/retail.ts`）：评价数少于 50 的不显示（只有缩写时按缩写判断门槛，显示原文）；按平台固定顺序列在详情里，注明"评分只作参考，不计入适配分；部分评价可能来自赠品试用；不同规格、香型可能合并统计"。不计算跨平台平均分。
 
-当前数据：美国洗护零售元数据第 1 批（SH-US-001—010、CO-US-001—010），2026-10-17 核对，41 条（Ulta 18、Sephora 4、Target 18、Amazon 1）。
+当前数据：美国洗护零售元数据第 1 批（SH-US-001—010、CO-US-001—010），2026-10-17 核对，41 条（Ulta 18、Sephora 4、Target 18、Amazon 1）。美国洁面 CL-US-001—040，2026-10-19 核对，54 条（Ulta 34、Target 11、Sephora 7、Bluemercury 1、Nordstrom 1），其中 8 条星级留空。
 
 ## purchase_links.csv（多平台购买链接）
 
@@ -245,7 +247,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | status | in_stock / purchasable / listed / official_store_listed_pdp_blocked（品牌店目录已确认，详情页和库存未确认）等，空白不等于不销售 |
 | checked_on / note | 核对日期、说明（如 Target Plus 第三方卖家） |
 
-页面详情"在哪买"按固定顺序每个平台一行：品牌官网 → Ulta → Sephora → Target → Amazon → Nordstrom → Neiman Marcus → Saks Fifth Avenue → Bergdorf Goodman → Bluemercury（`RETAIL_PLATFORMS`）→ 其他网站。平台由链接域名识别（`RETAIL_PLATFORM_DOMAINS`）。收起状态的主购买按钮默认指向评价数最多的平台，没有评分时用 products.csv 的 purchase_url。当前 20 款、63 条链接。
+页面详情"在哪买"按固定顺序每个平台一行：品牌官网 → Ulta → Sephora → Target → Amazon → Nordstrom → Neiman Marcus → Saks Fifth Avenue → Bergdorf Goodman → Bluemercury（`RETAIL_PLATFORMS`）→ 其他网站。平台由链接域名识别（`RETAIL_PLATFORM_DOMAINS`）。收起状态的主购买按钮默认指向评价数最多的平台，没有评分时用 products.csv 的 purchase_url。当前洗护 20 款、63 条链接；美国洁面 40 款、100 条链接（2026-10-19）。
 
 ## exchange_rates.csv（固定汇率表）
 
@@ -293,6 +295,27 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 - 默认只显示一行"等级 · 数值 · 来源"和刻度条：刻度条按 USGS 分四档（0–60 软水、61–120 中等、121–180 硬水、>180 很硬），用户城市只有一个数值时为圆点，多个分区时为一段；参照城市为细刻度，下方列出名称和数值。
 - 各条记录的口径、时期、范围、资料备注，以及参照城市的范围和出处，收进"数据说明"折叠。
 - 内部取值不直接显示：统计口径代码翻译成中文（未登记的写"其他口径"）；采样时期整理成"2025 年全年""2025 年第 4 季度"等，写明未注明的（如 not_stated_in_FAQ）显示"未注明"，其他认不出的写法只取其中的日期或不显示（`src/data/water.ts` 的 formatPeriod）。
+
+## inci_aliases.csv（非 INCI 写法 → INCI 名）
+
+产品成分表里有些写法不是 INCI 名（美国药品标签写法、美国色素名等）。这里登记写法与 INCI 名的对应关系，匹配时**先查别名表**，再查成分库和 CosIng。products.csv 中的原文不改，页面上的"包装原文"仍显示原写法。
+
+只收录**对应关系明确且有出处**的别名：
+
+| alias_type | 含义 | 例子 |
+|---|---|---|
+| us_drug_name | 美国药品标签（USP–NF）写法 | Polyoxyl 40 Stearate → PEG-40 Stearate |
+| us_color_name | 美国色素名（FD&C / D&C / Ext. D&C，可省略前缀和 "No."） | Red 4 → CI 14700 |
+| plant_oil_short | 植物油省略了部位的写法；只收 CosIng 中对应唯一的情况（同一植物有果皮油、种子油等多种时不收） | — |
+
+| 字段 | 含义 |
+|---|---|
+| alias | 产品成分表中的写法（大小写、多余空格不限） |
+| inci | 对应的 INCI 名，必须能在成分库或 CosIng 中找到 |
+| alias_type | 见上表 |
+| source_url | 对应关系的出处 |
+
+对应关系不唯一的写法（如 Iron Oxides 对应 CI 77491 / 77492 / 77499，Citrus Paradisi Oil 对应果皮油或种子油）不收录，保持未匹配。拼写错误、多语言写法（如 `Mel/Honey/Miel`）不在别名表处理，由数据收集方修正原文或在成分库 aliases 登记。校验会检查别名重复、类型、出处、INCI 名能否找到。
 
 ## ingredient_explanations.csv（常见成分通俗解释）
 
