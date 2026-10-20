@@ -359,7 +359,8 @@ function hardFilters(
 
 // ---------- 搭配冲突 ----------
 
-function conflictSeverity(a: Ingredient, b: Ingredient): 'mild' | 'severe' | null {
+/** 两个成分之间的搭配冲突（任一方的 conflicts_with 写明即可，双向识别） */
+export function conflictSeverity(a: Ingredient, b: Ingredient): 'mild' | 'severe' | null {
   const matches = (target: Ingredient, name: string) => {
     const key = normalizeName(name);
     return [target.inciName, ...target.aliases].some((n) => normalizeName(n) === key);

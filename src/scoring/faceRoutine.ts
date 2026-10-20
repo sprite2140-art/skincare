@@ -9,6 +9,8 @@ import { buildFaceSteps, type FaceStep, type FaceStepId } from './faceSteps';
 import { faceScoringProfile, rankFaceStep, type FaceProductScore } from './faceScore';
 import type { RiskTag } from '../data/types';
 import type { ScoringData, ScoringProfile, SpecialStatus } from './score';
+import { scheduleRoutine, type Schedule } from './faceSchedule';
+import { checkRoutineConflicts, type RoutineConflict } from './faceConflicts';
 
 /** 整套预算组合时每步最多看前几款，避免组合数过多 */
 const SET_BUDGET_POOL = 8;
@@ -95,4 +97,42 @@ export function routineTotalUsd(steps: RoutineStep[]): number | null {
     sum += s.primary.price.usd;
   }
   return sum;
+}
+
+/**
+ * 流程 + 早晚安排 + 搭配检查。首选组合有冲突时，在不改变适合等级的前提下换成同一步里下一款没有冲突的产品
+ * （先换可选步骤，再换基础步骤；用户自己选的不换）；换不了时保留首选，冲突写在页面顶部（草案 7.2）。
+ */
+export function buildScheduledRoutine(input: FaceRoutineInput): { routine: FaceRoutine; schedule: Schedule; conflicts: RoutineConflict[] } {
+  const routine = buildFaceRoutine(input);
+  const evaluate = () => {
+    const schedule = scheduleRoutine(routine.steps);
+    return { schedule, conflicts: checkRoutineConflicts(schedule, input.data.index) };
+  };
+  let current = evaluate();
+  const involved = (s: RoutineStep, list: RoutineConflict[]) =>
+    !!s.primary && list.some((c) => c.rule !== 'photosensitive_no_sunscreen' && c.products.includes(s.primary!));
+  const order = [...routine.steps].sort((a, b) => Number(a.step.tier === 'basic') - Number(b.step.tier === 'basic'));
+  for (const s of order) {
+    if (input.picks?.[s.step.id] || !involved(s, current.conflicts)) continue;
+    const original = s.primary!;
+    for (const cand of s.eligible) {
+      if (cand === original || cand.fitLevel !== original.fitLevel) continue;
+      s.primary = cand;
+      // 设了整套预算时，换了之后不能超出预算
+      if (input.setBudgetUsd != null && (routineTotalUsd(routine.steps) ?? Infinity) > input.setBudgetUsd) {
+        s.primary = original;
+        continue;
+      }
+      const trial = evaluate();
+      if (trial.conflicts.length < current.conflicts.length) {
+        current = trial;
+        break;
+      }
+      s.primary = original;
+    }
+  }
+  for (const s of routine.steps) s.alternates = s.eligible.filter((r) => r !== s.primary).slice(0, ALTERNATES);
+  routine.totalUsd = routineTotalUsd(routine.steps);
+  return { routine, ...current };
 }
