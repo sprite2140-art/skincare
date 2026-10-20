@@ -315,11 +315,11 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | alias_type | 见上表 |
 | source_url | 对应关系的出处 |
 
-对应关系不唯一的写法（如 Iron Oxides 对应 CI 77491 / 77492 / 77499，Citrus Paradisi Oil 对应果皮油或种子油）不收录，保持未匹配。拼写错误、多语言写法（如 `Mel/Honey/Miel`）不在别名表处理，由数据收集方修正原文或在成分库 aliases 登记。校验会检查别名重复、类型、出处、INCI 名能否找到。
+对应关系不唯一的写法（如 Iron Oxides 对应 CI 77491 / 77492 / 77499，Citrus Paradisi Oil 对应果皮油或种子油）不收录，保持未匹配。拼写错误、多语言写法（如 `Mel/Honey/Miel`）不在别名表处理，由数据收集方修正原文或在成分库 aliases 登记。2026-10-20 在成分库登记了 4 个：Coco Glucoside → Coco-Glucoside、Mel/Honey/Miel → Mel、Sea Salt\Maris Sal\Sel Marin → Maris Sal、CI 77891/ Titanium Dioxide → CI 77891；Carbomer Interpolymer Type A、Citrus Paradisi Oil、Citrus Sinensis Oil、Olea Europaea Oil、Chlorella Pyrenoidosa、Yucca Schidigera Extract、Iron Oxides、Disodium Cocoyl Glycinate 对应关系不唯一或不确定，保持未匹配。出处：色素用 FDA UNII 页面（precision.fda.gov），药品名用 FDA 页面（UNII 或 FDA 食品接触物质清单）。校验会检查别名重复、类型、出处、INCI 名能否找到。
 
 ## ingredient_explanations.csv（常见成分通俗解释）
 
-产品中出现频率最高的约 150 个成分里，成分库没有的（只在 CosIng 中）在这里起草一两句中英文通俗解释。**全部为起草稿，未经人工核对**（review_status = draft），页面标注"通俗解释为起草稿，未核对"。成分库已有的条目用成分库的 explain_zh / explain_en。
+产品中出现频率最高的约 150 个成分里，成分库没有的（只在 CosIng 中）在这里起草一两句中英文通俗解释。起草稿 review_status = draft，页面标注"通俗解释为起草稿，未核对"；作者核对后改为 verified 并填 reviewed_on，页面不再标注。2026-10-20 作者核对了 14 条（洁面首批新增的常见成分）。成分库已有的条目用成分库的 explain_zh / explain_en。
 
 | 字段 | 含义 |
 |---|---|
@@ -327,6 +327,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | explain_zh / explain_en | 通俗解释，一两句；只说明在配方中的作用，不写功效承诺 |
 | review_status | draft / verified |
 | drafted_on | 起草日期 |
+| reviewed_on | 核对日期；verified 时必填 |
 
 成分弹窗还会显示该成分的 CosIng 登记功能（翻译成通俗中文，见 `src/data/cosingFunctions.ts`），并注明来源和获取日期。登记功能是成分在配方中的作用，不是功效。
 

@@ -156,7 +156,7 @@ export function parseCosingExport(text: string): CosingEntry[] {
   return out;
 }
 
-/** 常见成分的通俗解释（data/ingredient_explanations.csv）：起草稿，未经人工核对 */
+/** 常见成分的通俗解释（data/ingredient_explanations.csv）：起草稿；核对后 review_status 为 verified */
 export interface ExplanationEntry {
   inciName: string;
   explainZh: string;
@@ -164,6 +164,8 @@ export interface ExplanationEntry {
   reviewStatus: ReviewStatus;
   /** 起草日期 YYYY-MM-DD */
   draftedOn: string;
+  /** 核对日期，verified 时必填 */
+  reviewedOn: string;
 }
 
 export function parseExplanations(text: string): ExplanationEntry[] {
@@ -173,6 +175,7 @@ export function parseExplanations(text: string): ExplanationEntry[] {
     explainEn: r.explain_en ?? '',
     reviewStatus: (r.review_status || 'draft') as ReviewStatus,
     draftedOn: r.drafted_on ?? '',
+    reviewedOn: r.reviewed_on ?? '',
   }));
 }
 
@@ -239,6 +242,7 @@ export function expandIngredients(
       conflictsWith: [],
       explainZh: explained.get(key)?.explainZh ?? '',
       explainEn: explained.get(key)?.explainEn ?? '',
+      explainReviewed: explained.get(key)?.reviewStatus === 'verified',
       sources: [COSING_SOURCE],
       reviewStatus: 'draft',
       reviewedOn: '',

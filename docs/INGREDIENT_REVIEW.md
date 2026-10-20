@@ -101,24 +101,10 @@
 
 ## 通俗解释待核对
 
-data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 120 条（卡片上只在 CosIng 成分的说明里显示，标为未核对）。按起草日期从新到旧、再按出现的产品数排序。核对后把 review_status 改为 verified。
+data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 104 条（卡片上只在 CosIng 成分的说明里显示，标为未核对）。按起草日期从新到旧、再按出现的产品数排序。核对后把 review_status 改为 verified。
 
 | 起草日期 | 产品数 | 成分 | 中文解释 | 英文解释 | 核对结果 |
 |---|---:|---|---|---|---|
-| 2026-10-19 | 13 | Stearic Acid | 硬脂酸，一种脂肪酸。在洁面产品中常和碱一起形成皂基，产生泡沫；也能让乳霜质地更稠。 | Stearic acid is a fatty acid. In cleansers it is often combined with an alkali to form soap that lathers; it also thickens creams. |   |
-| 2026-10-19 | 10 | Sodium Lauroyl Lactylate | 月桂酰乳酰乳酸钠，乳化成分，帮助油和水混合在一起，质地更稳定。 | Sodium lauroyl lactylate is an emulsifier that helps oil and water stay mixed for a stable texture. |   |
-| 2026-10-19 | 8 | Hydroxyacetophenone | 羟苯乙酮，抗氧化成分，常用来辅助防腐，减少其他防腐剂的用量。 | Hydroxyacetophenone is an antioxidant often used to support preservatives so less of them is needed. |   |
-| 2026-10-19 | 7 | Allantoin | 尿囊素，护肤品中常见的舒缓、保护皮肤的成分。 | Allantoin is a common skin-soothing and skin-protecting ingredient. |   |
-| 2026-10-19 | 7 | Glyceryl Stearate | 甘油硬脂酸酯，乳化和润肤成分，让乳液、乳霜质地顺滑稳定。 | Glyceryl stearate is an emulsifier and emollient that keeps lotions and creams smooth and stable. |   |
-| 2026-10-19 | 7 | Hydrogenated Lecithin | 氢化卵磷脂，来自大豆等的乳化成分，帮助油水混合，也有润肤作用。 | Hydrogenated lecithin is an emulsifier, often from soy, that helps oil and water mix and softens skin. |   |
-| 2026-10-19 | 7 | Lauric Acid | 月桂酸，一种脂肪酸。在洁面产品中常和碱一起形成皂基，产生丰富的泡沫。 | Lauric acid is a fatty acid. In cleansers it is often combined with an alkali to form soap with a rich lather. |   |
-| 2026-10-19 | 7 | Lauryl Glucoside | 月桂基葡糖苷，来自植物糖和脂肪醇的温和清洁成分。 | Lauryl glucoside is a mild cleanser made from plant sugar and fatty alcohol. |   |
-| 2026-10-19 | 7 | Palmitic Acid | 棕榈酸，一种脂肪酸，用于乳化和润肤；在洁面产品中也参与形成皂基。 | Palmitic acid is a fatty acid used as an emulsifier and emollient; in cleansers it also helps form soap. |   |
-| 2026-10-19 | 6 | Acrylates/C10-30 Alkyl Acrylate Crosspolymer | 丙烯酸（酯）类/C10-30 烷醇丙烯酸酯交联聚合物，增稠和稳定成分，让凝胶、乳液质地更稳定。 | Acrylates/C10-30 alkyl acrylate crosspolymer thickens and stabilises gels and lotions. |   |
-| 2026-10-19 | 6 | BHT | BHT（二丁基羟基甲苯），抗氧化成分，防止配方中的油脂氧化变质。 | BHT (butylated hydroxytoluene) is an antioxidant that keeps oils in the formula from going rancid. |   |
-| 2026-10-19 | 6 | Glycolic Acid | 乙醇酸，一种果酸（AHA），能让皮肤表面的老化角质更容易脱落；也常用来调节酸碱度。含果酸的产品可能让皮肤对日晒更敏感。 | Glycolic acid is an alpha hydroxy acid (AHA) that helps loosen dead skin cells on the surface; it is also used to adjust pH. Products with AHAs may make skin more sensitive to the sun. |   |
-| 2026-10-19 | 6 | PEG-120 Methyl Glucose Dioleate | PEG-120 甲基葡糖二油酸酯，增稠成分，让洁面和洗发水更稠，也能减轻清洁成分的刺激感。 | PEG-120 methyl glucose dioleate thickens cleansers and shampoos and can help reduce the sting of cleansing agents. |   |
-| 2026-10-19 | 6 | Sodium Cocoamphoacetate | 椰油酰两性基乙酸钠，来自椰子油的温和辅助清洁成分，增加泡沫。 | Sodium cocoamphoacetate is a mild coconut-derived co-cleanser that boosts foam. |   |
 | 2026-10-17 | 116 | Citric Acid | 柠檬酸，常用来把产品调到偏弱酸性，让头发表面更平顺；也能结合水中的金属离子。 | Citric acid adjusts the product to a mildly acidic pH, which helps the hair surface lie flat; it also binds metal ions in water. |   |
 | 2026-10-17 | 79 | Sodium Chloride | 氯化钠，也就是食盐，在洗发水里主要用来让质地变稠。 | Sodium chloride is table salt; in shampoo it is mainly used to thicken the formula. |   |
 | 2026-10-17 | 77 | Phenoxyethanol | 苯氧乙醇，常见的防腐剂，用量有法规上限。 | Phenoxyethanol is a common preservative; its concentration is capped by regulation. |   |
@@ -172,7 +158,6 @@ data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 120 
 | 2026-10-17 | 12 | Persea Gratissima Oil | 鳄梨油，润泽头发的植物油。 | Avocado oil is a plant oil that conditions hair. |   |
 | 2026-10-17 | 12 | Potassium Hydroxide | 氢氧化钾，少量用来调节酸碱度，在配方中会被中和。 | Potassium hydroxide is used in small amounts to adjust pH and is neutralised in the formula. |   |
 | 2026-10-17 | 12 | PPG-5-Ceteth-20 | PPG-5-鲸蜡醇聚醚-20，乳化和增溶成分，帮助油性成分溶在水里。 | PPG-5-ceteth-20 emulsifies and solubilises oily ingredients in water. |   |
-| 2026-10-17 | 11 | Coco-Glucoside | 椰油基葡糖苷，来自椰子油和糖的温和清洁成分。 | Coco-glucoside is a mild cleanser made from coconut oil and sugar. |   |
 | 2026-10-17 | 11 | Dipropylene Glycol | 二丙二醇，溶剂，常用来溶解香料。 | Dipropylene glycol is a solvent, often used to dissolve fragrance. |   |
 | 2026-10-17 | 11 | Hydrolyzed Soy Protein | 水解大豆蛋白，蛋白类调理成分，让头发更好梳理。 | Hydrolyzed soy protein is a protein conditioner that makes hair easier to manage. |   |
 | 2026-10-17 | 11 | Hydrolyzed Vegetable Protein PG-Propyl Silanetriol | 水解植物蛋白 PG-丙基硅烷三醇，蛋白类调理成分，附着在头发上，帮助改善受损发的手感。 | Hydrolyzed vegetable protein PG-propyl silanetriol is a protein conditioner that clings to hair to improve the feel of damaged strands. |   |
@@ -203,7 +188,6 @@ data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 120 
 | 2026-10-17 | 7 | Sodium Isethionate | 羟乙磺酸钠，清洁成分的原料，也有调理作用。 | Sodium isethionate is a building block of mild cleansers and also conditions. |   |
 | 2026-10-17 | 6 | Ascorbic Acid | 抗坏血酸，即维生素 C，在洗护产品中主要起抗氧化或调节酸碱度作用。 | Ascorbic acid is vitamin C; in hair care it mainly acts as an antioxidant or pH adjuster. |   |
 | 2026-10-17 | 6 | Bisabolol | 红没药醇，最早从洋甘菊中提取，常作为舒缓成分加入。 | Bisabolol, originally from chamomile, is added as a soothing ingredient. |   |
-| 2026-10-17 | 6 | CI 77891 | CI 77891，二氧化钛，白色颜料，让产品呈乳白色。 | CI 77891 is titanium dioxide, a white pigment that makes the product opaque. |   |
 | 2026-10-17 | 6 | Laureth-23 | 月桂醇聚醚-23，乳化和辅助清洁成分。 | Laureth-23 is an emulsifier and co-cleanser. |   |
 | 2026-10-17 | 6 | PEG-100 Stearate | PEG-100 硬脂酸酯，乳化成分，让油和水混合均匀。 | PEG-100 stearate is an emulsifier that keeps oil and water mixed. |   |
 | 2026-10-17 | 6 | Polyquaternium-37 | 聚季铵盐-37，调理和增稠成分，让头发好梳理。 | Polyquaternium-37 conditions and thickens, making hair easier to comb. |   |

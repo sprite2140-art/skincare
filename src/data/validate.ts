@@ -285,6 +285,8 @@ export function validateData(
     if (seenExp.has(n)) err(F_EXP, key, '重复');
     seenExp.add(n);
     if (!e.explainZh || !e.explainEn) err(F_EXP, key, 'explain_zh 和 explain_en 都要填写');
+    oneOf(F_EXP, key, 'review_status', e.reviewStatus, REVIEW_STATUSES);
+    if (e.reviewStatus === 'verified' && !DATE_RE.test(e.reviewedOn)) err(F_EXP, key, 'verified 的解释必须填写 reviewed_on（YYYY-MM-DD）');
     const ing = index.get(e.inciName);
     if (!ing) warn(F_EXP, key, '成分不在成分库，也不在 CosIng');
     else if (ing.origin === 'library') warn(F_EXP, key, '成分库已有通俗解释，这里的不会使用');

@@ -145,6 +145,8 @@ export interface Ingredient {
   fragranceListed?: boolean;
   /** 在本项目维护的螯合剂清单（data/chelators.csv）上 */
   chelator?: boolean;
+  /** 通俗解释已核对（ingredient_explanations.csv 中 review_status = verified）；成分本身是否核对看 reviewStatus */
+  explainReviewed?: boolean;
   /** CosIng 登记的功能（小写），仅批量导入后才有；只用于展示，不参与打分 */
   cosingFunctions?: string[];
 }

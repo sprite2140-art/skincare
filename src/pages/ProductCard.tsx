@@ -88,7 +88,7 @@ function IngredientChip({ name, status }: { name: string; status: IngredientStat
           {explain && (
             <span>
               {explain}
-              {ing!.reviewStatus !== 'verified' && <span className="muted">（{t('ing.explainDraft')}）</span>}
+              {ing!.reviewStatus !== 'verified' && !ing!.explainReviewed && <span className="muted">（{t('ing.explainDraft')}）</span>}
             </span>
           )}
           {fns.length > 0 && (
