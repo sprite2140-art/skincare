@@ -515,6 +515,7 @@
   "card.noConfirmedStore": "库存未确认，购买渠道见详情",
   "card.formulaPending": "配方版本待核对：在售版本可能与这里的成分表不同，以包装为准",
   "card.sunscreenFilter": "防晒剂",
+  "card.priceNote": "价格以零售商页面为准",
   "card.cautions": "需要注意",
   "card.ingredients": "成分",
   "card.noZhLegend": "斜体为暂无中文名的成分，显示 INCI 名。",

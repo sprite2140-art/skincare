@@ -69,3 +69,4 @@
 |---|---|---|
 | 2026-10-19 | 卡片一致性、"适合"等级规则、设计自查清单 | `docs/screenshots/2026-10-19-qa/` |
 | 2026-10-21 | 导入防晒 40 款（新增 skin-sunscreen-missing、skin-sunscreen-stock） | `docs/screenshots/2026-10-21-sunscreen-qa/` |
+| 2026-10-21 | 上线阻塞项：价格旁提示"价格以零售商页面为准"（收起状态 3 个案例） | `docs/screenshots/2026-10-21-price-note/` |

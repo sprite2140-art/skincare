@@ -515,6 +515,7 @@
   "card.noConfirmedStore": "Stock not confirmed; see where to buy in details",
   "card.formulaPending": "Formula version not yet confirmed: the version on sale may differ from this ingredient list, so check the package",
   "card.sunscreenFilter": "Sunscreen filter",
+  "card.priceNote": "Check retailer for current price",
   "card.cautions": "Things to note",
   "card.ingredients": "Ingredients",
   "card.noZhLegend": "Italic: no Chinese name yet, INCI name shown.",

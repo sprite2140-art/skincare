@@ -14,7 +14,9 @@
     "ingredient-frequency": "tsx scripts/ingredient-frequency.ts",
     "ingredient-review": "tsx scripts/ingredient-review.ts",
     "import-cosing": "tsx scripts/import-cosing.ts",
-    "coverage": "tsx scripts/coverage.ts"
+    "coverage": "tsx scripts/coverage.ts",
+    "verify-list-ingredients": "tsx scripts/verify-list-ingredients.ts",
+    "test-mode-impact": "tsx scripts/test-mode-impact.ts"
   },
   "dependencies": {
     "papaparse": "^5.4.1",

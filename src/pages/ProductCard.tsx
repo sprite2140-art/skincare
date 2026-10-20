@@ -218,9 +218,12 @@ export default function ProductCard({ r, market, profile, scentGoal, compact, de
           <div className="brand">{p.brand}</div>
           <h3 className="name">{productName(p, lang)}</h3>
           <div className="meta">
-            {p.price !== null ? formatMoney(p.price, p.currency, false) : t('results.noPrice')}
-            {p.sizeMl !== null ? ` · ${t('results.size', { n: p.sizeMl })}` : ''}
-            {!inMarket(p, market) && ` · ${t('results.region')} ${p.region}`}
+            <span>
+              {p.price !== null ? formatMoney(p.price, p.currency, false) : t('results.noPrice')}
+              {p.sizeMl !== null ? ` · ${t('results.size', { n: p.sizeMl })}` : ''}
+              {!inMarket(p, market) && ` · ${t('results.region')} ${p.region}`}
+            </span>
+            {p.price !== null && <span className="price-note">{t('card.priceNote')}</span>}
           </div>
           {top && (
             <div className="rating-line">
