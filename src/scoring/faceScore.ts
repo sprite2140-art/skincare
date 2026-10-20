@@ -18,11 +18,22 @@ import { isFaceSensitive, prefersWaterResistant } from '../profile/faceQuestionn
 import { IRRITANT_DEDUCTION, RANKED_CONCERN_WEIGHTS, RINSE_OFF_MULTIPLIER, SENSITIVE_MULTIPLIER } from './config';
 import { fragranceTier } from './fragrance';
 import type { FaceStep } from './faceSteps';
-import { TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
+import { ingredientName, joinNames, type Text } from './labels';
 import {
   levelOf, scoreProduct, weightedTotal, type Flag, type NeedSpec, type ProductScore, type ScoringData, type ScoringProfile, type SpecialStatus,
 } from './score';
 import type { BudgetChoice } from './budget';
+
+/** 面部需求在页面上的名称，与问卷选项一致 */
+export const FACE_NEED_LABELS: Record<FaceTarget, Text> = {
+  acne: { zh: '痘痘、闭口', en: 'Breakouts' },
+  oil: { zh: '出油', en: 'Oiliness' },
+  dryness: { zh: '干燥、脱皮', en: 'Dryness' },
+  redness: { zh: '泛红', en: 'Redness' },
+  pigmentation: { zh: '暗沉、色斑', en: 'Dullness, dark spots' },
+  aging: { zh: '细纹、松弛', en: 'Fine lines, firmness' },
+  pores: { zh: '毛孔', en: 'Visible pores' },
+};
 
 /** 防晒的硬性门槛（AAD：SPF 30 以上、广谱） */
 export const MIN_SPF = 30;
@@ -56,7 +67,7 @@ export function faceScoringProfile(
   base: Pick<ScoringProfile, 'specialStatus' | 'specialStatuses' | 'avoidIngredients' | 'avoidTags'> & { customBudgetUsd?: number | null },
 ): ScoringProfile {
   const weightOf = (t: FaceTarget) => RANKED_CONCERN_WEIGHTS[Math.min(face.concerns.indexOf(t), RANKED_CONCERN_WEIGHTS.length - 1)];
-  const needs: NeedSpec[] = step.needs.map((t) => ({ id: t, label: TARGET_LABELS[t], targets: [t], weight: weightOf(t) }));
+  const needs: NeedSpec[] = step.needs.map((t) => ({ id: t, label: FACE_NEED_LABELS[t], targets: [t], weight: weightOf(t) }));
   const budget: BudgetChoice = face.budget === 'q1' || face.budget === 'q2' || face.budget === 'q3' ? face.budget : 'none';
   return {
     concerns: [...step.needs],
@@ -244,6 +255,11 @@ export function scoreFaceProduct(product: Product, profile: ScoringProfile, data
     const ingredients = irritantClasses.flatMap((c) => classes.get(c)!).map((raw) => data.index.get(raw)).filter((i): i is NonNullable<typeof i> => !!i);
     irritation = { ...irritation, hits: [...irritation.hits, { tag: 'active_irritant', ingredients, deduction, counted: true, unverified: false }] };
   }
+  // 面部暂不用水硬度：环境维度不计分，原因写清楚（不是"未设置城市"）
+  dimensions = {
+    ...dimensions,
+    environment: { ...dimensions.environment, reason: { zh: '面部护肤暂不考虑水硬度，不计分', en: 'Water hardness is not used for face care yet; not scored' } },
+  };
   const score = weightedTotal(dimensions);
   const anyMet = ps.needMatches.some((m) => m.credit >= 1);
   const rawLevel = ps.noNeeds ? null : levelOf(score);

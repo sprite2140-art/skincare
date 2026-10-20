@@ -172,6 +172,12 @@ function ExternalIcon() {
   );
 }
 
+/** "需要注意"里列出的提示（洗护 + 护肤） */
+const CAUTION_NOTICE_CODES = [
+  'pregnancy_notice', 'rx_notice', 'budget_unchecked',
+  'sunscreen_incomplete', 'water_resistance', 'active_start_slow', 'pregnancy_caution_use', 'below_range', 'above_range',
+];
+
 function firstSentence(s: string) {
   const m = s.match(/^.*?[。.](?=\s|$|[^0-9])/);
   return (m ? m[0] : s).replace(/（成分数据未核对）|\(ingredient data not yet verified\)/, '').trim();
@@ -274,7 +280,7 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
   const keys = keyIngredients(p, ingredientIndex, profile.concerns);
   const all = ingredientStatuses(p, ingredientIndex);
   const checked = [...new Set(p.ratings.map((x) => x.checkedOn).filter(Boolean))].sort().at(-1);
-  const notices = r.notices.filter((n) => n.code === 'pregnancy_notice' || n.code === 'rx_notice' || n.code === 'budget_unchecked');
+  const notices = r.notices.filter((n) => CAUTION_NOTICE_CODES.includes(n.code));
   const missing = r.notices.find((n) => n.code === 'missing_data');
   const bc = p.brandClaims;
   const quote = bc.status === 'brand_page_quote' || bc.status === 'retail_mismatch' || lang !== 'zh' ? bc.quote || bc.text : bc.text;
@@ -415,6 +421,10 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
         <h4 className="sec-title">{t('card.usage')}</h4>
         <p>{t((p.subtype ? `usage.${p.subtype}` : `usage.${p.category}`) as Key)}</p>
         {p.category === 'shampoo' && !p.subtype && hasAntiDandruffActive(p, ingredientIndex) && <p>{t('usage.antiDandruff')}</p>}
+        {/* 面部产品：品牌原文的用法（不从成分推测） */}
+        {(p.face?.useFrequency || p.face?.faceStepNote) && (
+          <p className="note">{t('usage.brandNote')}：{[p.face.useFrequency, p.face.faceStepNote].filter(Boolean).join(' · ')}</p>
+        )}
       </section>
 
       {/* ⑦ 评分明细（折叠）：每行结构相同；不计分的维度数字列为"—"，原因写在表格下方 */}

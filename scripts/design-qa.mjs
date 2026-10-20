@@ -17,7 +17,9 @@ if (!out) {
 mkdirSync(out, { recursive: true });
 
 // 与 src/pages/DesignQA.tsx 的 QA_CASES 一致
-const ids = ['all-met', 'partial', 'none', 'no-evidence', 'no-rating', 'long-name', 'unverified', 'routine'];
+const allIds = ['all-met', 'partial', 'none', 'no-evidence', 'no-rating', 'long-name', 'unverified', 'routine', 'skin-minimal', 'skin-full', 'skin-sensitive', 'skin-rx'];
+// QA_IDS=skin-minimal,skin-full 只截指定案例
+const ids = process.env.QA_IDS ? process.env.QA_IDS.split(',') : allIds;
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 const errors = [];
 const report = [];

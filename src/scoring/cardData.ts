@@ -2,7 +2,7 @@
 // 原则：卡片展示"用户需要知道什么"，判断方法统一放在数据说明页。
 
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
-import { RETAIL_PLATFORMS, RETAIL_PLATFORM_DOMAINS, type Ingredient, type Product, type RetailPlatform, type RetailRating, type Target } from '../data/types';
+import { FACE_TARGETS, RETAIL_PLATFORMS, RETAIL_PLATFORM_DOMAINS, type Ingredient, type Product, type RetailPlatform, type RetailRating, type Target } from '../data/types';
 import { ratingCountForThreshold, visibleRatings } from '../data/retail';
 import { SHAMPOO_OWN_HAIR_TARGETS, WEIGHTS, type DimensionKey } from './config';
 import { RISK_TAG_LABELS, TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
@@ -91,6 +91,12 @@ const ROLE: Partial<Record<Target, Text>> = {
   flat_hair: { zh: '蓬松', en: 'Volume' },
   shine: { zh: '光泽', en: 'Shine' },
   curl_definition: { zh: '卷发定型', en: 'Curl definition' },
+  acne: { zh: '祛痘', en: 'Acne care' },
+  oil: { zh: '控油', en: 'Oil control' },
+  redness: { zh: '舒缓泛红', en: 'Redness relief' },
+  pigmentation: { zh: '淡化色斑', en: 'Dark-spot care' },
+  aging: { zh: '抗老', en: 'Anti-aging' },
+  pores: { zh: '毛孔护理', en: 'Pore care' },
 };
 
 export interface KeyIngredient {
@@ -115,10 +121,13 @@ export function keyIngredients(p: Product, index: IngredientIndex, concerns: Tar
     const ing = index.get(raw);
     if (!ing || seen.has(ing.inciName)) continue;
     if (ing.category === 'active' && ing.targets.length > 0) {
-      const mine = ing.targets.find((t) => concerns.includes(t));
-      const target = mine ?? ing.targets[0];
+      // 面部产品只用面部需求的作用（如水杨酸在洗护里是"去屑"，面部产品不这样写）；没有面部作用时写"有效成分"
+      const targets = p.zone === 'face' ? ing.targets.filter((t) => (FACE_TARGETS as readonly Target[]).includes(t)) : ing.targets;
+      const mine = targets.find((t) => concerns.includes(t));
+      const target = mine ?? targets[0];
       seen.add(ing.inciName);
-      items.push({ role: ROLE[target] ?? TARGET_LABELS[target], raw, ingredient: ing, kind: 'active', rank: mine ? 0 : 1 });
+      const role = target ? ROLE[target] ?? TARGET_LABELS[target] : { zh: '有效成分', en: 'Active' };
+      items.push({ role, raw, ingredient: ing, kind: 'active', rank: mine ? 0 : 1 });
     } else if (ing.chelator) {
       seen.add(ing.inciName);
       items.push({ role: { zh: '螯合剂', en: 'Chelating agent' }, raw, ingredient: ing, kind: 'chelator', rank: 2 });
