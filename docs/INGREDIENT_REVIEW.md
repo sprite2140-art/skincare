@@ -126,9 +126,9 @@ data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 120 
 | 2026-10-17 | 62 | Sodium Hydroxide | 氢氧化钠，少量用来调节酸碱度，在配方中会被中和，不是以强碱形式留在产品里。 | Sodium hydroxide is used in small amounts to adjust pH; it is neutralised in the formula rather than left as a strong alkali. |   |
 | 2026-10-17 | 51 | Tocopherol | 生育酚，即维生素 E，主要用来防止配方中的油脂氧化变质。 | Tocopherol is vitamin E, mainly used to keep oils in the formula from going rancid. |   |
 | 2026-10-17 | 48 | Cocamidopropyl Betaine | 椰油酰胺丙基甜菜碱，温和的辅助清洁成分，常和其他清洁成分搭配，增加泡沫、降低刺激。 | Cocamidopropyl betaine is a mild co-surfactant used alongside other cleansers to boost foam and reduce harshness. |   |
+| 2026-10-17 | 43 | Ethylhexylglycerin | 乙基己基甘油，常和防腐剂一起用，帮助防腐，也有轻微保湿作用。 | Ethylhexylglycerin is used with preservatives to support them and adds mild conditioning. |   |
 | 2026-10-17 | 43 | Glycol Distearate | 乙二醇二硬脂酸酯，让洗发水呈现珠光乳白的外观，也让质地更稠。 | Glycol distearate gives shampoo a pearly, opaque look and adds some thickness. |   |
 | 2026-10-17 | 42 | Cetearyl Alcohol | 鲸蜡硬脂醇，一种脂肪醇，不是会让头发变干的酒精；让护发素质地顺滑并帮助软化头发。 | Cetearyl alcohol is a fatty alcohol, not a drying alcohol; it makes conditioner creamy and helps soften hair. |   |
-| 2026-10-17 | 42 | Ethylhexylglycerin | 乙基己基甘油，常和防腐剂一起用，帮助防腐，也有轻微保湿作用。 | Ethylhexylglycerin is used with preservatives to support them and adds mild conditioning. |   |
 | 2026-10-17 | 42 | Potassium Sorbate | 山梨酸钾，常见的防腐剂，食品中也会用到。 | Potassium sorbate is a common preservative, also used in food. |   |
 | 2026-10-17 | 34 | Caprylyl Glycol | 辛甘醇，保湿调理成分，也常用来辅助防腐。 | Caprylyl glycol conditions and moisturises, and is often used to support preservatives. |   |
 | 2026-10-17 | 34 | Propylene Glycol | 丙二醇，保湿和溶剂成分，帮助溶解其他成分；少数人可能对它敏感。 | Propylene glycol is a humectant and solvent that helps dissolve other ingredients; a few people are sensitive to it. |   |
