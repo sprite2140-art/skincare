@@ -129,7 +129,17 @@ export interface Ingredient {
   targets: Target[];
   effectiveRange: string;
   maxLimit: string;
+  /** 成分的最高证据等级，只用于展示；打分按 evidenceByTarget 逐个需求读取 */
   evidenceLevel: EvidenceLevel | null;
+  /**
+   * 每个需求单独的证据等级（evidence_by_target，如 dandruff:A;scalp_oil:C）。
+   * 填了这一列时，没写等级的需求按"暂无证据"计；整列为空的旧条目按 evidenceLevel 计。
+   */
+  evidenceByTarget?: Partial<Record<Target, EvidenceLevel>>;
+  /** 证据来自哪种使用方式的产品（evidence_usage）；用在另一种使用方式的产品上时降一级 */
+  evidenceUsage?: UsageType | null;
+  /** 核对备注，只供核对，不显示 */
+  notes?: string;
   riskTags: RiskTag[];
   conflictsWith: Conflict[];
   explainZh: string;

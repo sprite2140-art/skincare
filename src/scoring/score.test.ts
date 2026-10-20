@@ -76,7 +76,10 @@ describe('data/ 真实数据', () => {
   });
 
   it('关闭测试模式时，draft 有效成分不参与需求匹配（只剩资料分类的产品定位）；基础成分无需核对即可使用', () => {
-    const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), strict);
+    // 吡硫鎓锌、水杨酸 2026-10-20 已核对；这里把它们改回 draft，检查 draft 成分不参与打分
+    const asDraft = ['Pyrithione Zinc', 'Salicylic Acid'];
+    const draftZpt = buildIngredientIndex(real.ingredients.map((i) => (asDraft.includes(i.inciName) ? { ...i, reviewStatus: 'draft' as const } : i)));
+    const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), { ...strict, index: draftZpt });
     expect(r.dimensions.need.score).toBe(70);
     expect(r.dimensions.need.reason.zh).toBe('针对头皮屑：资料分类');
     expect(r.dimensions.evidence.score).toBe(40); // 只有资料分类：暂无证据，按最低等级（C）计
@@ -85,6 +88,12 @@ describe('data/ 真实数据', () => {
     expect(r.unverifiedIngredients).not.toContain('Water'); // Aqua 是基础成分
     expect(r.usesDraftData).toBe(false);
     expect(r.notices.some((n) => n.code === 'test_data')).toBe(false);
+  });
+
+  it('关闭测试模式时，已核对的有效成分按需求读取证据等级', () => {
+    const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), strict);
+    expect(r.dimensions.need.score).toBe(100);
+    expect(r.dimensions.evidence.reason.zh).toBe('吡硫鎓锌 A 级');
   });
 
   it('测试模式下 draft 成分参与打分，并标注测试数据', () => {
@@ -182,7 +191,8 @@ const fake = (inciName: string, extra: Partial<Ingredient>): Ingredient => verif
 }, extra);
 
 const fixtureIngredients: Ingredient[] = [
-  verify(realIng('Piroctone Olamine'), { evidenceLevel: 'A' }),
+  // 测试夹具：不随真实证据数据变化（真实数据见 data/ingredients.csv 的 evidence_by_target）
+  verify(realIng('Piroctone Olamine'), { evidenceLevel: 'A', evidenceByTarget: {}, targets: ['dandruff', 'scalp_itch'] }),
   verify(realIng('Fragrance')),
   verify(realIng('Glycerin')),
   fake('Aqua', { aliases: ['Water'] }),
