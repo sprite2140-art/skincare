@@ -152,6 +152,7 @@ const CLASS_LABELS: Record<ActiveClass, Text> = {
   benzoyl_peroxide: { zh: '过氧化苯甲酰', en: 'benzoyl peroxide' },
   aha: { zh: '果酸', en: 'AHAs' },
   bha: { zh: '水杨酸类', en: 'BHAs' },
+  pha: { zh: 'PHA（多羟基酸）', en: 'PHAs (polyhydroxy acids)' },
   vitamin_c: { zh: '维生素 C', en: 'vitamin C' },
   sunscreen_mineral: { zh: '物理防晒剂', en: 'mineral sunscreen filters' },
   sunscreen_organic: { zh: '化学防晒剂', en: 'chemical sunscreen filters' },

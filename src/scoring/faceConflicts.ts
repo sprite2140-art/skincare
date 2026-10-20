@@ -2,7 +2,7 @@
 // 只看同一时段（早上或晚上）一起用的产品；结果放在结果页顶部，每条附出处。
 // 第 8 条（处方药 / 异维 A 酸 + 功效成分）在单品打分时直接排除，不在这里重复。
 
-import type { ActiveClass } from '../data/faceActives';
+import { EXFOLIANT_CLASSES, type ActiveClass } from '../data/faceActives';
 import type { IngredientIndex } from '../data/ingredientIndex';
 import { usageTypeOf } from '../data/types';
 import type { FaceProductScore } from './faceScore';
@@ -40,9 +40,10 @@ const name = (p: FaceProductScore): Text => ({ zh: p.product.nameZh || p.product
 const both = (a: FaceProductScore, b: FaceProductScore): Text => ({ zh: `「${name(a).zh}」和「${name(b).zh}」`, en: `"${name(a).en}" and "${name(b).en}"` });
 const TIME: Record<TimeOfDay, Text> = { am: { zh: '早上', en: 'morning' }, pm: { zh: '晚上', en: 'evening' } };
 
-/** 去角质类：果酸、水杨酸类的免洗产品，或去角质步骤的产品（含磨砂） */
+const hasExfoliant = (p: FaceProductScore) => EXFOLIANT_CLASSES.some((c) => has(p, c));
+/** 去角质类：果酸、水杨酸类、PHA 的免洗产品，或去角质步骤的产品（含磨砂） */
 const exfoliates = (s: ScheduledStep) =>
-  !!s.product && (s.step.step.id === 'exfoliator' || ((has(s.product, 'aha') || has(s.product, 'bha')) && leaveOn(s.product)));
+  !!s.product && (s.step.step.id === 'exfoliator' || (hasExfoliant(s.product) && leaveOn(s.product)));
 
 function slotConflicts(time: TimeOfDay, slot: ScheduledStep[], index: IngredientIndex): RoutineConflict[] {
   const out: RoutineConflict[] = [];
@@ -84,11 +85,11 @@ function slotConflicts(time: TimeOfDay, slot: ScheduledStep[], index: Ingredient
     }
   }
   // 4. 同一时段两个以上去角质类产品（含水杨酸洁面）
-  const exf = items.filter((s) => s.product && (exfoliates(s) || has(s.product, 'aha') || has(s.product, 'bha'))).map((s) => s.product!);
+  const exf = items.filter((s) => s.product && (exfoliates(s) || hasExfoliant(s.product))).map((s) => s.product!);
   if (exf.length >= 2) {
     out.push({
       rule: 'multi_exfoliant', time, products: exf, severity: 'mild', source: AAD_EXFOLIATE,
-      text: { zh: `${t.zh}有 ${exf.length} 个去角质类产品（果酸、水杨酸类或去角质）`, en: `${exf.length} exfoliating products in the ${t.en} (AHAs, BHAs or an exfoliator)` },
+      text: { zh: `${t.zh}有 ${exf.length} 个去角质类产品（果酸、水杨酸类、PHA 或去角质）`, en: `${exf.length} exfoliating products in the ${t.en} (AHAs, BHAs, PHAs or an exfoliator)` },
       advice: { zh: '同一时段只保留一个，其余换成不含这些成分的产品', en: 'Keep only one at a time; swap the others for products without these ingredients' },
     });
   }

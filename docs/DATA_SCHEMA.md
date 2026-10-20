@@ -199,11 +199,11 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 | 字段 | 含义 |
 |---|---|
 | inci_name | INCI 名或美国药品标签写法（如 Avobenzone 和 Butyl Methoxydibenzoylmethane 各一行） |
-| active_class | retinoid（A 醇类）/ benzoyl_peroxide / aha（果酸）/ bha（水杨酸类）/ vitamin_c（只收 Ascorbic Acid）/ sunscreen_mineral（氧化锌、二氧化钛）/ sunscreen_organic（美国获准的化学防晒剂）/ iron_oxide（CI 77491 / 77492 / 77499，含 Iron Oxides 写法） |
-| source_url | 列入依据：A 醇类 AAD Retinoid or retinol?；过氧化苯甲酰 FDA 痤疮 OTC 专论（21 CFR 333 Subpart D）；果酸、水杨酸类 FDA AHA / BHA 页面；维生素 C AAD 20 多岁护肤页；防晒剂 FDA 防晒 OTC 专论 M020；氧化铁 21 CFR 73.2250 |
+| active_class | retinoid（A 醇类）/ benzoyl_peroxide / aha（果酸）/ bha（水杨酸类）/ pha（多羟基酸，温和去角质）/ vitamin_c（只收 Ascorbic Acid）/ sunscreen_mineral（氧化锌、二氧化钛）/ sunscreen_organic（美国获准的化学防晒剂）/ iron_oxide（CI 77491 / 77492 / 77499，含 Iron Oxides 写法） |
+| source_url | 列入依据：A 醇类 AAD Retinoid or retinol?；过氧化苯甲酰 FDA 痤疮 OTC 专论（21 CFR 333 Subpart D）；果酸、水杨酸类 FDA AHA / BHA 页面；维生素 C AAD 20 多岁护肤页；防晒剂 FDA 防晒 OTC 专论 M020；氧化铁 21 CFR 73.2250。没有权威出处、按行业惯例列入的写"行业惯例"（目前只有 PHA） |
 | added_on | 加入日期 |
 
-2026-10-20 首批 46 行。PHA（Gluconolactone、Lactobionic Acid）没有找到权威的分类出处，暂不列入。
+2026-10-20 首批 46 行。2026-10-21 按作者决定加入 PHA（Gluconolactone、Lactobionic Acid），出处为"行业惯例"：算去角质类，参与搭配冲突检查（第 5 节第 2–4 条），但不算刺激成分，也不算光敏成分。
 
 ## cosing_ingredients.csv 与 eu_fragrance_allergens.csv（欧盟成分基础分类）
 

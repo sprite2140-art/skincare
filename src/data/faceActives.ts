@@ -6,14 +6,20 @@ import { normalizeName, type IngredientIndex } from './ingredientIndex';
 import type { Ingredient, Product } from './types';
 
 export const ACTIVE_CLASSES = [
-  'retinoid', 'benzoyl_peroxide', 'aha', 'bha', 'vitamin_c', 'sunscreen_mineral', 'sunscreen_organic', 'iron_oxide',
+  'retinoid', 'benzoyl_peroxide', 'aha', 'bha', 'pha', 'vitamin_c', 'sunscreen_mineral', 'sunscreen_organic', 'iron_oxide',
 ] as const;
 export type ActiveClass = (typeof ACTIVE_CLASSES)[number];
 
 /** 只对敏感肌计入刺激风险、所有人显示"从低频开始"的功效成分类别（作者决定 2026-10-20） */
 export const IRRITANT_ACTIVE_CLASSES: ActiveClass[] = ['retinoid', 'benzoyl_peroxide', 'aha', 'bha'];
-/** 去角质类：同一时段最多一个 */
-export const EXFOLIANT_CLASSES: ActiveClass[] = ['aha', 'bha'];
+/**
+ * 去角质类：参与搭配冲突检查（第 5 节第 2–4 条），同一时段最多一个。
+ * PHA（如 Gluconolactone）按行业惯例算温和去角质（作者决定 2026-10-20），不算刺激成分，也不算光敏
+ */
+export const EXFOLIANT_CLASSES: ActiveClass[] = ['aha', 'bha', 'pha'];
+
+/** 没有权威出处、按行业惯例列入类别清单时，source_url 写这个值 */
+export const INDUSTRY_PRACTICE = '行业惯例';
 
 export interface ActiveClassEntry {
   inciName: string;

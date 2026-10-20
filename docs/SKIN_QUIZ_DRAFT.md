@@ -210,7 +210,7 @@
 | # | 组合 | 处理 | 严重程度 | 出处 |
 |---|---|---|---|---|
 | 1 | 过氧化苯甲酰 + A 醇类，同一时段 | 过氧化苯甲酰放早上，A 醇类放晚上（3.3）；无法错开时提示"不要同时涂" | 一般（只提醒） | 实验室研究：过氧化苯甲酰加光照，约 2 小时降解 50% 以上的维 A 酸，24 小时降解 95%，阿达帕林稳定。Martin B et al. *Br J Dermatol* 1998;139 Suppl 52:8–11，[PMID 9990414](https://pubmed.ncbi.nlm.nih.gov/9990414/)。注意：这项研究测的是两种产品混合后的稳定性，不是皮肤上的效果；化妆品里的视黄醇同样怕氧化，按同样处理属于行业惯例 |
-| 2 | A 醇类 + 去角质产品（果酸、水杨酸类、磨砂），同一晚 | 去角质的那晚不用 A 醇类 | 一般 | AAD How to safely exfoliate at home |
+| 2 | A 醇类 + 去角质产品（果酸、水杨酸类、PHA、磨砂），同一晚 | 去角质的那晚不用 A 醇类 | 一般 | AAD How to safely exfoliate at home |
 | 3 | 过氧化苯甲酰 + 去角质产品，同一时段 | 错开时段或错开日子 | 一般 | 同上 |
 | 4 | 同一时段有两个以上的去角质产品（如果酸精华 + 水杨酸洁面 + 磨砂） | 只保留一个，其余换成不含这些成分的产品 | 一般 | AAD How to safely exfoliate at home（越强的去角质越少做）；"同时段最多一个"：行业惯例 |
 | 5 | 同一时段有两个 A 醇类产品 | 只保留一个 | 一般 | AAD How to maximize results from anti-aging skin care products（同时用多种抗老产品可能刺激） |
@@ -247,7 +247,7 @@
 | benzoyl_peroxide | Benzoyl Peroxide |
 | aha | Glycolic Acid, Lactic Acid, Mandelic Acid |
 | bha | Salicylic Acid, Capryloyl Salicylic Acid |
-| pha | Gluconolactone, Lactobionic Acid（按温和去角质算，只计入第 5 节第 4 条） |
+| pha | Gluconolactone, Lactobionic Acid（按温和去角质算，出处为"行业惯例"；参与第 5 节第 2–4 条，不算刺激成分，不算光敏。作者决定 2026-10-21） |
 | vitamin_c | Ascorbic Acid（只这一种计入第 5 节第 7 条；衍生物不计） |
 | sunscreen_mineral | Zinc Oxide, Titanium Dioxide, CI 77891（4.1 的"未调色物理防晒"开关） |
 | iron_oxide | CI 77491, CI 77492, CI 77499（判断是否含色） |

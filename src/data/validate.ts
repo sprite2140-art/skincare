@@ -5,7 +5,7 @@ import { unmatchedKeyActives } from './keyActives';
 import { SOURCE_LEVELS, expandIngredients, onlyFragranceFunctions, type AllergenEntry, type CosingEntry, type ExplanationEntry, type IngredientLists } from './cosing';
 import { ingredientFrequency } from './frequency';
 import { validateFaceProduct } from './face';
-import { ACTIVE_CLASSES, type ActiveClassEntry } from './faceActives';
+import { ACTIVE_CLASSES, INDUSTRY_PRACTICE, type ActiveClassEntry } from './faceActives';
 import { highestLevel } from '../scoring/evidence';
 import {
   PREGNANCY_NOTES, US_REGULATORY_STATUSES, YES_NO_UNKNOWN, BRAND_CLAIM_STATUSES, CATEGORIES, INCLUSION_BASIS_TYPES, PRODUCT_SUBTYPES, RETAIL_PLATFORMS, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
@@ -350,7 +350,7 @@ export function validateData(
     if (seenCls.has(normalizeName(e.inciName))) err(F_CLS, key, '重复');
     seenCls.add(normalizeName(e.inciName));
     oneOf(F_CLS, key, 'active_class', e.activeClass, ACTIVE_CLASSES);
-    if (!/^https?:\/\//.test(e.sourceUrl)) err(F_CLS, key, '缺少来源链接 source_url');
+    if (!/^https?:\/\//.test(e.sourceUrl) && e.sourceUrl !== INDUSTRY_PRACTICE) err(F_CLS, key, `缺少来源链接 source_url（没有权威出处时写"${INDUSTRY_PRACTICE}"）`);
     if (!DATE_RE.test(e.addedOn)) err(F_CLS, key, `added_on 应为 YYYY-MM-DD：${e.addedOn}`);
   }
 

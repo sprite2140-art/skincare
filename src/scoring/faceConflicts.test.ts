@@ -51,6 +51,14 @@ describe('整套流程的搭配检查', () => {
     expect(rules([step('cleanser', ['Water', 'Salicylic Acid']), step('exfoliator', ['Water', 'Glycolic Acid']), sunscreen()])).toContain('multi_exfoliant:pm');
   });
 
+  it('PHA（Gluconolactone）算去角质类：参与搭配检查，但不算刺激成分', () => {
+    expect(rules([step('cleanser', ['Water', 'Gluconolactone']), step('exfoliator', ['Water', 'Glycolic Acid']), sunscreen()])).toContain('multi_exfoliant:pm');
+    expect(rules([step('treatment', ['Water', 'Gluconolactone']), step('moisturizer', ['Water', 'Retinol']), sunscreen()])).toContain('retinoid_exfoliant:pm');
+    const pha = step('treatment', ['Water', 'Gluconolactone']).primary!;
+    expect(pha.faceExtras.toleranceDependent).toBe(false);
+    expect(pha.irritation.hits.some((h) => h.tag === 'active_irritant')).toBe(false);
+  });
+
   it('维生素 C + 过氧化苯甲酰同在早上：行业惯例，没有出处链接', () => {
     const c = checkRoutineConflicts(scheduleRoutine([step('treatment', ['Water', 'Ascorbic Acid']), step('spot', ['Water', 'Benzoyl Peroxide'], { useTime: 'am' }), sunscreen()]), data.index);
     const v = c.find((x) => x.rule === 'vitc_bpo')!;
