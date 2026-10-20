@@ -1,0 +1,47 @@
+inci_name,active_class,source_url,added_on
+Retinol,retinoid,https://www.aad.org/public/everyday-care/skin-care-secrets/anti-aging/retinoid-retinol,2026-10-20
+Retinal,retinoid,https://www.aad.org/public/everyday-care/skin-care-secrets/anti-aging/retinoid-retinol,2026-10-20
+Retinaldehyde,retinoid,https://www.aad.org/public/everyday-care/skin-care-secrets/anti-aging/retinoid-retinol,2026-10-20
+Retinyl Palmitate,retinoid,https://www.aad.org/public/everyday-care/skin-care-secrets/anti-aging/retinoid-retinol,2026-10-20
+Retinyl Retinoate,retinoid,https://www.aad.org/public/everyday-care/skin-care-secrets/anti-aging/retinoid-retinol,2026-10-20
+Hydroxypinacolone Retinoate,retinoid,https://www.aad.org/public/everyday-care/skin-care-secrets/anti-aging/retinoid-retinol,2026-10-20
+Adapalene,retinoid,https://www.aad.org/public/everyday-care/skin-care-secrets/anti-aging/retinoid-retinol,2026-10-20
+Benzoyl Peroxide,benzoyl_peroxide,https://www.ecfr.gov/current/title-21/chapter-I/subchapter-D/part-333/subpart-D,2026-10-20
+Glycolic Acid,aha,https://www.fda.gov/cosmetics/cosmetic-ingredients/alpha-hydroxy-acids,2026-10-20
+Lactic Acid,aha,https://www.fda.gov/cosmetics/cosmetic-ingredients/alpha-hydroxy-acids,2026-10-20
+Mandelic Acid,aha,https://www.fda.gov/cosmetics/cosmetic-ingredients/alpha-hydroxy-acids,2026-10-20
+Salicylic Acid,bha,https://www.fda.gov/cosmetics/cosmetic-ingredients/beta-hydroxy-acids,2026-10-20
+Capryloyl Salicylic Acid,bha,https://www.fda.gov/cosmetics/cosmetic-ingredients/beta-hydroxy-acids,2026-10-20
+Ascorbic Acid,vitamin_c,https://www.aad.org/public/everyday-care/skin-care-basics/care/skin-care-in-your-20s,2026-10-20
+Zinc Oxide,sunscreen_mineral,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Titanium Dioxide,sunscreen_mineral,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+CI 77891,sunscreen_mineral,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Avobenzone,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Butyl Methoxydibenzoylmethane,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Homosalate,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Octisalate,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Ethylhexyl Salicylate,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Octocrylene,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Oxybenzone,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Benzophenone-3,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Octinoxate,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Ethylhexyl Methoxycinnamate,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Ensulizole,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Phenylbenzimidazole Sulfonic Acid,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Meradimate,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Menthyl Anthranilate,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Dioxybenzone,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Benzophenone-8,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Sulisobenzone,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Benzophenone-4,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Cinoxate,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Padimate O,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Ethylhexyl Dimethyl PABA,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Aminobenzoic Acid,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+PABA,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+Trolamine Salicylate,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+TEA-Salicylate,sunscreen_organic,https://dps-admin.fda.gov/omuf/sites/omuf/files/monograph-documents/2022-09/OTCMonograph_M020-SunscreenDrugProductsforOTCHumanUse09242021.pdf,2026-10-20
+CI 77491,iron_oxide,https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-73/subpart-C/section-73.2250,2026-10-20
+CI 77492,iron_oxide,https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-73/subpart-C/section-73.2250,2026-10-20
+CI 77499,iron_oxide,https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-73/subpart-C/section-73.2250,2026-10-20
+Iron Oxides,iron_oxide,https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-73/subpart-C/section-73.2250,2026-10-20

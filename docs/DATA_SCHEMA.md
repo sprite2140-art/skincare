@@ -44,6 +44,9 @@ risk_tags 取值：fragrance, essential_oil, alcohol, strong_acid, sensitizer, s
 | evidence_by_target | 每个需求单独的证据等级，`需求:等级`，分号分隔。需求必须在 targets 中，targets 里的每个需求都要写等级；evidence_level 必须是其中最高的一级。填了这一列的成分，打分时按需求读取等级；整列为空的旧条目沿用 evidence_level | dandruff:A;scalp_oil:C |
 | evidence_usage | 证据来自哪种使用方式的产品：leave_on / rinse_off，可留空。与产品的使用方式不同时降一级计算（A→B，B→C，C 不再降） | leave_on |
 | notes | 核对备注，只供核对，不在页面显示 | |
+| us_regulatory_status | 美国监管状态（面部有效成分）：otc_drug_active / rx_only / cosmetic / not_permitted_otc / unknown，可留空；只在成分弹窗显示 | otc_drug_active |
+| pregnancy_note | 孕期：avoid（自动带 pregnancy_caution 标签：怀孕 / 备孕 / 哺乳排除，对所有人被动提示）/ caution（护肤中只提示"注意用量"，不排除）/ no_known_concern / unknown，可留空 | avoid |
+| photosensitizing | 是否让皮肤更怕晒：yes / no / unknown，可留空 | yes |
 
 verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后没有可引用的出处时，sources 可以为空，但必须在 notes 写明原因（校验给提示），这类需求按 C 级计，与暂无证据相同。有 targets 的 verified 有效成分必须填写 evidence_level 和 evidence_by_target。`npm run validate-data` 会检查。
 
@@ -188,6 +191,19 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 6. 没有价格（或币种不在汇率表）的产品不参与分位数计算；选了任一上限时不显示它们，只在"不限"中出现。
 7. 问卷也可以自填上限（单品），或在洗护搭配时"按整套"自填总预算；金额按用户所在地货币保存，比较时换算成 USD。没有符合条件的商品时页面明确提示，不自动放宽条件。
 8. 每次产品数据或汇率更新后，上限在构建时自动重新计算；用户档案保存的是"第几个上限"（q1–q3），不是金额，所以不用重填。旧档案保存的 p33 / p67 和前一版的 q4 在读取时去掉，需要重新选择。`npm run validate-data` 会打印当前各品类的上限。
+
+## face_active_classes.csv（面部有效成分类别清单）
+
+本项目维护的清单，做法与螯合剂清单、加香成分清单相同。护肤的冲突规则、敏感肌规则、特殊状态排除和"未调色物理防晒"判断都按类别，不按 CosIng 功能（代码 `src/data/faceActives.ts`）。
+
+| 字段 | 含义 |
+|---|---|
+| inci_name | INCI 名或美国药品标签写法（如 Avobenzone 和 Butyl Methoxydibenzoylmethane 各一行） |
+| active_class | retinoid（A 醇类）/ benzoyl_peroxide / aha（果酸）/ bha（水杨酸类）/ vitamin_c（只收 Ascorbic Acid）/ sunscreen_mineral（氧化锌、二氧化钛）/ sunscreen_organic（美国获准的化学防晒剂）/ iron_oxide（CI 77491 / 77492 / 77499，含 Iron Oxides 写法） |
+| source_url | 列入依据：A 醇类 AAD Retinoid or retinol?；过氧化苯甲酰 FDA 痤疮 OTC 专论（21 CFR 333 Subpart D）；果酸、水杨酸类 FDA AHA / BHA 页面；维生素 C AAD 20 多岁护肤页；防晒剂 FDA 防晒 OTC 专论 M020；氧化铁 21 CFR 73.2250 |
+| added_on | 加入日期 |
+
+2026-10-20 首批 46 行。PHA（Gluconolactone、Lactobionic Acid）没有找到权威的分类出处，暂不列入。
 
 ## cosing_ingredients.csv 与 eu_fragrance_allergens.csv（欧盟成分基础分类）
 

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { parseCities, parseExchangeRates, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
 import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseInciAliases, parseIngredientList } from './cosing';
 import { buildIngredientIndex } from './ingredientIndex';
+import { buildActiveClassIndex, parseActiveClasses } from './faceActives';
 
 const dataDir = fileURLToPath(new URL('../../data/', import.meta.url));
 const read = (name: string) => readFileSync(dataDir + name, 'utf8');
@@ -19,6 +20,7 @@ export function loadDataFromDisk() {
     fragrances: parseIngredientList(read('fragrance_ingredients.csv')),
   };
   const aliases = parseInciAliases(read('inci_aliases.csv'));
+  const faceClassList = parseActiveClasses(read('face_active_classes.csv'));
   const allIngredients = expandIngredients(ingredients, cosing, allergens, explanations, lists);
   return {
     /** 成分库 ingredients.csv 本身 */
@@ -39,5 +41,8 @@ export function loadDataFromDisk() {
     referenceWater: parseReferenceWater(read('water_hardness_reference.csv')),
     cities: parseCities(read('cities.csv'), parseWaterRecords(read('water_hardness.csv'))),
     exchangeRates: parseExchangeRates(read('exchange_rates.csv')),
+    /** 面部有效成分类别清单（本项目维护） */
+    faceClassList,
+    faceActiveClasses: buildActiveClassIndex(faceClassList),
   };
 }

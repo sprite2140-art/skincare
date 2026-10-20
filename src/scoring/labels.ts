@@ -44,6 +44,7 @@ export const RISK_TAG_LABELS: Record<RiskTag, Text> = {
   strong_cleanser: { zh: '强清洁力表活', en: 'strong cleansers' },
   pregnancy_caution: { zh: '孕期需注意成分', en: 'pregnancy-caution ingredients' },
   rx_caution: { zh: '与处方皮肤药需注意的成分', en: 'ingredients to watch with prescription skin drugs' },
+  active_irritant: { zh: 'A 醇类、过氧化苯甲酰、果酸、水杨酸类', en: 'retinoids, benzoyl peroxide, AHAs or BHAs' },
 };
 
 /** 中文与英文字母、数字之间加空格（中文界面的排版规则）；已有空格的不重复加 */

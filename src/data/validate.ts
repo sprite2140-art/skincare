@@ -5,9 +5,10 @@ import { unmatchedKeyActives } from './keyActives';
 import { SOURCE_LEVELS, expandIngredients, onlyFragranceFunctions, type AllergenEntry, type CosingEntry, type ExplanationEntry, type IngredientLists } from './cosing';
 import { ingredientFrequency } from './frequency';
 import { validateFaceProduct } from './face';
+import { ACTIVE_CLASSES, type ActiveClassEntry } from './faceActives';
 import { highestLevel } from '../scoring/evidence';
 import {
-  BRAND_CLAIM_STATUSES, CATEGORIES, INCLUSION_BASIS_TYPES, PRODUCT_SUBTYPES, RETAIL_PLATFORMS, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
+  PREGNANCY_NOTES, US_REGULATORY_STATUSES, YES_NO_UNKNOWN, BRAND_CLAIM_STATUSES, CATEGORIES, INCLUSION_BASIS_TYPES, PRODUCT_SUBTYPES, RETAIL_PLATFORMS, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
   REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
 } from './types';
 import type { Category, Target, City, ExchangeRate, Ingredient, Product, ReferenceWater, WaterRecord } from './types';
@@ -30,7 +31,7 @@ export function validateData(
   cities: City[],
   exchangeRates: ExchangeRate[],
   /** CosIng 批量导入的成分和欧盟香料致敏原清单；用于匹配产品成分，不做成分库的格式检查 */
-  extra: { cosing?: CosingEntry[]; allergens?: AllergenEntry[]; water?: WaterRecord[]; referenceWater?: ReferenceWater[]; explanations?: ExplanationEntry[]; lists?: IngredientLists; aliases?: InciAlias[] } = {},
+  extra: { cosing?: CosingEntry[]; allergens?: AllergenEntry[]; water?: WaterRecord[]; referenceWater?: ReferenceWater[]; explanations?: ExplanationEntry[]; lists?: IngredientLists; aliases?: InciAlias[]; faceClasses?: ActiveClassEntry[] } = {},
 ): Issue[] {
   const issues: Issue[] = [];
   const err = (file: string, key: string, message: string) =>
@@ -62,6 +63,7 @@ export function validateData(
     if (ing.evidenceLevel !== null) oneOf(F_ING, key, 'evidence_level', ing.evidenceLevel, EVIDENCE_LEVELS);
     for (const t of ing.targets) oneOf(F_ING, key, 'targets', t, TARGETS);
     for (const t of ing.riskTags) oneOf(F_ING, key, 'risk_tags', t, RISK_TAGS);
+    if (ing.riskTags.includes('active_irritant')) err(F_ING, key, 'active_irritant 由面部有效成分类别清单算出，不要在 risk_tags 中填写');
     for (const c of ing.conflictsWith) oneOf(F_ING, key, 'conflicts_with 严重程度', c.severity, CONFLICT_SEVERITIES);
 
     for (const name of [ing.inciName, ...ing.aliases]) {
@@ -99,6 +101,9 @@ export function validateData(
       if (top && ing.evidenceLevel !== top) err(F_ING, key, `evidence_level 应为 evidence_by_target 中最高的一级 ${top}`);
     }
     if (ing.evidenceUsage) oneOf(F_ING, key, 'evidence_usage', ing.evidenceUsage, USAGE_TYPES);
+    if (ing.usRegulatoryStatus) oneOf(F_ING, key, 'us_regulatory_status', ing.usRegulatoryStatus, US_REGULATORY_STATUSES);
+    if (ing.pregnancyNote) oneOf(F_ING, key, 'pregnancy_note', ing.pregnancyNote, PREGNANCY_NOTES);
+    if (ing.photosensitizing) oneOf(F_ING, key, 'photosensitizing', ing.photosensitizing, YES_NO_UNKNOWN);
   }
 
   const all = expandIngredients(ingredients, extra.cosing ?? [], extra.allergens ?? [], extra.explanations ?? [], extra.lists ?? {});
@@ -335,6 +340,18 @@ export function validateData(
         warn('fragrance_ingredients.csv', ing.inciName, 'CosIng 只登记了香料功能，但不在加香清单；请确认是否加入');
       }
     }
+  }
+
+  // face_active_classes.csv（本项目维护的面部有效成分类别清单）
+  const F_CLS = 'face_active_classes.csv';
+  const seenCls = new Set<string>();
+  for (const e of extra.faceClasses ?? []) {
+    const key = e.inciName || '(缺 inci_name)';
+    if (seenCls.has(normalizeName(e.inciName))) err(F_CLS, key, '重复');
+    seenCls.add(normalizeName(e.inciName));
+    oneOf(F_CLS, key, 'active_class', e.activeClass, ACTIVE_CLASSES);
+    if (!/^https?:\/\//.test(e.sourceUrl)) err(F_CLS, key, '缺少来源链接 source_url');
+    if (!DATE_RE.test(e.addedOn)) err(F_CLS, key, `added_on 应为 YYYY-MM-DD：${e.addedOn}`);
   }
 
   // water_hardness_reference.csv（参照城市，只用于刻度条对照）

@@ -14,11 +14,13 @@ import explanationsCsv from '../../data/ingredient_explanations.csv?raw';
 import chelatorsCsv from '../../data/chelators.csv?raw';
 import fragrancesCsv from '../../data/fragrance_ingredients.csv?raw';
 import aliasesCsv from '../../data/inci_aliases.csv?raw';
+import faceClassesCsv from '../../data/face_active_classes.csv?raw';
 // CosIng 全表很大，构建时只保留产品成分表中出现的成分（见 vite.config.ts）
 import cosingCsv from 'virtual:cosing-used';
 import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseInciAliases, parseIngredientList } from './cosing';
 import { parseCities, parseExchangeRates, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
 import { buildIngredientIndex } from './ingredientIndex';
+import { buildActiveClassIndex, parseActiveClasses } from './faceActives';
 import { computeBudgetCaps } from '../scoring/budget';
 
 export const ingredients = parseIngredients(ingredientsCsv);
@@ -31,5 +33,7 @@ export const ingredientIndex = buildIngredientIndex(expandIngredients(ingredient
   chelators: parseIngredientList(chelatorsCsv),
   fragrances: parseIngredientList(fragrancesCsv),
 }), parseInciAliases(aliasesCsv));
+/** 面部有效成分类别清单（本项目维护） */
+export const faceActiveClasses = buildActiveClassIndex(parseActiveClasses(faceClassesCsv));
 // 预算价格上限界线：每次构建时按当前产品库自动重新计算
 export const budgetCaps = computeBudgetCaps(products, exchangeRates);

@@ -231,7 +231,11 @@ export function cautionItems(r: ProductScore, profile: Pick<ScoringProfile, 'was
     }
     const why: Text[] = [];
     if (rinseOff) why.push({ zh: `冲洗型产品，${label.zh}扣分减半`, en: 'halved because it is rinsed off' });
-    if (sensitive) why.push({ zh: '你的头皮较敏感，扣分加倍', en: 'doubled because your scalp is sensitive' });
+    if (sensitive) {
+      why.push(r.product.zone === 'face'
+        ? { zh: '你的皮肤经常敏感，扣分加倍', en: 'doubled because your skin is often sensitive' }
+        : { zh: '你的头皮较敏感，扣分加倍', en: 'doubled because your scalp is sensitive' });
+    }
     const pts = fmtPts(h.deduction);
     return {
       label,

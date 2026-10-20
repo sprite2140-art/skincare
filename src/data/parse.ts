@@ -4,7 +4,7 @@ import Papa from 'papaparse';
 import { cleanInciName } from './ingredientIndex';
 import { RETAIL_PLATFORMS } from './types';
 import type {
-  ActiveConcentration, FaceAttributes, SkinTypeClaim, Texture, UseTime, WaterResistance, YesNoUnknown,
+  PregnancyNote, UsRegulatoryStatus, ActiveConcentration, FaceAttributes, SkinTypeClaim, Texture, UseTime, WaterResistance, YesNoUnknown,
   InclusionBasisType, PurchaseLink, RetailPlatform, RetailRating, Award, BrandClaimStatus, ProductSubtype, City, WaterRecord, ReferenceWater, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
   UsageType, WaterHardness, Zone,
@@ -61,7 +61,8 @@ export function parseIngredients(text: string): Ingredient[] {
     effectiveRange: r.effective_range ?? '',
     maxLimit: r.max_limit ?? '',
     evidenceLevel: (r.evidence_level || null) as EvidenceLevel | null,
-    riskTags: splitList(r.risk_tags) as RiskTag[],
+    // pregnancy_note = avoid 的成分自动带 pregnancy_caution 标签（孕期排除 + 对所有人的被动提示，与洗护一致）；caution 只在护肤中提示
+    riskTags: [...new Set([...splitList(r.risk_tags), ...(r.pregnancy_note === 'avoid' ? ['pregnancy_caution'] : [])])] as RiskTag[],
     conflictsWith: parseConflicts(r.conflicts_with),
     explainZh: r.explain_zh ?? '',
     explainEn: r.explain_en ?? '',
@@ -71,6 +72,9 @@ export function parseIngredients(text: string): Ingredient[] {
     evidenceByTarget: parseEvidenceByTarget(r.evidence_by_target),
     evidenceUsage: (r.evidence_usage || null) as UsageType | null,
     notes: r.notes ?? '',
+    usRegulatoryStatus: (r.us_regulatory_status || null) as UsRegulatoryStatus | null,
+    pregnancyNote: (r.pregnancy_note || null) as PregnancyNote | null,
+    photosensitizing: (r.photosensitizing || null) as YesNoUnknown | null,
   }));
 }
 
