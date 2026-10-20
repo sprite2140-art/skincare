@@ -7,7 +7,8 @@
 // - 安全相关（硬性过滤、孕期提示、搭配冲突）也看 draft 成分和名称未核对的成分，宁可多提示，结果里标注"未核对"。
 
 import { usageTypeOf } from '../data/types';
-import type { City, ExchangeRate, Ingredient, Product, RiskTag, Target } from '../data/types';
+import { evidenceFor, type TargetEvidence } from './evidence';
+import type { City, ExchangeRate, Ingredient, Product, RiskTag, Target, UsageType } from '../data/types';
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import {
   BRAND_CLAIM_CREDIT, CHELATOR_TARGETS, ENVIRONMENT_SCORES, EVIDENCE_SCORES, MISSING_EVIDENCE_LEVEL,
@@ -549,11 +550,11 @@ function scoreNeed(
 }
 
 /**
- * 证据强度：每个需求取最强的依据——成品测试 100；否则取针对它的成分中证据最强的一个（A / B / C）。
+ * 证据强度：每个需求取最强的依据——成品测试 100；否则取针对它的成分中证据最强的一个（按需求读取 evidence_by_target，A / B / C）。
  * 没有可评级的证据（只有品牌宣称、资料分类、尚无证据等级的成分，或没有依据）的需求按最低等级
  * （MISSING_EVIDENCE_LEVEL，C 级）计分，页面写"暂无证据，按最低等级计"。再按需求权重平均。
  */
-function scoreEvidence(needMatches: NeedMatch[]): Dimension {
+function scoreEvidence(needMatches: NeedMatch[], usage: UsageType | null): Dimension {
   if (needMatches.length === 0) {
     return dimension('evidence', null, { zh: '你没有选择需求，此项不计分', en: 'No needs selected, so this is not scored' }, 'not_scored');
   }
@@ -565,20 +566,25 @@ function scoreEvidence(needMatches: NeedMatch[]): Dimension {
   const missingEn: string[] = [];
   const low = EVIDENCE_SCORES[MISSING_EVIDENCE_LEVEL];
   for (const m of needMatches) {
+    // 每个成分按这个需求的 targets 逐个读取证据等级（evidence_by_target），取最强的一个
     const best = m.ingredients
-      .filter((i) => i.evidenceLevel !== null)
-      .sort((a, b) => EVIDENCE_SCORES[b.evidenceLevel!] - EVIDENCE_SCORES[a.evidenceLevel!])[0];
+      .flatMap((i) => m.targets.filter((t) => ingredientTargets(i, t)).map((t) => ({ ing: i, ev: evidenceFor(i, t, usage) })))
+      .filter((x): x is { ing: Ingredient; ev: TargetEvidence } => x.ev !== null)
+      .sort((a, b) => EVIDENCE_SCORES[b.ev.level] - EVIDENCE_SCORES[a.ev.level])[0];
     let score: number;
     if (m.bases.includes('tested')) {
       score = TESTED_EVIDENCE_SCORE;
       zh.push(`${m.label.zh}有成品测试`);
       en.push(`product test for ${m.label.en}`);
     } else if (best) {
-      score = EVIDENCE_SCORES[best.evidenceLevel!];
-      const n = ingredientName(best, best.inciName);
-      if (!zh.includes(`${n.zh} ${best.evidenceLevel} 级`)) {
-        zh.push(`${n.zh} ${best.evidenceLevel} 级`);
-        en.push(`${n.en} level ${best.evidenceLevel}`);
+      score = EVIDENCE_SCORES[best.ev.level];
+      const n = ingredientName(best.ing, best.ing.inciName);
+      const down = best.ev.downgraded
+        ? { zh: '（证据来自免洗产品，冲洗型降一级）', en: ' (evidence is from leave-on use, one level lower for rinse-off)' }
+        : { zh: '', en: '' };
+      if (!zh.includes(`${n.zh} ${best.ev.level} 级${down.zh}`)) {
+        zh.push(`${n.zh} ${best.ev.level} 级${down.zh}`);
+        en.push(`${n.en} level ${best.ev.level}${down.en}`);
       }
     } else {
       score = low;
@@ -812,7 +818,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   } else {
     const need = scoreNeed(product, verified, specs, productKeyActiveTerms(product));
     needMatches = need.needMatches;
-    const evidence = scoreEvidence(needMatches);
+    const evidence = scoreEvidence(needMatches, usageTypeOf(product));
     const irr = scoreIrritation(verified, profile, product, items.filter((r): r is Resolved & { ingredient: Ingredient } => !r.nameUnverified && r.ingredient !== null));
     irritation = irr.detail;
     dimensions = {
