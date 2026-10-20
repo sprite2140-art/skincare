@@ -4,6 +4,7 @@
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import { FACE_TARGETS, RETAIL_PLATFORMS, RETAIL_PLATFORM_DOMAINS, type Ingredient, type Product, type RetailPlatform, type RetailRating, type Target } from '../data/types';
 import { ratingCountForThreshold, visibleRatings } from '../data/retail';
+import { productActiveClasses, type ActiveClassIndex } from '../data/faceActives';
 import { SHAMPOO_OWN_HAIR_TARGETS, WEIGHTS, type DimensionKey } from './config';
 import { RISK_TAG_LABELS, TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
 import type { ReasonBasis } from './reasons';
@@ -145,6 +146,24 @@ export function keyIngredients(p: Product, index: IngredientIndex, concerns: Tar
     }
   }
   return items.sort((a, b) => a.rank - b.rank).slice(0, max).map(({ rank: _rank, ...k }) => k);
+}
+
+export interface SunscreenFilter {
+  name: string;
+  /** 美国标签公布的浓度；没有公布时为空 */
+  concentration: string;
+}
+
+/**
+ * 防晒的关键成分：防晒剂。优先用产品公布的有效成分浓度（美国 Drug Facts），没有时按类别清单从成分表里找。
+ * 美国药品标签写法（如 Avobenzone）不在 CosIng 里，也照样列出
+ */
+export function sunscreenFilters(p: Product, index: IngredientIndex, classes: ActiveClassIndex): SunscreenFilter[] {
+  if (p.category !== 'sunscreen') return [];
+  const disclosed = p.face?.activeConcentrations ?? [];
+  if (disclosed.length > 0) return disclosed.map((a) => ({ name: a.inci, concentration: a.concentration }));
+  const found = productActiveClasses(p, index, classes);
+  return [...(found.get('sunscreen_mineral') ?? []), ...(found.get('sunscreen_organic') ?? [])].map((name) => ({ name, concentration: '' }));
 }
 
 /** 含针对头皮屑的有效成分（只有这样的产品才显示去屑用法） */

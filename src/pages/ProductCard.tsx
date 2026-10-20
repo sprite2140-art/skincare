@@ -9,7 +9,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ingredientIndex, products } from '../data/load';
+import { faceActiveClasses, ingredientIndex, products } from '../data/load';
 import { COSING_RETRIEVED_ON, COSING_SOURCE } from '../data/cosing';
 import { translateCosingFunctions } from '../data/cosingFunctions';
 import { ratingCountText } from '../data/retail';
@@ -17,7 +17,7 @@ import type { Ingredient, Product, Region } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { formatMoney } from '../scoring/budget';
 import {
-  cautionItems, hasAntiDandruffActive, keyIngredients, needRows, needSummary, primaryStore, scoreBreakdown, storeRows, topRating, type StoreRow,
+  cautionItems, hasAntiDandruffActive, keyIngredients, sunscreenFilters, needRows, needSummary, primaryStore, scoreBreakdown, storeRows, topRating, type StoreRow,
 } from '../scoring/cardData';
 import { spaceCjk } from '../scoring/labels';
 import { inMarket } from '../scoring/market';
@@ -284,6 +284,7 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
   const sum = needSummary(needs);
   const cautions = cautionItems(r, profile);
   const keys = keyIngredients(p, ingredientIndex, profile.concerns);
+  const filters = sunscreenFilters(p, ingredientIndex, faceActiveClasses);
   const all = ingredientStatuses(p, ingredientIndex);
   const checked = [...new Set(p.ratings.map((x) => x.checkedOn).filter(Boolean))].sort().at(-1);
   const notices = r.notices.filter((n) => CAUTION_NOTICE_CODES.includes(n.code));
@@ -427,8 +428,10 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
       {/* ⑤ 成分：关键成分 → 全部成分（折叠）→ 包装原文 */}
       <section>
         <h4 className="sec-title">{t('card.ingredients')}</h4>
-        {keys.length > 0 ? (
+        {keys.length + filters.length > 0 ? (
           <ul className="list">
+            {/* 防晒剂：美国标签写法（如 Avobenzone）不在成分库，按原文和公布的浓度列出 */}
+            {filters.map((f) => <li key={f.name}><span className="muted">{t('card.sunscreenFilter')}</span> · {f.name}{f.concentration && ` ${f.concentration}`}</li>)}
             {keys.map((k) => <li key={k.ingredient.inciName}><span className="muted">{tx(k.role)}</span> · <IngNames list={[k.ingredient]} /></li>)}
           </ul>
         ) : <p className="note">{t('card.noKeyIngs')}</p>}
