@@ -9,7 +9,7 @@ import { faceScoringProfile, scoreFaceProduct } from '../scoring/faceScore';
 import type { SpecialStatus } from '../scoring/score';
 import { EMPTY_HAIR, toScoringProfile, type Answers, type HairAnswers, type ScalpAnswers } from '../profile/questionnaire';
 import { newProfile } from '../profile/storage';
-import type { Category } from '../data/types';
+import type { Category, FaceAttributes } from '../data/types';
 import { TEST_MODE_DRAFT_SCORING } from '../scoring/config';
 import { scoreProduct } from '../scoring/score';
 import ProductCard from './ProductCard';
@@ -49,14 +49,22 @@ interface FaceQaCase {
   face: Partial<FaceAnswers>;
   statuses: SpecialStatus[];
   step: FaceStepId;
+  /**
+   * 只用于设计自查的模拟改动（如去掉 SPF 数据，看"信息不全"的样子）；标题里写明"模拟"，
+   * 不改 data/ 里的产品数据
+   */
+  simulate?: Partial<FaceAttributes>;
 }
 
-/** 护肤固定案例（草案 7.3）。目前只有洁面数据；防晒信息不全的案例等防晒数据导入后补上 */
+/** 护肤固定案例（草案 7.3） */
 export const FACE_QA_CASES: FaceQaCase[] = [
   { id: 'skin-minimal', title: 'S1 没有选困扰：基础 3 步（洁面）', productIds: ['CL-US-002'], face: {}, statuses: [], step: 'cleanser' },
   { id: 'skin-full', title: 'S2 痘痘、暗沉色斑、细纹（洁面，含过氧化苯甲酰）', productIds: ['CL-US-013'], face: { concerns: ['acne', 'pigmentation', 'aging'] }, statuses: [], step: 'cleanser' },
   { id: 'skin-sensitive', title: 'S3 经常敏感 + 泛红（水杨酸洁面计入刺激）', productIds: ['CL-US-006'], face: { concerns: ['redness'], sensitivity: 'often' }, statuses: [], step: 'cleanser' },
   { id: 'skin-rx', title: 'S4 口服异维 A 酸（冲洗型不排除，提示从低频开始）', productIds: ['CL-US-006'], face: { concerns: ['acne'] }, statuses: ['isotretinoin'], step: 'cleanser' },
+  // 40 款防晒都有 SPF 和广谱数据，没有真实的"信息不全"产品，这里用模拟：去掉 SU-US-001 的 SPF
+  { id: 'skin-sunscreen-missing', title: 'S5 防晒信息不全（模拟：去掉 SU-US-001 的 SPF，只用于设计自查）', productIds: ['SU-US-001'], face: {}, statuses: [], step: 'sunscreen', simulate: { spf: null } },
+  { id: 'skin-sunscreen-stock', title: 'S6 防晒：缺货（SU-US-034）、库存未确认（SU-US-031）、配方版本待核对（SU-US-029）', productIds: ['SU-US-034', 'SU-US-031', 'SU-US-029'], face: { concerns: ['oil'] }, statuses: [], step: 'sunscreen' },
 ];
 
 export default function DesignQA() {
@@ -84,8 +92,9 @@ export default function DesignQA() {
           <section key={c.id} id={`case-${c.id}`} className="qa-case">
             <h2 className="label">{c.title}</h2>
             {c.productIds.map((id) => {
-              const p = products.find((x) => x.productId === id);
-              if (!p) return <p key={id} className="small muted">{id} not found</p>;
+              const found = products.find((x) => x.productId === id);
+              if (!found) return <p key={id} className="small muted">{id} not found</p>;
+              const p = c.simulate && found.face ? { ...found, face: { ...found.face, ...c.simulate } } : found;
               const r = scoreFaceProduct(p, profile, data, { face, step, classes: faceActiveClasses });
               return <ProductCard key={`${id}-${open}`} r={r} market="US" profile={profile} scentGoal={false} defaultOpen={open} />;
             })}

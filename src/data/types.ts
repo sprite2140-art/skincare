@@ -306,6 +306,17 @@ export interface Product {
   ratings: RetailRating[];
   /** 各平台购买链接（data/purchase_links.csv），按 RETAIL_PLATFORMS 的固定顺序 */
   purchaseLinks: PurchaseLink[];
+  /** 配方版本待核对（data/formula_version_checks.csv）：卡片显示"配方版本待核对" */
+  formulaVersionPending?: boolean;
+}
+
+/** data/formula_version_checks.csv：在售配方与成分表对应哪一版尚未核对的产品 */
+export interface FormulaVersionCheck {
+  productId: string;
+  /** 目前只有 pending */
+  status: string;
+  note: string;
+  addedOn: string;
 }
 
 export interface ExchangeRate {

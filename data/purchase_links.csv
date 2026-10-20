@@ -162,3 +162,45 @@ CL-US-039,nordstrom,https://www.nordstrom.com/s/the-essence-foaming-cleanser-for
 CL-US-039,brand,https://www.cremedelamer.com/product/20180/26245/face/cleansers-and-toners/the-essence-foaming-cleanser,listed,2026-10-19,US brand product page.
 CL-US-040,nordstrom,https://www.nordstrom.com/s/the-calming-lotion-cleanser/7657836,listed,2026-10-19,[待核对] Product listing corroborated by retailer search-index content; direct page returned an access challenge. No retailer rating recorded.
 CL-US-040,brand,https://www.cremedelamer.com/product/20180/26243/face/cleansers-and-toners/the-calming-lotion-cleanser,listed,2026-10-19,US brand product page.
+SU-US-001,ulta,https://www.ulta.com/p/suntouchable-invisible-sunscreen-spf-35-pimprod2039942,listed,2026-10-19,1.7 oz；INCI单取Ulta Active/Inactive；[待核对]Drug Facts包装及耐水分钟数未完成，SPF暂依据美国产品名；不可按已核标签上线
+SU-US-002,ulta,https://www.ulta.com/p/suntouchable-whoa-glow-broad-spectrum-spf-30-sunscreen-pimprod2036596,listed,2026-10-19,Sunbeam 1.69 oz；单一Ulta来源；[待核对]官网全INCI与美国Drug Facts包装未能交叉核实
+SU-US-003,ulta,https://www.ulta.com/p/moisturizing-sunscreen-lotion-spf-30-pimprod2021860?correlationId=38d06450-12ff-41d5-978c-aa9c0d2d0256,listed,2026-10-19,3 fl oz Fragrance Free；官网及Ulta非活性列表一致；原文Anuus拼写标待核对；[待核对]独立美国包装Drug Facts尚未完成
+SU-US-004,brand,https://blackgirlsunscreen.com/product/make-it-matte-spf-45/,listed,2026-10-19,官网参考1.7 oz规格待核对；INCI和浓度仅取官网。冲突：DailyMed 2bc47bd0-d81b-f1b9-e063-6394a90ad375写Octocrylene5%且非活性配方不同，官网10%；不拼接；整款暂挂
+SU-US-006,target,https://www.target.com/p/-/A-85804834,listed,2026-10-19,Net Wt2.5oz/71g，不换算ml；官网、Target和药品标签配方实质一致（Target个别转写异常），INCI仅取官网；榜单/奖项依据待核
+SU-US-007,target,https://www.target.com/p/-/A-80139631,listed,2026-10-19,1.7fl oz；官网/标签/Target非活性列表实质一致，Target转写slicate异常不用于主成分表；价格不减会员券；榜单/奖项依据待核
+SU-US-008,brand,https://www.herocosmetics.us/products/superlight-sunscreen-spf-30,listed,2026-10-19,1.7fl oz；绿色修色遮红，不代表治疗泛红/痘痘；标签与官网成分一致，零售榜单/奖项及零售版本交叉核验待补
+SU-US-009,ulta,https://www.ulta.com/p/am-facial-moisturizing-lotion-spf-30-xlsImpprod4190253?CAWELAID=330000200003251833,listed,2026-10-19,3fl oz；INCI仅官网当前版本；[待核对]DailyMed旧配方含Meradimate且ZnO6.3%，官网ZnO8%不含Meradimate；不拼接。active_concentrations为官网公开值，不冒充已核同版Drug Facts
+SU-US-010,ulta,https://www.ulta.com/p/ultra-light-moisturizing-lotion-spf-30-xlsImpprod17162943?sku=2520842,listed,2026-10-19,1.7oz零售标注液体单位待核，size_ml暂空；官网Cermaide和Xanthum原拼写标待核；药品标签已打开，细节未完成对照；榜单依据待补
+SU-US-011,ulta,https://www.ulta.com/p/anthelios-melt-in-milk-body-face-sunscreen-spf-60-pimprod2018267,listed,2026-10-19,3fl oz；官网和Ulta成分一致；品牌2周自评90%滋润/舒缓属消费者体验；美国包装Drug Facts版本仍需完整核验
+SU-US-012,ulta,https://www.ulta.com/p/anthelios-mineral-tinted-ultra-light-face-sunscreen-fluid-spf-50-xlsImpprod4350455?sku=2246041,listed,2026-10-19,1.7oz；Ulta非活性表已读但活性未同源读全，故整条INCI留空，避免拼接；品牌页500；2026品牌新增多色且有40/50版本，具体Tinted SKU及标签需核对
+SU-US-015,bluemercury,https://bluemercury.com/collections/moisturizers-with-spf/products/supergoop-unseen-sunscreen-spf-50,listed,2026-10-19,SPF50新配方，不能套SPF40旧版；多规格网页价格跟SKU未确定，price/size_ml留空；scentless不是明确fragrance-free，填unknown；零售全INCI一致性待补
+SU-US-019,brand,https://www.skinceuticals.com/skincare/sunscreens/physical-fusion-uv-defense-sunscreen-spf-50/S54.html,listed,2026-10-19,参考1.7fl oz待核当前SKU；INCI只取DailyMed（官网完整列表按钮未展开）；品牌主打成分与药品活性一致，零售配方一致性及价格/入库榜单待核
+SU-US-020,ulta,https://www.ulta.com/p/ultimate-sun-protector-lotion-spf-60-pimprod2043993,listed,2026-10-19,美国SPF60+；spf数字60，+号保留在名称；5fl oz按模板148ml（官网150ml）；配方明确Fragrance；非无香；Drug Facts已定位但整版一致性未完成，榜单依据待核
+SU-US-005,ulta,https://www.ulta.com/p/clear-face-oil-free-sunscreen-spf-50-pimprod2021433?sku=2576185,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-013,bluemercury,https://bluemercury.com/products/elta-md-uv-clear-broad-spectrum-spf-46,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-014,bluemercury,https://bluemercury.com/collections/eltamd/products/eltamd-uv-daily-broad-spectrum-spf-40,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-015,ulta,https://www.ulta.com/p/unseen-sunscreen-spf-50-invisible-sun-protection-pimprod2049447?sku=2632648,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-016,ulta,https://www.ulta.com/p/mineral-mattescreen-spf-40-pimprod2057254,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-017,sephora,https://www.sephora.com/product/paula-s-choice-resist-super-light-daily-wrinkle-defense-spf-30-P469524?skuId=2421402,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-018,brand,https://www.colorescience.com/products/sunforgettable-total-protection-face-shield-flex-spf-50?srsltid=AU7gw4VVUruAhJgCRFadAKR8UZcJGGbc7Cnqtx-zi3tcqm9TzCAsyioN,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-019,bluemercury,https://bluemercury.com/collections/suncare/products/skinceuticals-physical-fusion-uv-defense-spf-50,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-021,target,https://www.target.com/p/-/A-83695787,listed,2026-10-20,品牌明确新名称、Oil Control原配方；INCI只取旧名称美国标签；2.5floz标签75mL，模板换算74mL；acne仅痘肌适用
+SU-US-022,brand,https://www.laroche-posay.us/our-products/sun/face-sunscreen/anthelios-clear-skin-oil-free-sunscreen-spf-60-antheliosclearskin.html,listed,2026-10-20,所选90mL/3floz；模板换算89mL；美国标签与品牌活性及全INCI一致；痘肌适用不表示治疗
+SU-US-023,ulta,https://www.ulta.com/p/clear-start-clearing-defense-moisturizer-spf-30-pimprod2006536?sku=2547226,listed,2026-10-20,INCI仅官网；品牌无人工香精不等于无香，含精油；Homosalate8%标签与另一7%标签不同，选8%对应，不拼接；一次购买价29.50已核；品牌明确不治疗痤疮
+SU-US-024,target,https://www.target.com/p/neutrogena-clear-face-liquid-sunscreen-lotion-3-fl-oz/-/A-1012287827,listed,2026-10-20,选择SPF30非50；3floz标签88mL，模板换算89；acne仅适用性
+SU-US-025,brand,https://www.colorescience.com/collections/treatments/products/all-calm-clinical-redness-corrector-spf-50,listed,2026-10-20,1floz/30mL；含绿/氧化铁颜料；品牌遮红及舒缓宣称，不是玫瑰痤疮药；单一品牌INCI；Drug Facts另核
+SU-US-026,brand,https://tatcha.com/products/the-silk-sunscreen-spf-50,listed,2026-10-20,原文两片分号分隔；品牌40人专家评分的单次使用结果，不是独立RCT；旧美国标签未标耐水故none，但现官网称water-resistant，耐水新标签版本[待核对]；有氧化铁但未明确多色选择，不计含色4款的保守覆盖；brand_claims_quote分号隔开不同原文片段
+SU-US-027,brand,https://www.tower28beauty.com/products/sunnydays-tinted-spf?variant=39828400570423,listed,2026-10-20,参考25 Ocean Park；17色覆盖浅到深，须选色；标签非活性CI77891不作为额外防晒活性；官网water-proof/resistant标签与Drug Facts游泳另用耐水防晒不一致，按美国标签none；遮红是润色效果
+SU-US-028,brand,https://alastin.com/products/hydratint-sunscreen-spf-36,listed,2026-10-20,Net Wt3.2oz/91g，不推算mL；完整INCI仅官网；2025 Shape Skin Awards品牌页列明；普通单次购买84美元
+SU-US-029,brand,https://www.isdin.com/us/p/ageless-34-fl-oz/3431?awc=20816_1638364058_4fb1c35084311f18c92e146aa0e1d4a7,listed,2026-10-20,3.4floz/100mL模板101mL；选择官网10.7%ZnO版本，不能混2026新TiO2 Eryfotona Ageless Tinted；现库存新旧版[待核对]；品牌功效未经本项目独立评估
+SU-US-030,brand,https://www.skinbetter.com/skincare-collections/sunbetter/sunbetter-tone-smart-spf-75-sunscreen-lotion-M025.html,listed,2026-10-20,1.7floz/50mL；品牌FAQ说明mattifying效果，oil只指油光外观，不推断减少皮脂；标签与现售完整INCI对应仍待核
+SU-US-031,brand,https://cotzskincare.com/products/cotz-face-prime-protect-tinted-spf-40,unknown,2026-10-20,NetWt1.5oz/42.5g，不换算mL；官网同时出现Add to cart及Sold Out通知，库存[待核对]；INCI仅官网；无香依据为品牌Sensitive页明确所有COTZ无香
+SU-US-032,brand,https://cotzskincare.com/products/cotz-flawless-complexion-spf-50,unknown,2026-10-20,选择Lightly Tinted；另Richly Tinted向中深肤色，未把浅色当深色；标签directions要求游泳另用耐水产品，none；官网同时有加购/售罄提示，库存[待核对]；净重规格待核，不猜mL
+SU-US-033,brand,https://cotzskincare.com/products/cotz-sensitive-spf-40,unknown,2026-10-20,NetWt3.5oz/100g，不换算mL；完整INCI仅品牌页；官网同时有加购/售罄提示，库存[待核对]
+SU-US-034,brand,https://cotzskincare.com/products/face-moisturespf-35-lightly-tinted,out_of_stock,2026-10-20,品牌明确Sold Out，当前缺货；规格净重未从本次可读页确认，size_ml留空；不将缺货计入可购覆盖
+SU-US-035,target,https://www.target.com/p/-/A-83695782,listed,2026-10-20,原文两片分号分隔；品牌注明持续使用1周；2.5floz/75mL模板74mL；标签单来源；brand_claims_quote分号隔开不同原文片段
+SU-US-036,target,https://www.target.com/p/-/A-80173090,listed,2026-10-20,品牌页不可读，功效映射留空；此DailyMed标签成分段未列色素，未擅自补氧化铁，不计含色氧化铁覆盖；标签与当前Medium成分对应[待核对]；完整单来源转录不保证标签无遗漏
+SU-US-037,target,https://www.target.com/p/-/A-89152875,listed,2026-10-20,虽有氧化铁润色，防晒活性均为化学剂，不计物理含色覆盖；2.5floz/75mL模板74mL；无香须品牌Free of fragrance原文
+SU-US-038,brand,https://supergoop.com/products/unseen-clear-sunscreen-stick?smsclickid=1755e040-b26c-4383-aa12-9af52833dca9,listed,2026-10-20,固体棒，不将净重换算mL；scentless/无合成香精不自动等于无香；标签单来源与官网列表一致；油光是外观功效
+SU-US-039,target,https://www.target.com/p/-/A-86936392,listed,2026-10-20,3floz/89mL；INCI仅DailyMed保留Tocoferol原文异常；品牌页503，claimed_benefits留空；非活性水杨酸不视为已证实祛痘；零售全成分对应[待核对]
+SU-US-040,target,https://www.target.com/p/-/A-80173035,listed,2026-10-20,采用NDC69968-0827 80分钟版本，另有2026不同配方；须核实际现售版本；even skin tone只指均匀外观，不冒充治疗色斑；DailyMed Feverfew后逗号显属换行异常，未改成另一成分

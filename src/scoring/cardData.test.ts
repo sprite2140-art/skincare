@@ -199,3 +199,26 @@ describe('百货 / 买手渠道', () => {
     expect(storeRows(p).map((r) => r.platform)).toEqual(['brand', 'amazon', 'nordstrom', 'saks', 'bluemercury', 'other']);
   });
 });
+
+describe('防晒第 1、2 批：库存状态、配方版本、同系列', () => {
+  it('缺货的链接不作为主购买按钮；库存未确认的照常列出，也不作为主购买按钮', () => {
+    const oos = byId('SU-US-034');
+    expect(oos.purchaseLinks.every((l) => l.status === 'out_of_stock')).toBe(true);
+    expect(storeRows(oos).every((r) => r.availability === 'out_of_stock')).toBe(true);
+    expect(primaryStore(oos)).toBeNull();
+    const unknown = byId('SU-US-031');
+    expect(storeRows(unknown).some((r) => r.availability === 'unknown')).toBe(true);
+    expect(primaryStore(unknown)?.availability ?? 'ok').toBe('ok');
+  });
+
+  it('配方版本待核对的 4 款打上标记，其他不打', () => {
+    const pending = ['SU-US-029', 'SU-US-036', 'SU-US-039', 'SU-US-040'];
+    for (const id of pending) expect(byId(id).formulaVersionPending).toBe(true);
+    expect(byId('SU-US-001').formulaVersionPending).toBe(false);
+  });
+
+  it('SU-US-005 和 SU-US-024 是同系列不同 SPF，互相关联', () => {
+    expect(byId('SU-US-005').pairedProductIds).toEqual(['SU-US-024']);
+    expect(byId('SU-US-024').pairedProductIds).toEqual(['SU-US-005']);
+  });
+});

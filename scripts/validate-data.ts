@@ -8,13 +8,17 @@ const readData = (name: string) => readFileSync(new URL(`../data/${name}`, impor
 import { validateData } from '../src/data/validate';
 import { computeBudgetCaps } from '../src/scoring/budget';
 
-const { ingredients, products, cities, exchangeRates, cosing, allergens, water, referenceWater, explanations, lists, aliases, faceClassList } = loadDataFromDisk();
+const { formulaChecks, ingredients, products, cities, exchangeRates, cosing, allergens, water, referenceWater, explanations, lists, aliases, faceClassList } = loadDataFromDisk();
 const issues = validateData(ingredients, products, cities, exchangeRates, { cosing, allergens, water, referenceWater, explanations, lists, aliases, faceClasses: faceClassList });
 // 评分和购买链接文件里的 product_id 必须在产品库中
 {
   const ids = new Set(products.map((p) => p.productId));
   for (const [file, rows] of [['retail_ratings.csv', parseRetailRatings(readData('retail_ratings.csv'))], ['purchase_links.csv', parsePurchaseLinks(readData('purchase_links.csv'))]] as const) {
     for (const r of rows) if (!ids.has(r.productId)) issues.push({ level: 'error', file, key: r.productId, message: 'product_id 不在 products.csv' });
+  }
+  for (const c of formulaChecks) {
+    if (!ids.has(c.productId)) issues.push({ level: 'error', file: 'formula_version_checks.csv', key: c.productId, message: 'product_id 不在 products.csv' });
+    if (c.status !== 'pending') issues.push({ level: 'error', file: 'formula_version_checks.csv', key: c.productId, message: `status 只能是 pending：${c.status}` });
   }
 }
 const errors = issues.filter((i) => i.level === 'error');

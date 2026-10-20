@@ -228,6 +228,7 @@ export default function ProductCard({ r, market, profile, scentGoal, compact, de
             </div>
           )}
           {tags.length > 0 && <div className="tags">{tags.map((x, i) => <span key={i} className="tag">{x}</span>)}</div>}
+          {p.formulaVersionPending && <p className="note">{t('card.formulaPending')}</p>}
         </div>
         {r.score !== null && !compact && (r.noNeeds ? (
           gentleLevel && (
@@ -260,7 +261,11 @@ export default function ProductCard({ r, market, profile, scentGoal, compact, de
           <a className="btn btn-primary" href={primary.url} target="_blank" rel="noreferrer nofollow">
             {t('card.buyAt', { store: storeName(primary, t) })}
           </a>
-        ) : <span className="small muted">{t('results.noBuy')}</span>)}
+        ) : (
+          <span className="small muted">
+            {rows.length === 0 ? t('results.noBuy') : rows.every((x) => x.availability === 'out_of_stock') ? t('card.allOutOfStock') : t('card.noConfirmedStore')}
+          </span>
+        ))}
         <button type="button" className="btn" aria-expanded={open} onClick={() => setOpen(!open)}>
           {open ? t('card.hide') : t('card.details')}
         </button>
@@ -386,13 +391,22 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
           <ul className="stores">
             {rows.map((row) => (
               <li key={row.platform + row.url}>
-                <a className="store-row" href={row.url} target="_blank" rel="noreferrer nofollow">
-                  <span className="store-name">{storeName(row, t)}</span>
-                  <span className="store-rating">
-                    {row.rating && <>★ {row.rating.rating.toFixed(1)} · {t('results.ratingCount', { n: ratingCountText(row.rating) })}</>}
-                  </span>
-                  <ExternalIcon />
-                </a>
+                {row.availability === 'out_of_stock' ? (
+                  // 缺货：不显示购买链接
+                  <div className="store-row off">
+                    <span className="store-name">{storeName(row, t)}</span>
+                    <span className="store-rating">{t('card.outOfStock')}</span>
+                    <span />
+                  </div>
+                ) : (
+                  <a className="store-row" href={row.url} target="_blank" rel="noreferrer nofollow">
+                    <span className="store-name">{storeName(row, t)}</span>
+                    <span className="store-rating">
+                      {row.rating && <>★ {row.rating.rating.toFixed(1)} · {t('results.ratingCount', { n: ratingCountText(row.rating) })}</>}
+                    </span>
+                    <ExternalIcon />
+                  </a>
+                )}
               </li>
             ))}
           </ul>

@@ -239,7 +239,8 @@ export function validateData(
     for (const id of p.pairedProductIds) {
       const other = products.find((x) => x.productId === id);
       if (!other) err(F_PRD, p.productId, `paired_product_ids 中的 "${id}" 不在产品表中`);
-      else if (other.category === p.category) warn(F_PRD, p.productId, `paired_product_ids 中的 "${id}" 与本产品是同一品类`);
+      // 面部：同系列的不同 SPF 版本等，同品类关联是有意的
+      else if (other.category === p.category && p.zone !== 'face') warn(F_PRD, p.productId, `paired_product_ids 中的 "${id}" 与本产品是同一品类`);
     }
   }
   // 在 CosIng 中找不到的产品成分名：多数是拼写错误或非 INCI 写法，方便逐个核对
