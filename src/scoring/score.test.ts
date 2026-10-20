@@ -100,8 +100,11 @@ describe('data/ 真实数据', () => {
     const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), testMode);
     expect(r.dimensions.need.score).toBe(100);
     expect(r.dimensions.evidence.score).toBe(100); // 吡硫鎓锌 A 级
-    expect(r.usesDraftData).toBe(true);
-    expect(r.notices.find((n) => n.code === 'test_data')?.text.zh).toContain('测试数据，尚未核对');
+    // SH-US-001 用到的成分都已核对（规则清单自动核对之后），不再标注测试数据
+    expect(r.usesDraftData).toBe(false);
+    const draft = scoreProduct(byId('SH-US-007'), profile({ concerns: ['dandruff'] }), testMode);
+    expect(draft.usesDraftData).toBe(true);
+    expect(draft.notices.find((n) => n.code === 'test_data')?.text.zh).toContain('测试数据，尚未核对');
     // [待核对] 的成分即使在测试模式下也不参与打分
     const jp = scoreProduct(byId('SH-JP-001'), profile({}), testMode);
     expect(jp.nameUnverifiedIngredients).toEqual(['Bis-Methoxypropylamido Isodocosane', 'Gamma-Docosalactone', 'Sodium Dilauramidoglutamide Lysine']);
