@@ -4,8 +4,11 @@
 // 做法：对照官方原文确认每个成分确实在对应清单里。
 // - 欧盟香料致敏原：法规 (EC) 1223/2009 附录 III 和修订法规 (EU) 2023/1545 的 EUR-Lex 原文。
 //   能下载时在原文中查找成分名；下载不了时这一项记为"未核对"，不用本项目自己的清单代替。
-// - 其余各类：欧盟委员会 CosIng 官方导出（先尝试在线下载；下载不了时用 data/cosing_export_2026-10-17.csv，
-//   即作者 2026-10-17 从 CosIng 获取的官方导出），按登记功能核对。
+//   只在附录 III 的正文范围内查找，不搜整部法规（避免名字出现在其他附录里也算通过）。
+// - 其余各类：欧盟委员会 CosIng 官方导出 data/cosing_export_2026-10-17.csv（作者 2026-10-17 获取；
+//   CosIng 网站本身是网页应用，没有固定的 CSV 下载地址，更新时用 npm run import-cosing 换新的导出），按登记功能核对。
+// - 强清洁力表活、致敏防腐剂、酒精：CosIng 只能确认是表活 / 防腐剂 / 溶剂，"强清洁力""致敏""会让皮肤变干"是本项目的判断，
+//   还要有 CosIng 以外的文献出处（sources）才算通过；没有时记为"无法核对"，保持未核对。
 // 通过的成分写入 docs/LIST_VERIFICATION.md；加 --apply 时，在 data/ingredients.csv 中标为已核对，
 // notes 写明核对依据。对不上的只列出，不改数据。
 
@@ -23,7 +26,6 @@ const LOCAL_COSING_DATE = '2026-10-17';
 
 /** 官方原文地址 */
 const OFFICIAL = {
-  cosing: 'https://ec.europa.eu/growth/tools-databases/cosing/',
   annexIII: 'https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02009R1223-20250501',
   reg2023_1545: 'https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023R1545',
 };
@@ -39,6 +41,18 @@ async function fetchText(url: string): Promise<string | null> {
 
 /** 网页正文：去掉标签、合并空白、统一大小写，用于查找成分名 */
 const plainText = (html: string) => html.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+
+/**
+ * 只取附录 III（限用物质清单）的正文：从附录 III 标题到附录 IV 标题之间。
+ * 合并版法规的附录 III 标题为"List of substances which cosmetic products must not contain except subject to the restrictions laid down"，
+ * 附录 IV 为"List of colorants allowed in cosmetic products"。找不到时返回 null（按无法核对处理）
+ */
+function annexIIIText(text: string): string | null {
+  const start = text.lastIndexOf('list of substances which cosmetic products must not contain except subject to the restrictions');
+  if (start === -1) return null;
+  const end = text.indexOf('list of colorants allowed in cosmetic products', start);
+  return end === -1 ? null : text.slice(start, end);
+}
 
 type ListKind = 'fragrance' | 'eu_allergen' | 'essential_oil' | 'alcohol' | 'strong_cleanser' | 'preservative' | 'chelator';
 
@@ -56,11 +70,15 @@ const KIND_LABEL: Record<ListKind, string> = {
 const COSING_RULE: Partial<Record<ListKind, { functions: string[]; extra?: (ing: Ingredient) => boolean; describe: string }>> = {
   fragrance: { functions: ['perfuming', 'fragrance'], describe: 'CosIng 登记功能含香料（PERFUMING）' },
   essential_oil: { functions: ['perfuming', 'fragrance'], extra: (i) => /\boil\b/i.test(i.inciName), describe: 'CosIng 登记功能含香料（PERFUMING），INCI 名为植物油' },
-  alcohol: { functions: ['solvent', 'antimicrobial', 'antifoaming'], describe: 'CosIng 收录该 INCI，登记功能含溶剂（SOLVENT）' },
-  strong_cleanser: { functions: ['surfactant - cleansing', 'cleansing'], describe: 'CosIng 登记功能含清洁型表活（SURFACTANT - CLEANSING）；"强清洁力"仍是本项目的分类，出处见 sources' },
-  preservative: { functions: ['preservative'], describe: 'CosIng 登记功能含防腐（PRESERVATIVE）' },
+  alcohol: { functions: ['solvent', 'antimicrobial', 'antifoaming'], describe: 'CosIng 收录该 INCI，登记功能含溶剂（SOLVENT），"会让皮肤变干"有文献出处（见 sources）' },
+  strong_cleanser: { functions: ['surfactant - cleansing', 'cleansing'], describe: 'CosIng 登记功能含清洁型表活（SURFACTANT - CLEANSING），"强清洁力"有文献出处（见 sources）' },
+  preservative: { functions: ['preservative'], describe: 'CosIng 登记功能含防腐（PRESERVATIVE），"致敏"有文献出处（见 sources）' },
   chelator: { functions: ['chelating'], describe: 'CosIng 登记功能含螯合（CHELATING）' },
 };
+
+/** 这几类是本项目的判断，除了 CosIng 功能，还要有 CosIng 以外的文献出处 */
+const NEEDS_LITERATURE: ListKind[] = ['strong_cleanser', 'preservative', 'alcohol'];
+const hasLiterature = (i: Ingredient) => i.sources.some((s) => /^https?:\/\//.test(s) && !s.includes('tools-databases/cosing'));
 
 interface Check {
   ing: Ingredient;
@@ -72,15 +90,16 @@ interface Check {
 async function main() {
   const real = loadDataFromDisk();
 
-  // CosIng：先尝试在线，下载不了用本地官方导出
-  const online = await fetchText(OFFICIAL.cosing);
-  const cosingSource = online && /inci name/i.test(online) ? `CosIng 在线（${TODAY}）` : `CosIng 官方导出（${LOCAL_COSING_DATE}，${LOCAL_COSING}）`;
-  const cosing: CosingEntry[] = online && /inci name/i.test(online) ? parseCosingExport(online) : parseCosingExport(readFileSync(LOCAL_COSING, 'utf8'));
+  // CosIng：本地官方导出（CosIng 网站没有固定的 CSV 下载地址）
+  const cosingSource = `CosIng 官方导出（${LOCAL_COSING_DATE}，${LOCAL_COSING}）`;
+  const cosing: CosingEntry[] = parseCosingExport(readFileSync(LOCAL_COSING, 'utf8'));
+  if (cosing.length < 10000) throw new Error(`CosIng 导出只解析出 ${cosing.length} 条，文件可能不完整`);
   const cosingBy = new Map(cosing.map((c) => [normalizeName(c.inciName), c]));
 
-  // 欧盟香料致敏原：EUR-Lex 原文
-  const annexHtml = (await fetchText(OFFICIAL.annexIII)) ?? (await fetchText(OFFICIAL.reg2023_1545));
-  const annexText = annexHtml ? plainText(annexHtml) : null;
+  // 欧盟香料致敏原：EUR-Lex 合并版法规，只取附录 III 正文；取不到时用修订法规 2023/1545（全文都是对附录 III 的修订）
+  const consolidated = await fetchText(OFFICIAL.annexIII);
+  const amending = consolidated ? null : await fetchText(OFFICIAL.reg2023_1545);
+  const annexText = consolidated ? annexIIIText(plainText(consolidated)) : amending ? plainText(amending) : null;
 
   const allergenNames = new Set(real.allergens.map((a) => normalizeName(a.inciName)));
   const chelatorNames = new Set(real.lists.chelators.map((c) => normalizeName(c.inciName)));
@@ -102,11 +121,11 @@ async function main() {
     for (const kind of kindsOf(ing)) {
       if (kind === 'eu_allergen') {
         if (!annexText) {
-          checks.push({ ing, kind, ok: null, detail: '无法下载 EUR-Lex 原文（法规 1223/2009 附录 III、2023/1545），未核对' });
+          checks.push({ ing, kind, ok: null, detail: '无法取得 EUR-Lex 附录 III 原文（法规 1223/2009 附录 III、2023/1545），未核对' });
           continue;
         }
         const found = names(ing).some((n) => annexText.includes(n.toLowerCase()));
-        checks.push({ ing, kind, ok: found, detail: found ? '在 EUR-Lex 原文中找到' : '在 EUR-Lex 原文中没有找到该名称' });
+        checks.push({ ing, kind, ok: found, detail: found ? '在 EUR-Lex 附录 III 原文中找到' : '在 EUR-Lex 附录 III 原文中没有找到该名称' });
         continue;
       }
       const rule = COSING_RULE[kind]!;
@@ -117,6 +136,10 @@ async function main() {
       }
       const fnOk = rule.functions.some((f) => entry.functions.includes(f));
       const extraOk = rule.extra ? rule.extra(ing) : true;
+      if (fnOk && extraOk && NEEDS_LITERATURE.includes(kind) && !hasLiterature(ing)) {
+        checks.push({ ing, kind, ok: null, detail: `CosIng 登记功能相符（CosIng ${entry.ref}），但"${KIND_LABEL[kind]}"是本项目的判断，sources 里没有 CosIng 以外的文献出处，未核对` });
+        continue;
+      }
       checks.push({
         ing, kind, ok: fnOk && extraOk,
         detail: fnOk && extraOk
