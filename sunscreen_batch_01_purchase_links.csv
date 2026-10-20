@@ -1,0 +1,23 @@
+﻿product_id,platform,url,status,checked_on,note
+SU-US-001,ulta,https://www.ulta.com/p/suntouchable-invisible-sunscreen-spf-35-pimprod2039942,listed,2026-10-19,1.7 oz；INCI单取Ulta Active/Inactive；[待核对]Drug Facts包装及耐水分钟数未完成，SPF暂依据美国产品名；不可按已核标签上线
+SU-US-002,ulta,https://www.ulta.com/p/suntouchable-whoa-glow-broad-spectrum-spf-30-sunscreen-pimprod2036596,listed,2026-10-19,Sunbeam 1.69 oz；单一Ulta来源；[待核对]官网全INCI与美国Drug Facts包装未能交叉核实
+SU-US-003,ulta,https://www.ulta.com/p/moisturizing-sunscreen-lotion-spf-30-pimprod2021860?correlationId=38d06450-12ff-41d5-978c-aa9c0d2d0256,listed,2026-10-19,3 fl oz Fragrance Free；官网及Ulta非活性列表一致；原文Anuus拼写标待核对；[待核对]独立美国包装Drug Facts尚未完成
+SU-US-004,brand,https://blackgirlsunscreen.com/product/make-it-matte-spf-45/,listed,2026-10-19,官网参考1.7 oz规格待核对；INCI和浓度仅取官网。冲突：DailyMed 2bc47bd0-d81b-f1b9-e063-6394a90ad375写Octocrylene5%且非活性配方不同，官网10%；不拼接；整款暂挂
+SU-US-006,target,https://www.target.com/p/-/A-85804834,listed,2026-10-19,Net Wt2.5oz/71g，不换算ml；官网、Target和药品标签配方实质一致（Target个别转写异常），INCI仅取官网；榜单/奖项依据待核
+SU-US-007,target,https://www.target.com/p/-/A-80139631,listed,2026-10-19,1.7fl oz；官网/标签/Target非活性列表实质一致，Target转写slicate异常不用于主成分表；价格不减会员券；榜单/奖项依据待核
+SU-US-008,brand,https://www.herocosmetics.us/products/superlight-sunscreen-spf-30,listed,2026-10-19,1.7fl oz；绿色修色遮红，不代表治疗泛红/痘痘；标签与官网成分一致，零售榜单/奖项及零售版本交叉核验待补
+SU-US-009,ulta,https://www.ulta.com/p/am-facial-moisturizing-lotion-spf-30-xlsImpprod4190253?CAWELAID=330000200003251833,listed,2026-10-19,3fl oz；INCI仅官网当前版本；[待核对]DailyMed旧配方含Meradimate且ZnO6.3%，官网ZnO8%不含Meradimate；不拼接。active_concentrations为官网公开值，不冒充已核同版Drug Facts
+SU-US-010,ulta,https://www.ulta.com/p/ultra-light-moisturizing-lotion-spf-30-xlsImpprod17162943?sku=2520842,listed,2026-10-19,1.7oz零售标注液体单位待核，size_ml暂空；官网Cermaide和Xanthum原拼写标待核；药品标签已打开，细节未完成对照；榜单依据待补
+SU-US-011,ulta,https://www.ulta.com/p/anthelios-melt-in-milk-body-face-sunscreen-spf-60-pimprod2018267,listed,2026-10-19,3fl oz；官网和Ulta成分一致；品牌2周自评90%滋润/舒缓属消费者体验；美国包装Drug Facts版本仍需完整核验
+SU-US-012,ulta,https://www.ulta.com/p/anthelios-mineral-tinted-ultra-light-face-sunscreen-fluid-spf-50-xlsImpprod4350455?sku=2246041,listed,2026-10-19,1.7oz；Ulta非活性表已读但活性未同源读全，故整条INCI留空，避免拼接；品牌页500；2026品牌新增多色且有40/50版本，具体Tinted SKU及标签需核对
+SU-US-015,bluemercury,https://bluemercury.com/collections/moisturizers-with-spf/products/supergoop-unseen-sunscreen-spf-50,listed,2026-10-19,SPF50新配方，不能套SPF40旧版；多规格网页价格跟SKU未确定，price/size_ml留空；scentless不是明确fragrance-free，填unknown；零售全INCI一致性待补
+SU-US-019,brand,https://www.skinceuticals.com/skincare/sunscreens/physical-fusion-uv-defense-sunscreen-spf-50/S54.html,listed,2026-10-19,参考1.7fl oz待核当前SKU；INCI只取DailyMed（官网完整列表按钮未展开）；品牌主打成分与药品活性一致，零售配方一致性及价格/入库榜单待核
+SU-US-020,ulta,https://www.ulta.com/p/ultimate-sun-protector-lotion-spf-60-pimprod2043993,listed,2026-10-19,美国SPF60+；spf数字60，+号保留在名称；5fl oz按模板148ml（官网150ml）；配方明确Fragrance；非无香；Drug Facts已定位但整版一致性未完成，榜单依据待核
+SU-US-005,ulta,https://www.ulta.com/p/clear-face-oil-free-sunscreen-spf-50-pimprod2021433?sku=2576185,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-013,bluemercury,https://bluemercury.com/products/elta-md-uv-clear-broad-spectrum-spf-46,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-014,bluemercury,https://bluemercury.com/collections/eltamd/products/eltamd-uv-daily-broad-spectrum-spf-40,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-015,ulta,https://www.ulta.com/p/unseen-sunscreen-spf-50-invisible-sun-protection-pimprod2049447?sku=2632648,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-016,ulta,https://www.ulta.com/p/mineral-mattescreen-spf-40-pimprod2057254,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-017,sephora,https://www.sephora.com/product/paula-s-choice-resist-super-light-daily-wrinkle-defense-spf-30-P469524?skuId=2421402,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-018,brand,https://www.colorescience.com/products/sunforgettable-total-protection-face-shield-flex-spf-50?srsltid=AU7gw4VVUruAhJgCRFadAKR8UZcJGGbc7Cnqtx-zi3tcqm9TzCAsyioN,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
+SU-US-019,bluemercury,https://bluemercury.com/collections/suncare/products/skinceuticals-physical-fusion-uv-defense-spf-50,listed,2026-10-20,已打开商品销售页；价格取正常单次购买，不取订阅价
