@@ -44,6 +44,7 @@ describe('按需求读取证据等级（evidence_by_target）', () => {
   });
 
   it('30 个成分已核对，日期 2026-10-20', () => {
-    expect(real.ingredients.filter((i) => i.reviewStatus === 'verified' && i.reviewedOn === '2026-10-20')).toHaveLength(30);
+    // 规则清单自动核对（scripts/verify-list-ingredients.ts）的成分另计
+    expect(real.ingredients.filter((i) => i.reviewStatus === 'verified' && i.reviewedOn === '2026-10-20' && !i.notes?.includes('规则清单自动核对'))).toHaveLength(30);
   });
 });
