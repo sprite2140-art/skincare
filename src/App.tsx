@@ -8,6 +8,8 @@ import ProfilePage from './pages/ProfilePage';
 import About from './pages/About';
 import DataNotes from './pages/DataNotes';
 import DesignQA from './pages/DesignQA';
+import FaceQuiz from './pages/FaceQuiz';
+import FaceResults from './pages/FaceResults';
 
 function Home() {
   const { t } = useI18n();
@@ -20,8 +22,10 @@ function Home() {
         <h1 className="display" style={{ marginTop: 12 }}>{t('home.title')}</h1>
         <p>{t('app.tagline')}</p>
         <div className="stack" style={{ marginTop: 28 }}>
-          <Link className="btn btn-primary btn-block" to="/quiz">{t('home.start')}</Link>
+          <Link className="btn btn-primary btn-block" to="/quiz">{t('home.startHair')}</Link>
+          <Link className="btn btn-primary btn-block" to="/skin/quiz">{t('home.startSkin')}</Link>
           {profile?.scalp && <Link className="btn btn-block" to="/results">{t('home.seeResults')}</Link>}
+          {profile?.face && <Link className="btn btn-block" to="/skin">{t('home.seeSkinResults')}</Link>}
         </div>
       </section>
 
@@ -72,6 +76,8 @@ export default function App() {
         <Route path="/results" element={<Results />} />
         {/* 旧链接兼容 */}
         <Route path="/results/shampoo" element={<Results />} />
+        <Route path="/skin/quiz" element={<FaceQuiz />} />
+        <Route path="/skin" element={<FaceResults />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/about" element={<About />} />
         <Route path="/data" element={<DataNotes />} />

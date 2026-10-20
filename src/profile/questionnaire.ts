@@ -31,9 +31,17 @@ export interface BaseAnswers {
   customBudgets: Partial<Record<Category, Money>>;
   /** 按整套时的总预算；null 表示不限 */
   setBudget: Money | null;
+  /** 旧档案的单选特殊状态；新档案用 specialStatuses */
   specialStatus: SpecialStatus;
+  /** 特殊状态（多选）；旧档案没有这一项时按 specialStatus */
+  specialStatuses?: SpecialStatus[];
   avoid: AvoidOption[];
   avoidIngredients: string[];
+}
+
+/** 档案的特殊状态（多选）；旧档案按单选的 specialStatus */
+export function baseStatuses(base: Pick<BaseAnswers, 'specialStatus' | 'specialStatuses'>): SpecialStatus[] {
+  return (base.specialStatuses ?? [base.specialStatus]).filter((s) => s !== 'none');
 }
 
 // ---------- 头皮 ----------
@@ -467,6 +475,7 @@ export function toScoringProfile(
     needs,
     sensitive: forScalp && isSensitiveScalp(scalp),
     specialStatus: base.specialStatus,
+    specialStatuses: baseStatuses(base),
     // 用户填写的想避开的成分 / 成分类型在打分中走硬性过滤，直接排除
     avoidIngredients: base.avoidIngredients,
     avoidTags: base.avoid as RiskTag[],

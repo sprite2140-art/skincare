@@ -31,7 +31,8 @@ export interface ScoringData {
   allowDraft?: boolean;
 }
 
-export type SpecialStatus = 'none' | 'pregnant' | 'trying' | 'breastfeeding' | 'rx';
+/** 特殊状态（档案入口，可多选）。isotretinoin = 口服异维 A 酸：只影响护肤，洗护的处理不变 */
+export type SpecialStatus = 'none' | 'pregnant' | 'trying' | 'breastfeeding' | 'rx' | 'isotretinoin';
 export type WashFrequency = 'daily' | 'every_other_day' | 'twice_weekly_or_less';
 /** 香味偏好：无香优先 / 接受香味 / 无所谓 */
 export type FragrancePref = 'free_first' | 'ok' | 'any';
@@ -59,6 +60,8 @@ export interface ScoringProfile {
   /** 敏感肌或头皮易痒 */
   sensitive: boolean;
   specialStatus: SpecialStatus;
+  /** 多选的特殊状态；有这一项时代替 specialStatus */
+  specialStatuses?: SpecialStatus[];
   /** 想避开的具体成分（INCI 名或别名） */
   avoidIngredients: string[];
   /** 想避开的成分类型，如 fragrance */
@@ -236,7 +239,14 @@ const STATUS_LABELS: Record<SpecialStatus, Text> = {
   trying: { zh: '备孕', en: 'trying to conceive' },
   breastfeeding: { zh: '哺乳', en: 'breastfeeding' },
   rx: { zh: '正在用处方皮肤药', en: 'using prescription skin medication' },
+  isotretinoin: { zh: '口服异维 A 酸', en: 'taking oral isotretinoin' },
 };
+
+/** 用户的特殊状态列表（多选；旧档案只有单选的 specialStatus） */
+export function statusesOf(profile: Pick<ScoringProfile, 'specialStatus' | 'specialStatuses'>): SpecialStatus[] {
+  const list = profile.specialStatuses ?? [profile.specialStatus];
+  return list.filter((s) => s !== 'none');
+}
 
 function withTag(items: Resolved[], tag: RiskTag) {
   const hits = items.filter(isKnown).filter((r) => r.ingredient.riskTags.includes(tag));
@@ -271,14 +281,17 @@ function hardFilters(
 ): Flag[] {
   const out: Flag[] = [];
 
-  // 特殊状态
-  const statusTag: RiskTag | null = PREGNANCY_STATUSES.includes(profile.specialStatus)
-    ? 'pregnancy_caution'
-    : profile.specialStatus === 'rx' ? 'rx_caution' : null;
-  if (statusTag) {
+  // 特殊状态（可多选）：孕期类对应 pregnancy_caution，处方药对应 rx_caution；口服异维 A 酸在洗护中没有对应标签
+  const seenTags = new Set<RiskTag>();
+  for (const status of statusesOf(profile)) {
+    const statusTag: RiskTag | null = PREGNANCY_STATUSES.includes(status)
+      ? 'pregnancy_caution'
+      : status === 'rx' ? 'rx_caution' : null;
+    if (!statusTag || seenTags.has(statusTag)) continue;
+    seenTags.add(statusTag);
     const { hits, names, unverified } = withTag(items, statusTag);
     if (hits.length > 0) {
-      const s = STATUS_LABELS[profile.specialStatus];
+      const s = STATUS_LABELS[status];
       const suf = unverifiedSuffix(unverified);
       const why = cautionReasons(hits);
       out.push({
