@@ -2,9 +2,9 @@
 // - 洁面、保湿：早晚；防晒：早上；去角质：晚上（每周 1–2 次）；点涂：晚上。
 // - 功效精华：品牌说明的使用时间（use_time）优先；未知时 A 醇类放晚上（AAD）、维生素 C 放早上（AAD）、
 //   果酸 / 水杨酸类放晚上（行业惯例；FDA：果酸增加日晒敏感）；仍无法确定时放晚上。
-// - 过氧化苯甲酰与 A 醇类：A 醇类在晚上时，含过氧化苯甲酰的产品放早上（品牌限定只能晚上用的除外）。
+// - 过氧化苯甲酰与 A 醇类：A 醇类在晚上时，含过氧化苯甲酰的产品放早上（品牌限定只能晚上用的除外；只含阿达帕林时不错开）。
 
-import type { ActiveClass } from '../data/faceActives';
+import { bpoSensitiveRetinoids, type ActiveClass } from '../data/faceActives';
 import type { FaceProductScore } from './faceScore';
 import type { RoutineStep } from './faceRoutine';
 import { FACE_STEP_ORDER, type FaceStepId } from './faceSteps';
@@ -50,8 +50,9 @@ export function scheduleRoutine(steps: RoutineStep[]): Schedule {
   const moved = new Set<RoutineStep>();
   for (const s of steps) times.set(s, productTimes(s.step.id, s.primary));
 
-  // 过氧化苯甲酰与 A 醇类不在同一时段：A 醇类在晚上时，过氧化苯甲酰产品（未限定只能晚上用）放早上
-  const retinoidAtNight = steps.some((s) => has(s.primary, 'retinoid') && times.get(s)!.includes('pm'));
+  // 过氧化苯甲酰与 A 醇类不在同一时段：A 醇类在晚上时，过氧化苯甲酰产品（未限定只能晚上用）放早上。
+  // 只有阿达帕林时不用错开（阿达帕林与过氧化苯甲酰同用稳定）
+  const retinoidAtNight = steps.some((s) => !!s.primary && bpoSensitiveRetinoids(s.primary.faceExtras.classes).length > 0 && times.get(s)!.includes('pm'));
   if (retinoidAtNight) {
     for (const s of steps) {
       if (!has(s.primary, 'benzoyl_peroxide') || has(s.primary, 'retinoid')) continue;

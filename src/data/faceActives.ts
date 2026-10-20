@@ -18,6 +18,14 @@ export const IRRITANT_ACTIVE_CLASSES: ActiveClass[] = ['retinoid', 'benzoyl_pero
  */
 export const EXFOLIANT_CLASSES: ActiveClass[] = ['aha', 'bha', 'pha'];
 
+/**
+ * 与过氧化苯甲酰同用时会被降解的 A 醇类：阿达帕林例外（Martin 1998 测得阿达帕林稳定；
+ * FDA 批准了阿达帕林 + 过氧化苯甲酰的复方凝胶 Epiduo，可以同时使用）
+ */
+export function bpoSensitiveRetinoids(found: Map<ActiveClass, string[]>): string[] {
+  return (found.get('retinoid') ?? []).filter((raw) => normalizeName(raw) !== 'adapalene');
+}
+
 /** 没有权威出处、按行业惯例列入类别清单时，source_url 写这个值 */
 export const INDUSTRY_PRACTICE = '行业惯例';
 

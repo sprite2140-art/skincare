@@ -40,6 +40,12 @@ describe('整套流程的搭配检查', () => {
       .toEqual(['bpo_retinoid:pm']);
   });
 
+  it('阿达帕林与过氧化苯甲酰同用稳定：不错开时段，也不报冲突', () => {
+    expect(rules([step('treatment', ['Water', 'Adapalene']), step('spot', ['Water', 'Benzoyl Peroxide'], { useTime: 'pm' }), sunscreen()])).toEqual([]);
+    const s = scheduleRoutine([step('treatment', ['Water', 'Adapalene']), step('spot', ['Water', 'Benzoyl Peroxide']), sunscreen()]);
+    expect(s.am.some((x) => x.step.step.id === 'spot')).toBe(false);
+  });
+
   it('A 醇类 + 每周去角质：提示去角质那晚不用 A 醇类', () => {
     const c = checkRoutineConflicts(scheduleRoutine([step('exfoliator', ['Water', 'Glycolic Acid']), step('treatment', ['Water', 'Retinol']), sunscreen()]), data.index);
     expect(c.map((x) => x.rule)).toContain('retinoid_exfoliant');

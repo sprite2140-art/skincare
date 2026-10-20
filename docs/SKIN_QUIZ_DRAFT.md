@@ -110,7 +110,7 @@
 **极简 / 标准 / 完整（由困扰自动得出）**：
 
 - **极简（基础 3 步）**：洁面、保湿、早上防晒。没有选困扰，或打开"只看基础 3 步"时显示这一档。
-- **标准**：极简 + 第一困扰对应的 1 个可选步骤。
+- **标准**：极简 + 第一困扰对应的可选步骤。一个困扰可能对应两步：暗沉色斑、毛孔同时对应精华（每天）和去角质（每周 1–2 次，敏感肌和用处方药时不出现），出油对应去角质；这种情况两步都加入，仍算这一个困扰的一档，不再另选其中一步。多个困扰对应同一步骤时合并为一个产品（见下方上限）。
 - **完整**：标准 + 第二、第三困扰对应的可选步骤。
 - **上限**（本项目设计，依据 AAD "产品过多可能刺激"）：早上最多 1 个功效产品，晚上最多 1 个功效产品加 1 个点涂。多个困扰对应同一步骤时，合并为一个产品（同一款精华尽量覆盖多个困扰）。去角质只占每周 1–2 个晚上，那几晚不用 A 醇类（见第 5 节）。
 - **只选了出油、干燥时**：不加步骤，只影响洁面、保湿、防晒的挑选。依据：AAD How to control oily skin、[Dermatologists' top tips for relieving dry skin](https://www.aad.org/public/everyday-care/skin-care-basics/dry/dermatologists-tips-relieve-dry-skin)。
@@ -142,6 +142,8 @@
 | `spf` 为空，或 `broad_spectrum = unknown` | 不排除，也不推荐，放进"信息不全，无法确认"分组，写明缺哪一项 | 缺数据不应高于"证据弱"，也不应重罚（产品原则） |
 | 防水 `water_resistance` | 不是硬性条件。F3 户外 2 小时以上，或出汗 / 游泳选"有时 / 经常"的用户：同等级内 40 / 80 排在前面；其他用户不按防水排序、不扣分。**所有用户**的防晒卡片都显示"防水 40 分钟 / 防水 80 分钟 / 未标注防水" | AAD 建议选防水款；FDA 21 CFR 201.327；作者决定（2026-10-20） |
 | "隐藏可能泛白的未调色物理防晒"开关打开 | **按成分表事实筛选，不用"泛白"这类体验描述**：防晒剂只有氧化锌和 / 或二氧化钛、且成分表中没有氧化铁（CI 77491 / 77492 / 77499）的产品隐藏，页面写"已隐藏 N 款未调色的物理防晒"。卡片不写"会泛白" | 作者决定（2026-10-20）：没有可靠出处支持具体产品的泛白体验，只按成分表事实判断 |
+
+**其他市场**：这些条件按美国标签（SPF、Broad Spectrum、FDA 40 / 80 分钟防水）写，第一阶段只有美国产品。导入日本、韩国、中国的防晒前，要先定好换算规则（如 PA 等级与广谱的对应、当地防水标注的对应），并写明出处；否则当地产品会被放进"信息不全"。
 
 防晒的需求匹配：防晒只对出油、干燥、痘痘、暗沉色斑这几项需求计分（见 4.3）。没有选这几项时，防晒按温和度和价格排序，与洗护"没选需求时"的规则相同。
 
@@ -209,12 +211,12 @@
 
 | # | 组合 | 处理 | 严重程度 | 出处 |
 |---|---|---|---|---|
-| 1 | 过氧化苯甲酰 + A 醇类，同一时段 | 过氧化苯甲酰放早上，A 醇类放晚上（3.3）；无法错开时提示"不要同时涂" | 一般（只提醒） | 实验室研究：过氧化苯甲酰加光照，约 2 小时降解 50% 以上的维 A 酸，24 小时降解 95%，阿达帕林稳定。Martin B et al. *Br J Dermatol* 1998;139 Suppl 52:8–11，[PMID 9990414](https://pubmed.ncbi.nlm.nih.gov/9990414/)。注意：这项研究测的是两种产品混合后的稳定性，不是皮肤上的效果；化妆品里的视黄醇同样怕氧化，按同样处理属于行业惯例 |
+| 1 | 过氧化苯甲酰 + A 醇类，同一时段（**阿达帕林除外**：同一研究测得阿达帕林稳定，FDA 也批准了阿达帕林 + 过氧化苯甲酰的复方凝胶 Epiduo，可以同时使用） | 过氧化苯甲酰放早上，A 醇类放晚上（3.3）；无法错开时提示"不要同时涂" | 一般（只提醒） | 实验室研究：过氧化苯甲酰加光照，约 2 小时降解 50% 以上的维 A 酸，24 小时降解 95%，阿达帕林稳定。Martin B et al. *Br J Dermatol* 1998;139 Suppl 52:8–11，[PMID 9990414](https://pubmed.ncbi.nlm.nih.gov/9990414/)。注意：这项研究测的是两种产品混合后的稳定性，不是皮肤上的效果；化妆品里的视黄醇同样怕氧化，按同样处理属于行业惯例 |
 | 2 | A 醇类 + 去角质产品（果酸、水杨酸类、PHA、磨砂），同一晚 | 去角质的那晚不用 A 醇类 | 一般 | AAD How to safely exfoliate at home |
 | 3 | 过氧化苯甲酰 + 去角质产品，同一时段 | 错开时段或错开日子 | 一般 | 同上 |
 | 4 | 同一时段有两个以上的去角质产品（如果酸精华 + 水杨酸洁面 + 磨砂） | 只保留一个，其余换成不含这些成分的产品 | 一般 | AAD How to safely exfoliate at home（越强的去角质越少做）；"同时段最多一个"：行业惯例 |
 | 5 | 同一时段有两个 A 醇类产品 | 只保留一个 | 一般 | AAD How to maximize results from anti-aging skin care products（同时用多种抗老产品可能刺激） |
-| 6 | 流程里有光敏成分（果酸、A 醇类；以成分库 `photosensitizing = yes` 为准），但用户关掉了防晒一步 | 页面顶部提醒"这套流程里有让皮肤更怕晒的成分，早上一定要防晒"；打开"只看基础 3 步"时防晒仍保留 | 一般 | FDA AHA 指南（停用后一周内仍需防晒） |
+| 6 | 流程里有光敏成分（果酸、A 醇类；以成分库 `photosensitizing = yes` 为准），但流程里没有防晒产品。防晒是基础步骤，用户不能关掉；这条只在防晒没有可选产品时出现（数据整理中，或"隐藏可能泛白的未调色物理防晒"开关打开后没有剩下的产品） | 页面顶部提醒"这套流程里有让皮肤更怕晒的成分，早上一定要防晒"；打开"只看基础 3 步"时防晒仍保留 | 一般 | FDA AHA 指南（停用后一周内仍需防晒） |
 | 7 | 维生素 C（抗坏血酸）+ 过氧化苯甲酰，同一时段 | 错开早晚 | 一般 | 行业惯例（过氧化苯甲酰是氧化剂），没有找到权威出处 |
 | 8 | 在用处方外用药或口服异维 A 酸 + A 醇类 / 果酸 / 水杨酸类 / 过氧化苯甲酰免洗产品 | 排除（4.5） | 严重（不推荐） | AAD 异维 A 酸页面；AAD How to safely exfoliate at home |
 
@@ -230,8 +232,8 @@
 
 | 新列 | 取值 | 用途 | 留空时 |
 |---|---|---|---|
-| us_regulatory_status | `otc_drug_active`（美国 OTC 药品活性成分，如防晒剂、水杨酸、过氧化苯甲酰、0.1% 阿达帕林）/ `rx_only`（只能处方）/ `cosmetic`（化妆品成分）/ `not_permitted_otc`（不能作为 OTC 销售，如氢醌）/ `unknown` | 成分弹窗显示；`not_permitted_otc` 的产品在"需要注意"里写明 | 不显示 |
-| pregnancy_note | `avoid` / `caution` / `no_known_concern` / `unknown` | 4.5 的孕期规则。`avoid` 和 `caution` 会自动加上现有的 `pregnancy_caution` 标签，洗护的被动提示保持不变 | 按 unknown：不排除；如果是有效成分，卡片写"孕期资料暂缺" |
+| us_regulatory_status | 成分在美国**可以**作为什么使用，不是某个产品的实际身份（产品是药品还是化妆品，取决于成品的用途和宣称，见 FDA [Is it a cosmetic, a drug, or both?](https://www.fda.gov/cosmetics/cosmetics-laws-regulations/it-cosmetic-drug-or-both-or-it-soap)）：`otc_drug_active`（可作为美国 OTC 药品活性成分，如防晒剂、水杨酸、过氧化苯甲酰、0.1% 阿达帕林）/ `rx_only`（只能处方）/ `cosmetic`（只作化妆品成分）/ `not_permitted_otc`（不能作为 OTC 销售，如氢醌）/ `unknown` | 成分弹窗写"可作为美国非处方药活性成分"这类说法，不给产品贴"药品"标签；`not_permitted_otc` 的产品在"需要注意"里写明 | 不显示 |
+| pregnancy_note | `avoid` / `caution` / `no_known_concern` / `unknown` | 4.5 的孕期规则。只有 `avoid` 自动加上现有的 `pregnancy_caution` 标签（孕期排除）；`caution` 不加标签、不排除，只在卡片上提示。洗护的被动提示保持不变 | 按 unknown：不排除；如果是有效成分，卡片写"孕期资料暂缺" |
 | photosensitizing | `yes` / `no` / `unknown` | 第 5 节第 6 条；卡片"怎么用"里写"用这款期间注意防晒" | 按 no；但果酸、A 醇类仍按 6.2 的类别清单提醒 |
 | notes | 自由文本 | 只供核对，不显示 | — |
 
@@ -255,14 +257,14 @@
 
 ### 6.3 打分要用到的成分
 
-需要另一个 AI 提供 targets、evidence_level、effective_range、pregnancy_note、photosensitizing 的成分，按需求列出。括号里是目前 40 款洁面中出现的款数。
+需要另一个 AI 提供 targets、evidence_level、effective_range、pregnancy_note、photosensitizing 的成分，按需求列出。括号里是目前 40 款洁面中出现的款数，按产品里的实际 INCI 写法分别列出（匹配不会自动合并不同的 INCI 名，如透明质酸、水解透明质酸、乙酰化透明质酸钠是三个成分）。
 
 | 需求 | 成分 |
 |---|---|
 | acne | Salicylic Acid (5), Benzoyl Peroxide (4), Adapalene, Azelaic Acid, Sulfur, Niacinamide (10) |
 | oil | Niacinamide, Zinc PCA, Salicylic Acid, Kaolin (1), Bentonite |
-| dryness | Glycerin (38), Sodium Hyaluronate (11), Hyaluronic Acid (4), Ceramide NP (12), Ceramide AP (5), Ceramide EOP (5), Cholesterol, Squalane (1), Urea, Petrolatum, Dimethicone, Panthenol (6) |
-| redness | Azelaic Acid, Niacinamide, Centella Asiatica Extract (2), Madecassoside, Allantoin (4), Panthenol, Avena Sativa Kernel Flour (3), Bisabolol (1) |
+| dryness | Glycerin (38), Sodium Hyaluronate (11), Hydrolyzed Hyaluronic Acid (4), Sodium Acetylated Hyaluronate (2), Hyaluronic Acid (0), Ceramide NP (12), Ceramide AP (5), Ceramide EOP (5), Cholesterol, Squalane (1), Urea, Petrolatum, Dimethicone, Panthenol (6) |
+| redness | Azelaic Acid, Niacinamide, Centella Asiatica Extract (2), Madecassoside, Allantoin (4), Panthenol, Avena Sativa (Oat) Kernel Extract (2), Avena Sativa (Oat) Meal Extract (1), Avena Sativa Kernel Flour (0), Bisabolol (1) |
 | pigmentation | Ascorbic Acid 及衍生物（Sodium Ascorbyl Phosphate, Ascorbyl Glucoside, 3-O-Ethyl Ascorbic Acid, Tetrahexyldecyl Ascorbate）, Niacinamide, Azelaic Acid, Tranexamic Acid, Alpha-Arbutin, Kojic Acid, Glycyrrhiza Glabra Root Extract, Glycolic Acid (2) |
 | aging | Retinol, Retinal, Hydroxypinacolone Retinoate, Bakuchiol, Palmitoyl Pentapeptide-4, Ascorbic Acid, Niacinamide |
 | pores | Salicylic Acid, Niacinamide, Retinoids, Glycolic Acid, Lactic Acid (3), Gluconolactone (4), Capryloyl Salicylic Acid (2) |

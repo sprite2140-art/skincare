@@ -2,7 +2,7 @@
 // 只看同一时段（早上或晚上）一起用的产品；结果放在结果页顶部，每条附出处。
 // 第 8 条（处方药 / 异维 A 酸 + 功效成分）在单品打分时直接排除，不在这里重复。
 
-import { EXFOLIANT_CLASSES, type ActiveClass } from '../data/faceActives';
+import { bpoSensitiveRetinoids, EXFOLIANT_CLASSES, type ActiveClass } from '../data/faceActives';
 import type { IngredientIndex } from '../data/ingredientIndex';
 import { usageTypeOf } from '../data/types';
 import type { FaceProductScore } from './faceScore';
@@ -52,9 +52,10 @@ function slotConflicts(time: TimeOfDay, slot: ScheduledStep[], index: Ingredient
   const t = TIME[time];
   const pairs = <T>(list: T[]) => list.flatMap((a, i) => list.slice(i + 1).map((b) => [a, b] as const));
 
-  // 1. 过氧化苯甲酰 + A 醇类
+  // 1. 过氧化苯甲酰 + A 醇类（阿达帕林除外：与过氧化苯甲酰同用稳定，FDA 批准了两者的复方）
+  const degradable = (p: FaceProductScore) => bpoSensitiveRetinoids(p.faceExtras.classes).length > 0;
   for (const [a, b] of pairs(prods)) {
-    const [bpo, ret] = has(a, 'benzoyl_peroxide') && has(b, 'retinoid') ? [a, b] : has(b, 'benzoyl_peroxide') && has(a, 'retinoid') ? [b, a] : [null, null];
+    const [bpo, ret] = has(a, 'benzoyl_peroxide') && degradable(b) ? [a, b] : has(b, 'benzoyl_peroxide') && degradable(a) ? [b, a] : [null, null];
     if (!bpo || !ret) continue;
     out.push({
       rule: 'bpo_retinoid', time, products: [bpo, ret], severity: 'mild', source: MARTIN_1998,
