@@ -12,13 +12,14 @@ export interface TargetEvidence {
 
 /**
  * 按需求读取证据等级：成分填了 evidence_by_target 时只看对应需求的等级（没写的需求为 null，按"暂无证据"计）；
- * 整列为空的旧条目沿用 evidence_level。证据的使用方式（evidence_usage）与产品不同时降一级，C 级不再降。
+ * 整列为空的旧条目沿用 evidence_level。证据的使用方式（evidence_usage）与产品不同时降一级，C 级不再降；
+ * both（免洗、冲洗都有证据）和留空不降。
  */
 export function evidenceFor(ing: Ingredient, target: Target, usage: UsageType | null): TargetEvidence | null {
   const byTarget = ing.evidenceByTarget ?? {};
   const level = Object.keys(byTarget).length > 0 ? byTarget[target] ?? null : ing.evidenceLevel;
   if (!level) return null;
-  if (ing.evidenceUsage && usage && usage !== ing.evidenceUsage) {
+  if (ing.evidenceUsage && ing.evidenceUsage !== 'both' && usage && usage !== ing.evidenceUsage) {
     return { level: DOWNGRADE[level], downgraded: DOWNGRADE[level] !== level };
   }
   return { level, downgraded: false };

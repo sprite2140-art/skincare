@@ -67,7 +67,7 @@
 | C | 小样本、开放标签、复配无法归因、离体、体外或机理研究 | 40 |
 
 - **按需求读取**（2026-10-20 起）：成分库的 evidence_by_target 写明每个需求单独的等级，证据强度按用户所选需求对应的等级计算（代码 `src/scoring/evidence.ts`）。evidence_level 是其中最高的一级，只用于展示。没写等级的需求按"暂无证据"（C 级）计；整列为空的旧条目沿用 evidence_level。
-- **使用方式降级**：成分的证据来自免洗产品（evidence_usage = leave_on）时，用在冲洗型产品上降一级（A→B，B→C，C 不再降），评分明细写"证据来自免洗产品，冲洗型降一级"。目前只有 Caffeine。
+- **使用方式降级**：成分的证据只来自免洗产品（evidence_usage = leave_on）时，用在冲洗型产品上降一级（A→B，B→C，C 不再降），评分明细写"证据来自免洗产品，冲洗型降一级"；证据只来自冲洗型产品（rinse_off）时，用在免洗产品上同样降一级。both（两种都有证据）和留空不降。2026-10-21 按作者决定，按现有 effective_range 和 notes 填写：leave_on 为 Caffeine、Niacinamide、Panthenol、Sodium Hyaluronate、Hyaluronic Acid、Ceramide NP / AP / EOP、Menthol（前臂试验）、Rosmarinus Officinalis Leaf Oil（迷迭香油制剂，非洗发水）；rinse_off 为 Piroctone Olamine（冲洗型 0.75%）；both 为 Pyrithione Zinc（冲洗型和免洗都有 OTC 浓度）。范围和备注里看不出使用方式的（如 Salicylic Acid、Ketoconazole、Selenium Sulfide）留空，不降级。
 - **核对方式**：由 AI 依据公开文献查证，经第二个 AI 核对 PubMed 摘要，未经皮肤科医生审核。数据说明页同样写明。
 
 ### 效果依据

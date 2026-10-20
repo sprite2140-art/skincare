@@ -192,7 +192,7 @@ const fake = (inciName: string, extra: Partial<Ingredient>): Ingredient => verif
 
 const fixtureIngredients: Ingredient[] = [
   // 测试夹具：不随真实证据数据变化（真实数据见 data/ingredients.csv 的 evidence_by_target）
-  verify(realIng('Piroctone Olamine'), { evidenceLevel: 'A', evidenceByTarget: {}, targets: ['dandruff', 'scalp_itch'] }),
+  verify(realIng('Piroctone Olamine'), { evidenceLevel: 'A', evidenceByTarget: {}, evidenceUsage: null, targets: ['dandruff', 'scalp_itch'] }),
   verify(realIng('Fragrance')),
   verify(realIng('Glycerin')),
   fake('Aqua', { aliases: ['Water'] }),

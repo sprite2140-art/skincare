@@ -9,7 +9,7 @@ import { ACTIVE_CLASSES, INDUSTRY_PRACTICE, type ActiveClassEntry } from './face
 import { highestLevel } from '../scoring/evidence';
 import {
   PREGNANCY_NOTES, US_REGULATORY_STATUSES, YES_NO_UNKNOWN, BRAND_CLAIM_STATUSES, CATEGORIES, INCLUSION_BASIS_TYPES, PRODUCT_SUBTYPES, RETAIL_PLATFORMS, CATEGORY_DEFAULT_USAGE, CLAIM_SOURCES, CN_AVAILABILITY, FRAGRANCE_FREE_CLAIMS, CONFLICT_SEVERITIES, EVIDENCE_LEVELS, INGREDIENT_CATEGORIES, REGIONS,
-  REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
+  EVIDENCE_USAGES, REVIEW_STATUSES, RISK_TAGS, TARGETS, TRANSPARENCY, USAGE_TYPES, WATER_HARDNESS, ZONES,
 } from './types';
 import type { Category, Target, City, ExchangeRate, Ingredient, Product, ReferenceWater, WaterRecord } from './types';
 
@@ -100,7 +100,7 @@ export function validateData(
       const top = highestLevel(byTarget);
       if (top && ing.evidenceLevel !== top) err(F_ING, key, `evidence_level 应为 evidence_by_target 中最高的一级 ${top}`);
     }
-    if (ing.evidenceUsage) oneOf(F_ING, key, 'evidence_usage', ing.evidenceUsage, USAGE_TYPES);
+    if (ing.evidenceUsage) oneOf(F_ING, key, 'evidence_usage', ing.evidenceUsage, EVIDENCE_USAGES);
     if (ing.usRegulatoryStatus) oneOf(F_ING, key, 'us_regulatory_status', ing.usRegulatoryStatus, US_REGULATORY_STATUSES);
     if (ing.pregnancyNote) oneOf(F_ING, key, 'pregnancy_note', ing.pregnancyNote, PREGNANCY_NOTES);
     if (ing.photosensitizing) oneOf(F_ING, key, 'photosensitizing', ing.photosensitizing, YES_NO_UNKNOWN);

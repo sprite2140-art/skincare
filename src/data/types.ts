@@ -146,8 +146,8 @@ export interface Ingredient {
    * 填了这一列时，没写等级的需求按"暂无证据"计；整列为空的旧条目按 evidenceLevel 计。
    */
   evidenceByTarget?: Partial<Record<Target, EvidenceLevel>>;
-  /** 证据来自哪种使用方式的产品（evidence_usage）；用在另一种使用方式的产品上时降一级 */
-  evidenceUsage?: UsageType | null;
+  /** 证据来自哪种使用方式的产品（evidence_usage）；用在另一种使用方式的产品上时降一级，both 不降 */
+  evidenceUsage?: EvidenceUsage | null;
   /** 核对备注，只供核对，不显示 */
   notes?: string;
   /** 美国监管状态（面部有效成分）；只在成分弹窗显示 */
@@ -319,6 +319,9 @@ export interface ExchangeRate {
 
 export const USAGE_TYPES = ['rinse_off', 'leave_on'] as const;
 export type UsageType = (typeof USAGE_TYPES)[number];
+/** 成分证据来自哪种使用方式的产品：both = 两种都有可靠证据 */
+export const EVIDENCE_USAGES = ['leave_on', 'rinse_off', 'both'] as const;
+export type EvidenceUsage = (typeof EVIDENCE_USAGES)[number];
 
 /**
  * 各品类的默认使用方式。卸妆、去角质和面膜没有统一默认值，必须按单个产品填写：

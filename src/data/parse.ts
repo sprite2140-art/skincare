@@ -7,7 +7,7 @@ import type {
   PregnancyNote, UsRegulatoryStatus, ActiveConcentration, FaceAttributes, SkinTypeClaim, Texture, UseTime, WaterResistance, YesNoUnknown,
   InclusionBasisType, PurchaseLink, RetailPlatform, RetailRating, Award, BrandClaimStatus, ProductSubtype, City, WaterRecord, ReferenceWater, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
-  UsageType, WaterHardness, Zone,
+  EvidenceUsage, UsageType, WaterHardness, Zone,
 } from './types';
 
 export type Row = Record<string, string>;
@@ -70,7 +70,7 @@ export function parseIngredients(text: string): Ingredient[] {
     reviewStatus: r.review_status as ReviewStatus,
     reviewedOn: r.reviewed_on ?? '',
     evidenceByTarget: parseEvidenceByTarget(r.evidence_by_target),
-    evidenceUsage: (r.evidence_usage || null) as UsageType | null,
+    evidenceUsage: (r.evidence_usage || null) as EvidenceUsage | null,
     notes: r.notes ?? '',
     usRegulatoryStatus: (r.us_regulatory_status || null) as UsRegulatoryStatus | null,
     pregnancyNote: (r.pregnancy_note || null) as PregnancyNote | null,

@@ -27,6 +27,15 @@ describe('按需求读取证据等级（evidence_by_target）', () => {
     expect(evidenceFor(caffeine, 'hair_loss', 'rinse_off')).toEqual({ level: 'C', downgraded: true });
   });
 
+  it('证据只来自免洗产品的成分（烟酰胺、透明质酸、泛醇等）同样降级；both 不降', () => {
+    expect(evidenceFor(ing('Niacinamide'), 'oil', 'rinse_off')).toEqual({ level: 'C', downgraded: true });
+    expect(evidenceFor(ing('Sodium Hyaluronate'), 'dryness', 'rinse_off')).toEqual({ level: 'C', downgraded: true });
+    expect(evidenceFor(ing('Panthenol'), 'dryness', 'leave_on')).toEqual({ level: 'B', downgraded: false });
+    expect(ing('Pyrithione Zinc').evidenceUsage).toBe('both');
+    expect(evidenceFor(ing('Pyrithione Zinc'), 'dandruff', 'leave_on')).toEqual({ level: 'A', downgraded: false });
+    expect(evidenceFor(ing('Pyrithione Zinc'), 'dandruff', 'rinse_off')).toEqual({ level: 'A', downgraded: false });
+  });
+
   it('没有证据的三个成分已删除功效目标', () => {
     for (const name of ['Sodium Salicylate', 'Tussilago Farfara Leaf Extract', 'Biotin']) {
       expect(ing(name).targets).toEqual([]);

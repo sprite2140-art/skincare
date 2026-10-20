@@ -42,7 +42,7 @@ risk_tags 取值：fragrance, essential_oil, alcohol, strong_acid, sensitizer, s
 | 字段 | 含义 | 示例 |
 |---|---|---|
 | evidence_by_target | 每个需求单独的证据等级，`需求:等级`，分号分隔。需求必须在 targets 中，targets 里的每个需求都要写等级；evidence_level 必须是其中最高的一级。填了这一列的成分，打分时按需求读取等级；整列为空的旧条目沿用 evidence_level | dandruff:A;scalp_oil:C |
-| evidence_usage | 证据来自哪种使用方式的产品：leave_on / rinse_off，可留空。与产品的使用方式不同时降一级计算（A→B，B→C，C 不再降） | leave_on |
+| evidence_usage | 证据来自哪种使用方式的产品：leave_on / rinse_off / both，可留空。与产品的使用方式不同时降一级计算（A→B，B→C，C 不再降）；both 和留空不降。按 effective_range 和 notes 填写 | leave_on |
 | notes | 核对备注，只供核对，不在页面显示 | |
 | us_regulatory_status | 美国监管状态（面部有效成分）：otc_drug_active / rx_only / cosmetic / not_permitted_otc / unknown，可留空；只在成分弹窗显示 | otc_drug_active |
 | pregnancy_note | 孕期：avoid（自动带 pregnancy_caution 标签：怀孕 / 备孕 / 哺乳排除，对所有人被动提示）/ caution（护肤中只提示"注意用量"，不排除）/ no_known_concern / unknown，可留空 | avoid |
