@@ -11,9 +11,19 @@ export const TARGETS = [
 ] as const;
 export type Target = (typeof TARGETS)[number];
 
+/** 美国监管状态（ingredients.csv 的 us_regulatory_status） */
+export const US_REGULATORY_STATUSES = ['otc_drug_active', 'rx_only', 'cosmetic', 'not_permitted_otc', 'unknown'] as const;
+export type UsRegulatoryStatus = (typeof US_REGULATORY_STATUSES)[number];
+
+/** 孕期（ingredients.csv 的 pregnancy_note） */
+export const PREGNANCY_NOTES = ['avoid', 'caution', 'no_known_concern', 'unknown'] as const;
+export type PregnancyNote = (typeof PREGNANCY_NOTES)[number];
+
 export const RISK_TAGS = [
   'fragrance', 'essential_oil', 'alcohol', 'strong_acid', 'sensitizer',
   'strong_cleanser', 'pregnancy_caution', 'rx_caution',
+  // 面部功效成分（A 醇类、过氧化苯甲酰、果酸、水杨酸类）：由类别清单算出，只对敏感肌计入刺激；不在 ingredients.csv 中填写
+  'active_irritant',
 ] as const;
 export type RiskTag = (typeof RISK_TAGS)[number];
 
@@ -136,10 +146,16 @@ export interface Ingredient {
    * 填了这一列时，没写等级的需求按"暂无证据"计；整列为空的旧条目按 evidenceLevel 计。
    */
   evidenceByTarget?: Partial<Record<Target, EvidenceLevel>>;
-  /** 证据来自哪种使用方式的产品（evidence_usage）；用在另一种使用方式的产品上时降一级 */
-  evidenceUsage?: UsageType | null;
+  /** 证据来自哪种使用方式的产品（evidence_usage）；用在另一种使用方式的产品上时降一级，both 不降 */
+  evidenceUsage?: EvidenceUsage | null;
   /** 核对备注，只供核对，不显示 */
   notes?: string;
+  /** 美国监管状态（面部有效成分）；只在成分弹窗显示 */
+  usRegulatoryStatus?: UsRegulatoryStatus | null;
+  /** 孕期：avoid 排除（怀孕 / 备孕 / 哺乳），caution 只提示 */
+  pregnancyNote?: PregnancyNote | null;
+  /** 是否让皮肤更怕晒 */
+  photosensitizing?: YesNoUnknown | null;
   riskTags: RiskTag[];
   conflictsWith: Conflict[];
   explainZh: string;
@@ -155,6 +171,8 @@ export interface Ingredient {
   fragranceListed?: boolean;
   /** 在本项目维护的螯合剂清单（data/chelators.csv）上 */
   chelator?: boolean;
+  /** 通俗解释已核对（ingredient_explanations.csv 中 review_status = verified）；成分本身是否核对看 reviewStatus */
+  explainReviewed?: boolean;
   /** CosIng 登记的功能（小写），仅批量导入后才有；只用于展示，不参与打分 */
   cosingFunctions?: string[];
 }
@@ -301,6 +319,9 @@ export interface ExchangeRate {
 
 export const USAGE_TYPES = ['rinse_off', 'leave_on'] as const;
 export type UsageType = (typeof USAGE_TYPES)[number];
+/** 成分证据来自哪种使用方式的产品：both = 两种都有可靠证据 */
+export const EVIDENCE_USAGES = ['leave_on', 'rinse_off', 'both'] as const;
+export type EvidenceUsage = (typeof EVIDENCE_USAGES)[number];
 
 /**
  * 各品类的默认使用方式。卸妆、去角质和面膜没有统一默认值，必须按单个产品填写：

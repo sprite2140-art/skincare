@@ -8,7 +8,7 @@
 
 import { usageTypeOf } from '../data/types';
 import { evidenceFor, type TargetEvidence } from './evidence';
-import type { City, ExchangeRate, Ingredient, Product, RiskTag, Target, UsageType } from '../data/types';
+import type { Category, City, ExchangeRate, Ingredient, Product, RiskTag, Target, UsageType } from '../data/types';
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import {
   BRAND_CLAIM_CREDIT, CHELATOR_TARGETS, ENVIRONMENT_SCORES, EVIDENCE_SCORES, MISSING_EVIDENCE_LEVEL,
@@ -31,7 +31,8 @@ export interface ScoringData {
   allowDraft?: boolean;
 }
 
-export type SpecialStatus = 'none' | 'pregnant' | 'trying' | 'breastfeeding' | 'rx';
+/** 特殊状态（档案入口，可多选）。isotretinoin = 口服异维 A 酸：只影响护肤，洗护的处理不变 */
+export type SpecialStatus = 'none' | 'pregnant' | 'trying' | 'breastfeeding' | 'rx' | 'isotretinoin';
 export type WashFrequency = 'daily' | 'every_other_day' | 'twice_weekly_or_less';
 /** 香味偏好：无香优先 / 接受香味 / 无所谓 */
 export type FragrancePref = 'free_first' | 'ok' | 'any';
@@ -56,9 +57,16 @@ export interface ScoringProfile {
   targetWeights?: Partial<Record<Target, number>>;
   /** true：按重要程度排序（面部）；false：多选不排序（头皮、头发），平均加权 */
   concernsRanked: boolean;
+  /**
+   * 只计入与某一步相关的需求时（面部按步骤分配）：这一步的品类和用户一共选了几项。
+   * 卡片写"与洁面相关的需求：痘痘（你共选了 3 项）"，而不是"你选的 1 个需求"。
+   */
+  needScope?: { category: Category; selected: number };
   /** 敏感肌或头皮易痒 */
   sensitive: boolean;
   specialStatus: SpecialStatus;
+  /** 多选的特殊状态；有这一项时代替 specialStatus */
+  specialStatuses?: SpecialStatus[];
   /** 想避开的具体成分（INCI 名或别名） */
   avoidIngredients: string[];
   /** 想避开的成分类型，如 fragrance */
@@ -236,7 +244,14 @@ const STATUS_LABELS: Record<SpecialStatus, Text> = {
   trying: { zh: '备孕', en: 'trying to conceive' },
   breastfeeding: { zh: '哺乳', en: 'breastfeeding' },
   rx: { zh: '正在用处方皮肤药', en: 'using prescription skin medication' },
+  isotretinoin: { zh: '口服异维 A 酸', en: 'taking oral isotretinoin' },
 };
+
+/** 用户的特殊状态列表（多选；旧档案只有单选的 specialStatus） */
+export function statusesOf(profile: Pick<ScoringProfile, 'specialStatus' | 'specialStatuses'>): SpecialStatus[] {
+  const list = profile.specialStatuses ?? [profile.specialStatus];
+  return list.filter((s) => s !== 'none');
+}
 
 function withTag(items: Resolved[], tag: RiskTag) {
   const hits = items.filter(isKnown).filter((r) => r.ingredient.riskTags.includes(tag));
@@ -271,14 +286,17 @@ function hardFilters(
 ): Flag[] {
   const out: Flag[] = [];
 
-  // 特殊状态
-  const statusTag: RiskTag | null = PREGNANCY_STATUSES.includes(profile.specialStatus)
-    ? 'pregnancy_caution'
-    : profile.specialStatus === 'rx' ? 'rx_caution' : null;
-  if (statusTag) {
+  // 特殊状态（可多选）：孕期类对应 pregnancy_caution，处方药对应 rx_caution；口服异维 A 酸在洗护中没有对应标签
+  const seenTags = new Set<RiskTag>();
+  for (const status of statusesOf(profile)) {
+    const statusTag: RiskTag | null = PREGNANCY_STATUSES.includes(status)
+      ? 'pregnancy_caution'
+      : status === 'rx' ? 'rx_caution' : null;
+    if (!statusTag || seenTags.has(statusTag)) continue;
+    seenTags.add(statusTag);
     const { hits, names, unverified } = withTag(items, statusTag);
     if (hits.length > 0) {
-      const s = STATUS_LABELS[profile.specialStatus];
+      const s = STATUS_LABELS[status];
       const suf = unverifiedSuffix(unverified);
       const why = cautionReasons(hits);
       out.push({
@@ -346,7 +364,8 @@ function hardFilters(
 
 // ---------- 搭配冲突 ----------
 
-function conflictSeverity(a: Ingredient, b: Ingredient): 'mild' | 'severe' | null {
+/** 两个成分之间的搭配冲突（任一方的 conflicts_with 写明即可，双向识别） */
+export function conflictSeverity(a: Ingredient, b: Ingredient): 'mild' | 'severe' | null {
   const matches = (target: Ingredient, name: string) => {
     const key = normalizeName(name);
     return [target.inciName, ...target.aliases].some((n) => normalizeName(n) === key);

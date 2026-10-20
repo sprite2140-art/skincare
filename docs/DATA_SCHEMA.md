@@ -42,8 +42,11 @@ risk_tags 取值：fragrance, essential_oil, alcohol, strong_acid, sensitizer, s
 | 字段 | 含义 | 示例 |
 |---|---|---|
 | evidence_by_target | 每个需求单独的证据等级，`需求:等级`，分号分隔。需求必须在 targets 中，targets 里的每个需求都要写等级；evidence_level 必须是其中最高的一级。填了这一列的成分，打分时按需求读取等级；整列为空的旧条目沿用 evidence_level | dandruff:A;scalp_oil:C |
-| evidence_usage | 证据来自哪种使用方式的产品：leave_on / rinse_off，可留空。与产品的使用方式不同时降一级计算（A→B，B→C，C 不再降） | leave_on |
+| evidence_usage | 证据来自哪种使用方式的产品：leave_on / rinse_off / both，可留空。与产品的使用方式不同时降一级计算（A→B，B→C，C 不再降）；both 和留空不降。按 effective_range 和 notes 填写 | leave_on |
 | notes | 核对备注，只供核对，不在页面显示 | |
+| us_regulatory_status | 美国监管状态（面部有效成分）：otc_drug_active / rx_only / cosmetic / not_permitted_otc / unknown，可留空；只在成分弹窗显示 | otc_drug_active |
+| pregnancy_note | 孕期：avoid（自动带 pregnancy_caution 标签：怀孕 / 备孕 / 哺乳排除，对所有人被动提示）/ caution（护肤中只提示"注意用量"，不排除）/ no_known_concern / unknown，可留空 | avoid |
+| photosensitizing | 是否让皮肤更怕晒：yes / no / unknown，可留空 | yes |
 
 verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后没有可引用的出处时，sources 可以为空，但必须在 notes 写明原因（校验给提示），这类需求按 C 级计，与暂无证据相同。有 targets 的 verified 有效成分必须填写 evidence_level 和 evidence_by_target。`npm run validate-data` 会检查。
 
@@ -189,6 +192,19 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 7. 问卷也可以自填上限（单品），或在洗护搭配时"按整套"自填总预算；金额按用户所在地货币保存，比较时换算成 USD。没有符合条件的商品时页面明确提示，不自动放宽条件。
 8. 每次产品数据或汇率更新后，上限在构建时自动重新计算；用户档案保存的是"第几个上限"（q1–q3），不是金额，所以不用重填。旧档案保存的 p33 / p67 和前一版的 q4 在读取时去掉，需要重新选择。`npm run validate-data` 会打印当前各品类的上限。
 
+## face_active_classes.csv（面部有效成分类别清单）
+
+本项目维护的清单，做法与螯合剂清单、加香成分清单相同。护肤的冲突规则、敏感肌规则、特殊状态排除和"未调色物理防晒"判断都按类别，不按 CosIng 功能（代码 `src/data/faceActives.ts`）。
+
+| 字段 | 含义 |
+|---|---|
+| inci_name | INCI 名或美国药品标签写法（如 Avobenzone 和 Butyl Methoxydibenzoylmethane 各一行） |
+| active_class | retinoid（A 醇类）/ benzoyl_peroxide / aha（果酸）/ bha（水杨酸类）/ pha（多羟基酸，温和去角质）/ vitamin_c（只收 Ascorbic Acid）/ sunscreen_mineral（氧化锌、二氧化钛）/ sunscreen_organic（美国获准的化学防晒剂）/ iron_oxide（CI 77491 / 77492 / 77499，含 Iron Oxides 写法） |
+| source_url | 列入依据：A 醇类 AAD Retinoid or retinol?；过氧化苯甲酰 FDA 痤疮 OTC 专论（21 CFR 333 Subpart D）；果酸、水杨酸类 FDA AHA / BHA 页面；维生素 C AAD 20 多岁护肤页；防晒剂 FDA 防晒 OTC 专论 M020；氧化铁 21 CFR 73.2250。没有权威出处、按行业惯例列入的写"行业惯例"（目前只有 PHA） |
+| added_on | 加入日期 |
+
+2026-10-20 首批 46 行。2026-10-21 按作者决定加入 PHA（Gluconolactone、Lactobionic Acid），出处为"行业惯例"：算去角质类，参与搭配冲突检查（第 5 节第 2–4 条），但不算刺激成分，也不算光敏成分。
+
 ## cosing_ingredients.csv 与 eu_fragrance_allergens.csv（欧盟成分基础分类）
 
 - **cosing_export_2026-10-17.csv**：原始数据，共 33,640 条。来源为欧盟委员会 CosIng 数据库（https://ec.europa.eu/growth/tools-databases/cosing/ ），由作者通过 CosIng 网站使用的公开数据接口于 **2026-10-17** 获取。列为 COSING Ref No、INCI name、CAS No、Function、Update Date。
@@ -325,11 +341,11 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | alias_type | 见上表 |
 | source_url | 对应关系的出处 |
 
-对应关系不唯一的写法（如 Iron Oxides 对应 CI 77491 / 77492 / 77499，Citrus Paradisi Oil 对应果皮油或种子油）不收录，保持未匹配。拼写错误、多语言写法（如 `Mel/Honey/Miel`）不在别名表处理，由数据收集方修正原文或在成分库 aliases 登记。校验会检查别名重复、类型、出处、INCI 名能否找到。
+对应关系不唯一的写法（如 Iron Oxides 对应 CI 77491 / 77492 / 77499，Citrus Paradisi Oil 对应果皮油或种子油）不收录，保持未匹配。拼写错误、多语言写法（如 `Mel/Honey/Miel`）不在别名表处理，由数据收集方修正原文或在成分库 aliases 登记。2026-10-20 在成分库登记了 4 个：Coco Glucoside → Coco-Glucoside、Mel/Honey/Miel → Mel、Sea Salt\Maris Sal\Sel Marin → Maris Sal、CI 77891/ Titanium Dioxide → CI 77891；Carbomer Interpolymer Type A、Citrus Paradisi Oil、Citrus Sinensis Oil、Olea Europaea Oil、Chlorella Pyrenoidosa、Yucca Schidigera Extract、Iron Oxides、Disodium Cocoyl Glycinate 对应关系不唯一或不确定，保持未匹配。出处：色素用 FDA UNII 页面（precision.fda.gov），药品名用 FDA 页面（UNII 或 FDA 食品接触物质清单）。校验会检查别名重复、类型、出处、INCI 名能否找到。
 
 ## ingredient_explanations.csv（常见成分通俗解释）
 
-产品中出现频率最高的约 150 个成分里，成分库没有的（只在 CosIng 中）在这里起草一两句中英文通俗解释。**全部为起草稿，未经人工核对**（review_status = draft），页面标注"通俗解释为起草稿，未核对"。成分库已有的条目用成分库的 explain_zh / explain_en。
+产品中出现频率最高的约 150 个成分里，成分库没有的（只在 CosIng 中）在这里起草一两句中英文通俗解释。起草稿 review_status = draft，页面标注"通俗解释为起草稿，未核对"；作者核对后改为 verified 并填 reviewed_on，页面不再标注。2026-10-20 作者核对了 14 条（洁面首批新增的常见成分）。成分库已有的条目用成分库的 explain_zh / explain_en。
 
 | 字段 | 含义 |
 |---|---|
@@ -337,6 +353,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | explain_zh / explain_en | 通俗解释，一两句；只说明在配方中的作用，不写功效承诺 |
 | review_status | draft / verified |
 | drafted_on | 起草日期 |
+| reviewed_on | 核对日期；verified 时必填 |
 
 成分弹窗还会显示该成分的 CosIng 登记功能（翻译成通俗中文，见 `src/data/cosingFunctions.ts`），并注明来源和获取日期。登记功能是成分在配方中的作用，不是功效。
 

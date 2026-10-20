@@ -172,3 +172,21 @@ describe('星级留空', () => {
     expect(issues.map((i) => [i.level, i.message])).toEqual([['error', 'rating 应为 0–5 之间的数字：unknown']]);
   });
 });
+
+describe('#13 遗留：别名与已核对的解释', () => {
+  it('多语言写法和缺连字符的写法登记在成分库 aliases，产品原文不改', () => {
+    for (const [raw, inci] of [['Mel/Honey/Miel', 'Mel'], ['Sea Salt\\Maris Sal\\Sel Marin', 'Maris Sal'], ['Coco Glucoside', 'Coco-Glucoside'], ['CI 77891/ Titanium Dioxide', 'CI 77891']]) {
+      expect(real.ingredientIndex.get(raw)?.inciName).toBe(inci);
+    }
+    expect(real.products.find((p) => p.productId === 'CL-US-035')!.inciList).toContain('Mel/Honey/Miel');
+    // 对应关系不唯一的保持未匹配
+    for (const raw of ['Iron Oxides', 'Citrus Paradisi Oil', 'Olea Europaea Oil']) expect(real.ingredientIndex.get(raw)).toBeUndefined();
+  });
+
+  it('已核对的通俗解释不再标"起草稿"', () => {
+    const g = real.ingredientIndex.get('Glycolic Acid')!;
+    expect(g.explainZh.startsWith('甘醇酸（乙醇酸）')).toBe(true);
+    expect(g.explainReviewed).toBe(true);
+    expect(real.explanations.filter((e) => e.reviewStatus === 'verified' && e.reviewedOn === '2026-10-20')).toHaveLength(14);
+  });
+});

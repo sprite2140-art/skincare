@@ -2,9 +2,10 @@
 
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
+import { baseStatuses } from '../profile/questionnaire';
 import type { SpecialStatus } from '../scoring/score';
 
-const STATUSES: SpecialStatus[] = ['none', 'pregnant', 'trying', 'breastfeeding', 'rx'];
+const STATUSES: SpecialStatus[] = ['pregnant', 'trying', 'breastfeeding', 'rx', 'isotretinoin'];
 
 export default function ProfilePage() {
   const { t } = useI18n();
@@ -21,6 +22,9 @@ export default function ProfilePage() {
     );
   }
   const p = profile;
+  const statuses = baseStatuses(p.base);
+  const setStatuses = (list: SpecialStatus[]) =>
+    save({ ...p, base: { ...p.base, specialStatuses: list, specialStatus: list[0] ?? 'none' } });
 
   return (
     <main className="shell stack-lg" style={{ paddingTop: 32 }}>
@@ -51,20 +55,32 @@ export default function ProfilePage() {
       <section className="panel">
         <div className="label">{t('profile.special')}</div>
         <p className="small muted" style={{ marginTop: 6 }}>{t('profile.specialHint')}</p>
-        <div className="options" role="radiogroup">
-          {STATUSES.map((s) => (
-            <button
-              key={s}
-              type="button"
-              role="radio"
-              aria-checked={p.base.specialStatus === s}
-              className="option"
-              onClick={() => save({ ...p, base: { ...p.base, specialStatus: s } })}
-            >
-              <span className="mark" aria-hidden="true" />
-              <span className="opt-text">{t(`special.${s}` as Key)}</span>
-            </button>
-          ))}
+        {/* 可多选；"无"清空其他选项。specialStatus 保留第一个选项，兼容旧版本读取 */}
+        <div className="options">
+          <button
+            type="button"
+            aria-pressed={statuses.length === 0}
+            className="option multi"
+            onClick={() => setStatuses([])}
+          >
+            <span className="mark" aria-hidden="true" />
+            <span className="opt-text">{t('special.none')}</span>
+          </button>
+          {STATUSES.map((s) => {
+            const on = statuses.includes(s);
+            return (
+              <button
+                key={s}
+                type="button"
+                aria-pressed={on}
+                className="option multi"
+                onClick={() => setStatuses(on ? statuses.filter((x) => x !== s) : [...statuses, s])}
+              >
+                <span className="mark" aria-hidden="true" />
+                <span className="opt-text">{t(`special.${s}` as Key)}</span>
+              </button>
+            );
+          })}
         </div>
       </section>
 

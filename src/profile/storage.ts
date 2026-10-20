@@ -3,6 +3,7 @@
 
 import { isBudgetChoice } from '../scoring/budget';
 import { EMPTY_HAIR, type BaseAnswers, type HairAnswers, type ScalpAnswers } from './questionnaire';
+import { migrateFace, type FaceAnswers } from './faceQuestionnaire';
 
 export const STORAGE_KEY = 'skincare.profiles';
 export const STORE_VERSION = 1;
@@ -15,6 +16,8 @@ export interface Profile {
   scalp: ScalpAnswers | null;
   /** 头发状态、期望效果、香味偏好和护理意愿；旧档案没有这一项 */
   hair: HairAnswers | null;
+  /** 护肤（面部）问卷；还没填时为 null */
+  face?: FaceAnswers | null;
   /** 在用产品的 product_id */
   inUseProductIds: string[];
   updatedAt: string;
@@ -45,6 +48,7 @@ export function newProfile(name: string, id: string = randomId()): Profile {
     },
     scalp: null,
     hair: null,
+    face: null,
     inUseProductIds: [],
     updatedAt: new Date().toISOString(),
   };
@@ -66,7 +70,7 @@ function migrate(data: unknown): ProfileStore {
       const base = { ...blank.base, ...p.base };
       // 旧的预算档（p33 / p67）和前一版的区间（q4）已不对应现在的四分位上限，去掉后需要重新选择
       base.budgets = Object.fromEntries(Object.entries(base.budgets ?? {}).filter(([, v]) => isBudgetChoice(v)));
-      return { ...blank, ...p, base, hair: p.hair ? { ...EMPTY_HAIR, ...p.hair } : null };
+      return { ...blank, ...p, base, hair: p.hair ? { ...EMPTY_HAIR, ...p.hair } : null, face: p.face ? migrateFace(p.face) : null };
     });
     return { version: STORE_VERSION, activeId: d.activeId ?? null, profiles };
   }
