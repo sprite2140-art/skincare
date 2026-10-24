@@ -3,7 +3,7 @@
 由 `npm run ingredient-review` 生成，请勿手改；数据更新后重新运行。核对结果请记在 data/ingredients.csv（review_status 改为 verified，填写 reviewed_on），再重新生成本表。
 
 只列影响打分的成分：有效成分（针对需求，影响需求匹配和证据强度）、风险成分（影响刺激风险、香味层级、孕期 / 处方药提示和想避开的成分）、螯合剂清单和加香清单上的成分。基础成分不列。
-共 86 个，出现在 187 个产品中；其中未核对 30 个。按影响的产品数排序。
+共 86 个，出现在 187 个产品中；其中未核对 26 个。按影响的产品数排序。
 
 核对时请逐项确认：中文名、声称的作用（针对的需求 / 风险标签）、证据等级（A / B / C）、有效浓度与法规限量、来源是否支持这些结论。
 "核对结果"栏留给核对人填写：✅ 通过 / ✏️ 需修改（写明改什么）/ ❌ 删除。
@@ -14,14 +14,14 @@
 |---:|---|---|---|---|---|---|---|---|---|
 | 103 | Fragrance | 香精 | 香精 | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj) | 已核对 |   |
 | 62 | Disodium EDTA | EDTA 二钠 | 螯合剂（清单） | 环境适配、产品残留 | — | — | [CIR：EDTA 及其盐类安全评估（PMID 12396676）](https://pubmed.ncbi.nlm.nih.gov/12396676/)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
-| 60 | Limonene | 柠檬烯 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
+| 60 | Limonene | 柠檬烯 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 56 | Linalool | 芳樟醇 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 39 | Sodium Hyaluronate | 透明质酸钠 | 针对干燥 | 需求匹配、证据强度 | B | 免洗 0.1%（面部） | [PMID 22052267](https://pubmed.ncbi.nlm.nih.gov/22052267/) | 已核对 |   |
 | 38 | Salicylic Acid | 水杨酸 | 针对头皮屑、头皮油 | 需求匹配、证据强度 | A | 美国 OTC 去屑 1.8%–3%；欧盟洗发类冲洗型 3% | [ecfr.gov](https://www.ecfr.gov/current/title-21/chapter-I/subchapter-D/part-358/subpart-H)<br>[aad.org](https://www.aad.org/public/everyday-care/hair-scalp-care/scalp/treat-dandruff) | 已核对 |   |
 | 34 | Hexyl Cinnamal | 己基肉桂醛 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 32 | Niacinamide | 烟酰胺 | 针对出油、泛红敏感、暗沉色斑、细纹松弛、毛孔 | 需求匹配、证据强度 | B | 免洗 2%（控油）–5%（红斑、色斑、细纹） | [PMID 16766489](https://pubmed.ncbi.nlm.nih.gov/16766489/)<br>[PMID 18492135](https://pubmed.ncbi.nlm.nih.gov/18492135/) | 已核对 |   |
 | 32 | Panthenol | 泛醇 | 针对干燥、受损、头皮痒 | 需求匹配、证据强度 | B | 免洗皮肤保湿；冲洗型未知 | [PMID 28503966](https://pubmed.ncbi.nlm.nih.gov/28503966/)<br>[PMID 12113650](https://pubmed.ncbi.nlm.nih.gov/12113650/) | 已核对 |   |
-| 31 | Benzyl Alcohol | 苯甲醇 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
+| 31 | Benzyl Alcohol | 苯甲醇 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 28 | Ceramide NP | 神经酰胺 NP | 针对干燥 | 需求匹配、证据强度 | B | 复配，单独浓度未披露 | [PMID 31585489](https://pubmed.ncbi.nlm.nih.gov/31585489/) | 已核对 |   |
 | 28 | Isopropyl Alcohol | 异丙醇 | 酒精 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 24 | Sodium Laureth Sulfate | 月桂醇聚醚硫酸酯钠 | 强清洁力表活 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[PMID 12641575](https://pubmed.ncbi.nlm.nih.gov/12641575/)<br>[PMID 11278060](https://pubmed.ncbi.nlm.nih.gov/11278060/) | 已核对 |   |
@@ -33,7 +33,7 @@
 | 17 | Trisodium Ethylenediamine Disuccinate | 乙二胺二琥珀酸三钠 | 螯合剂（清单） | 环境适配、产品残留 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/details/59889)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 15 | Coumarin | 香豆素 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 15 | Menthol | 薄荷醇 | 针对头皮痒 | 需求匹配、证据强度 | C | 未知（化妆品浓度） | [PMID 27141849](https://pubmed.ncbi.nlm.nih.gov/27141849/) | 已核对 |   |
-| 14 | Citronellol | 香茅醇 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
+| 14 | Citronellol | 香茅醇 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 12 | Amyl Cinnamal | 戊基肉桂醛 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 12 | Tetrasodium Glutamate Diacetate | 谷氨酸二乙酸四钠 | 螯合剂（清单） | 环境适配、产品残留 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/details/84400)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 11 | Rosmarinus Officinalis Leaf Oil | 迷迭香叶油 | 针对掉发；精油 | 需求匹配、证据强度；刺激风险；香味层级 | B | 未知（试验为迷迭香油制剂，非洗发水） | [PMID 25842469](https://pubmed.ncbi.nlm.nih.gov/25842469/) | 已核对 |   |
@@ -63,7 +63,7 @@
 | 4 | Menthyl Lactate | 乳酸薄荷酯 | 针对头皮痒 | 需求匹配、证据强度 | C | 未知 | — | 已核对 |   |
 | 4 | Serenoa Serrulata Fruit Extract | 锯棕榈果提取物 | 针对掉发 | 需求匹配、证据强度 | B | 外用试验为 20% 标准化锯棕榈油配方 | [PMID 38021422](https://pubmed.ncbi.nlm.nih.gov/38021422/)<br>[PMID 33313047](https://pubmed.ncbi.nlm.nih.gov/33313047/) | 已核对 |   |
 | 3 | Acetyl Tetrapeptide-3 | 乙酰基四肽-3 | 针对掉发 | 需求匹配、证据强度 | C | 未知 | [PMID 33584955](https://pubmed.ncbi.nlm.nih.gov/33584955/) | 已核对 |   |
-| 3 | Citral | 柠檬醛 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
+| 3 | Citral | 柠檬醛 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 3 | CURCUMA LONGA ROOT EXTRACT | — | 香精；加香（清单） | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/details/75441)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 3 | Eucalyptus Globulus Leaf Oil | 蓝桉叶油 | 精油 | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 3 | Mentha Piperita Oil | 辣薄荷油 | 精油 | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
