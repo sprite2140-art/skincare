@@ -65,6 +65,10 @@ export interface ListEntry {
   /** 来源级别：cir（CIR 安全评估）/ peer_reviewed（同行评议文献）/ cosing（CosIng 条目）；没有这一列的清单为空 */
   sourceLevel: string;
   sourceUrl: string;
+  /** 加香成分清单：核对过"是否加香"的条目为 verified（只核对这一点）；没有这一列的清单为空 */
+  reviewStatus?: string;
+  reviewedOn?: string;
+  notes?: string;
 }
 
 export const SOURCE_LEVELS = ['cir', 'peer_reviewed', 'cosing'] as const;
@@ -75,6 +79,9 @@ export function parseIngredientList(text: string): ListEntry[] {
     abbreviation: r.abbreviation ?? '',
     sourceLevel: r.source_level ?? '',
     sourceUrl: r.source_url ?? '',
+    reviewStatus: r.review_status ?? '',
+    reviewedOn: r.reviewed_on ?? '',
+    notes: r.notes ?? '',
   }));
 }
 
@@ -201,6 +208,7 @@ export function expandIngredients(
   const isChelator = (names: string[]) => names.some((n) => chelatorKeys.has(normalizeName(n)));
   const isListedFragrance = (names: string[]) => names.some((n) => fragranceKeys.has(normalizeName(n)));
   const explained = new Map(explanations.map((e) => [normalizeName(e.inciName), e]));
+  const verifiedFragrance = new Map((lists.fragrances ?? []).filter((e) => e.reviewStatus === 'verified').map((e) => [normalizeName(e.inciName), e]));
   const known = new Map<string, Ingredient>();
   const allergenKeys = new Set(allergens.map((a) => normalizeName(a.inciName)));
   const isAllergen = (ing: Ingredient) => [ing.inciName, ...ing.aliases].some((n) => allergenKeys.has(normalizeName(n)));
@@ -246,9 +254,10 @@ export function expandIngredients(
       explainZh: explained.get(key)?.explainZh ?? '',
       explainEn: explained.get(key)?.explainEn ?? '',
       explainReviewed: explained.get(key)?.reviewStatus === 'verified',
-      sources: [COSING_SOURCE],
-      reviewStatus: 'draft',
-      reviewedOn: '',
+      // 加香成分清单上核对过的条目（只核对"是否加香"）按已核对；其他只在 CosIng 中的成分为未核对
+      sources: verifiedFragrance.get(key) ? [verifiedFragrance.get(key)!.sourceUrl, COSING_SOURCE] : [COSING_SOURCE],
+      reviewStatus: fragrance && verifiedFragrance.has(key) ? 'verified' : 'draft',
+      reviewedOn: fragrance && verifiedFragrance.has(key) ? verifiedFragrance.get(key)!.reviewedOn ?? '' : '',
       origin: 'cosing',
       euAllergen: allergen,
       chelator: isChelator([c.inciName]),

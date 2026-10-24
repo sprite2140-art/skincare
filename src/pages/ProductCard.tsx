@@ -177,7 +177,7 @@ function ExternalIcon() {
 /** "需要注意"里列出的提示（洗护 + 护肤） */
 const CAUTION_NOTICE_CODES = [
   'pregnancy_notice', 'rx_notice', 'budget_unchecked',
-  'sunscreen_incomplete', 'water_resistance', 'active_start_slow', 'pregnancy_caution_use', 'below_range', 'above_range',
+  'sunscreen_incomplete', 'water_resistance', 'active_start_slow', 'pregnancy_caution_use', 'below_range', 'above_range', 'rx_bpo_note',
 ];
 
 function firstSentence(s: string) {
@@ -385,7 +385,7 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
               <div className="note">{tx(c.note)}</div>
             </li>
           ))}
-          {notices.map((n, i) => <li key={`n${i}`}>{firstSentence(tx(n.text))}</li>)}
+          {notices.map((n, i) => <li key={`n${i}`}>{n.code === 'rx_bpo_note' ? tx(n.text) : firstSentence(tx(n.text))}</li>)}
         </ul>
         {missing && <p className="note">{tx(missing.text)}</p>}
       </section>
