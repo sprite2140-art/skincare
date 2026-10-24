@@ -20,12 +20,14 @@
 | skin-full | 护肤：痘痘、暗沉色斑、细纹 | CL-US-013 | 护肤；痘痘、暗沉色斑、细纹 |
 | skin-sensitive | 护肤：经常敏感 + 泛红（功效成分计入刺激） | CL-US-006 | 护肤；泛红；经常敏感 |
 | skin-rx | 护肤：口服异维 A 酸（冲洗型不排除） | CL-US-006 | 护肤；痘痘；档案选口服异维 A 酸 |
+| skin-sunscreen-missing | 护肤：防晒信息不全（**模拟**：去掉 SU-US-001 的 SPF；40 款防晒都有 SPF 和广谱数据，没有真实案例） | SU-US-001 | 护肤；无困扰 |
+| skin-sunscreen-stock | 护肤：防晒缺货、库存未确认、配方版本待核对 | SU-US-034、SU-US-031、SU-US-029 | 护肤；容易出油 |
 
-护肤案例在 `FACE_QA_CASES` 中。草案 7.3 的"防晒信息不全"案例等防晒数据导入后补上。截图脚本可用 `QA_IDS=skin-minimal,skin-full` 只截指定案例。
+护肤案例在 `FACE_QA_CASES` 中。模拟案例只在 /qa 页面改动产品数据的副本，不改 data/。截图脚本可用 `QA_IDS=skin-minimal,skin-full` 只截指定案例。
 
 ## 截图矩阵
 
-每个案例都要截以下 8 种组合，8 个案例共 64 张：
+每个案例都要截以下 8 种组合（14 个案例共 112 张）：
 
 - 宽度：390px、1280px
 - 语言：中文、英文
@@ -39,7 +41,7 @@
 2. 临时安装 `npm i --no-save playwright-core`，然后运行：
    `node scripts/design-qa.mjs docs/screenshots/<日期>-qa`
    如果需要指定浏览器路径，设置环境变量 `CHROMIUM_PATH`。
-3. 脚本会截下全部 64 张图，并自动检查下列项目。有问题时，脚本列出问题并以非 0 状态退出。
+3. 脚本会截下全部 112 张图，并自动检查下列项目。有问题时，脚本列出问题并以非 0 状态退出。
    - 页面是否横向溢出
    - 最小字号是否小于 13px
    - 是否出现连续两个冒号
@@ -66,4 +68,5 @@
 | 日期 | PR | 截图 |
 |---|---|---|
 | 2026-10-19 | 卡片一致性、"适合"等级规则、设计自查清单 | `docs/screenshots/2026-10-19-qa/` |
+| 2026-10-21 | 导入防晒 40 款（新增 skin-sunscreen-missing、skin-sunscreen-stock） | `docs/screenshots/2026-10-21-sunscreen-qa/` |
 | 2026-10-21 | 上线阻塞项：价格旁提示"价格以零售商页面为准"（收起状态 3 个案例） | `docs/screenshots/2026-10-21-price-note/` |

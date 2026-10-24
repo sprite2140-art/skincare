@@ -17,7 +17,23 @@
 
 **当前状态**：草案已由作者确认（2026-10-20），上线日 11 月 1 日。#14 上已完成问卷、单品打分、步骤、早晚流程、冲突检查、结果页（/skin/quiz、/skin），目前只有 40 款洁面数据，其他步骤显示"数据整理中"。
 
-**下一步**：10/28 前导入保湿、防晒、精华、去角质、点涂数据和面部成分 CSV（按 6.1 的列合并），补"防晒信息不全"设计自查案例；10/29 关闭测试模式；10/30–31 按试用反馈修改。
+**下一步**：10/28 前导入保湿、精华、去角质、点涂数据和面部成分 CSV（按 6.1 的列合并）；防晒 40 款已导入（2026-10-21）；10/29 关闭测试模式；10/30–31 按试用反馈修改。
+
+### 2026-10-24 #16 防晒：作者决定后的修正
+- skin_type_claim 新增 acne_prone（acne-prone、breakout-prone、problem-prone 统一为它；选了痘痘的用户同等级内优先）；texture 新增 serum，emulsion 改为 lotion。9 个校验错误已修正。
+- SU-US-006、008、030、037 的 "1;2-Hexanediol" 改为 "1,2-Hexanediol"；校验新增：只有数字的一项后面紧跟"数字-"开头的一项时报错（不误报 3-O-Ethyl Ascorbic Acid 这类写法）。
+- 面部产品 formula_note 写了"待核对"时显示"配方版本待核对"（洗护不按此显示，因为洗护的"待核对"多指成分名称）。
+- 别名表新增 Avobenzone、Octisalate、Octinoxate（FDA UNII 页面，作者已核对）；两个防晒剂进入高频成分前 150，补写通俗解释（草稿）。
+
+### 2026-10-21 导入防晒 40 款（SU-US-001—040）
+- 完成：
+  1. 两批防晒 40 款、购买链接 42 条、零售商评分 24 条追加到 data/。上传文件少 inclusion_basis_type 一列：入库依据写明美容奖项的 2 款（SU-US-015、018）填 beauty_award，其余留空。第 2 批自查报告移到 `docs/data_batches/`，其余 6 个原始文件已删除。数据本身没有改动（除下面第 3 条的同系列关联）。
+  2. 购买链接 status：out_of_stock 在"在哪买"里显示"缺货"、不能点，不作为主购买按钮；unknown 照常列出，但不作为主购买按钮。
+  3. SU-US-005 和 SU-US-024（同系列不同 SPF）在 paired_product_ids 中互相关联；面部产品同品类关联不再提示。
+  4. 新增 `data/formula_version_checks.csv`：SU-US-029、036、039、040 的卡片显示"配方版本待核对"。
+  5. 设计自查新增"防晒信息不全"（模拟）和"缺货 / 库存未确认 / 配方版本待核对"两个案例，截图在 `docs/screenshots/2026-10-21-sunscreen-qa/`。
+  6. 防晒带进来的 21 个常见成分补写通俗解释（draft）。
+- 问题：校验 9 个错误（skin_type_claim、texture 取值不在枚举里），按规则不改数据，列在 PR 说明里；美国防晒剂写法 Avobenzone、Octisalate、Octinoxate 匹配不上 CosIng，影响 18 款的"成分暂无数据"计数。
 
 ### 2026-10-21 #14 合并前（作者决定）
 - 完成：
@@ -82,7 +98,7 @@
 - 完成：
   1. 作者上传的 (EU) 2023/1545 官方公报 PDF 移到 `data/sources/eu_2023_1545.pdf`，并用 `pdftotext -layout` 导出文本 `data/sources/eu_2023_1545.txt`。`npm run verify-list-ingredients` 下载不了 EUR-Lex 时改用这份文本：只看附件里被替换、新增的附录 III 条目，成分名要单独占"Name of Common Ingredients Glossary"一格、后面紧跟 CAS 号才算找到。
   2. 13 个欧盟香料致敏原里，4 个在附件中找到并标为已核对：Benzyl Alcohol（第 45 条）、Citral（第 70 条）、Citronellol（第 86 条）、Limonene（第 88 条）。其余 9 个（Alpha-Isomethyl Ionone、Amyl Cinnamal、Benzyl Benzoate、Benzyl Salicylate、Coumarin、Geraniol、Hexyl Cinnamal、Hydroxycitronellal、Linalool）所在的条目没有被 2023/1545 修改，PDF 里没有它们，仍为未核对，不算对不上。
-  3. 规则清单核对：57 个成分，通过 38 个，对不上 0 个，无法核对 19 个（9 个致敏原 + 10 个缺文献出处的风险成分）。关闭测试模式后受影响：洗护 107 款中 86 款、护肤 40 款中 10 款。
+  3. 规则清单核对：57 个成分，通过 38 个，对不上 0 个，无法核对 19 个（9 个致敏原 + 10 个缺文献出处的风险成分）。关闭测试模式后受影响：洗护 107 款中 86 款、护肤 80 款中 20 款（含 #16 的 40 款防晒）。
 - 下一步：剩下 9 个致敏原需要法规 1223/2009 附录 III 合并版原文（EUR-Lex CELEX 02009R1223 的最新合并版 PDF），上传后用同样方法核对。
 
 ### 2026-10-21（Claude Code：上线阻塞项）
