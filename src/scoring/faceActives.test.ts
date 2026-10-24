@@ -72,6 +72,9 @@ describe('氧化锌、二氧化钛的 aging:A 只在防晒且为活性成分时�
     const t = score({ ...sun }, { concerns: ['aging'] }, 'treatment');
     expect(t.r.needMatches[0].ingredients.map((i) => i.inciName)).toContain('Zinc Oxide');
     expect(r.faceExtras.sunscreen).toBe('ok');
+    // "允许最高25%"是上限，不是有效下限：20% 不提示浓度偏低
+    expect(r.notices.some((n) => n.code === 'below_range')).toBe(false);
+    expect(t.r.notices.some((n) => n.code === 'below_range')).toBe(false);
   });
 
   it('作为色料出现在其他产品、或防晒里没有公开为活性成分：不计', () => {

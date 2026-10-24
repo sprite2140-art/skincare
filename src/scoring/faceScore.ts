@@ -94,8 +94,12 @@ export function faceScoringProfile(
   };
 }
 
-/** 有效范围里的百分比下限和上限，如"免洗 2%（控油）–5%"→ 2 / 5；认不出时为 null */
+/**
+ * 有效范围里的百分比下限和上限，如"免洗 2%（控油）–5%"→ 2 / 5；认不出时为 null。
+ * 写的是允许最高浓度（如防晒剂"允许最高25%"）、或写明有效浓度未知 / 未核定时，不当作下限，返回 null
+ */
 export function parseRangePercent(range: string): { min: number; max: number | null } | null {
+  if (/最高|未知|未核定/.test(range)) return null;
   const nums = [...range.matchAll(/(\d+(?:\.\d+)?)\s*%/g)].map((m) => Number(m[1]));
   if (nums.length === 0) return null;
   // 第一个范围：数字与连接号之间可以有说明文字，如"2%（控油）–5%"
@@ -120,7 +124,8 @@ function applyConcentrations(product: Product, index: IngredientIndex): { produc
     const ing = index.get(a.inci);
     const range = ing ? parseRangePercent(ing.effectiveRange) : null;
     const pct = percentOf(a.concentration);
-    if (!ing || !range || pct === null) continue;
+    // 有最低有效浓度的成分（如壬二酸）由证据等级降级处理，不再按非主打计，避免重复扣分
+    if (!ing || !range || pct === null || ing.evidenceMinConcentration != null) continue;
     const n = ingredientName(ing, a.inci);
     if (pct < range.min) below.push(a.inci);
     else if (range.max !== null && pct > range.max) {
