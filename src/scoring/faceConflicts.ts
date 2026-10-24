@@ -2,7 +2,7 @@
 // 只看同一时段（早上或晚上）一起用的产品；结果放在结果页顶部，每条附出处。
 // 第 8 条（处方药 / 异维 A 酸 + 功效成分）在单品打分时直接排除，不在这里重复。
 
-import { bpoSensitiveRetinoids, EXFOLIANT_CLASSES, type ActiveClass } from '../data/faceActives';
+import { bpoSensitiveRetinoids, EXFOLIANT_CLASSES, findConflictNote, type ActiveClass, type FaceConflictNote } from '../data/faceActives';
 import type { IngredientIndex } from '../data/ingredientIndex';
 import { usageTypeOf } from '../data/types';
 import type { FaceProductScore } from './faceScore';
@@ -45,7 +45,7 @@ const hasExfoliant = (p: FaceProductScore) => EXFOLIANT_CLASSES.some((c) => has(
 const exfoliates = (s: ScheduledStep) =>
   !!s.product && (s.step.step.id === 'exfoliator' || (hasExfoliant(s.product) && leaveOn(s.product)));
 
-function slotConflicts(time: TimeOfDay, slot: ScheduledStep[], index: IngredientIndex): RoutineConflict[] {
+function slotConflicts(time: TimeOfDay, slot: ScheduledStep[], index: IngredientIndex, conflictNotes: FaceConflictNote[]): RoutineConflict[] {
   const out: RoutineConflict[] = [];
   const items = slot.filter((s) => s.product);
   const prods = items.map((s) => s.product!);
@@ -113,8 +113,12 @@ function slotConflicts(time: TimeOfDay, slot: ScheduledStep[], index: Ingredient
       advice: { zh: '错开早晚使用（行业惯例）', en: 'Use them at different times of day (common practice)' },
     });
   }
-  // 成分库的 conflicts_with（逐个成分）
+  // 成分库的 conflicts_with（逐个成分）：有搭配提醒记录（data/face_conflicts.csv）时用它的用法和出处；
+  // 同一对产品已经有类别规则的提醒时不重复
+  const reported = new Set(out.map((c) => c.products.map((p) => p.product.productId).sort().join(',')));
   for (const [a, b] of pairs(prods)) {
+    const pairKey = [a.product.productId, b.product.productId].sort().join(',');
+    if (reported.has(pairKey)) continue;
     for (const ra of a.product.inciList) {
       const ia = index.get(ra);
       if (!ia) continue;
@@ -123,23 +127,33 @@ function slotConflicts(time: TimeOfDay, slot: ScheduledStep[], index: Ingredient
         if (!ib || ia === ib) continue;
         const severity = conflictSeverity(ia, ib);
         if (!severity) continue;
+        // 同一对产品只报一次
+        if (reported.has(pairKey)) break;
         const na = ingredientName(ia, ra);
         const nb = ingredientName(ib, rb);
+        const note = findConflictNote(conflictNotes, ia, ib);
+        reported.add(pairKey);
         out.push({
-          rule: 'ingredient', time, products: [a, b], severity, source: null,
-          text: { zh: `${both(a, b).zh}：${na.zh}与${nb.zh}有冲突`, en: `${both(a, b).en}: ${na.en} conflicts with ${nb.en}` },
-          advice: severity === 'severe'
-            ? { zh: '不建议一起使用', en: 'Not recommended together' }
-            : { zh: '建议分开早晚使用', en: 'Use them at different times of day' },
+          rule: 'ingredient', time, products: [a, b], severity,
+          source: note ? { label: `${note.id} · ${/dailymed/i.test(note.sourceUrl) ? 'DailyMed' : 'source'}`, url: note.sourceUrl } : null,
+          text: note
+            ? { zh: `${both(a, b).zh}：${na.zh}与${nb.zh}一起用可能增加干燥或刺激`, en: `${both(a, b).en}: ${na.en} with ${nb.en} may add dryness or irritation` }
+            : { zh: `${both(a, b).zh}：${na.zh}与${nb.zh}有冲突`, en: `${both(a, b).en}: ${na.en} conflicts with ${nb.en}` },
+          advice: note
+            ? { zh: `提醒：${note.sameSessionRule}`, en: 'Reminder: avoid layering them at the same time on your own; follow the product labels and your doctor' }
+            : severity === 'severe'
+              ? { zh: '不建议一起使用', en: 'Not recommended together' }
+              : { zh: '建议分开早晚使用', en: 'Use them at different times of day' },
         });
+        break;
       }
     }
   }
   return out;
 }
 
-export function checkRoutineConflicts(schedule: Schedule, index: IngredientIndex): RoutineConflict[] {
-  const all = [...slotConflicts('am', schedule.am, index), ...slotConflicts('pm', schedule.pm, index)];
+export function checkRoutineConflicts(schedule: Schedule, index: IngredientIndex, conflictNotes: FaceConflictNote[] = []): RoutineConflict[] {
+  const all = [...slotConflicts('am', schedule.am, index, conflictNotes), ...slotConflicts('pm', schedule.pm, index, conflictNotes)];
   // 早晚都用的产品之间的冲突只报一次
   const seen = new Set<string>();
   const out = all.filter((c) => {

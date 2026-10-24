@@ -121,6 +121,8 @@ describe('浓度', () => {
     expect(parseRangePercent('美国 OTC 去屑 1.8%–3%')).toEqual({ min: 1.8, max: 3 });
     expect(parseRangePercent('免洗 0.1%（面部）')).toEqual({ min: 0.1, max: null });
     expect(parseRangePercent('未知')).toBeNull();
+    expect(parseRangePercent('美国防晒专论允许最高25%；浓度不能代替成品SPF及广谱测试')).toBeNull();
+    expect(parseRangePercent('45%专业短接触换肤每2周1次共6次;日常5%至10%免洗的独立有效范围本批未核定')).toBeNull();
   });
 
   it('公开浓度低于有效范围的主打成分按非主打计', () => {

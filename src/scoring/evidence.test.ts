@@ -43,8 +43,18 @@ describe('按需求读取证据等级（evidence_by_target）', () => {
     }
   });
 
-  it('30 个成分已核对，日期 2026-10-20', () => {
-    // 规则清单自动核对（scripts/verify-list-ingredients.ts）的成分另计
-    expect(real.ingredients.filter((i) => i.reviewStatus === 'verified' && i.reviewedOn === '2026-10-20' && !i.notes?.includes('规则清单自动核对'))).toHaveLength(30);
+  it('30 个洗护成分已核对（其中 9 个在 2026-10-24 面部有效成分导入时重新核对）', () => {
+    const HAIR_30 = [
+      'Piroctone Olamine', 'Pyrithione Zinc', 'Salicylic Acid', 'Sodium Salicylate', 'Tussilago Farfara Leaf Extract', 'Menthol',
+      'Menthyl Lactate', 'Dipotassium Glycyrrhizate', 'Caffeine', 'Biotin', 'Acetyl Tetrapeptide-3', 'Copper Tripeptide-1',
+      'Serenoa Serrulata Fruit Extract', 'Rosmarinus Officinalis Leaf Oil', 'Niacinamide', 'Panthenol', 'Ceramide NP', 'Ceramide AP',
+      'Ceramide EOP', 'Ceramide NG', 'Ceramide AG', 'Sodium Hyaluronate', 'Hydrolyzed Keratin', 'Hydrolyzed Collagen',
+      'Bis-Aminopropyl Diglycol Dimaleate', 'sh-Oligopeptide-78', 'Ketoconazole', 'Selenium Sulfide', 'Hydrolyzed Hyaluronic Acid', 'Hyaluronic Acid',
+    ];
+    const rows = HAIR_30.map(ing);
+    expect(rows.every((i) => i.reviewStatus === 'verified')).toBe(true);
+    expect(rows.filter((i) => i.reviewedOn === '2026-10-24').map((i) => i.inciName).sort()).toEqual([
+      'Ceramide AP', 'Ceramide EOP', 'Ceramide NP', 'Hyaluronic Acid', 'Hydrolyzed Hyaluronic Acid', 'Niacinamide', 'Panthenol', 'Salicylic Acid', 'Sodium Hyaluronate',
+    ]);
   });
 });

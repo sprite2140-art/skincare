@@ -35,6 +35,13 @@
   6. 防晒带进来的 21 个常见成分补写通俗解释（draft）。
 - 问题：校验 9 个错误（skin_type_claim、texture 取值不在枚举里），按规则不改数据，列在 PR 说明里；美国防晒剂写法 Avobenzone、Octisalate、Octinoxate 匹配不上 CosIng，影响 18 款的"成分暂无数据"计数。
 
+### 2026-10-24 面部有效成分 33 个、搭配提醒 7 条
+- 导入 face_actives_batch1/2（33 个）和 face_conflicts_batch1（7 条），标为已核对（AI 查证 + 第二个 AI 核对 PMID）。已有成分按需求合并：Salicylic Acid、Niacinamide、Panthenol、Hyaluronic Acid、Sodium Hyaluronate、Hydrolyzed Hyaluronic Acid、神经酰胺。神经酰胺统一 C 级。Hydrolyzed Hyaluronic Acid 的 dryness 保留原来的 C（新数据为未知），aging 记为 unknown。
+- 资料里孕期、光敏、美国监管是文字说明，导入时逐个对应到 enum，原文另存：孕期 avoid = Retinol、Retinal、Adapalene；caution = Salicylic Acid、Benzoyl Peroxide、Sulfur；no_known_concern = Glycolic Acid、Azelaic Acid、Ascorbic Acid、Zinc Oxide、Titanium Dioxide；其余 unknown。光敏 yes = Glycolic、Lactic、Mandelic Acid、Adapalene；no = Zinc Oxide、Titanium Dioxide、Azelaic Acid；其余 unknown。美国监管 otc_drug_active = Adapalene、Salicylic Acid、Benzoyl Peroxide、Sulfur、Zinc Oxide、Titanium Dioxide；其余 cosmetic。
+- 规则：证据"未知"按缺数据；壬二酸低于 15% 或未公开降一级；氧化锌、二氧化钛只在防晒里作为活性成分时计入细纹；Zinc Sulfate 没有功效目标。
+- 搭配提醒存为 data/face_conflicts.csv，成分库 conflicts_with 只写成分名；页面显示"提醒：…"和出处，与类别规则同一对产品不重复。
+- Glycolic、Lactic、Ascorbic Acid 进入成分库后，通俗解释沿用常见成分解释表（核对状态按那张表）。
+
 ### 2026-10-21 #14 合并前（作者决定）
 - 完成：
   1. 卡片需求摘要按步骤写："与洁面相关的需求：痘痘（你共选了 3 项）"。

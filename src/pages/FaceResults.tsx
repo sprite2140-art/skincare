@@ -4,7 +4,7 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { cities, exchangeRates, faceActiveClasses, budgetCaps, ingredientIndex, products } from '../data/load';
+import { cities, exchangeRates, faceActiveClasses, faceConflictNotes, budgetCaps, ingredientIndex, products } from '../data/load';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import { faceMedicalAlerts, isFaceSensitive, migrateFace, wearsMakeup } from '../profile/faceQuestionnaire';
@@ -42,7 +42,7 @@ export default function FaceResults() {
     return buildScheduledRoutine({
       products: shown, face, statuses, avoidIngredients: profile.base.avoidIngredients, avoidTags: profile.base.avoid as RiskTag[],
       data: { index: ingredientIndex, exchangeRates, budgetCaps, allowDraft: TEST_MODE_DRAFT_SCORING },
-      classes: faceActiveClasses, basicOnly, hideUntintedMineral: hideMineral, setBudgetUsd, picks,
+      classes: faceActiveClasses, conflictNotes: faceConflictNotes, basicOnly, hideUntintedMineral: hideMineral, setBudgetUsd, picks,
     });
   }, [profile, basicOnly, hideMineral, picks, market]);
 
