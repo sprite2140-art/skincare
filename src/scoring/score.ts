@@ -903,7 +903,8 @@ export function rankProducts(
   const price = (s: ProductScore) => s.price.usd ?? Infinity;
   const noNeeds = profile.concerns.length === 0;
   return products
-    .filter((p) => p.category === category)
+    // 入库依据待补的产品不出现在推荐结果里
+    .filter((p) => p.category === category && !p.inclusionPending)
     .map((p) => scoreProduct(p, profile, data))
     .sort((a, b) =>
       group(a) - group(b)

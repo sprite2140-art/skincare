@@ -2,7 +2,7 @@
 
 import Papa from 'papaparse';
 import { cleanInciName } from './ingredientIndex';
-import { RETAIL_PLATFORMS } from './types';
+import { RETAIL_PLATFORMS, REVIEW_COUNT_MIN, REVIEW_COUNT_PLATFORMS } from './types';
 import type {
   PregnancyNote, UsRegulatoryStatus, ActiveConcentration, FaceAttributes, SkinTypeClaim, Texture, UseTime, WaterResistance, YesNoUnknown,
   FormulaVersionCheck, InclusionBasisType, PurchaseLink, RetailPlatform, RetailRating, Award, BrandClaimStatus, ProductSubtype, City, WaterRecord, ReferenceWater, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
@@ -254,16 +254,40 @@ export function parseFormulaVersionChecks(text: string): FormulaVersionCheck[] {
 }
 
 /** 把评分、购买链接和配方版本核对状态挂到产品上；购买链接按 RETAIL_PLATFORMS 的固定顺序 */
+/**
+ * 评价数入库依据：没有其他入库依据类型的产品，在美国主要零售商任一平台评价数达到 1,000 条以上时，
+ * 自动记为 review_count，依据写明平台、评价数、核对日期和链接（取评价数最多的一条）。评价数只决定能否入库，不参与打分。
+ */
+const REVIEW_PLATFORM_NAMES: Record<(typeof REVIEW_COUNT_PLATFORMS)[number], string> = {
+  ulta: 'Ulta', sephora: 'Sephora', target: 'Target', amazon: 'Amazon', nordstrom: 'Nordstrom',
+};
+
+export function reviewCountBasis(ratings: RetailRating[]): string | null {
+  const best = ratings
+    .filter((r) => (REVIEW_COUNT_PLATFORMS as readonly string[]).includes(r.platform) && r.ratingCount !== null && r.ratingCount >= REVIEW_COUNT_MIN)
+    .sort((a, b) => b.ratingCount! - a.ratingCount!)[0];
+  if (!best) return null;
+  return `${REVIEW_PLATFORM_NAMES[best.platform as keyof typeof REVIEW_PLATFORM_NAMES]} 评价数 ${best.ratingCount!.toLocaleString('en-US')}（核对于 ${best.checkedOn}）${best.url}`;
+}
+
 export function attachRetail(products: Product[], ratings: RetailRating[], links: PurchaseLink[], checks: FormulaVersionCheck[] = []): Product[] {
   const order = (p: RetailPlatform) => RETAIL_PLATFORMS.indexOf(p);
   const pending = new Set(checks.filter((c) => c.status === 'pending').map((c) => c.productId));
-  return products.map((p) => ({
+  return products.map((p) => withInclusion({
     ...p,
     // 面部产品的 formula_note 写了"待核对"也显示"配方版本待核对"（洗护的"待核对"多指成分名称，不按此显示）
     formulaVersionPending: pending.has(p.productId) || (p.zone === 'face' && p.formulaNote.includes('待核对')),
     ratings: ratings.filter((r) => r.productId === p.productId).sort((a, b) => order(a.platform) - order(b.platform)),
     purchaseLinks: links.filter((l) => l.productId === p.productId).sort((a, b) => order(a.platform) - order(b.platform)),
   }));
+}
+
+function withInclusion(p: Product): Product {
+  if (p.inclusionBasisType !== null) return p;
+  const basis = reviewCountBasis(p.ratings);
+  if (basis) return { ...p, inclusionBasisType: 'review_count', inclusionBasis: basis };
+  // inclusion_basis 写 none 且评价数不足：入库依据待补
+  return p.inclusionBasis.trim().toLowerCase() === 'none' ? { ...p, inclusionPending: true } : p;
 }
 
 export function parseExchangeRates(text: string): ExchangeRate[] {
