@@ -168,6 +168,11 @@ export function validateData(
     oneOf(F_PRD, key, 'available_in_cn', p.availableInCn, CN_AVAILABILITY);
     oneOf(F_PRD, key, 'transparency', p.transparency, TRANSPARENCY);
     if (p.inciList.length === 0) err(F_PRD, key, 'inci_list 为空');
+    // 成分名里的逗号被写成分号（如 1;2-Hexanediol）：只有数字的一项后面紧跟"数字-"开头的一项
+    p.inciList.forEach((n, i) => {
+      const next = p.inciList[i + 1];
+      if (/^\d+$/.test(n) && next && /^\d+-/.test(next)) err(F_PRD, key, `inci_list 中"${n};${next}"像是被分号拆开的成分名，应为"${n},${next}"`);
+    });
     if (p.price === null) warn(F_PRD, key, 'price 为空或不是数字');
     else if (p.price <= 0) err(F_PRD, key, `price 应为正数：${p.price}`);
     else if (!p.currency) err(F_PRD, key, '有 price 但缺 currency');

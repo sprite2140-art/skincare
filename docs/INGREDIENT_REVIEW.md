@@ -101,10 +101,12 @@
 
 ## 通俗解释待核对
 
-data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 125 条（卡片上只在 CosIng 成分的说明里显示，标为未核对）。按起草日期从新到旧、再按出现的产品数排序。核对后把 review_status 改为 verified。
+data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 127 条（卡片上只在 CosIng 成分的说明里显示，标为未核对）。按起草日期从新到旧、再按出现的产品数排序。核对后把 review_status 改为 verified。
 
 | 起草日期 | 产品数 | 成分 | 中文解释 | 英文解释 | 核对结果 |
 |---|---:|---|---|---|---|
+| 2026-10-24 | 20 | Butyl Methoxydibenzoylmethane | 丁基甲氧基二苯甲酰基甲烷，美国标签写作 Avobenzone（阿伏苯宗），化学防晒剂，主要吸收长波紫外线（UVA）。 | Butyl methoxydibenzoylmethane, listed as avobenzone on US labels, is a chemical sunscreen filter that mainly absorbs UVA. |   |
+| 2026-10-24 | 19 | Ethylhexyl Salicylate | 水杨酸乙基己酯，美国标签写作 Octisalate（奥替柳酯），化学防晒剂，主要吸收中波紫外线（UVB）。 | Ethylhexyl salicylate, listed as octisalate on US labels, is a chemical sunscreen filter that mainly absorbs UVB. |   |
 | 2026-10-21 | 27 | Silica | 二氧化硅，吸油、让质地更顺滑、减少油光的粉体成分。 | Silica is a powder that absorbs oil, smooths the texture and reduces shine. |   |
 | 2026-10-21 | 22 | Zinc Oxide | 氧化锌，物理（矿物）防晒剂，在美国是获准的防晒活性成分；也用作白色颜料。 | Zinc oxide is a mineral sunscreen filter approved as a sunscreen active in the US; it is also used as a white pigment. |   |
 | 2026-10-21 | 19 | C12-15 Alkyl Benzoate | C12-15 醇苯甲酸酯，润肤剂，让质地轻薄不油腻，也帮助溶解防晒剂。 | C12-15 alkyl benzoate is an emollient that keeps the texture light and helps dissolve sunscreen filters. |   |
@@ -163,6 +165,7 @@ data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 125 
 | 2026-10-17 | 20 | Sodium Citrate | 柠檬酸钠，和柠檬酸一起调节酸碱度，也能结合水中的金属离子。 | Sodium citrate works with citric acid to buffer pH and also binds metal ions in water. |   |
 | 2026-10-17 | 19 | Camellia Sinensis Leaf Extract | 茶叶提取物，含多酚，主要起抗氧化作用。 | Green tea leaf extract contains polyphenols and acts mainly as an antioxidant. |   |
 | 2026-10-17 | 19 | Phytosphingosine | 植物鞘氨醇，和神经酰胺相关的成分，帮助维持头皮屏障。 | Phytosphingosine is related to ceramides and helps support the scalp barrier. |   |
+| 2026-10-17 | 18 | 1,2-Hexanediol | 1,2-己二醇，保湿和溶剂成分，也常用来辅助防腐。 | 1,2-Hexanediol is a humectant and solvent that also supports preservation. |   |
 | 2026-10-17 | 18 | Bisabolol | 红没药醇，最早从洋甘菊中提取，常作为舒缓成分加入。 | Bisabolol, originally from chamomile, is added as a soothing ingredient. |   |
 | 2026-10-17 | 18 | Cholesterol | 胆固醇，皮肤屏障中本来就有的脂质，常和神经酰胺搭配使用。 | Cholesterol is a lipid naturally found in the skin barrier, often paired with ceramides. |   |
 | 2026-10-17 | 18 | Pentylene Glycol | 戊二醇，保湿和溶剂成分，也有辅助防腐作用。 | Pentylene glycol is a humectant and solvent with some preservative-boosting action. |   |
@@ -172,7 +175,6 @@ data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 125 
 | 2026-10-17 | 16 | Cocos Nucifera Oil | 椰子油，润泽头发，能减少洗发时头发吸水膨胀。 | Coconut oil conditions hair and can reduce swelling from water during washing. |   |
 | 2026-10-17 | 16 | Sodium Lauroyl Sarcosinate | 月桂酰肌氨酸钠，氨基酸类清洁成分，通常比硫酸盐类温和。 | Sodium lauroyl sarcosinate is an amino-acid-based cleanser, usually milder than sulfates. |   |
 | 2026-10-17 | 15 | Arginine | 精氨酸，一种氨基酸，用于调理头发，也可调节酸碱度。 | Arginine is an amino acid used to condition hair and adjust pH. |   |
-| 2026-10-17 | 14 | 1,2-Hexanediol | 1,2-己二醇，保湿和溶剂成分，也常用来辅助防腐。 | 1,2-Hexanediol is a humectant and solvent that also supports preservation. |   |
 | 2026-10-17 | 14 | Butyrospermum Parkii Butter | 乳木果油，润泽成分，让头发柔软、减少干涩。 | Shea butter is an emollient that softens hair and eases dryness. |   |
 | 2026-10-17 | 14 | Cocamide MEA | 椰油酰胺 MEA，增加泡沫、让洗发水变稠。 | Cocamide MEA boosts foam and thickens shampoo. |   |
 | 2026-10-17 | 14 | Disodium Laureth Sulfosuccinate | 月桂醇聚醚磺基琥珀酸酯二钠，较温和的清洁成分，常和其他清洁成分搭配。 | Disodium laureth sulfosuccinate is a relatively mild cleanser, often paired with other surfactants. |   |

@@ -115,8 +115,8 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 
 | 字段 | 取值 | 留空 |
 |---|---|---|
-| skin_type_claim | 品牌标注的适用肤质：oily / dry / combination / normal / sensitive / all，分号分隔 | 未标注 |
-| texture | gel / lotion / cream / balm / oil / foam / liquid / stick | 未知 |
+| skin_type_claim | 品牌标注的适用肤质：oily / dry / combination / normal / sensitive / acne_prone / all，分号分隔。acne_prone = 品牌标注适合痘肌（acne-prone、breakout-prone、problem-prone 等写法都填 acne_prone） | 未标注 |
+| texture | gel / lotion / cream / balm / oil / foam / liquid / stick / serum；emulsion 填 lotion | 未知 |
 | spf | 正数，**只有 sunscreen 填写**（其他品类填了报错；防晒没填给提示） | 未知 |
 | broad_spectrum | yes / no / unknown（广谱防晒标注，只用于防晒） | unknown |
 | water_resistance | 40 / 80 / none / unknown（防水分钟数，只用于防晒） | unknown |

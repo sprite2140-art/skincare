@@ -250,7 +250,8 @@ export function attachRetail(products: Product[], ratings: RetailRating[], links
   const pending = new Set(checks.filter((c) => c.status === 'pending').map((c) => c.productId));
   return products.map((p) => ({
     ...p,
-    formulaVersionPending: pending.has(p.productId),
+    // 面部产品的 formula_note 写了"待核对"也显示"配方版本待核对"（洗护的"待核对"多指成分名称，不按此显示）
+    formulaVersionPending: pending.has(p.productId) || (p.zone === 'face' && p.formulaNote.includes('待核对')),
     ratings: ratings.filter((r) => r.productId === p.productId).sort((a, b) => order(a.platform) - order(b.platform)),
     purchaseLinks: links.filter((l) => l.productId === p.productId).sort((a, b) => order(a.platform) - order(b.platform)),
   }));

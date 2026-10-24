@@ -196,10 +196,12 @@ export const FACE_ID_PREFIXES: Partial<Record<Category, string>> = {
   mask: 'MA',
 };
 
-export const SKIN_TYPE_CLAIMS = ['oily', 'dry', 'combination', 'normal', 'sensitive', 'all'] as const;
+/** acne_prone = 品牌标注适合痘肌（acne-prone / breakout-prone 等写法统一为这一项） */
+export const SKIN_TYPE_CLAIMS = ['oily', 'dry', 'combination', 'normal', 'sensitive', 'acne_prone', 'all'] as const;
 export type SkinTypeClaim = (typeof SKIN_TYPE_CLAIMS)[number];
 
-export const TEXTURES = ['gel', 'lotion', 'cream', 'balm', 'oil', 'foam', 'liquid', 'stick'] as const;
+/** emulsion 不单独设项，记为 lotion */
+export const TEXTURES = ['gel', 'lotion', 'cream', 'balm', 'oil', 'foam', 'liquid', 'stick', 'serum'] as const;
 export type Texture = (typeof TEXTURES)[number];
 
 export const YES_NO_UNKNOWN = ['yes', 'no', 'unknown'] as const;

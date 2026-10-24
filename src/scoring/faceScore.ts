@@ -294,7 +294,9 @@ export function scoreFaceProduct(product: Product, profile: ScoringProfile, data
       preferred: {
         waterResistant: product.category === 'sunscreen' && prefersWaterResistant(ctx.face) && (f?.waterResistance === '40' || f?.waterResistance === '80'),
         nonComedogenic: (ctx.face.concerns.includes('acne') || ctx.face.concerns.includes('oil')) && f?.nonComedogenicClaim === 'yes',
-        skinType: !!skinType && skinType !== 'unsure' && (claims.includes(skinType) || claims.includes('all')),
+        // 品牌标注适合痘肌：选了痘痘的人也算肤质一致
+        skinType: (!!skinType && skinType !== 'unsure' && (claims.includes(skinType) || claims.includes('all')))
+          || (ctx.face.concerns.includes('acne') && claims.includes('acne_prone')),
       },
     },
   };
