@@ -191,6 +191,22 @@ describe('#13 遗留：别名与已核对的解释', () => {
   });
 });
 
+describe('#17 遗留：香料核对', () => {
+  it('加香成分清单上核对过的 5 个植物成分按已核对', () => {
+    for (const n of ['Curcuma Longa Root Extract', 'Cocos Nucifera Water', 'Rosmarinus Officinalis Leaf Water', 'Lavandula Oil/Extract', 'Viola Odorata Leaf Extract']) {
+      const ing = real.ingredientIndex.get(n)!;
+      expect(ing.riskTags).toContain('fragrance');
+      expect(ing.reviewStatus).toBe('verified');
+    }
+  });
+
+  it('在法规 2023/1545 原文中核对到的 4 个欧盟香料致敏原已核对，其余 9 个仍未核对', () => {
+    const lib = (n: string) => real.ingredients.find((i) => i.inciName === n)!;
+    for (const n of ['Benzyl Alcohol', 'Citral', 'Citronellol', 'Limonene']) expect(lib(n).reviewStatus).toBe('verified');
+    for (const n of ['Linalool', 'Coumarin', 'Geraniol']) expect(lib(n).reviewStatus).toBe('draft');
+  });
+});
+
 describe('#16：防晒数据规则', () => {
   it('痘肌写法统一为 acne_prone；texture 可填 serum', () => {
     const su = (id: string) => real.products.find((p) => p.productId === id)!;

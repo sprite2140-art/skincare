@@ -187,7 +187,7 @@
 | 状态 | 处理 | 出处 |
 |---|---|---|
 | 怀孕 / 备孕 / 哺乳 | 成分的 `pregnancy_note = avoid`（如 A 醇类、氢醌）→ 排除；`caution`（如 2% 以上水杨酸、过氧化苯甲酰）→ 不排除，卡片写"孕期请注意用量，告诉医生你在用什么" | AAD [Dermatologist-approved pregnancy skin care](https://www.aad.org/public/everyday-care/skin-care-secrets/routine/pregnancy-skin-care)、[Is any acne treatment safe to use during pregnancy?](https://www.aad.org/public/diseases/acne/derm-treat/pregnancy)；AAD 痤疮指南 2024（孕期优先选 A 醇类以外的外用药） |
-| 在用处方外用药（如处方 A 酸） | 不出现去角质步骤；含 A 醇类、果酸、水杨酸类、过氧化苯甲酰的免洗产品排除，原因写"你在用处方外用药，叠加可能加重刺激，请按医生的方案"；沿用现有 `rx_caution` 排除 | AAD How to safely exfoliate at home |
+| 在用处方外用药（如处方 A 酸） | 不出现去角质步骤；含 A 醇类、果酸、水杨酸类的免洗产品排除，原因写"你在用处方外用药，叠加可能加重刺激，请按医生的方案"；**过氧化苯甲酰不排除**，含它的产品提示"如果你在用处方外用药：抗生素类（如克林霉素）常与过氧化苯甲酰同用；处方维 A 酸（tretinoin）不要与过氧化苯甲酰在同一时段使用。具体请按医生的方案。"（作者决定 2026-10-24）；沿用现有 `rx_caution` 排除 | AAD How to safely exfoliate at home |
 | 口服异维 A 酸 | 同上，另外显示一行"按医生建议，用温和洁面、保湿和防晒" | AAD [Isotretinoin: The truth about safety, side effects, and skin care](https://www.aad.org/public/diseases/acne/derm-treat/isotretinoin/side-effects)（温和洁面、不致痘保湿、SPF 30+ 广谱防水防晒；谨慎使用 A 醇类、过氧化苯甲酰、果酸、水杨酸类） |
 
 对所有人的被动提示沿用现有规则：含孕期需注意成分的产品显示"孕期或哺乳期请注意"。

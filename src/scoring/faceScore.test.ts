@@ -113,6 +113,15 @@ describe('功效成分', () => {
     expect(iso.exclusions.map((e) => e.code)).toContain('rx_actives');
     expect(run(saCleanser, { concerns: ['acne'] }, 'cleanser', ['isotretinoin']).excluded).toBe(false);
   });
+
+  it('处方外用药：不排除过氧化苯甲酰，改为提示；A 醇类、果酸、水杨酸类仍排除；口服异维 A 酸时过氧化苯甲酰仍排除', () => {
+    const bpoSpot = product('ST-US-901', 'spot_treatment', ['Water', 'Benzoyl Peroxide']);
+    const rx = run(bpoSpot, { concerns: ['acne'] }, 'spot', ['rx']);
+    expect(rx.excluded).toBe(false);
+    expect(rx.notices.find((n) => n.code === 'rx_bpo_note')!.text.zh).toBe('如果你在用处方外用药：抗生素类（如克林霉素）常与过氧化苯甲酰同用；处方维 A 酸（tretinoin）不要与过氧化苯甲酰在同一时段使用。具体请按医生的方案。');
+    expect(run(saSerum, { concerns: ['pores'] }, 'treatment', ['rx']).exclusions.map((e) => e.code)).toContain('rx_actives');
+    expect(run(bpoSpot, { concerns: ['acne'] }, 'spot', ['isotretinoin']).exclusions.map((e) => e.code)).toContain('rx_actives');
+  });
 });
 
 describe('浓度', () => {
