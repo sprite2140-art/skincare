@@ -190,3 +190,32 @@ describe('#13 遗留：别名与已核对的解释', () => {
     expect(real.explanations.filter((e) => e.reviewStatus === 'verified' && e.reviewedOn === '2026-10-20')).toHaveLength(14);
   });
 });
+
+describe('#16：防晒数据规则', () => {
+  it('痘肌写法统一为 acne_prone；texture 可填 serum', () => {
+    const su = (id: string) => real.products.find((p) => p.productId === id)!;
+    expect(su('SU-US-023').face!.skinTypeClaim).toEqual(['acne_prone']);
+    expect(su('SU-US-040').face!.texture).toBe('serum');
+    expect(su('SU-US-029').face!.texture).toBe('lotion');
+    expect(errorsOf([product({}, { skin_type_claim: 'acne_prone;oily', texture: 'serum' })])).toEqual([]);
+  });
+
+  it('成分名被分号拆开（1;2-Hexanediol）时报错；3-O-Ethyl Ascorbic Acid 这类正常写法不报', () => {
+    expect(errorsOf([product({ inci_list: 'Water;1;2-Hexanediol' })])).toContainEqual(expect.stringContaining('被分号拆开'));
+    expect(errorsOf([product({ inci_list: 'Water;3-O-Ethyl Ascorbic Acid' })]).filter((m) => m.includes('被分号拆开'))).toEqual([]);
+    expect(real.products.find((p) => p.productId === 'SU-US-006')!.inciList).toContain('1,2-Hexanediol');
+  });
+
+  it('面部产品 formula_note 写了"待核对"时显示配方版本待核对；洗护不按此显示', () => {
+    for (const id of ['SU-US-002', 'SU-US-004', 'SU-US-012', 'SU-US-029', 'SU-US-036', 'SU-US-039', 'SU-US-040', 'CL-US-001']) {
+      expect(real.products.find((p) => p.productId === id)!.formulaVersionPending).toBe(true);
+    }
+    expect(real.products.find((p) => p.productId === 'SH-JP-001')!.formulaVersionPending).toBeFalsy();
+  });
+
+  it('美国药品写法的防晒剂通过别名表匹配', () => {
+    expect(real.ingredientIndex.get('Avobenzone')?.inciName.toLowerCase()).toBe('butyl methoxydibenzoylmethane');
+    expect(real.ingredientIndex.get('Octisalate')?.inciName.toLowerCase()).toBe('ethylhexyl salicylate');
+    expect(real.ingredientIndex.get('Octinoxate')?.inciName.toLowerCase()).toBe('ethylhexyl methoxycinnamate');
+  });
+});

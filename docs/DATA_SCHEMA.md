@@ -86,7 +86,7 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 | transparency | high / medium / low | |
 | source_url | 成分表来源链接，可有多个，用分号分隔 | https://a.example;https://b.example |
 | purchase_url | 购买链接（零售商或品牌产品页）。本轮取 source_url 中与 channels 对应的零售商产品页 | https://www.ulta.com/p/… |
-| paired_product_ids | 同系列的其他品类产品 ID，分号分隔，双向记录（洗发水记护发素、护发素记洗发水）。只用于显示"同系列"，不代表必须成套购买，搭配不限定同系列 | CO-US-001 |
+| paired_product_ids | 同系列的其他品类产品 ID，分号分隔，双向记录（洗发水记护发素、护发素记洗发水）。面部产品也可以记同品类的同系列产品（如同一款防晒的不同 SPF 版本：SU-US-005 ↔ SU-US-024），校验不提示。只用于显示"同系列"，不代表必须成套购买，搭配不限定同系列 | CO-US-001 |
 | image_url / image_source / image_license / image_license_url / image_attribution | 产品图链接、来源记录页、许可名称、许可链接、署名。**五项都填写时页面才展示图片**（详情中显示署名、来源和许可链接），否则用按品类区分的占位图。优先使用 Open Beauty Facts 等开放授权来源；**不抓取零售商网站的图片**。目前 CO-US-005、CO-US-009 两张来自 Open Beauty Facts（CC BY-SA 3.0），可能是旧包装，不用于证明当前配方 | |
 | reviewed_on | 核对日期 | |
 | skin_type_claim … face_step_note | 面部属性，共 10 列，接在 reviewed_on 之后，见下方"面部产品" | |
@@ -115,8 +115,8 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 
 | 字段 | 取值 | 留空 |
 |---|---|---|
-| skin_type_claim | 品牌标注的适用肤质：oily / dry / combination / normal / sensitive / all，分号分隔 | 未标注 |
-| texture | gel / lotion / cream / balm / oil / foam / liquid / stick | 未知 |
+| skin_type_claim | 品牌标注的适用肤质：oily / dry / combination / normal / sensitive / acne_prone / all，分号分隔。acne_prone = 品牌标注适合痘肌（acne-prone、breakout-prone、problem-prone 等写法都填 acne_prone） | 未标注 |
+| texture | gel / lotion / cream / balm / oil / foam / liquid / stick / serum；emulsion 填 lotion | 未知 |
 | spf | 正数，**只有 sunscreen 填写**（其他品类填了报错；防晒没填给提示） | 未知 |
 | broad_spectrum | yes / no / unknown（广谱防晒标注，只用于防晒） | unknown |
 | water_resistance | 40 / 80 / none / unknown（防水分钟数，只用于防晒） | unknown |
@@ -270,7 +270,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | product_id | 对应 products.csv |
 | platform | brand（品牌官网）/ ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks（Saks Fifth Avenue）/ bergdorf_goodman / bluemercury。也接受 neimanmarcus、bergdorf、bergdorfgoodman、saksfifthavenue 的写法，读取时统一为左边的代码 |
 | url | 平台上的产品页（不用搜索结果页） |
-| status | in_stock / purchasable / listed / official_store_listed_pdp_blocked（品牌店目录已确认，详情页和库存未确认）等，空白不等于不销售 |
+| status | in_stock / purchasable / listed / official_store_listed_pdp_blocked（品牌店目录已确认，详情页和库存未确认）/ unknown / out_of_stock 等，空白不等于不销售。**out_of_stock**："在哪买"里显示"缺货"、不能点，不作为主购买按钮；**unknown**（库存未确认）：照常列出，但不作为主购买按钮。只有缺货或库存未确认的链接时，卡片不显示主购买按钮，改写"库存未确认，购买渠道见详情" |
 | checked_on / note | 核对日期、说明（如 Target Plus 第三方卖家） |
 
 页面详情"在哪买"按固定顺序每个平台一行：品牌官网 → Ulta → Sephora → Target → Amazon → Nordstrom → Neiman Marcus → Saks Fifth Avenue → Bergdorf Goodman → Bluemercury（`RETAIL_PLATFORMS`）→ 其他网站。平台由链接域名识别（`RETAIL_PLATFORM_DOMAINS`）。收起状态的主购买按钮默认指向评价数最多的平台，没有评分时用 products.csv 的 purchase_url。当前洗护 20 款、63 条链接；美国洁面 40 款、100 条链接（2026-10-19）。
@@ -342,6 +342,12 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | source_url | 对应关系的出处 |
 
 对应关系不唯一的写法（如 Iron Oxides 对应 CI 77491 / 77492 / 77499，Citrus Paradisi Oil 对应果皮油或种子油）不收录，保持未匹配。拼写错误、多语言写法（如 `Mel/Honey/Miel`）不在别名表处理，由数据收集方修正原文或在成分库 aliases 登记。2026-10-20 在成分库登记了 4 个：Coco Glucoside → Coco-Glucoside、Mel/Honey/Miel → Mel、Sea Salt\Maris Sal\Sel Marin → Maris Sal、CI 77891/ Titanium Dioxide → CI 77891；Carbomer Interpolymer Type A、Citrus Paradisi Oil、Citrus Sinensis Oil、Olea Europaea Oil、Chlorella Pyrenoidosa、Yucca Schidigera Extract、Iron Oxides、Disodium Cocoyl Glycinate 对应关系不唯一或不确定，保持未匹配。出处：色素用 FDA UNII 页面（precision.fda.gov），药品名用 FDA 页面（UNII 或 FDA 食品接触物质清单）。校验会检查别名重复、类型、出处、INCI 名能否找到。
+
+## formula_version_checks.csv（配方版本待核对）
+
+在售配方与这里的成分表对应哪一版尚未核对的产品。列为 product_id、status（目前只有 pending）、note（原因）、added_on。列入的产品，卡片在名称下方显示"配方版本待核对：在售版本可能与这里的成分表不同，以包装为准"。核对完成后删除对应行。不放在 products.csv 里，是为了不改动产品表的列。
+
+2026-10-21 首批 4 款，来自防晒第 2 批自查：SU-US-029、SU-US-036、SU-US-039、SU-US-040。
 
 ## ingredient_explanations.csv（常见成分通俗解释）
 

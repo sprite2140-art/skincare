@@ -51,17 +51,29 @@ export function buildActiveClassIndex(entries: ActiveClassEntry[]): ActiveClassI
   return new Map(entries.map((e) => [normalizeName(e.inciName), e.activeClass]));
 }
 
+/**
+ * 成分表里"May Contain: A, B (CI …)"这类色号成分整段写成一项时，拆成单个成分名再查类别
+ * （括号内的 CI 编号已由名称统一去掉）；其他写法原样返回
+ */
+function splitMayContain(raw: string): string[] {
+  const m = /^\s*(?:\+\/-|may contain)\s*(?:\(\+\/-\))?\s*:?\s*(.*)$/i.exec(raw);
+  if (!m) return [raw];
+  return m[1].replace(/\([^()]*\)/g, ' ').split(',').map((s) => s.trim()).filter(Boolean);
+}
+
 /** 产品成分表中各类别的成分（原文写法）；按原文、成分库主名和别名查 */
 export function productActiveClasses(product: Product, index: IngredientIndex, classes: ActiveClassIndex): Map<ActiveClass, string[]> {
   const out = new Map<ActiveClass, string[]>();
   for (const raw of product.inciList) {
-    const ing: Ingredient | undefined = index.get(raw);
-    const names = [raw, ...(ing ? [ing.inciName, ...ing.aliases] : [])];
-    const cls = names.map((n) => classes.get(normalizeName(n))).find((c) => c !== undefined);
-    if (!cls) continue;
-    const list = out.get(cls) ?? [];
-    if (!list.includes(raw)) list.push(raw);
-    out.set(cls, list);
+    for (const part of splitMayContain(raw)) {
+      const ing: Ingredient | undefined = index.get(part);
+      const names = [part, ...(ing ? [ing.inciName, ...ing.aliases] : [])];
+      const cls = names.map((n) => classes.get(normalizeName(n))).find((c) => c !== undefined);
+      if (!cls) continue;
+      const list = out.get(cls) ?? [];
+      if (!list.includes(raw)) list.push(raw);
+      out.set(cls, list);
+    }
   }
   return out;
 }
