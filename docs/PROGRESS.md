@@ -19,6 +19,12 @@
 
 **下一步**：10/28 前导入保湿、精华、去角质、点涂数据和面部成分 CSV（按 6.1 的列合并）；防晒 40 款已导入（2026-10-21）；10/29 关闭测试模式；10/30–31 按试用反馈修改。
 
+### 2026-10-24 入库依据：评价数 1,000 条以上（review_count）
+- 新增入库依据类型 review_count：没有其他依据类型的产品，在 Ulta、Sephora、Target、Amazon、Nordstrom 任一平台评价数 ≥ 1,000 时自动获得，依据写明平台、评价数、核对日期、链接。只决定能否入库，不参与打分。
+- 现有产品新获得依据 11 款（都是防晒）；仍没有依据类型的 36 款（防晒 27、洗护 9）原文不是 none，暂按原样推荐。
+- inclusion_basis 为 none 且评价数不足：标"入库依据待补"，不出现在推荐里，校验只提示。
+- 保湿、精华第 1 批的自查报告移到 docs/data_batches/。产品主表（mo_batch1_products.csv、se_batch1_products.csv）没有上传，入库依据、购买链接、评分 6 个附表暂留根目录，等主表到了一起导入。
+
 ### 2026-10-24 #16 防晒：作者决定后的修正
 - skin_type_claim 新增 acne_prone（acne-prone、breakout-prone、problem-prone 统一为它；选了痘痘的用户同等级内优先）；texture 新增 serum，emulsion 改为 lotion。9 个校验错误已修正。
 - SU-US-006、008、030、037 的 "1;2-Hexanediol" 改为 "1,2-Hexanediol"；校验新增：只有数字的一项后面紧跟"数字-"开头的一项时报错（不误报 3-O-Ethyl Ascorbic Acid 这类写法）。

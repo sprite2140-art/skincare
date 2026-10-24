@@ -335,7 +335,8 @@ export function rankFaceStep(
   products: Product[], profile: ScoringProfile, data: ScoringData, ctx: FaceContext, opts: RankOptions = {},
 ): { ranked: FaceProductScore[]; hidden: number } {
   const scored = products
-    .filter((p) => p.category === ctx.step.category)
+    // 入库依据待补的产品不出现在推荐结果里
+    .filter((p) => p.category === ctx.step.category && !p.inclusionPending)
     .map((p) => scoreFaceProduct(p, profile, data, ctx));
   const hide = opts.hideUntintedMineral && ctx.step.id === 'sunscreen';
   const shown = hide ? scored.filter((s) => !s.faceExtras.untintedMineral) : scored;

@@ -271,6 +271,8 @@ export interface Product {
   inclusionBasis: string;
   /** 入库依据的类型（只决定能否入库，不参与打分）；没有分类时为 null */
   inclusionBasisType: InclusionBasisType | null;
+  /** 入库依据待补：inclusion_basis 写 none、评价数也不足 1,000 条；照常导入，但不出现在推荐结果里 */
+  inclusionPending?: boolean;
   awards: Award[];
   /** 产品定位针对的困扰 / 效果 */
   claimedBenefits: Target[];
@@ -441,10 +443,15 @@ export interface City {
  * 入库依据类型（products.csv 的 inclusion_basis_type）。只决定产品能否入库，不参与打分：
  * retailer_bestseller = 零售商畅销榜 / 按畅销排序（Ulta、Sephora、Walgreens 等）；
  * department_store_bestseller = 百货 / 买手渠道畅销榜（Nordstrom、Neiman Marcus、Saks、Bergdorf Goodman、Bluemercury）；
- * beauty_award = 美容大奖（Allure Best of Beauty、Cosmopolitan、NewBeauty 等）。
+ * beauty_award = 美容大奖（Allure Best of Beauty、Cosmopolitan、NewBeauty 等）；
+ * review_count = 在美国主要零售商（REVIEW_COUNT_PLATFORMS）任一平台评价数达到 REVIEW_COUNT_MIN 条以上，
+ * 由 retail_ratings.csv 自动生成（见 attachRetail），也可以在 products.csv 里直接填写。
  */
-export const INCLUSION_BASIS_TYPES = ['retailer_bestseller', 'department_store_bestseller', 'beauty_award'] as const;
+export const INCLUSION_BASIS_TYPES = ['retailer_bestseller', 'department_store_bestseller', 'beauty_award', 'review_count'] as const;
 export type InclusionBasisType = (typeof INCLUSION_BASIS_TYPES)[number];
+/** 评价数入库依据：认哪些零售商、至少多少条评价 */
+export const REVIEW_COUNT_PLATFORMS = ['ulta', 'sephora', 'target', 'amazon', 'nordstrom'] as const;
+export const REVIEW_COUNT_MIN = 1000;
 
 /**
  * 零售平台，也是购买链接的固定显示顺序：品牌官网 → Ulta → Sephora → Target → Amazon →
