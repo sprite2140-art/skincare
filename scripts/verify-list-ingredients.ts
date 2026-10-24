@@ -3,8 +3,11 @@
 //
 // 做法：对照官方原文确认每个成分确实在对应清单里。
 // - 欧盟香料致敏原：法规 (EC) 1223/2009 附录 III 和修订法规 (EU) 2023/1545 的 EUR-Lex 原文。
-//   能下载时在原文中查找成分名；下载不了时这一项记为"未核对"，不用本项目自己的清单代替。
-//   只在附录 III 的正文范围内查找，不搜整部法规（避免名字出现在其他附录里也算通过）。
+//   能下载合并版时在附录 III 正文中查找成分名（不搜整部法规，避免名字出现在其他附录里也算通过）。
+//   下载不了时，用作者提供的 2023/1545 官方公报 PDF（data/sources/eu_2023_1545.pdf，
+//   文本由 pdftotext -layout 导出为 data/sources/eu_2023_1545.txt）：只看附件里被替换、新增的条目，
+//   成分名要单独占"Name of Common Ingredients Glossary"一格、后面紧跟 CAS 号才算找到。
+//   2023/1545 只改了附录 III 的部分条目，不在其中的成分记为"未核对"，不算对不上，也不用本项目自己的清单代替。
 // - 其余各类：欧盟委员会 CosIng 官方导出 data/cosing_export_2026-10-17.csv（作者 2026-10-17 获取；
 //   CosIng 网站本身是网页应用，没有固定的 CSV 下载地址，更新时用 npm run import-cosing 换新的导出），按登记功能核对。
 // - 强清洁力表活、致敏防腐剂、酒精：CosIng 只能确认是表活 / 防腐剂 / 溶剂，"强清洁力""致敏""会让皮肤变干"是本项目的判断，
@@ -12,7 +15,7 @@
 // 通过的成分写入 docs/LIST_VERIFICATION.md；加 --apply 时，在 data/ingredients.csv 中标为已核对，
 // notes 写明核对依据。对不上的只列出，不改数据。
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import Papa from 'papaparse';
 import { loadDataFromDisk } from '../src/data/node';
 import { parseCosingExport, type CosingEntry } from '../src/data/cosing';
@@ -29,6 +32,9 @@ const OFFICIAL = {
   annexIII: 'https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02009R1223-20250501',
   reg2023_1545: 'https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023R1545',
 };
+/** 作者提供的 (EU) 2023/1545 官方公报 PDF 及其 pdftotext -layout 文本 */
+const LOCAL_2023_1545 = 'data/sources/eu_2023_1545.pdf';
+const LOCAL_2023_1545_TEXT = 'data/sources/eu_2023_1545.txt';
 
 async function fetchText(url: string): Promise<string | null> {
   try {
@@ -53,6 +59,22 @@ function annexIIIText(text: string): string | null {
   const end = text.indexOf('list of colorants allowed in cosmetic products', start);
   return end === -1 ? null : text.slice(start, end);
 }
+
+/**
+ * 2023/1545 附件（"Annex III to Regulation (EC) No 1223/2009 is amended as follows"之后）的版式文本。
+ * 软连字符只出现在某一格折行处（如"3,7-Dimethyl-2,6-oc­ Citral"），换成空格，让后面的格子与它隔开
+ * 找不到附件开头时返回 null
+ */
+function amendingAnnexLines(layout: string): string[] | null {
+  const start = layout.indexOf('is amended as follows');
+  return start === -1 ? null : layout.slice(start).replace(/\u00ad/g, ' ').split('\n');
+}
+
+/** 成分名单独占一格（前面是行首或至少两个空格），后面隔至少两个空格紧跟 CAS 号 */
+const inGlossaryColumn = (lines: string[], name: string) => {
+  const re = new RegExp(`(^|\\s{2,})${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s{2,}\\d{2,7}-\\d{2}-\\d`, 'i');
+  return lines.some((l) => re.test(l));
+};
 
 type ListKind = 'fragrance' | 'eu_allergen' | 'essential_oil' | 'alcohol' | 'strong_cleanser' | 'preservative' | 'chelator';
 
@@ -96,10 +118,17 @@ async function main() {
   if (cosing.length < 10000) throw new Error(`CosIng 导出只解析出 ${cosing.length} 条，文件可能不完整`);
   const cosingBy = new Map(cosing.map((c) => [normalizeName(c.inciName), c]));
 
-  // 欧盟香料致敏原：EUR-Lex 合并版法规，只取附录 III 正文；取不到时用修订法规 2023/1545（全文都是对附录 III 的修订）
+  // 欧盟香料致敏原：EUR-Lex 合并版法规，只取附录 III 正文；取不到时用修订法规 2023/1545（全文都是对附录 III 的修订），
+  // 网页也取不到时用作者提供的 2023/1545 PDF 文本（只含被修订的条目）
   const consolidated = await fetchText(OFFICIAL.annexIII);
   const amending = consolidated ? null : await fetchText(OFFICIAL.reg2023_1545);
   const annexText = consolidated ? annexIIIText(plainText(consolidated)) : amending ? plainText(amending) : null;
+  const localLines = annexText || !existsSync(LOCAL_2023_1545_TEXT) ? null : amendingAnnexLines(readFileSync(LOCAL_2023_1545_TEXT, 'utf8'));
+  const allergenSource = annexText
+    ? 'EUR-Lex 原文（法规 1223/2009 附录 III / 2023/1545）'
+    : localLines
+      ? `EUR-Lex 原文无法下载，改用作者提供的 (EU) 2023/1545 官方公报 PDF（${LOCAL_2023_1545}），只能核对其中被替换、新增的附录 III 条目`
+      : '**EUR-Lex 原文无法下载，未核对**';
 
   const allergenNames = new Set(real.allergens.map((a) => normalizeName(a.inciName)));
   const chelatorNames = new Set(real.lists.chelators.map((c) => normalizeName(c.inciName)));
@@ -120,6 +149,16 @@ async function main() {
   for (const ing of real.ingredients) {
     for (const kind of kindsOf(ing)) {
       if (kind === 'eu_allergen') {
+        if (!annexText && localLines) {
+          const found = names(ing).some((n) => inGlossaryColumn(localLines, n));
+          checks.push({
+            ing, kind, ok: found ? true : null,
+            detail: found
+              ? '在 (EU) 2023/1545 官方公报附件中找到（OJ L 188/1，2023-07-27；该附件替换了附录 III 的这一条目）'
+              : '(EU) 2023/1545 只替换、新增了附录 III 的部分条目，这个成分所在的条目不在其中；需要附录 III 合并版原文，未核对',
+          });
+          continue;
+        }
         if (!annexText) {
           checks.push({ ing, kind, ok: null, detail: '无法取得 EUR-Lex 附录 III 原文（法规 1223/2009 附录 III、2023/1545），未核对' });
           continue;
@@ -162,7 +201,7 @@ async function main() {
     '',
     `由 \`npm run verify-list-ingredients\` 生成（${TODAY}），请勿手改。`,
     '',
-    `核对依据：${cosingSource}；欧盟香料致敏原：${annexText ? 'EUR-Lex 原文（法规 1223/2009 附录 III / 2023/1545）' : '**EUR-Lex 原文无法下载，未核对**'}。`,
+    `核对依据：${cosingSource}；欧盟香料致敏原：${allergenSource}。`,
     '',
     `共 ${byIng.size} 个成分：通过 ${passed.length} 个，对不上 ${failed.length} 个，无法核对 ${pending.length} 个。`,
     '一个成分属于多个清单时，每项都通过才算通过。',

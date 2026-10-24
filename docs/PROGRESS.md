@@ -78,6 +78,13 @@
 
 ## 记录
 
+### 2026-10-24（Claude Code：用 2023/1545 PDF 核对欧盟香料致敏原）
+- 完成：
+  1. 作者上传的 (EU) 2023/1545 官方公报 PDF 移到 `data/sources/eu_2023_1545.pdf`，并用 `pdftotext -layout` 导出文本 `data/sources/eu_2023_1545.txt`。`npm run verify-list-ingredients` 下载不了 EUR-Lex 时改用这份文本：只看附件里被替换、新增的附录 III 条目，成分名要单独占"Name of Common Ingredients Glossary"一格、后面紧跟 CAS 号才算找到。
+  2. 13 个欧盟香料致敏原里，4 个在附件中找到并标为已核对：Benzyl Alcohol（第 45 条）、Citral（第 70 条）、Citronellol（第 86 条）、Limonene（第 88 条）。其余 9 个（Alpha-Isomethyl Ionone、Amyl Cinnamal、Benzyl Benzoate、Benzyl Salicylate、Coumarin、Geraniol、Hexyl Cinnamal、Hydroxycitronellal、Linalool）所在的条目没有被 2023/1545 修改，PDF 里没有它们，仍为未核对，不算对不上。
+  3. 规则清单核对：57 个成分，通过 38 个，对不上 0 个，无法核对 19 个（9 个致敏原 + 10 个缺文献出处的风险成分）。关闭测试模式后受影响：洗护 107 款中 86 款、护肤 40 款中 10 款。
+- 下一步：剩下 9 个致敏原需要法规 1223/2009 附录 III 合并版原文（EUR-Lex CELEX 02009R1223 的最新合并版 PDF），上传后用同样方法核对。
+
 ### 2026-10-21（Claude Code：上线阻塞项）
 - 完成：
   1. 新增 `npm run verify-list-ingredients`：规则清单类成分对照官方原文自动核对。加香、精油、螯合剂按 CosIng 官方导出（作者 2026-10-17 获取）的登记功能核对；欧盟香料致敏原只在 EUR-Lex 附录 III 原文里查找；强清洁力表活、致敏防腐剂、酒精除了 CosIng 功能，还要有 CosIng 以外的文献出处。报告在 `docs/LIST_VERIFICATION.md`。本次 57 个成分：通过 34 个（33 个标为已核对，notes 写明依据），对不上 0 个，无法核对 23 个（13 个欧盟香料致敏原：本环境下载不了 EUR-Lex；10 个强清洁力表活 / 致敏防腐剂 / 酒精：缺文献出处）。

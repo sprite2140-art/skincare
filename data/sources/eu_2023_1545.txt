@@ -1,0 +1,1107 @@
+27.7.2023           EN                             Official Journal of the European Union                                          L 188/1
+
+
+
+                                                                         II
+                                                               (Non-legislative acts)
+
+
+
+
+                                                          REGULATIONS
+
+                                             COMMISSION REGULATION (EU) 2023/1545
+                                                                of 26 July 2023
+            amending Regulation (EC) No 1223/2009 of the European Parliament and of the Council as regards
+                                  labelling of fragrance allergens in cosmetic products
+
+                                                            (Text with EEA relevance)
+
+
+
+
+     THE EUROPEAN COMMISSION,
+
+
+     Having regard to the Treaty on the Functioning of the European Union,
+
+     Having regard to Regulation (EC) No 1223/2009 of the European Parliament and of the Council of 30 November 2009 on
+     cosmetic products (1), and in particular Article 31(1) thereof,
+
+     Whereas:
+
+     (1)    Fragrance substances are organic compounds with characteristic, usually pleasant, odours. They are widely used in
+            perfumes and other perfumed cosmetic products, but also in many other products such as detergents, fabric
+            softeners and other household products.
+
+     (2)    Contact allergy is a life-long, altered specific reactivity in the human immune system. Upon re-exposure to a
+            sufficient amount of an allergen, eczema (allergic contact dermatitis) may develop. When a person has already been
+            sensitised to an allergen, a much lower concentration of it is sufficient to trigger symptoms of an allergy. The
+            percentage of the population allergic to fragrance allergens in the Union can be estimated to 1–9 % (2).
+
+     (3)    Different measures aim to protect the whole population from acquiring fragrance allergies (primary prevention) and
+            to protect sensitised individuals from developing allergy symptoms (secondary prevention).
+
+     (4)    For the purposes of primary prevention, a restriction of fragrance allergens may be sufficient. However, sensitised
+            persons may develop symptoms when they are exposed to lower concentrations of an allergen than the maximum
+            permitted levels. Therefore, as a measure of secondary prevention, it is important to provide information on the
+            presence of individual fragrance allergens in cosmetic products so that sensitised persons can avoid contact with the
+            substance to which they are allergic.
+
+     (5)    In accordance with Article 19(1), point (g), of Regulation (EC) No 1223/2009, a cosmetic product is to be made
+            available on the Union market only where a list of ingredients is indicated on its packaging. Furthermore, that
+            Article specifies that perfume and aromatic compositions and their raw material are to be referred to by the terms
+            ‘parfum’ or ‘aroma’ in the list of ingredients and complemented by substances the mention of which is required
+            under the column ‘Other’ in Annex III to that Regulation. Currently, 24 fragrance allergens listed in entries 45
+            and 67 to 92 of Annex III to Regulation (EC) No 1223/2009 are to be mentioned in the list of ingredients
+            (individually labelled).
+
+     (1) OJ L 342, 22.12.2009, p. 59.
+     (2) Impact assessment study on fragrance labelling on cosmetic products - Publications Office of the EU (europa.eu), p. 64.
+L 188/2            EN                           Official Journal of the European Union                                            27.7.2023
+
+
+     (6)    In response to the request of the Commission for an update of the list of individually labelled fragrance allergens, the
+            Scientific Committee on Consumer Safety (SCCS) adopted an opinion at its plenary meeting of 26-27 June 2012 (3).
+            It confirmed that the fragrance allergens listed in entries 45 and 67–92 of Annex III to Regulation (EC)
+            No 1223/2009 are still relevant. Furthermore, it identified 56 additional fragrance allergens, which have clearly
+            caused allergies in humans and which have currently no requirement of individual labelling.
+
+
+     (7)    In light of the SCCS opinion, it can be concluded that there is a potential risk to human health arising from the use of
+            the additional fragrance allergens identified by the SCCS and that it is necessary to inform consumers about the
+            presence of those fragrance allergens. Therefore, an obligation to individually label those fragrance allergens should
+            be introduced in Annex III to Regulation (EC) No 1223/2009 when their concentration exceeds 0,001 % in leave-on
+            products and 0,01 % in rinse-off products. Furthermore, fragrance substances, such as prehaptens and prohaptens,
+            that can be transformed to known contact allergens via air oxidation or bioactivation should be treated as
+            equivalent to fragrance allergens and be subject to the same restrictions and other regulatory requirements.
+
+
+     (8)    For reasons of consistency and clarity, it is also necessary to update certain existing entries for fragrance allergens in
+            Annex III to Regulation (EC) No 1223/2009 by aligning common names of the substances to those of the latest
+            version of the Common Ingredients Glossary referred to in Article 33 of that Regulation, and by grouping similar
+            substances in one entry. Furthermore, when there are multiple common ingredient names for a substance, it should
+            be set out in the individual labelling requirement which name is to be used in the list of ingredients referred to in
+            Article 19(1), point (g), in order for the labelling to be streamlined and more consumer-friendly, as well as to
+            facilitate the work of economic operators and national authorities.
+
+
+     (9)    For reasons of completeness and clarity, it is also necessary to update certain existing entries for fragrance allergens
+            in Annex III to Regulation (EC) No 1223/2009 by adding isomers and by complementing and amending the
+            respective CAS and EC numbers, thus facilitating the work of economic operators and national authorities.
+
+
+     (10)   As the updated list of fragrance allergens is likely to result in entries in Annex III to Regulation (EC) No 1223/2009
+            combining existing and new restrictions, it is necessary to provide that the economic operators should, on the one
+            hand, continue to apply existing restrictions, and, on the other hand, be allowed a reasonable period of time to
+            comply with new restrictions.
+
+
+     (11)   With regard to the new restrictions, economic operators should be allowed a reasonable period of time to adapt to
+            them by making the adjustments to product formulations and containers that are necessary to ensure that only
+            cosmetic products complying with the new requirements are placed on the market. Economic operators should also
+            be allowed a reasonable period of time to withdraw from the market cosmetic products which do not comply with
+            the new requirements and which were placed on the market before the new labelling provisions become applicable.
+            Considering the relatively low and stable percentage of consumers developing allergic contact dermatitis, the large
+            number of new fragrance allergens to be individually labelled and the significant number of cosmetic products
+            concerned, the transition period should be 3 and 5 years, respectively.
+
+
+     (12)   The measures provided for in this Regulation are in accordance with the opinion of the Standing Committee on
+            Cosmetic Products,
+
+
+
+
+     HAS ADOPTED THIS REGULATION:
+
+
+
+
+                                                                 Article 1
+
+
+     Annex III to Regulation (EC) No 1223/2009 is amended in accordance with the Annex to this Regulation.
+
+     (3) SCCS (Scientific Committee on Consumer Safety), opinion on fragrance allergens in cosmetic products (SCCS/1459/11), 26-27 June
+         2012.
+27.7.2023         EN                          Official Journal of the European Union                                           L 188/3
+
+
+                                                               Article 2
+
+     This Regulation shall enter into force on the twentieth day following that of its publication in the Official Journal of the
+     European Union.
+
+
+
+                  This Regulation shall be binding in its entirety and directly applicable in all Member States.
+
+
+                  Done at Brussels, 26 July 2023.
+
+
+                                                                                      For the Commission
+                                                                                         The President
+                                                                                   Ursula VON DER LEYEN
+                                                                                         ANNEX
+
+
+
+
+                                                                                                                                                                                                            L 188/4
+Annex III to Regulation (EC) No 1223/2009 is amended as follows:
+(1) entries 45, 46, 70, 73, 86, 88, 109, 114, 122, 124, 131, 133, 154, 157, 175, 196 and 324 are replaced by the following:
+
+                                        Substance identification                                                                 Restrictions
+    Refer­                                                                                                                                                                                   Wording of
+
+
+
+
+                                                                                                                                                                                                                EN
+    ence                                                                                                  Maximum                                                                           conditions of
+    num­                               Name of Common                                  Product type,    concentration                                                                         use and
+              Chemical name/INN                              CAS number    EC number                                                                  Other
+     ber                              Ingredients Glossary                              body parts     in ready for use                                                                       warnings
+                                                                                                         preparation
+
+         a              b                        c                 d           e             f                g                                         h                                         i
+
+    ‘45      Benzyl alcohol(6) (**)   Benzyl Alcohol         100-51-6     202-859-9                                       For purposes other than inhibiting the development of
+                                                                                                                          microorganisms in the product. This purpose has to be
+                                                                                                                          apparent from the presentation of the product.
+                                                                                                                          The presence of the substance shall be indicated in the
+
+
+
+
+                                                                                                                                                                                                            Official Journal of the European Union
+                                                                                                                          list of ingredients referred to in Article 19(1), point (g),
+                                                                                                                          when its concentration exceeds:
+                                                                                                                          — 0,001 % in leave-on products
+                                                                                                                          — 0,01 % in rinse-off products.
+    46       6-Methylcou­             6-Methyl               92-48-8      202-158-8    Oral products 0,003 %              The presence of the substance shall be indicated in the
+             marin (**)               Coumarin                                                                            list of ingredients referred to in Article 19(1), point (g),
+                                                                                                                          when its concentration exceeds:
+                                                                                                                          — 0,001 % in leave-on products
+                                                                                                                          — 0,01 % in rinse-off products.
+    70       3,7-Dimethyl-2,6-oc­ Citral                     5392-40-5    226-394-6                                       The presence of the substance or substances shall be
+             tadienal                                                                                                     indicated as ‘Citral’ in the list of ingredients referred to in
+                                                                                                                          Article 19(1), point (g), when the concentration of the
+             (E)-3,7-dimethyloc­      Geranial               141-27-5     205-476-5                                       substance or substances exceeds:
+             ta-2,6-dienal (*)                                                                                            — 0,001 % in leave-on products
+             (Z)-3,7-dimethyloc­      Neral                  106-26-3     203-379-2                                       — 0,01 % in rinse-off products.
+             ta-2,6-dienal (*)
+
+
+
+
+                                                                                                                                                                                                            27.7.2023
+                                                                                                                                                            27.7.2023
+73   Phenol, 2-methoxy-   Isoeugenol    97-54-1      202-590-7    (a) Oral pro­ (b) 0,02 %   (a) (b)
+     4-(1-propenyl)                                                   ducts                  The presence of the substance shall be indicated in the
+                                                                  (b) Other                  list of ingredients referred to in Article 19(1), point (g),
+     (E)-2-methoxy-                     5932-68-3    227-678-2        products               when its concentration exceeds:
+     4-(prop-1-enyl)                                                                         — 0,001 % in leave-on products
+     phenol;                                                                                 — 0,01 % in rinse-off products.
+     (trans-Isoeugenol)
+
+
+
+
+                                                                                                                                                                EN
+     (Z)-2-methoxy-                     5912-86-7    227-633-7
+     4-(prop-1-enyl)
+     phenol;
+     (cis-Isoeugenol)
+86   Citronellol/ (±)     Citronellol   106-22-9/    203-375-0/                              The presence of the substance shall be indicated in the
+     3,7-Dimethyl-                      26489-01-0   247-737-6                               list of ingredients referred to in Article 19(1), point (g),
+     6-octen-1-ol                                                                            when its concentration exceeds:
+                                                                                             — 0,001 % in leave-on products
+     (3R)-3,7-dimethy­                  1117-61-9    214-250-5                               — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                                            Official Journal of the European Union
+     loct-6-en-1-ol
+     (3S)-3,7-dimethy­                  7540-51-4    231-415-7
+     loct-6-en-1-ol
+88   1-methyl-4-prop-     Limonene      138-86-3/    205-341-0/                              The presence of the substance shall be indicated in the
+     1-en-2-yl-                         7705-14-8    231-732-0                               list of ingredients referred to in Article 19(1), point (g),
+     cyclohexene;                                                                            when its concentration exceeds:
+     dl-limonene                                                                             — 0,001 % in leave-on products
+     (racemic);                                                                              — 0,01 % in rinse-off products.
+     Dipentene (*)
+                                                                                             The peroxide value for each substance shall be less than
+     (R)-p-                             5989-27-5    227-813-5                               20 mmoles/L(15)
+     mentha-1,8-diene;
+     (d-limonene)
+     (S)-p-                             5989-54-8    227-815-6
+     mentha-1,8-diene;
+     (l-limonene) (*)
+
+
+
+
+                                                                                                                                                            L 188/5
+                                                                                                                                          L 188/6
+109   Pinus mugo leaf and     Pinus Mugo Leaf      90082-72-7   290-163-6   The presence of the substance or substances shall be
+      twig oil and            Oil; Pinus Mugo                               indicated as ‘Pinus Mugo’ in the list of ingredients
+      extract (**)            Twig Leaf Extract;                            referred to in Article 19(1), point (g), when the
+                              Pinus Mugo Twig                               concentration of the substance or substances exceeds:
+                              Oil                                           — 0,001 % in leave-on products
+                                                                            — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                              EN
+                                                                            The peroxide value shall be less than 10 mmoles/L(15)
+114   Pinus pumila leaf and   Pinus Pumila      97676-05-6      307-681-6   The presence of the substance or substances shall be
+      twig oil and            Needle Extract;                               indicated as ‘Pinus Pumila’ in the list of ingredients
+      extract (**)            Pinus Pumila Twig                             referred to in Article 19(1), point (g), when the
+                              Leaf Extract;                                 concentration of the substance or substances exceeds:
+                              Pinus Pumila Twig                             — 0,001 % in leave-on products
+                              Leaf Oil                                      — 0,01 % in rinse-off products.
+                                                                            The peroxide value shall be less than 10 mmoles/L(15)
+
+
+
+
+                                                                                                                                          Official Journal of the European Union
+122   Cedrus atlantica oil and Cedrus Atlantica    92201-55-3/ 295-985-9/   The presence of the substance or substances shall be
+      extract (**)             Bark Extract;       8023-85-6   -            indicated as ‘Cedrus Atlantica Oil/ Extract’ in the list of
+                               Cedrus Atlantica                             ingredients referred to in Article 19(1), point (g), when
+                               Bark Oil;                                    the concentration of the substance or substances
+                               Cedrus Atlantica                             exceeds:
+                               Bark Water;                                  — 0,001 % in leave-on products
+                               Cedrus Atlantica                             — 0,01 % in rinse-off products.
+                               Leaf Extract;
+                               Cedrus Atlantica                             The peroxide value shall be less than 10 mmoles/L(15)
+                               Wood Extract;
+                               Cedrus Atlantica
+                               Wood Oil
+
+
+
+
+                                                                                                                                          27.7.2023
+                                                                                                                                                 27.7.2023
+124   Turpentine gum       Turpentine          9005-90-7;    232-688-5;           The presence of the substance shall be indicated in the
+      (Pinus spp.);                            8006-64-2;    232-350-7;           list of ingredients referred to in Article 19(1), point (g),
+      Turpentine oil and                       8052-14-0     -                    when its concentration exceeds:
+      rectified oil;                                                              — 0,001 % in leave-on products
+      Turpentine, steam                                                           — 0,01 % in rinse-off products.
+      distilled (Pinus
+      spp.) (**)                                                                  The peroxide value for each substance shall be less than
+
+
+
+
+                                                                                                                                                     EN
+                                                                                  10 mmoles/L(15)
+131   p-Men­               Alpha-Terpinene     99-86-5       202-795-1            The presence of the substance shall be indicated in the
+      tha-1,3-diene (**)                                                          list of ingredients referred to in Article 19(1), point (g),
+                                                                                  when its concentration exceeds:
+                                                                                  — 0,001 % in leave-on products
+                                                                                  — 0,01 % in rinse-off products.
+                                                                                  The peroxide value shall be less than 10 mmoles/L(15)
+133   p-Mentha-1,4(8)-     Terpinolene         586-62-9      209-578-0            The presence of the substance shall be indicated in the
+
+
+
+
+                                                                                                                                                 Official Journal of the European Union
+      diene (**)                                                                  list of ingredients referred to in Article 19(1), point (g),
+                                                                                  when its concentration exceeds:
+                                                                                  — 0,001 % in leave-on products
+                                                                                  — 0,01 % in rinse-off products
+                                                                                  The peroxide value shall be less than 10 mmoles/L(15)
+154   Myroxylon balsamum Myroxylon               8007-00-9   232-352-8    0,4 %   The presence of the substance or substances shall be
+      var. pereirae; extracts Balsamum Pereirae                                   indicated as ‘Myroxylon Pereirae Oil/ Extract’ in the list
+      and distillates; Balsam Balsam Extract;                                     of ingredients referred to in Article 19(1), point (g),
+      Peru oil, absolute and Myroxylon                                            when the concentration of the substance or substances
+      anhydrol (Balsam Oil Balsamum Pereirae                                      exceeds:
+      Peru) (**)              Balsam Oil;                                         — 0,001 % in leave-on products
+                              Myroxylon Pereirae                                  — 0,01 % in rinse-off products.
+                              Oil;
+                              Myroxylon Pereirae
+                              Resin Extract;
+                              Myroxylon Pereirae
+                              Resin
+
+
+
+
+                                                                                                                                                 L 188/7
+                                                                                                                                                                      L 188/8
+157   1-(2,6,6-trimethyl-      Alpha-Damascone; 43052-87-5/ -/              (a) Oral pro­ (b) 0,02 %   (a) (b)
+      2-cyclohexen-1-yl)-      cis-Rose ketone 1 23726-94-5 245-845-8           ducts                  The presence of the substance or substances shall be
+      2-buten-1-one(16) (**)                                                (b) Other                  indicated as ‘Rose Ketones’ in the list of ingredients
+                               trans-Rose ketone 1 24720-09-0   246-430-4       products               referred to in Article 19(1), point (g), when the
+      1-(2,6,6-Trimethylcy­ Rose ketone 4          23696-85-7   245-833-2                              concentration of the substance or substances exceeds:
+      clohexa-1,3-dien-     (Damascone)                                                                — 0,001 % in leave-on products
+      1-yl)-2-buten-                                                                                   — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                                                          EN
+      1-one(16) (**)
+      1-(2,6,6-Trimethyl-      Rose ketone 3     57378-68-4     260-709-8
+      3-cyclohexen-1-yl)-      (delta-Damascone)
+      2-buten-1-one(16) (**)
+                               trans-Rose ketone 3 71048-82-3   275-156-8
+      (Z)-                    cis-Rose ketone 2    23726-92-3   245-843-7
+      1-(2,6,6-trimethyl-     (cis-beta-
+      1-cyclohexen-1-yl)- Damascone)
+      2-buten-1-one (16) (**)
+
+
+
+
+                                                                                                                                                                      Official Journal of the European Union
+      (E)-                     trans-Rose ketone 2 23726-91-2   245-842-1
+      1-(2,6,6-Trimethyl-      (trans-beta-
+      1-cyclohexen-1-yl)-      Damascone)
+      2-buten-1-one(16) (**)
+175   3-Propylidene-1(3H)- 3-Propylideneph­        17369-59-4   241-402-8   (a) Oral pro­ b) 0,01 %    (a)
+      isobenzofuranone;    thalide                                              ducts                  The presence of the substance shall be indicated in the
+      3-Propylidenephtha­                                                   (b) Other                  list of ingredients referred to in Article 19(1), point (g),
+      lide (**)                                                                 products               when its concentration exceeds:
+                                                                                                       — 0,001 % in leave-on products
+                                                                                                       — 0,01 % in rinse-off products.
+196   Verbena                  Lippia citriodora   8024-12-2/   -                        0,2 %         The presence of the substance shall be indicated in the
+      absolute (**) (***)      absolute            85116-63-8   285-515-0                              list of ingredients referred to in Article 19(1), point (g),
+                                                                                                       when its concentration exceeds:
+                                                                                                       — 0,001 % in leave-on products
+                                                                                                       — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                                                      27.7.2023
+                                                                                                                                                            27.7.2023
+324   Methyl            Methyl Salicylate   119-36-8   204-317-7   (a) Leave-on (a) 0,06 %   Not to be used in preparations for children under 6
+      2-hydroxybenzo­                                                  skin pro­             years of age, with the exception of (k) “Toothpaste”.
+      ate (**)                                                         ducts (ex­            The presence of the substance shall be indicated in the
+                                                                       cept face             list of ingredients referred to in Article 19(1), point (g),
+                                                                       makeup,               when its concentration exceeds:
+                                                                       spray/ae­             — 0,001 % in leave-on products
+                                                                       rosol                 — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                                                EN
+                                                                       body lo­
+                                                                       tion,
+                                                                       spray/ae­
+                                                                       rosol
+                                                                       deodor­
+                                                                       ant and
+                                                                       hydroal­
+                                                                       coholic-
+                                                                       based fra­
+                                                                       grances)
+
+
+
+
+                                                                                                                                                            Official Journal of the European Union
+                                                                       and leave
+                                                                       on hair
+                                                                       products
+                                                                       (except
+                                                                       spray/ae­
+                                                                       rosol pro­
+                                                                       ducts)
+                                                                   (b) Face ma­ (b) 0,05 %
+                                                                       keup (ex­
+                                                                       cept lip
+                                                                       products,
+                                                                       eye ma­
+                                                                       keup and
+                                                                       makeup
+                                                                       remover)
+                                                                   (c) Eye ma­ (c) 0,002 %
+                                                                       keup and
+                                                                       makeup
+                                                                       remover
+
+
+
+
+                                                                                                                                                            L 188/9
+                           L 188/10
+(d) Leave-on (d) 0,009 %
+    hair pro­
+    ducts
+    (spray/a­
+    erosol)
+(e) Deodor­ (e) 0,003 %
+    ant
+
+
+
+
+                               EN
+    spray/ae­
+    rosol
+(f) Body lo­ (f) 0,04 %
+    tion
+    spray/aer­
+    osol
+(g) Rinse-off (g) 0,06 %
+    skin pro­
+
+
+
+
+                           Official Journal of the European Union
+    ducts (ex­
+    cept hand
+    wash)
+    and
+    rinse-off
+    hair pro­
+    ducts
+(h) Hand     (h) 0,6 %
+    wash
+(i) Hydroal­ (i) 0,6 %
+    coholic-
+    based fra­
+    grances
+(j) Lip pro­ (j) 0,03 %
+    ducts
+
+
+
+
+                           27.7.2023
+                                                                                                                                                                                                           27.7.2023
+                                                                                            (k) Tooth­      (k) 2,52 %
+                                                                                                paste
+                                                                                            (l) Mouthw­ (l) 0,1 %
+                                                                                                ash    in­
+                                                                                                tended
+                                                                                                for chil­
+                                                                                                dren aged
+
+
+
+
+                                                                                                                                                                                                               EN
+                                                                                                6–10
+                                                                                                years
+                                                                                            (m) Mouth­ (m) 0,6 %
+                                                                                                wash in­
+                                                                                                tended
+                                                                                                for chil­
+                                                                                                dren
+                                                                                                above
+                                                                                                10 years
+
+
+
+
+                                                                                                                                                                                                           Official Journal of the European Union
+                                                                                                of age
+                                                                                                and
+                                                                                                adults
+                                                                                            (n) Mouth       (n) 0,65 %
+                                                                                                spray
+    (*)   Cosmetic products containing that substance that do not comply with the restrictions may be placed on the Union market until 31 July 2026 and made available on the Union market until 31 July
+          2028.
+    (**) Cosmetic products containing that substance that do not comply with the restrictions may, provided that they comply with the restrictions applicable on 15 August 2023, be placed on the Union
+          market until 31 July 2026 and made available on the Union market until 31 July 2028.
+    (***) For use as Verbena essential oils (Lippia citriodora Kunth.) and derivatives, see Annex II, No 450.’
+
+
+(2) entries 125, 126, 158, 160-163, 165, 167 and 168 are deleted;
+
+
+
+
+                                                                                                                                                                                                           L 188/11
+(3) the following entries are added:
+
+
+
+
+                                                                                                                                                                                                     L 188/12
+                                         Substance identification                                                                Restrictions
+                                                                                                                                                                                      Wording of
+    Reference                                                                                              Maximum                                                                   conditions of
+     number                             Name of Common                                  Product type,    concentration                                                                 use and
+                 Chemical name/INN                            CAS number    EC number                                                              Other
+                                       Ingredients Glossary                              body parts     in ready for use                                                               warnings
+                                                                                                          preparation
+
+
+
+
+                                                                                                                                                                                                         EN
+        a                b                      c                   d           e             f                g                                     h                                     i
+
+    ‘327        [3R-(3α,3aβ,7β,8aα)]- Acetyl Cedrene          32388-55-9   251-020-3                                       The presence of the substance shall be indicated in the
+                1-(2,3,4,7,8,8a-                                                                                           list of ingredients referred to in Article 19(1), point
+                hexahy­                                                                                                    (g), when its concentration exceeds:
+                dro-3,6,8,8-tetrame­                                                                                       — 0,001 % in leave-on products
+                thyl-                                                                                                      — 0,01 % in rinse-off products.
+                1H-3a,7-methanoa­
+                zulen-5-yl)ethan-
+                1-one (*)
+
+
+
+
+                                                                                                                                                                                                     Official Journal of the European Union
+    328         Pentyl-2-hydroxy-      Amyl Salicylate        2050-08-0    218-080-2                                       The presence of the substance shall be indicated in the
+                benzoate (*)                                                                                               list of ingredients referred to in Article 19(1), point
+                                                                                                                           (g), when its concentration exceeds:
+                                                                                                                           — 0,001 % in leave-on products
+                                                                                                                           — 0,01 % in rinse-off products.
+    329         1-Methoxy-4-(1E)-      Anethole               104-46-1/    203-205-5/                                      The presence of the substance shall be indicated in the
+                1-propen-1-yl-                                4180-23-8    224-052-0                                       list of ingredients referred to in Article 19(1), point
+                benzene (trans-                                                                                            (g), when its concentration exceeds:
+                Anethole) (*)                                                                                              — 0,001 % in leave-on products
+                                                                                                                           — 0,01 % in rinse-off products.
+    330         Benzaldehyde (*)       Benzaldehyde           100-52-7     202-860-4                                       The presence of the substance shall be indicated in the
+                                                                                                                           list of ingredients referred to in Article 19(1), point
+                                                                                                                           (g), when its concentration exceeds:
+                                                                                                                           — 0,001 % in leave-on products
+                                                                                                                           — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                                                                                     27.7.2023
+                                                                                                                                      27.7.2023
+331   Bornan-2-one;          Camphor             76-22-2/      200-945-0/   The presence of the substance shall be indicated in the
+      1,7,7-Trimethylbi-                         21368-68-3/   244-350-4/   list of ingredients referred to in Article 19(1), point
+      cyclo[2.2.1]-                              464-49-3/     207-355-2/   (g), when its concentration exceeds:
+      2-heptanone (*)                            464-48-2      207-354-7    — 0,001 % in leave-on products
+                                                                            — 0,01 % in rinse-off products.
+332   (1R,4E,9S)-4,11,11-­ Beta-                 87-44-5       201-746-1    The presence of the substance shall be indicated in the
+      Trimethyl-           Caryophyllene                                    list of ingredients referred to in Article 19(1), point
+
+
+
+
+                                                                                                                                          EN
+      8-methylenebicyclo                                                    (g), when its concentration exceeds:
+      [7.2.0]undec-                                                         — 0,001 % in leave-on products
+      4-ene (*)                                                             — 0,01 % in rinse-off products.
+333   2-methyl-5-(prop-      Carvone             99-49-0 /     202-759-5/   The presence of the substance shall be indicated in the
+      1-en-2-yl)cyclohex-                        6485-40-1/    229-352-5/   list of ingredients referred to in Article 19(1), point
+      2-en-1-one;(5R)-                           2244-16-8     218-827-2    (g), when its concentration exceeds:
+      2-Methyl-5-prop-                                                      — 0,001 % in leave-on products
+      1-en-2-ylcyclohex-                                                    — 0,01 % in rinse-off products.
+      2-en-1-one;(5S)-
+
+
+
+
+                                                                                                                                      Official Journal of the European Union
+      2-Methyl-5-prop-
+      1-en-2-ylcyclohex-
+      2-en-1-one (*)
+334   2-Methyl-1-phenyl-     Dimethyl            151-05-3      205-781-3    The presence of the substance shall be indicated in the
+      2-propyl acetate;      Phenethyl Acetate                              list of ingredients referred to in Article 19(1), point
+      Dimethylbenzyl                                                        (g), when its concentration exceeds:
+      Carbinyl Acetate (*)                                                  — 0,001 % in leave-on products
+                                                                            — 0,01 % in rinse-off products.
+335   Oxacyclohepta-         Hexadecanolac­      109-29-5      203-662-0    The presence of the substance shall be indicated in the
+      decan-2-one (*)        tone                                           list of ingredients referred to in Article 19(1), point
+                                                                            (g), when its concentration exceeds:
+                                                                            — 0,001 % in leave-on products
+                                                                            — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                      L 188/13
+                                                                                                                                   L 188/14
+336   1,3,4,6,7,8-Hexahy­ Hexamethylinda­     1222-05-5     214-946-9    The presence of the substance shall be indicated in the
+      dro-4,6,6,7,8,8-hexa­ nopyran                                      list of ingredients referred to in Article 19(1), point
+      methylcyclopenta-γ-                                                (g), when its concentration exceeds:
+      2-benzopyran (*)                                                   — 0,001 % in leave-on products
+                                                                         — 0,01 % in rinse-off products.
+337   3,7-Dimethyl          Linalyl Acetate   115-95-7      204-116-4    The presence of the substance shall be indicated in the
+      octa-1,6-diene-3-yl                                                list of ingredients referred to in Article 19(1), point
+
+
+
+
+                                                                                                                                       EN
+      acetate (*)                                                        (g), when its concentration exceeds:
+                                                                         — 0,001 % in leave-on products
+                                                                         — 0,01 % in rinse-off products.
+338   Menthol;              Menthol           89-78-1 /     201-939-0/   The presence of the substance shall be indicated in the
+      dl-menthol;                             1490-04-6 /   216-074-4/   list of ingredients referred to in Article 19(1), point
+      l-menthol;                              2216-51-5 /   218-690-9/   (g), when its concentration exceeds:
+      d-menthol (*)                           15356-60-2    239-387-8    — 0,001 % in leave-on products
+                                                                         — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                   Official Journal of the European Union
+339   3-Methyl-             Trimethylcyclo­   67801-20-1    267-140-4    The presence of the substance shall be indicated in the
+      5-(2,2,3-Trimethyl-   pentenyl                                     list of ingredients referred to in Article 19(1), point
+      3-Cyclopentenyl)      Methylisopentenol                            (g), when its concentration exceeds:
+      pent-4-en-2-ol (*)                                                 — 0,001 % in leave-on products
+                                                                         — 0,01 % in rinse-off products.
+340   o-Hydroxy-            Salicylaldehyde   90-02-8       201-961-0    The presence of the substance shall be indicated in the
+      benzaldehyde (*)                                                   list of ingredients referred to in Article 19(1), point
+                                                                         (g), when its concentration exceeds:
+                                                                         — 0,001 % in leave-on products
+                                                                         — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                   27.7.2023
+                                                                                                                            27.7.2023
+341   5-(2,3-Dimethyl-       Santalol   11031-45-1/ 234-262-4/    The presence of the substance shall be indicated in the
+      tricyclo[2.2.1.02,6]-             115-71-9/   204-102-8/    list of ingredients referred to in Article 19(1), point
+      hept-3-yl)-                       77-42-9     201-027-2     (g), when its concentration exceeds:
+      2-methylpent-2-en-                                          — 0,001 % in leave-on products
+      1-ol (alpha-Santalol);                                      — 0,01 % in rinse-off products.
+      (1S-(1a,2a(Z),4a))-
+      2-Methyl-
+
+
+
+
+                                                                                                                                EN
+      5-(2-methyl-
+      3-methylenebicyclo
+      [2.2.1]hept-2-yl)-
+      2-penten-1-ol
+      (beta-Santalol) (*)
+342   [1R-(1alpha)]-alpha- Sclareol     515-03-7     208-194-0    The presence of the substance shall be indicated in the
+      Ethenyldecahydro-                                           list of ingredients referred to in Article 19(1), point
+      2-hydro­                                                    (g), when its concentration exceeds:
+      xy-a,2,5,5,8a-                                              — 0,001 % in leave-on products
+
+
+
+
+                                                                                                                            Official Journal of the European Union
+      pentamethyl-                                                — 0,01 % in rinse-off products.
+      1-naphthalenepropa­
+      nol (*)
+343   2-(4-methylcyclohex- Terpineol    8000-41-7/   232-268-1/   The presence of the substance shall be indicated in the
+      3-en-1-yl)propan-                 98-55-5/     202-680-6/   list of ingredients referred to in Article 19(1), point
+      2-ol; p-Menth-1-en-               138-87-4/    205-342-6/   (g), when its concentration exceeds:
+      8-ol (alpha-                      586-81-2     209-584-3    — 0,001 % in leave-on products
+      Terpineol); 1-methyl-                                       — 0,01 % in rinse-off products.
+      4-(1-methylvinyl)
+      cyclohexan-1-ol
+      (beta-Terpineol);
+      1-methyl-
+      4-(1-methylethyli­
+      dene)cyclohexan-1-ol
+      (gamma-Terpineol) (*)
+
+
+
+
+                                                                                                                            L 188/15
+                                                                                                                                   L 188/16
+344   1-(1,2,3,4,5,6,7,8-o­ Tetramethyl       54464-57-2/   259-174-3/   The presence of the substance shall be indicated in the
+      ctahydro-2,3,8,8-te­ acetyloctahydro­   54464-59-4/   259-175-9/   list of ingredients referred to in Article 19(1), point
+      tramethyl-            naphthalenes      68155-66-8/   268-978-3/   (g), when its concentration exceeds:
+      2-naphthyl)ethan-                       68155-67-9/   268-979-9/   — 0,001 % in leave-on products
+      1-one;                                                             — 0,01 % in rinse-off products.
+      1-(1,2,3,4,5,6,7,8-o­
+      ctahydro-2,3,5,5-te­
+
+
+
+
+                                                                                                                                       EN
+      tramethyl-
+      2-naphthyl)ethan-
+      1-one;
+      1-(1,2,3,5,6,7,8,8a-
+      octahydro-2,3,8,8-te­
+      tramethyl-
+      2-naphthyl)ethan-
+      1-one;
+      1-(1,2,3,4,6,7,8,8a-
+      octahydro-2,3,8,8-te­
+
+
+
+
+                                                                                                                                   Official Journal of the European Union
+      tramethyl-
+      2-naphthyl)ethan-
+      1-one (*)
+345   3-(2,2-Dimethyl-     Trimethylbenzene­ 103694-68-­ 403-140-4       The presence of the substance shall be indicated in the
+      3-hydroxypropyl)     propanol          4                           list of ingredients referred to in Article 19(1), point
+      toluene (*)                                                        (g), when its concentration exceeds:
+                                                                         — 0,001 % in leave-on products
+                                                                         — 0,01 % in rinse-off products.
+346   4-Hydroxy-           Vanillin           121-33-5      204-465-2    The presence of the substance shall be indicated in the
+      3-methoxybenz-                                                     list of ingredients referred to in Article 19(1), point
+      aldehyde (*)                                                       (g), when its concentration exceeds:
+                                                                         — 0,001 % in leave-on products
+                                                                         — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                   27.7.2023
+                                                                                                                                     27.7.2023
+347   Cananga odorata         Cananga Odorata   83863-30-3/   281-092-1/   The presence of the substance or substances shall be
+      flower oil and extract; Flower Extract;   8006-81-3/    -/           indicated as ‘Cananga Odorata Oil/Extract’ in the list
+      Ylang Ylang flower oil Cananga Odorata    68606-83-7/   -/           of ingredients referred to in Article 19(1), point (g),
+      and extract (*)         Flower Oil        93686-30-7    297-681-1    when the concentration exceeds of the substance or
+                                                                           substances:
+                                                                           — 0,001 % in leave-on products
+                                                                           — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                         EN
+348   Cinnamomum cassia Cinnamomum              8007-80-5/    -/           The presence of the substance shall be indicated in the
+      leaf Oil (*)      Cassia Leaf Oil         84961-46-6    284-635-0    list of ingredients referred to in Article 19(1), point
+                                                                           (g), when its concentration exceeds:
+                                                                           — 0,001 % in leave-on products
+                                                                           — 0,01 % in rinse-off products.
+349   Cinnamomum            Cinnamomum          8015-91-6/    -/           The presence of the substance shall be indicated in the
+      zeylanicum bark       Zeylanicum Bark     84649-98-9    283-479-0    list of ingredients referred to in Article 19(1), point
+      oil (*)               Oil                                            (g), when its concentration exceeds:
+                                                                           — 0,001 % in leave-on products
+
+
+
+
+                                                                                                                                     Official Journal of the European Union
+                                                                           — 0,01 % in rinse-off products.
+350   Citrus aurantium      Citrus Aurantium    72968-50-4    277-143-2    The presence of the substance or substances shall be
+      amara and dulcis      Amara Flower Oil                               indicated as ‘Citrus Aurantium Flower Oil’ in the list
+      flower oil (*)                                                       of ingredients referred to in Article 19(1), point (g),
+                            Citrus Aurantium    8028-48-6/    232-433-8/   when the concentration of the substance or
+                            Dulcis Flower Oil   8016-38-4     -            substances exceeds:
+                                                                           — 0,001 % in leave-on products
+                                                                           — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                     L 188/17
+                                                                                                                                        L 188/18
+351   Citrus aurantium      Citrus Aurantium      68916-04-1/ -/             The presence of the substance or substances shall be
+      amara and dulcis peel Amara Peel Oil        72968-50-4 277-143-2       indicated as ‘Citrus Aurantium Peel Oil’ in the list of
+      oil (*)                                                                ingredients referred to in Article 19(1), point (g),
+                                                                             when the concentration of the substance or
+                             Citrus Aurantium 97766-30-8/ 307-891-8/         substances exceeds:
+                             Dulcis Peel Oil;     8028-48-6/ 232-433-8/      — 0,001 % in leave-on products
+                             Citrus Sinensis Peel 8008-57-9  -               — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                            EN
+                             Oil
+
+
+352   Citrus aurantium       Citrus Aurantium     8007-75-8     616-915-9    The presence of the substance shall be indicated in the
+      bergamia oil           Bergamia Peel Oil    89957-91-5    289-612-9    list of ingredients referred to in Article 19(1), point
+      (Bergamot oil) (*)                          68648-33-9/   -/           (g), when its concentration exceeds:
+                                                  8007-75-8/    616-915-9/   — 0,001 % in leave-on products
+                                                  85049-52-1    -            — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                        Official Journal of the European Union
+353   Citrus limon oil (*)   Citrus Limon Peel    84929-31-7/ 284-515-8/     The presence of the substance shall be indicated in the
+                             Oil                  8008-56-8   -              list of ingredients referred to in Article 19(1), point
+                                                                             (g), when its concentration exceeds:
+                                                                             — 0,001 % in leave-on products
+                                                                             — 0,01 % in rinse-off products.
+
+
+354   Cymbopogon citratus Cymbopogon              8007-02-1/    -/           The presence of the substance or substances shall be
+      / schoenanthus/     Schoenanthus Oil        89998-16-3    289-754-1    indicated as ‘Lemongrass Oil’ in the list of ingredients
+      flexuosus oils (*)                                                     referred to in Article 19(1), point (g), when the
+                                                                             concentration of the substance or substances
+                             Cymbopogon           91844-92-7    295-161-9    exceeds:
+                             Flexuosus Oil                                   — 0,001 % in leave-on products
+                                                                             — 0,01 % in rinse-off products.
+
+                             Cymbopogon           8007-02-1/    295-161-9/
+                             Citratus Leaf Oil    91844-92-7    295-161-9
+
+
+355   Eucalyptus globulus    Eucalyptus           97926-40-4/ 308-257-3/     The presence of the substance or substances shall be
+      oil (*)                Globulus Leaf Oil;   8000-48-4/ 616-775-9/      indicated as ‘Eucalyptus Globulus Oil’ in the list of
+                                                                             ingredients referred to in Article 19(1), point (g),
+                                                                             when the concentration of the substance or
+                             Eucalyptus         8000-48-4       616-775-9    substances exceeds:
+                             Globulus Leaf/Twig                              — 0,001 % in leave-on products
+                             Oil                                             — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                        27.7.2023
+                                                                                                                                      27.7.2023
+356   Eugenia caryophyllus Eugenia               8000-34-8 /   616-772-2/   The presence of the substance or substances shall be
+      oil (*)              Caryophyllus Leaf     8015-97-2/    -/           indicated as ‘Eugenia Caryophyllus Oil’ in the list of
+                           Oil                   84961-50-2    284-638-7    ingredients referred to in Article 19(1), point (g),
+                                                                            when the concentration of the substance or
+                                                                            substances exceeds:
+                             Eugenia             84961-50-2    284-638-7    — 0,001 % in leave-on products
+                             Caryophyllus                                   — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                          EN
+                             Flower Oil
+
+
+                             Eugenia           84961-50-2      284-638-7
+                             Caryophyllus Stem
+                             oil
+
+
+                             Eugenia             84961-50-2    284-638-7
+
+
+
+
+                                                                                                                                      Official Journal of the European Union
+                             Caryophyllus Bud
+                             oil
+
+
+357   Jasminum               Jasminum            84776-64-7/   283-993-5/   The presence of the substance or substances shall be
+      grandiflorum /         Grandiflorum        90045-94-6/   289-960-1/   indicated as ‘Jasmine Oil/Extract’ in the list of
+      officinale oil and     Flower Extract;     8022-96-6/    -/           ingredients referred to in Article 19(1), point (g),
+      extract (*)            Jasminum            8024-43-9     -            when the concentration of the substance or
+                             Officinale Oil;     90045-94-6    289-960-1    substances exceeds:
+                             Jasminum                                       — 0,001 % in leave-on products
+                             Officinale Flower                              — 0,01 % in rinse-off products
+                             Extract
+
+
+358   Juniperus virginiana   Juniperus           8000-27-9 /   -/           The presence of the substance or substances shall be
+      oil (*)                Virginiana Oil;     85085-41-2    285-370-3    indicated as ‘Juniperus Virginiana Oil’ in the list of
+                             Juniperus                                      ingredients referred to in Article 19(1), point (g),
+                             Virginiana Wood                                when the concentration of the substance or
+                             Oil                                            substances exceeds:
+                                                                            — 0,001 % in leave-on products
+                                                                            — 0,01 % in rinse-off products.
+
+
+359   Laurus nobilis         Laurus Nobilis Leaf 8002-41-3/    -/           The presence of the substance shall be indicated in the
+      oil (*) (***)          Oil                 8007-48-5/    -/           list of ingredients referred to in Article 19(1), point
+                                                 84603-73-6    283-272-5    (g), when its concentration exceeds:
+                                                                            — 0,001 % in leave-on products
+
+
+
+
+                                                                                                                                      L 188/19
+                                                                            — 0,01 % in rinse-off products.
+                                                                                                                                      L 188/20
+360   Lavandula hybrida     Lavandula Hybrida   91722-69-9/    294-470-6/   The presence of the substance or substances shall be
+      oil/extract;          Oil;                8022-15-9/     -/           indicated ‘Lavandula Oil/ Extract’ in the list of
+                            Lavandula Hybrida   93455-96-0/    -/           ingredients referred to in Article 19(1), point (g),
+                            Extract;            93455-97-1/    -/           when the concentration of the substance or
+                            Lavandula Hybrida   92623-76-2     296-408-3    substances exceeds:
+                            Flower Extract;                                 — 0,001 % in leave-on products
+                                                                            — 0,01 % in rinse-off products.
+      Lavandula intermedia Lavandula          84776-65-8/ 283-994-0/
+
+
+
+
+                                                                                                                                          EN
+      oil/extract;         Intermedia         8000-28-0/ -/
+                           Flower/Leaf/Stem 90063-37-9 289-995-2
+                           Extract; Lavandula
+                           Intermedia
+                           Flower/Leaf/Stem
+                           Oil; Lavandula
+                           Intermedia Oil
+      Lavandula             Lavandula           84776-65-8/ 283-994-0/
+      angustifolia          Angustifolia Oil;   8000-28-0/ -/
+
+
+
+
+                                                                                                                                      Official Journal of the European Union
+      oil/extract (*)       Lavandula           90063-37-9 289-995-2
+                            Angustifolia
+                            Flower/Leaf/Stem
+                            Extract
+361   Mentha piperita oil (*) Mentha Piperita Oil 8006-90-4/   -/           The presence of the substance shall be indicated in the
+                                                  84082-70-2   282-015-4    list of ingredients referred to in Article 19(1), point
+                                                                            (g), when its concentration exceeds:
+                                                                            — 0,001 % in leave-on products
+                                                                            — 0,01 % in rinse-off products.
+362   Mentha spicata oil    Mentha Viridis Leaf 8008-79-5/     616-927-4/   The presence of the substance shall be indicated in the
+      (spearmint oil) (*)   Oil                 84696-51-5     283-656-2    list of ingredients referred to in Article 19(1), point
+                                                                            (g), when its concentration exceeds:
+                                                                            — 0,001 % in leave-on products
+                                                                            — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                      27.7.2023
+                                                                                                                                    27.7.2023
+363   Narcissus poeticus/   Narcissus Poeticus   90064-26-9/ 290-087-3/   The presence of the substance or substances shall be
+      pseudonarcissus/      Extract              68917-12-4 -             indicated as ‘Narcissus Extract’ in the list of
+      jonquilla/tazetta                                                   ingredients referred to in Article 19(1), point (g),
+      extract (*)                                                         when the concentration of the substance or
+                            Narcissus            90064-27-0   290-088-9   substances exceeds:
+                            Pseudonarcissus                               — 0,001 % in leave-on products
+                            Flower Extract                                — 0,01 % in rinse-off products.
+
+
+
+
+                                                                                                                                        EN
+                            Narcissus Jonquilla 90064-25-8    290-086-8
+                            Extract
+                            Narcissus Tazetta
+                            Extract
+
+
+364   Pelargonium           Pelargonium       90082-51-2/ 290-140-0/ -    The presence of the substance shall be indicated in the
+      graveolens oil (*)    Graveolens Flower 8000-46-2                   list of ingredients referred to in Article 19(1), point
+                            Oil                                           (g), when its concentration exceeds:
+
+
+
+
+                                                                                                                                    Official Journal of the European Union
+                                                                          — 0,001 % in leave-on products
+                                                                          — 0,01 % in rinse-off products.
+
+
+365   Pogostemon cablin     Pogostemon Cablin 8014-09-3/      -/          The presence of the substance shall be indicated in the
+      oil (*)               Oil               84238-39-1      282-493-4   list of ingredients referred to in Article 19(1), point
+                                                                          (g), when its concentration exceeds:
+                                                                          — 0,001 % in leave-on products
+                                                                          — 0,01 % in rinse-off products.
+
+
+366   Rosa damascena        Rosa Damascena   8007-01-0/ -/                The presence of the substance or substances shall be
+      flower oil/extract;   Flower Oil; Rosa 90106-38-0/ 290-260-3        indicated as ‘Rose Flower Oil/Extract’ in the list of
+                            Damascena Flower                              ingredients referred to in Article 19(1), point (g),
+                            Extract                                       when the concentration of the substance or
+                                                                          substances exceeds:
+                                                                          — 0,001 % in leave-on products
+      Rosa alba flower      Rosa Alba Flower     93334-48-6   297-122-1   — 0,01 % in rinse-off products.
+      oil/extract;          Oil; Rosa Alba
+                            Flower Extract
+
+
+      Rosa canina flower    Rosa Canina Flower 84696-47-9     283-652-0
+      oil;                  Oil
+
+
+      Rosa centifolia       Rosa Centifolia      84604-12-6   283-289-8
+      oil/extract;          Flower Oil; Rosa
+
+
+
+
+                                                                                                                                    L 188/21
+                            Centifolia Flower
+                            Extract
+                                                                                                                                     L 188/22
+      Rosa gallica flower     Rosa Gallica Flower 84604-13-7   283-290-3
+      oil;                    Oil
+
+
+
+      Rosa moschata flower Rosa Moschata        -              -
+
+
+
+
+                                                                                                                                         EN
+      oil;                 Flower Oil
+
+
+
+      Rosa rugosa flower      Rosa Rugosa       92347-25-6     296-213-3
+      oil (*)                 Flower Oil
+
+
+
+
+                                                                                                                                     Official Journal of the European Union
+367   Santalum album oil (*) Santalum Album     8006-87-9/     -/          The presence of the substance shall be indicated in the
+                             Oil                84787-70-2     284-111-1   list of ingredients referred to in Article 19(1), point
+                                                                           (g), when its concentration exceeds:
+                                                                           — 0,001 % in leave-on products
+                                                                           — 0,01 % in rinse-off products.
+
+
+
+368   Phenol, 2-methoxy-      Eugenyl Acetate   93-28-7        202-235-6   The presence of the substance shall be indicated in the
+      4-(2-propenyl)-,                                                     list of ingredients referred to in Article 19(1), point
+      acetate (*)                                                          (g), when its concentration exceeds:
+                                                                           — 0,001 % in leave-on products
+                                                                           — 0,01 % in rinse-off products.
+
+
+
+369   2,6-Octadien-1-ol,      Geranyl Acetate   105-87-3       203-341-5   The presence of the substance shall be indicated in the
+      3,7-dimethyl-                                                        list of ingredients referred to in Article 19(1), point
+      ,1-acetate, (2E)- (*)                                                (g), when its concentration exceeds:
+                                                                           — 0,001 % in leave-on products
+                                                                           — 0,01 % in rinse-off products.
+
+
+
+370   2-Methoxy-4-prop-       Isoeugenyl Acetate 93-29-8       202-236-1   The presence of the substance shall be indicated in the
+      1-enylphenyl                                                         list of ingredients referred to in Article 19(1), point
+      acetate (*)                                                          (g), when its concentration exceeds:
+                                                                           — 0,001 % in leave-on products
+
+
+
+
+                                                                                                                                     27.7.2023
+                                                                           — 0,01 % in rinse-off products.
+                                                                                                                                                                                                         27.7.2023
+371        2,6,6-Trimethylbi-    Pinene                   80-56-8/         201-291-9/                                       The presence of the substance or the substances shall
+           cyclo[3.1.1]hept-                              7785-70-8/       232-087-8/                                       be indicated in the list of ingredients referred to in
+           2-ene (alpha-Pinene);                          127-91-3/        204-872-5/                                       Article 19(1), point (g), when the concentration of the
+           6,6-Dimethyl-                                  18172-67-3       242-060-2                                        substance or the substances exceeds:
+           2-methylenebicyclo                                                                                               — 0,001 % in leave-on products
+           [3.1.1]heptane (beta-                                                                                            — 0,01 % in rinse-off products.
+           Pinene) (*) (**)                                                                                                 The peroxide value shall be less than 10 mmoles/L(15)
+
+
+
+
+                                                                                                                                                                                                             EN
+(*)   Cosmetic products containing that substance that do not comply with the restriction(s) may be placed on the Union market until 31 July 2026 and made available on the Union market until 31 July
+      2028.
+(**) Since that substance is a monoterpene, it is subject to the restriction on peroxide value set out in entry 130.
+(***) For use of ‘Oil from the seeds of Laurus nobilis L.’, see Annex II, No 359.’
+
+
+
+
+                                                                                                                                                                                                         Official Journal of the European Union
+                                                                                                                                                                                                         L 188/23
+
