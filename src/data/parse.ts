@@ -5,7 +5,7 @@ import { cleanInciName } from './ingredientIndex';
 import { RETAIL_PLATFORMS } from './types';
 import type {
   PregnancyNote, UsRegulatoryStatus, ActiveConcentration, FaceAttributes, SkinTypeClaim, Texture, UseTime, WaterResistance, YesNoUnknown,
-  InclusionBasisType, PurchaseLink, RetailPlatform, RetailRating, Award, BrandClaimStatus, ProductSubtype, City, WaterRecord, ReferenceWater, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
+  FormulaVersionCheck, InclusionBasisType, PurchaseLink, RetailPlatform, RetailRating, Award, BrandClaimStatus, ProductSubtype, City, WaterRecord, ReferenceWater, ClaimSource, CnAvailability, FragranceFreeClaim, TestedClaim, Conflict, ConflictSeverity, EvidenceLevel, ExchangeRate, Ingredient,
   IngredientCategory, Product, Region, ReviewStatus, RiskTag, Target, Transparency,
   EvidenceUsage, UsageType, WaterHardness, Zone,
 } from './types';
@@ -244,11 +244,23 @@ export function parsePurchaseLinks(text: string): PurchaseLink[] {
   }));
 }
 
-/** 把评分和购买链接挂到产品上；购买链接按 RETAIL_PLATFORMS 的固定顺序 */
-export function attachRetail(products: Product[], ratings: RetailRating[], links: PurchaseLink[]): Product[] {
+export function parseFormulaVersionChecks(text: string): FormulaVersionCheck[] {
+  return parseCsv(text).map((r) => ({
+    productId: r.product_id ?? '',
+    status: r.status ?? '',
+    note: r.note ?? '',
+    addedOn: r.added_on ?? '',
+  }));
+}
+
+/** 把评分、购买链接和配方版本核对状态挂到产品上；购买链接按 RETAIL_PLATFORMS 的固定顺序 */
+export function attachRetail(products: Product[], ratings: RetailRating[], links: PurchaseLink[], checks: FormulaVersionCheck[] = []): Product[] {
   const order = (p: RetailPlatform) => RETAIL_PLATFORMS.indexOf(p);
+  const pending = new Set(checks.filter((c) => c.status === 'pending').map((c) => c.productId));
   return products.map((p) => ({
     ...p,
+    // 面部产品的 formula_note 写了"待核对"也显示"配方版本待核对"（洗护的"待核对"多指成分名称，不按此显示）
+    formulaVersionPending: pending.has(p.productId) || (p.zone === 'face' && p.formulaNote.includes('待核对')),
     ratings: ratings.filter((r) => r.productId === p.productId).sort((a, b) => order(a.platform) - order(b.platform)),
     purchaseLinks: links.filter((l) => l.productId === p.productId).sort((a, b) => order(a.platform) - order(b.platform)),
   }));

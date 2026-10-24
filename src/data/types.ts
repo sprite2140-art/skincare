@@ -207,10 +207,12 @@ export const FACE_ID_PREFIXES: Partial<Record<Category, string>> = {
   mask: 'MA',
 };
 
-export const SKIN_TYPE_CLAIMS = ['oily', 'dry', 'combination', 'normal', 'sensitive', 'all'] as const;
+/** acne_prone = 品牌标注适合痘肌（acne-prone / breakout-prone 等写法统一为这一项） */
+export const SKIN_TYPE_CLAIMS = ['oily', 'dry', 'combination', 'normal', 'sensitive', 'acne_prone', 'all'] as const;
 export type SkinTypeClaim = (typeof SKIN_TYPE_CLAIMS)[number];
 
-export const TEXTURES = ['gel', 'lotion', 'cream', 'balm', 'oil', 'foam', 'liquid', 'stick'] as const;
+/** emulsion 不单独设项，记为 lotion */
+export const TEXTURES = ['gel', 'lotion', 'cream', 'balm', 'oil', 'foam', 'liquid', 'stick', 'serum'] as const;
 export type Texture = (typeof TEXTURES)[number];
 
 export const YES_NO_UNKNOWN = ['yes', 'no', 'unknown'] as const;
@@ -317,6 +319,17 @@ export interface Product {
   ratings: RetailRating[];
   /** 各平台购买链接（data/purchase_links.csv），按 RETAIL_PLATFORMS 的固定顺序 */
   purchaseLinks: PurchaseLink[];
+  /** 配方版本待核对（data/formula_version_checks.csv）：卡片显示"配方版本待核对" */
+  formulaVersionPending?: boolean;
+}
+
+/** data/formula_version_checks.csv：在售配方与成分表对应哪一版尚未核对的产品 */
+export interface FormulaVersionCheck {
+  productId: string;
+  /** 目前只有 pending */
+  status: string;
+  note: string;
+  addedOn: string;
 }
 
 export interface ExchangeRate {

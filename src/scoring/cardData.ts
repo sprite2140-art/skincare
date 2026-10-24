@@ -4,6 +4,7 @@
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import { FACE_TARGETS, RETAIL_PLATFORMS, RETAIL_PLATFORM_DOMAINS, type Ingredient, type Product, type RetailPlatform, type RetailRating, type Target } from '../data/types';
 import { ratingCountForThreshold, visibleRatings } from '../data/retail';
+import { productActiveClasses, type ActiveClassIndex } from '../data/faceActives';
 import { SHAMPOO_OWN_HAIR_TARGETS, WEIGHTS, type DimensionKey } from './config';
 import { RISK_TAG_LABELS, TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
 import type { ReasonBasis } from './reasons';
@@ -24,7 +25,15 @@ export interface StoreRow {
   /** 该平台的评分；评价数不足显示门槛时为 null，但 lowCount 为 true */
   rating: RetailRating | null;
   lowCount: boolean;
+  /**
+   * 购买链接的库存状态（purchase_links.csv 的 status）：out_of_stock = 缺货，不能点，不作为主购买按钮；
+   * unknown = 库存未确认，照常列出但不作为主购买按钮；其他为 ok
+   */
+  availability: 'ok' | 'unknown' | 'out_of_stock';
 }
+
+const availabilityOf = (status: string): StoreRow['availability'] =>
+  status === 'out_of_stock' ? 'out_of_stock' : status === 'unknown' ? 'unknown' : 'ok';
 
 /** 由链接判断平台 */
 export function platformOf(url: string): { platform: StorePlatform; host: string } {
@@ -50,7 +59,7 @@ export function storeRows(p: Product): StoreRow[] {
   const links = mismatch ? p.purchaseLinks.filter((l) => l.platform !== 'brand') : p.purchaseLinks;
   const rows: StoreRow[] = links.map((l) => {
     const r = ratingOf(l.platform);
-    return { platform: l.platform, host: '', url: l.url, rating: r && shown.has(r.platform) ? r : null, lowCount: !!r && !shown.has(r.platform) };
+    return { platform: l.platform, host: '', url: l.url, rating: r && shown.has(r.platform) ? r : null, lowCount: !!r && !shown.has(r.platform), availability: availabilityOf(l.status) };
   });
   // 产品表的 purchase_url 不在购买链接里时也列出
   const dropped = new Set(p.purchaseLinks.filter((l) => !links.includes(l)).map((l) => l.url));
@@ -58,16 +67,19 @@ export function storeRows(p: Product): StoreRow[] {
     const { platform, host } = platformOf(p.purchaseUrl);
     if (!rows.some((x) => x.platform === platform && platform !== 'other')) {
       const r = ratingOf(platform);
-      rows.push({ platform, host, url: p.purchaseUrl, rating: r && shown.has(r.platform) ? r : null, lowCount: !!r && !shown.has(r.platform) });
+      rows.push({ platform, host, url: p.purchaseUrl, rating: r && shown.has(r.platform) ? r : null, lowCount: !!r && !shown.has(r.platform), availability: 'ok' });
     }
   }
   const order = (x: StoreRow) => (x.platform === 'other' ? RETAIL_PLATFORMS.length : RETAIL_PLATFORMS.indexOf(x.platform));
   return rows.sort((a, b) => order(a) - order(b));
 }
 
-/** 主购买按钮：默认指向评价数最多的平台；没有评分时用产品表的 purchase_url；再没有时用第一条链接 */
+/**
+ * 主购买按钮：默认指向评价数最多的平台；没有评分时用产品表的 purchase_url；再没有时用第一条链接。
+ * 缺货和库存未确认的链接不作为主购买按钮
+ */
 export function primaryStore(p: Product): StoreRow | null {
-  const rows = storeRows(p);
+  const rows = storeRows(p).filter((r) => r.availability === 'ok');
   const top = topRating(p);
   return (top && rows.find((r) => r.platform === top.platform))
     ?? rows.find((r) => r.url === p.purchaseUrl)
@@ -134,6 +146,24 @@ export function keyIngredients(p: Product, index: IngredientIndex, concerns: Tar
     }
   }
   return items.sort((a, b) => a.rank - b.rank).slice(0, max).map(({ rank: _rank, ...k }) => k);
+}
+
+export interface SunscreenFilter {
+  name: string;
+  /** 美国标签公布的浓度；没有公布时为空 */
+  concentration: string;
+}
+
+/**
+ * 防晒的关键成分：防晒剂。优先用产品公布的有效成分浓度（美国 Drug Facts），没有时按类别清单从成分表里找。
+ * 美国药品标签写法（如 Avobenzone）不在 CosIng 里，也照样列出
+ */
+export function sunscreenFilters(p: Product, index: IngredientIndex, classes: ActiveClassIndex): SunscreenFilter[] {
+  if (p.category !== 'sunscreen') return [];
+  const disclosed = p.face?.activeConcentrations ?? [];
+  if (disclosed.length > 0) return disclosed.map((a) => ({ name: a.inci, concentration: a.concentration }));
+  const found = productActiveClasses(p, index, classes);
+  return [...(found.get('sunscreen_mineral') ?? []), ...(found.get('sunscreen_organic') ?? [])].map((name) => ({ name, concentration: '' }));
 }
 
 /** 含针对头皮屑的有效成分（只有这样的产品才显示去屑用法） */

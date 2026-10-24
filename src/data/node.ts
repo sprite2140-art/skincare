@@ -2,7 +2,7 @@
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { parseCities, parseExchangeRates, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
+import { parseCities, parseExchangeRates, parseFormulaVersionChecks, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
 import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseInciAliases, parseIngredientList } from './cosing';
 import { buildIngredientIndex } from './ingredientIndex';
 import { buildActiveClassIndex, parseActiveClasses, parseFaceConflicts } from './faceActives';
@@ -20,6 +20,8 @@ export function loadDataFromDisk() {
     fragrances: parseIngredientList(read('fragrance_ingredients.csv')),
   };
   const aliases = parseInciAliases(read('inci_aliases.csv'));
+  /** 配方版本待核对的产品（formula_version_checks.csv） */
+  const formulaChecks = parseFormulaVersionChecks(read('formula_version_checks.csv'));
   const faceClassList = parseActiveClasses(read('face_active_classes.csv'));
   const allIngredients = expandIngredients(ingredients, cosing, allergens, explanations, lists);
   return {
@@ -36,7 +38,8 @@ export function loadDataFromDisk() {
     /** 成分库 + CosIng + 致敏原清单，用于匹配产品成分 */
     allIngredients,
     ingredientIndex: buildIngredientIndex(allIngredients, aliases),
-    products: attachRetail(parseProducts(read('products.csv')), parseRetailRatings(read('retail_ratings.csv')), parsePurchaseLinks(read('purchase_links.csv'))),
+    formulaChecks,
+    products: attachRetail(parseProducts(read('products.csv')), parseRetailRatings(read('retail_ratings.csv')), parsePurchaseLinks(read('purchase_links.csv')), formulaChecks),
     water: parseWaterRecords(read('water_hardness.csv')),
     referenceWater: parseReferenceWater(read('water_hardness_reference.csv')),
     cities: parseCities(read('cities.csv'), parseWaterRecords(read('water_hardness.csv'))),
