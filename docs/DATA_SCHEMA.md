@@ -245,6 +245,14 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 
 加香判断规则 (c) 用的清单：inci_name、basis（列入依据，目前都是 cosing_perfuming_only = CosIng 只登记了香料功能）、cosing_ref、source_url、added_on。2026-10-17 由原规则"CosIng 功能只有香料类"在产品中识别出的 12 个成分转入，判断结果与原规则相同。新产品中出现 CosIng 只登记了香料功能、但不在清单上的成分时，`npm run validate-data` 会提示，由人工决定是否加入。
 
+2026-10-24 新增 review_status、reviewed_on、notes 三列：只核对"是否加香"，核对过的条目为 verified，这个成分在打分中按已核对的加香成分计。首批 5 个（Curcuma Longa Root Extract、Cocos Nucifera Water、Rosmarinus Officinalis Leaf Water、Lavandula Oil/Extract、Viola Odorata Leaf Extract）依据 CosIng 官方导出（2026-10-17）的登记功能：Curcuma 为 FRAGRANCE、PERFUMING，其余 4 个为 FRAGRANCE。
+
+## eu_allergen_checks.csv（欧盟香料致敏原逐条核对记录）
+
+`npm run verify-list-ingredients` 核对欧盟香料致敏原时读这个文件。列：inci_name、status（found / not_in_document）、document（原文文件）、entry（附录 III 条目号）、glossary_name（原文"Common Ingredients Glossary"一栏的名称）、checked_on、note。
+
+原文为修订法规 (EU) 2023/1545（`docs/sources/eu_2023_1545.pdf`，作者提供的官方 PDF）。PDF 表格在文本提取时各列会交错，自动查找容易误判（例如"6-Methyl Coumarin"含有"Coumarin"），所以逐条记下条目号和名称。2023/1545 只替换了附录 III 的部分条目（45、46、70、73、86、88 等）并新增了一批；成分库的 13 个致敏原中，Benzyl Alcohol（45）、Citral（70）、Citronellol（86）、Limonene（88）在这份原文里，其余 9 个是 1223/2009 附录 III 中没有被替换的原条目，要用合并版原文核对，在那之前保持未核对。
+
 ## retail_ratings.csv（零售商评分）
 
 每行是一个产品在一个平台的评分，一个产品可以有多行。**只展示，不计入任何分数。**

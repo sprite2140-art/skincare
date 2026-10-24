@@ -1,13 +1,13 @@
-inci_name,basis,cosing_ref,source_url,added_on
-Citrus Aurantium Peel Oil,cosing_perfuming_only,100219,https://ec.europa.eu/growth/tools-databases/cosing/details/100219,2026-10-17
-Rosmarinus Officinalis Leaf Water,cosing_perfuming_only,59425,https://ec.europa.eu/growth/tools-databases/cosing/details/59425,2026-10-17
-Terpineol,cosing_perfuming_only,80711,https://ec.europa.eu/growth/tools-databases/cosing/details/80711,2026-10-17
-Lavandula Oil/Extract,cosing_perfuming_only,100225,https://ec.europa.eu/growth/tools-databases/cosing/details/100225,2026-10-17
-Linalyl Acetate,cosing_perfuming_only,77311,https://ec.europa.eu/growth/tools-databases/cosing/details/77311,2026-10-17
-Terpinolene,cosing_perfuming_only,41511,https://ec.europa.eu/growth/tools-databases/cosing/details/41511,2026-10-17
-Turpentine,cosing_perfuming_only,41521,https://ec.europa.eu/growth/tools-databases/cosing/details/41521,2026-10-17
-Cocos Nucifera Water,cosing_perfuming_only,55635,https://ec.europa.eu/growth/tools-databases/cosing/details/55635,2026-10-17
-Curcuma Longa Root Extract,cosing_perfuming_only,75441,https://ec.europa.eu/growth/tools-databases/cosing/details/75441,2026-10-17
-Mentha Arvensis Leaf Oil,cosing_perfuming_only,57860,https://ec.europa.eu/growth/tools-databases/cosing/details/57860,2026-10-17
-Viola Odorata Leaf Extract,cosing_perfuming_only,80615,https://ec.europa.eu/growth/tools-databases/cosing/details/80615,2026-10-17
-Cupressus Sempervirens Oil,cosing_perfuming_only,83473,https://ec.europa.eu/growth/tools-databases/cosing/details/83473,2026-10-17
+inci_name,basis,cosing_ref,source_url,added_on,review_status,reviewed_on,notes
+Citrus Aurantium Peel Oil,cosing_perfuming_only,100219,https://ec.europa.eu/growth/tools-databases/cosing/details/100219,2026-10-17,,,
+Rosmarinus Officinalis Leaf Water,cosing_perfuming_only,59425,https://ec.europa.eu/growth/tools-databases/cosing/details/59425,2026-10-17,verified,2026-10-24,"只核对""是否加香""：CosIng 官方导出（2026-10-17）登记功能为 FRAGRANCE（CosIng 59425）"
+Terpineol,cosing_perfuming_only,80711,https://ec.europa.eu/growth/tools-databases/cosing/details/80711,2026-10-17,,,
+Lavandula Oil/Extract,cosing_perfuming_only,100225,https://ec.europa.eu/growth/tools-databases/cosing/details/100225,2026-10-17,verified,2026-10-24,"只核对""是否加香""：CosIng 官方导出（2026-10-17）登记功能为 FRAGRANCE（CosIng 100225）"
+Linalyl Acetate,cosing_perfuming_only,77311,https://ec.europa.eu/growth/tools-databases/cosing/details/77311,2026-10-17,,,
+Terpinolene,cosing_perfuming_only,41511,https://ec.europa.eu/growth/tools-databases/cosing/details/41511,2026-10-17,,,
+Turpentine,cosing_perfuming_only,41521,https://ec.europa.eu/growth/tools-databases/cosing/details/41521,2026-10-17,,,
+Cocos Nucifera Water,cosing_perfuming_only,55635,https://ec.europa.eu/growth/tools-databases/cosing/details/55635,2026-10-17,verified,2026-10-24,"只核对""是否加香""：CosIng 官方导出（2026-10-17）登记功能为 FRAGRANCE（CosIng 55635）"
+Curcuma Longa Root Extract,cosing_perfuming_only,75441,https://ec.europa.eu/growth/tools-databases/cosing/details/75441,2026-10-17,verified,2026-10-24,"只核对""是否加香""：CosIng 官方导出（2026-10-17）登记功能为 FRAGRANCE, PERFUMING（CosIng 75441）"
+Mentha Arvensis Leaf Oil,cosing_perfuming_only,57860,https://ec.europa.eu/growth/tools-databases/cosing/details/57860,2026-10-17,,,
+Viola Odorata Leaf Extract,cosing_perfuming_only,80615,https://ec.europa.eu/growth/tools-databases/cosing/details/80615,2026-10-17,verified,2026-10-24,"只核对""是否加香""：CosIng 官方导出（2026-10-17）登记功能为 FRAGRANCE（CosIng 80615）"
+Cupressus Sempervirens Oil,cosing_perfuming_only,83473,https://ec.europa.eu/growth/tools-databases/cosing/details/83473,2026-10-17,,,

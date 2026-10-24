@@ -51,11 +51,11 @@ describe('步骤由困扰决定', () => {
     expect(steps.find((s) => s.id === 'sunscreen')!.needs).toEqual(['pigmentation', 'acne']);
   });
 
-  it('经常敏感、或在用处方药 / 异维 A 酸：不出现去角质；处方药时也不出现点涂', () => {
+  it('经常敏感、或在用处方药 / 异维 A 酸：不出现去角质；口服异维 A 酸时也不出现点涂', () => {
     expect(ids({ concerns: ['pores'], sensitivity: 'often' })).not.toContain('exfoliator');
     expect(ids({ concerns: ['pores'], sensitivity: 'sometimes' })).toContain('exfoliator');
     expect(ids({ concerns: ['acne', 'pores'] }, ['isotretinoin'])).toEqual(['cleanser', 'treatment', 'moisturizer', 'sunscreen']);
-    expect(ids({ concerns: ['acne', 'aging'] }, ['rx'])).toEqual(['cleanser', 'treatment', 'moisturizer', 'sunscreen']);
+    expect(ids({ concerns: ['acne', 'aging'] }, ['rx'])).toEqual(['cleanser', 'treatment', 'spot', 'moisturizer', 'sunscreen']);
   });
 
   it('"只看基础 3 步"开关', () => {

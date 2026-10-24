@@ -48,7 +48,7 @@ export interface FaceStepOptions {
   basicOnly?: boolean;
 }
 
-/** 在用处方外用药或口服异维 A 酸：不出现去角质和点涂（点涂产品几乎都含过氧化苯甲酰或水杨酸，草案 4.5） */
+/** 在用处方外用药或口服异维 A 酸：不出现去角质（草案 4.5）；口服异维 A 酸时也不出现点涂（处方外用药时过氧化苯甲酰点涂不排除） */
 export const onRxTreatment = (statuses: SpecialStatus[]) => statuses.includes('rx') || statuses.includes('isotretinoin');
 
 export function buildFaceSteps(a: FaceAnswers, opts: FaceStepOptions): FaceStep[] {
@@ -64,7 +64,7 @@ export function buildFaceSteps(a: FaceAnswers, opts: FaceStepOptions): FaceStep[
     const treatment = pick(TREATMENT_CONCERNS);
     if (treatment.length > 0) add('treatment', 'optional', treatment, treatment);
     const rx = onRxTreatment(opts.statuses);
-    if (chosen.includes('acne') && !rx) add('spot', 'optional', ['acne'], ['acne']);
+    if (chosen.includes('acne') && !opts.statuses.includes('isotretinoin')) add('spot', 'optional', ['acne'], ['acne']);
     const exfoliate = pick(EXFOLIATOR_CONCERNS);
     if (exfoliate.length > 0 && !isFaceSensitive(a) && !rx) add('exfoliator', 'optional', exfoliate, exfoliate, true);
   }

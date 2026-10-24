@@ -187,9 +187,22 @@ export function scoreFaceProduct(product: Product, profile: ScoringProfile, data
       notices.push({ code: 'pregnancy_caution_use', unverified: false, text: { zh: `含${n.zh}，孕期请注意用量，告诉医生你在用什么`, en: `Contains ${n.en}; during pregnancy, watch the amount and tell your doctor what you use` } });
     }
   }
-  // 处方外用药 / 口服异维 A 酸：含功效成分的免洗产品排除（AAD 去角质页、异维 A 酸护肤页）
-  if ((statuses.includes('rx') || statuses.includes('isotretinoin')) && leaveOn && irritantClasses.length > 0) {
-    const n = names(irritantClasses);
+  // 处方外用药 / 口服异维 A 酸：含功效成分的免洗产品排除（AAD 去角质页、异维 A 酸护肤页）。
+  // 只有处方外用药时不排除过氧化苯甲酰（处方抗生素外用药常与它同用，作者决定 2026-10-24），改为提示
+  const iso = statuses.includes('isotretinoin');
+  const rxExcluded = iso ? irritantClasses : statuses.includes('rx') ? irritantClasses.filter((c) => c !== 'benzoyl_peroxide') : [];
+  if (statuses.includes('rx') && !iso && classes.has('benzoyl_peroxide')) {
+    notices.push({
+      code: 'rx_bpo_note',
+      unverified: false,
+      text: {
+        zh: '如果你在用处方外用药：抗生素类（如克林霉素）常与过氧化苯甲酰同用；处方维 A 酸（tretinoin）不要与过氧化苯甲酰在同一时段使用。具体请按医生的方案。',
+        en: 'If you use a prescription topical: antibiotics (such as clindamycin) are often used with benzoyl peroxide; do not use prescription tretinoin at the same time of day as benzoyl peroxide. Follow your doctor\'s plan.',
+      },
+    });
+  }
+  if (leaveOn && rxExcluded.length > 0) {
+    const n = names(rxExcluded);
     exclusions.push({
       code: 'rx_actives',
       unverified: false,
