@@ -222,9 +222,12 @@ export function expandIngredients(
     const others = ing.riskTags.filter((t) => t !== 'fragrance');
     const fragrance = c ? isFragrance(names, allergen, fragranceKeys) : ing.riskTags.includes('fragrance') || allergen;
     const riskTags = fragrance ? [...others, 'fragrance' as const] : others;
+    // 成分库条目没有写通俗解释时，用常见成分通俗解释表里的（是否核对按那张表）
+    const listed = !ing.explainZh ? names.map((n) => explained.get(normalizeName(n))).find(Boolean) : undefined;
     const full: Ingredient = {
       ...ing, riskTags, origin: 'library', euAllergen: allergen, chelator: isChelator(names), fragranceListed: isListedFragrance(names),
       cosingFunctions: c?.functions,
+      ...(listed ? { explainZh: listed.explainZh, explainEn: listed.explainEn, explainFromList: true, explainReviewed: listed.reviewStatus === 'verified' } : {}),
     };
     for (const n of [ing.inciName, ...ing.aliases]) known.set(normalizeName(n), full);
     return full;

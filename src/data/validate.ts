@@ -79,7 +79,8 @@ export function validateData(
       // 查证后没有找到可引用的研究时，sources 可以为空，但要在 notes 写明原因（这类需求按 C 级计，与暂无证据相同）
       if (ing.sources.length === 0 && !ing.notes) err(F_ING, key, 'verified 成分缺少 sources（没有可引用的出处时在 notes 写明原因）');
       else if (ing.sources.length === 0) warn(F_ING, key, `verified 成分没有出处，原因：${ing.notes}`);
-      if (ing.category === 'active' && ing.targets.length > 0 && !ing.evidenceLevel) {
+      const allUnknown = Object.values(ing.evidenceByTarget ?? {}).every((l) => l === 'unknown') && Object.keys(ing.evidenceByTarget ?? {}).length > 0;
+      if (ing.category === 'active' && ing.targets.length > 0 && !ing.evidenceLevel && !allUnknown) {
         err(F_ING, key, 'verified 有效成分缺少 evidence_level');
       }
       if (ing.category === 'active' && ing.targets.length > 0 && Object.keys(ing.evidenceByTarget ?? {}).length === 0) {
@@ -91,7 +92,7 @@ export function validateData(
     const byTarget = ing.evidenceByTarget ?? {};
     for (const [t, level] of Object.entries(byTarget)) {
       oneOf(F_ING, key, 'evidence_by_target 需求', t, TARGETS);
-      oneOf(F_ING, key, `evidence_by_target 中 ${t} 的等级`, level ?? '', EVIDENCE_LEVELS);
+      oneOf(F_ING, key, `evidence_by_target 中 ${t} 的等级`, level ?? '', [...EVIDENCE_LEVELS, 'unknown']);
       if (!ing.targets.includes(t as Target)) err(F_ING, key, `evidence_by_target 中的 ${t} 不在 targets 里`);
     }
     if (Object.keys(byTarget).length > 0) {
@@ -101,6 +102,7 @@ export function validateData(
       if (top && ing.evidenceLevel !== top) err(F_ING, key, `evidence_level 应为 evidence_by_target 中最高的一级 ${top}`);
     }
     if (ing.evidenceUsage) oneOf(F_ING, key, 'evidence_usage', ing.evidenceUsage, EVIDENCE_USAGES);
+    if (ing.evidenceMinConcentration != null && !(ing.evidenceMinConcentration > 0)) err(F_ING, key, 'evidence_min_concentration 应为正数（%）');
     if (ing.usRegulatoryStatus) oneOf(F_ING, key, 'us_regulatory_status', ing.usRegulatoryStatus, US_REGULATORY_STATUSES);
     if (ing.pregnancyNote) oneOf(F_ING, key, 'pregnancy_note', ing.pregnancyNote, PREGNANCY_NOTES);
     if (ing.photosensitizing) oneOf(F_ING, key, 'photosensitizing', ing.photosensitizing, YES_NO_UNKNOWN);
@@ -320,7 +322,7 @@ export function validateData(
     if (e.reviewStatus === 'verified' && !DATE_RE.test(e.reviewedOn)) err(F_EXP, key, 'verified 的解释必须填写 reviewed_on（YYYY-MM-DD）');
     const ing = index.get(e.inciName);
     if (!ing) warn(F_EXP, key, '成分不在成分库，也不在 CosIng');
-    else if (ing.origin === 'library') warn(F_EXP, key, '成分库已有通俗解释，这里的不会使用');
+    else if (ing.origin === 'library' && !ing.explainFromList) warn(F_EXP, key, '成分库已有通俗解释，这里的不会使用');
   }
 
   // chelators.csv / fragrance_ingredients.csv（本项目维护的判断清单）

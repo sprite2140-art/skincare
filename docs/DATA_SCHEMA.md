@@ -41,12 +41,14 @@ risk_tags 取值：fragrance, essential_oil, alcohol, strong_acid, sensitizer, s
 
 | 字段 | 含义 | 示例 |
 |---|---|---|
-| evidence_by_target | 每个需求单独的证据等级，`需求:等级`，分号分隔。需求必须在 targets 中，targets 里的每个需求都要写等级；evidence_level 必须是其中最高的一级。填了这一列的成分，打分时按需求读取等级；整列为空的旧条目沿用 evidence_level | dandruff:A;scalp_oil:C |
+| evidence_by_target | 每个需求单独的证据等级，`需求:等级`，分号分隔；等级可写 unknown（查证过但没有可评级的证据，按"暂无证据"计，不会高于 C 级）。需求必须在 targets 中，targets 里的每个需求都要写等级；evidence_level 必须是其中最高的一级。填了这一列的成分，打分时按需求读取等级；整列为空的旧条目沿用 evidence_level | dandruff:A;scalp_oil:C |
 | evidence_usage | 证据来自哪种使用方式的产品：leave_on / rinse_off / both，可留空。与产品的使用方式不同时降一级计算（A→B，B→C，C 不再降）；both 和留空不降。按 effective_range 和 notes 填写 | leave_on |
 | notes | 核对备注，只供核对，不在页面显示 | |
 | us_regulatory_status | 美国监管状态（面部有效成分）：otc_drug_active / rx_only / cosmetic / not_permitted_otc / unknown，可留空；只在成分弹窗显示 | otc_drug_active |
 | pregnancy_note | 孕期：avoid（自动带 pregnancy_caution 标签：怀孕 / 备孕 / 哺乳排除，对所有人被动提示）/ caution（护肤中只提示"注意用量"，不排除）/ no_known_concern / unknown，可留空 | avoid |
 | photosensitizing | 是否让皮肤更怕晒：yes / no / unknown，可留空 | yes |
+| evidence_min_concentration | 证据对应的最低浓度（%）：产品公开的浓度低于它、或没有公开时，证据降一级（目前只有 Azelaic Acid = 15） | 15 |
+| pregnancy_text / photosensitizing_text / us_regulatory_text | 查证资料的原文说明，只供核对，不显示。enum 列（pregnancy_note 等）由导入时逐个成分对应，见 PROGRESS.md 2026-10-24 | |
 
 verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后没有可引用的出处时，sources 可以为空，但必须在 notes 写明原因（校验给提示），这类需求按 C 级计，与暂无证据相同。有 targets 的 verified 有效成分必须填写 evidence_level 和 evidence_by_target。`npm run validate-data` 会检查。
 
@@ -191,6 +193,10 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 6. 没有价格（或币种不在汇率表）的产品不参与分位数计算；选了任一上限时不显示它们，只在"不限"中出现。
 7. 问卷也可以自填上限（单品），或在洗护搭配时"按整套"自填总预算；金额按用户所在地货币保存，比较时换算成 USD。没有符合条件的商品时页面明确提示，不自动放宽条件。
 8. 每次产品数据或汇率更新后，上限在构建时自动重新计算；用户档案保存的是"第几个上限"（q1–q3），不是金额，所以不用重填。旧档案保存的 p33 / p67 和前一版的 q4 在读取时去掉，需要重新选择。`npm run validate-data` 会打印当前各品类的上限。
+
+## face_conflicts.csv（面部搭配提醒）
+
+成分库 conflicts_with 的说明和出处：conflict_id、ingredient_1、ingredient_2、conflict_type、same_session_rule（同一时段怎么用，原文）、source_url、notes、added_on。成分库 conflicts_with 只写成分名（一般冲突）。结果页顶部的搭配检查遇到这些组合时，显示为"提醒：…"并附出处；同一对产品已经有类别规则的提醒时不重复。2026-10-24 首批 7 条（C01–C07），已由第二个 AI 核对出处。
 
 ## face_active_classes.csv（面部有效成分类别清单）
 

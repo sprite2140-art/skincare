@@ -10,7 +10,7 @@ const SECTIONS: { id: string; items: string[] }[] = [
   { id: 'fit', items: ['1', '2', '3', '4', '5', '6', '7', '8'] },
   { id: 'basis', items: ['tested', 'ingredients', 'brand_claim', 'classification', 'award'] },
   { id: 'ingredients', items: ['1', '2', '3', '4'] },
-  { id: 'evidence', items: ['1', '2', '3', '4'] },
+  { id: 'evidence', items: ['1', '2', '3', '4', '5', '6'] },
   { id: 'fragrance', items: ['1', '2', '3'] },
   { id: 'gentle', items: ['1', '2', '3'] },
   { id: 'ratings', items: ['1', '2', '3', '4'] },

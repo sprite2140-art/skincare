@@ -10,6 +10,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { faceActiveClasses, ingredientIndex, products } from '../data/load';
+import { productScopedIndex } from '../data/faceActives';
 import { COSING_RETRIEVED_ON, COSING_SOURCE } from '../data/cosing';
 import { translateCosingFunctions } from '../data/cosingFunctions';
 import { ratingCountText } from '../data/retail';
@@ -89,7 +90,7 @@ function IngredientChip({ name, status }: { name: string; status: IngredientStat
           {explain && (
             <span>
               {explain}
-              {ing!.reviewStatus !== 'verified' && !ing!.explainReviewed && <span className="muted">（{t('ing.explainDraft')}）</span>}
+              {(ing!.explainFromList ? !ing!.explainReviewed : ing!.reviewStatus !== 'verified' && !ing!.explainReviewed) && <span className="muted">（{t('ing.explainDraft')}）</span>}
             </span>
           )}
           {fns.length > 0 && (
@@ -286,7 +287,8 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
   const needs = needRows(r);
   const sum = needSummary(needs);
   const cautions = cautionItems(r, profile);
-  const keys = keyIngredients(p, ingredientIndex, profile.concerns);
+  // 面部产品：氧化锌、二氧化钛只在防晒里作为活性成分时写功效
+  const keys = keyIngredients(p, p.zone === 'face' ? productScopedIndex(ingredientIndex, p) : ingredientIndex, profile.concerns);
   const filters = sunscreenFilters(p, ingredientIndex, faceActiveClasses);
   const all = ingredientStatuses(p, ingredientIndex);
   const checked = [...new Set(p.ratings.map((x) => x.checkedOn).filter(Boolean))].sort().at(-1);

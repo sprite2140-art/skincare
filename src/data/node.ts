@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { parseCities, parseExchangeRates, parseFormulaVersionChecks, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
 import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseInciAliases, parseIngredientList } from './cosing';
 import { buildIngredientIndex } from './ingredientIndex';
-import { buildActiveClassIndex, parseActiveClasses } from './faceActives';
+import { buildActiveClassIndex, parseActiveClasses, parseFaceConflicts } from './faceActives';
 
 const dataDir = fileURLToPath(new URL('../../data/', import.meta.url));
 const read = (name: string) => readFileSync(dataDir + name, 'utf8');
@@ -47,5 +47,7 @@ export function loadDataFromDisk() {
     /** 面部有效成分类别清单（本项目维护） */
     faceClassList,
     faceActiveClasses: buildActiveClassIndex(faceClassList),
+    /** 面部搭配提醒（data/face_conflicts.csv） */
+    faceConflictNotes: parseFaceConflicts(read('face_conflicts.csv')),
   };
 }

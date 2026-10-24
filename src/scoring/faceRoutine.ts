@@ -2,7 +2,7 @@
 // （先比适合等级，再比总分，同分取总价低的）。没有符合条件的产品时明确说明，不放宽条件。
 
 import type { Product } from '../data/types';
-import type { ActiveClassIndex } from '../data/faceActives';
+import type { ActiveClassIndex, FaceConflictNote } from '../data/faceActives';
 import type { FaceAnswers } from '../profile/faceQuestionnaire';
 import { buildRoutine } from './routine';
 import { buildFaceSteps, type FaceStep, type FaceStepId } from './faceSteps';
@@ -32,6 +32,8 @@ export interface RoutineStep {
 
 export interface FaceRoutineInput {
   products: Product[];
+  /** 搭配提醒的说明和出处（data/face_conflicts.csv） */
+  conflictNotes?: FaceConflictNote[];
   face: FaceAnswers;
   statuses: SpecialStatus[];
   avoidIngredients: string[];
@@ -107,7 +109,7 @@ export function buildScheduledRoutine(input: FaceRoutineInput): { routine: FaceR
   const routine = buildFaceRoutine(input);
   const evaluate = () => {
     const schedule = scheduleRoutine(routine.steps);
-    return { schedule, conflicts: checkRoutineConflicts(schedule, input.data.index) };
+    return { schedule, conflicts: checkRoutineConflicts(schedule, input.data.index, input.conflictNotes) };
   };
   let current = evaluate();
   const involved = (s: RoutineStep, list: RoutineConflict[]) =>

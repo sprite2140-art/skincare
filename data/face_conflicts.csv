@@ -1,0 +1,8 @@
+conflict_id,ingredient_1,ingredient_2,conflict_type,same_session_rule,source_url,notes,added_on
+C01,Adapalene,Glycolic Acid,irritation,避免自行同一时段叠加;按各成品标签及医生指导,https://www.dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=fb57f9d4-54d6-412c-aeb4-00a8bd46f958,处方阿达帕林乳霜标签明确提示避免含AHA或甘醇酸产品;不是化学失活结论,2026-10-24
+C02,Adapalene,Lactic Acid,irritation,按AHA类别避免自行同一时段叠加,https://www.dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=fb57f9d4-54d6-412c-aeb4-00a8bd46f958,由标签AHA类别提醒映射乳酸;不是乳酸专门配对试验,2026-10-24
+C03,Adapalene,Mandelic Acid,irritation,按AHA类别避免自行同一时段叠加尤其专业换肤,https://www.dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=fb57f9d4-54d6-412c-aeb4-00a8bd46f958,由标签AHA类别提醒映射杏仁酸;不是杏仁酸专门配对试验,2026-10-24
+C04,Adapalene,Salicylic Acid,irritation,谨慎叠加;已刺激时不要自行继续加药,https://www.dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=fb57f9d4-54d6-412c-aeb4-00a8bd46f958,标签特别提醒;不应写成任何浓度任何剂型都绝对禁配,2026-10-24
+C05,Adapalene,Sulfur,irritation,谨慎叠加;已刺激时不要自行继续加药,https://www.dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=fb57f9d4-54d6-412c-aeb4-00a8bd46f958,标签特别提醒;不能等同于临床上不能联合治疗,2026-10-24
+C06,Benzoyl Peroxide,Salicylic Acid,irritation,同时使用增加干燥或刺激时仅用一种除非医生指导,https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=45a93c47-552f-4660-a37c-7a8cceac2d8e,依据BPO对其他外用祛痘药的类别警告;不是两者专门对照试验,2026-10-24
+C07,Benzoyl Peroxide,Sulfur,irritation,同时使用增加干燥或刺激时仅用一种除非医生指导,https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=45a93c47-552f-4660-a37c-7a8cceac2d8e,依据BPO对其他外用祛痘药的类别警告;不是绝对禁配,2026-10-24
