@@ -5,8 +5,9 @@ import { EMPTY_HAIR, toScoringProfile, type HairAnswers, type ScalpAnswers } fro
 import { newProfile } from '../profile/storage';
 import { computeBudgetCaps } from './budget';
 import {
-  cautionItems, hasAntiDandruffActive, keyIngredients, needRows, needSummary, platformOf, primaryStore, scoreBreakdown, storeRows, topRating,
+  cautionItems, hasAntiDandruffActive, keyIngredients, needRows, needSummary, platformOf, primaryStore, scoreBreakdown, storeRows, sunscreenFilters, topRating,
 } from './cardData';
+import { isUntintedMineral, productActiveClasses } from '../data/faceActives';
 import { scoreProduct } from './score';
 
 const real = loadDataFromDisk();
@@ -197,5 +198,47 @@ describe('百货 / 买手渠道', () => {
       ],
     };
     expect(storeRows(p).map((r) => r.platform)).toEqual(['brand', 'amazon', 'nordstrom', 'saks', 'bluemercury', 'other']);
+  });
+});
+
+describe('防晒第 1、2 批：库存状态、配方版本、同系列', () => {
+  it('缺货的链接不作为主购买按钮；库存未确认的照常列出，也不作为主购买按钮', () => {
+    const oos = byId('SU-US-034');
+    expect(oos.purchaseLinks.every((l) => l.status === 'out_of_stock')).toBe(true);
+    expect(storeRows(oos).every((r) => r.availability === 'out_of_stock')).toBe(true);
+    expect(primaryStore(oos)).toBeNull();
+    const unknown = byId('SU-US-031');
+    expect(storeRows(unknown).some((r) => r.availability === 'unknown')).toBe(true);
+    expect(primaryStore(unknown)?.availability ?? 'ok').toBe('ok');
+  });
+
+  it('配方版本待核对的 4 款打上标记，其他不打', () => {
+    const pending = ['SU-US-029', 'SU-US-036', 'SU-US-039', 'SU-US-040'];
+    for (const id of pending) expect(byId(id).formulaVersionPending).toBe(true);
+    expect(byId('SU-US-001').formulaVersionPending).toBe(false);
+  });
+
+  it('SU-US-005 和 SU-US-024 是同系列不同 SPF，互相关联', () => {
+    expect(byId('SU-US-005').pairedProductIds).toEqual(['SU-US-024']);
+    expect(byId('SU-US-024').pairedProductIds).toEqual(['SU-US-005']);
+  });
+});
+
+describe('防晒卡片：防晒剂和含色判断', () => {
+  it('关键成分列出防晒剂和标签浓度，包括 CosIng 里没有的美国写法', () => {
+    const f = sunscreenFilters(byId('SU-US-001'), real.ingredientIndex, real.faceActiveClasses);
+    expect(f).toEqual([
+      { name: 'Avobenzone', concentration: '3%' }, { name: 'Octisalate', concentration: '5%' },
+      { name: 'Octocrylene', concentration: '8%' }, { name: 'Homosalate', concentration: '7%' },
+    ]);
+    expect(sunscreenFilters(byId('CL-US-001'), real.ingredientIndex, real.faceActiveClasses)).toEqual([]);
+  });
+
+  it('单数 Iron Oxide 和"May Contain: … Iron Oxides"都算含氧化铁，不会被当成未调色的物理防晒', () => {
+    for (const id of ['SU-US-017', 'SU-US-027', 'SU-US-031']) {
+      const found = productActiveClasses(byId(id), real.ingredientIndex, real.faceActiveClasses);
+      expect(found.has('iron_oxide')).toBe(true);
+      expect(isUntintedMineral(found)).toBe(false);
+    }
   });
 });

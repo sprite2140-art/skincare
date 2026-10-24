@@ -14,17 +14,18 @@ import explanationsCsv from '../../data/ingredient_explanations.csv?raw';
 import chelatorsCsv from '../../data/chelators.csv?raw';
 import fragrancesCsv from '../../data/fragrance_ingredients.csv?raw';
 import aliasesCsv from '../../data/inci_aliases.csv?raw';
+import formulaChecksCsv from '../../data/formula_version_checks.csv?raw';
 import faceClassesCsv from '../../data/face_active_classes.csv?raw';
 // CosIng 全表很大，构建时只保留产品成分表中出现的成分（见 vite.config.ts）
 import cosingCsv from 'virtual:cosing-used';
 import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseInciAliases, parseIngredientList } from './cosing';
-import { parseCities, parseExchangeRates, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
+import { parseCities, parseExchangeRates, parseFormulaVersionChecks, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
 import { buildIngredientIndex } from './ingredientIndex';
 import { buildActiveClassIndex, parseActiveClasses } from './faceActives';
 import { computeBudgetCaps } from '../scoring/budget';
 
 export const ingredients = parseIngredients(ingredientsCsv);
-export const products = attachRetail(parseProducts(productsCsv), parseRetailRatings(ratingsCsv), parsePurchaseLinks(linksCsv));
+export const products = attachRetail(parseProducts(productsCsv), parseRetailRatings(ratingsCsv), parsePurchaseLinks(linksCsv), parseFormulaVersionChecks(formulaChecksCsv));
 export const cities = parseCities(citiesCsv, parseWaterRecords(waterCsv));
 /** 参照城市水硬度，只用于刻度条对照 */
 export const referenceWater = parseReferenceWater(waterReferenceCsv);

@@ -94,3 +94,27 @@ CL-US-031,ulta,4.7,139,139,Reviews,2026-10-19,https://www.ulta.com/p/hydrobubble
 CL-US-032,ulta,4.5,7135,"7,135",Reviews,2026-10-19,https://www.ulta.com/p/gentle-skin-cleanser-face-wash-sensitive-skin-pimprod2028662?sku=2586968,Visible product-page header; may aggregate sizes/formulas. Display only; not a recommendation score.
 CL-US-033,ulta,4.8,2116,"2,116",Reviews,2026-10-19,https://www.ulta.com/p/fresh-start-gel-cleanser-pimprod2035467?sku=2600875,Visible product-page header; may aggregate sizes/formulas. Display only; not a recommendation score.
 CL-US-034,ulta,4.6,44652,"44,652",Reviews,2026-10-19,https://www.ulta.com/p/all-about-clean-rinse-off-foaming-face-cleanser-xlsImpprod10791755?sku=2154676,Visible product-page header; may aggregate sizes/formulas. Display only; not a recommendation score.
+SU-US-001,ulta,4.6,11806,11806,Reviews,2026-10-19,https://www.ulta.com/p/suntouchable-invisible-sunscreen-spf-35-pimprod2039942,评分原样记录；缺失留空；1.7 oz；INCI单取Ulta Active/Inactive；[待核对]Drug Facts包装及耐水分钟数未完成，SPF暂依据美国产品名；不可按已核标签上线
+SU-US-002,ulta,4.4,5115,5115,Reviews,2026-10-19,https://www.ulta.com/p/suntouchable-whoa-glow-broad-spectrum-spf-30-sunscreen-pimprod2036596,评分原样记录；缺失留空；Sunbeam 1.69 oz；单一Ulta来源；[待核对]官网全INCI与美国Drug Facts包装未能交叉核实
+SU-US-003,ulta,4.6,1225,1225,Reviews,2026-10-19,https://www.ulta.com/p/moisturizing-sunscreen-lotion-spf-30-pimprod2021860?correlationId=38d06450-12ff-41d5-978c-aa9c0d2d0256,评分原样记录；缺失留空；3 fl oz Fragrance Free；官网及Ulta非活性列表一致；原文Anuus拼写标待核对；[待核对]独立美国包装Drug Facts尚未完成
+SU-US-004,brand,,,,,2026-10-19,https://blackgirlsunscreen.com/product/make-it-matte-spf-45/,评分原样记录；缺失留空；官网参考1.7 oz规格待核对；INCI和浓度仅取官网。冲突：DailyMed 2bc47bd0-d81b-f1b9-e063-6394a90ad375写Octocrylene5%且非活性配方不同，官网10%；不拼接；整款暂挂
+SU-US-006,target,4.09,506,506,Reviews,2026-10-19,https://www.target.com/p/-/A-85804834,评分原样记录；缺失留空；Net Wt2.5oz/71g，不换算ml；官网、Target和药品标签配方实质一致（Target个别转写异常），INCI仅取官网；榜单/奖项依据待核
+SU-US-007,target,4.19,961,961,Reviews,2026-10-19,https://www.target.com/p/-/A-80139631,评分原样记录；缺失留空；1.7fl oz；官网/标签/Target非活性列表实质一致，Target转写slicate异常不用于主成分表；价格不减会员券；榜单/奖项依据待核
+SU-US-008,brand,,,,,2026-10-19,https://www.herocosmetics.us/products/superlight-sunscreen-spf-30,评分原样记录；缺失留空；1.7fl oz；绿色修色遮红，不代表治疗泛红/痘痘；标签与官网成分一致，零售榜单/奖项及零售版本交叉核验待补
+SU-US-009,ulta,3.9,6193,6193,Reviews,2026-10-19,https://www.ulta.com/p/am-facial-moisturizing-lotion-spf-30-xlsImpprod4190253?CAWELAID=330000200003251833,评分原样记录；缺失留空；3fl oz；INCI仅官网当前版本；[待核对]DailyMed旧配方含Meradimate且ZnO6.3%，官网ZnO8%不含Meradimate；不拼接。active_concentrations为官网公开值，不冒充已核同版Drug Facts
+SU-US-010,ulta,4.5,831,831,Reviews,2026-10-19,https://www.ulta.com/p/ultra-light-moisturizing-lotion-spf-30-xlsImpprod17162943?sku=2520842,评分原样记录；缺失留空；1.7oz零售标注液体单位待核，size_ml暂空；官网Cermaide和Xanthum原拼写标待核；药品标签已打开，细节未完成对照；榜单依据待补
+SU-US-011,ulta,4.4,2076,2076,Reviews,2026-10-19,https://www.ulta.com/p/anthelios-melt-in-milk-body-face-sunscreen-spf-60-pimprod2018267,评分原样记录；缺失留空；3fl oz；官网和Ulta成分一致；品牌2周自评90%滋润/舒缓属消费者体验；美国包装Drug Facts版本仍需完整核验
+SU-US-012,ulta,4.3,2657,2657,Reviews,2026-10-19,https://www.ulta.com/p/anthelios-mineral-tinted-ultra-light-face-sunscreen-fluid-spf-50-xlsImpprod4350455?sku=2246041,评分原样记录；缺失留空；1.7oz；Ulta非活性表已读但活性未同源读全，故整条INCI留空，避免拼接；品牌页500；2026品牌新增多色且有40/50版本，具体Tinted SKU及标签需核对
+SU-US-015,bluemercury,,,,,2026-10-19,https://bluemercury.com/collections/moisturizers-with-spf/products/supergoop-unseen-sunscreen-spf-50,评分原样记录；缺失留空；SPF50新配方，不能套SPF40旧版；多规格网页价格跟SKU未确定，price/size_ml留空；scentless不是明确fragrance-free，填unknown；零售全INCI一致性待补
+SU-US-016,ulta,4.5,1799,1799,Reviews,2026-10-19,https://www.ulta.com/p/mineral-mattescreen-spf-40-pimprod2057254,评分原样记录；缺失留空；Sunrise1.5fl oz，官网多色配方对应待核；只取得synthetic fragrance free不足以判yes；榜单依据及色号零售全INCI一致性待补
+SU-US-018,brand,,,,,2026-10-19,https://www.colorescience.com/products/sunforgettable-total-protection-face-shield-flex-spf-50,评分原样记录；缺失留空；参考Fair；品牌有Fair/Light/Medium/Tan/Deep/Rich Deep六色，不将Fair冒充深肤色适用；网页未读到明确SKU价格，留空；1.8fl oz按模板换算53ml（官网同时写55ml）；Drug Facts整版待核
+SU-US-019,brand,,,,,2026-10-19,https://www.skinceuticals.com/skincare/sunscreens/physical-fusion-uv-defense-sunscreen-spf-50/S54.html,评分原样记录；缺失留空；参考1.7fl oz待核当前SKU；INCI只取DailyMed（官网完整列表按钮未展开）；品牌主打成分与药品活性一致，零售配方一致性及价格/入库榜单待核
+SU-US-020,ulta,4.5,516,516,Reviews,2026-10-19,https://www.ulta.com/p/ultimate-sun-protector-lotion-spf-60-pimprod2043993,评分原样记录；缺失留空；美国SPF60+；spf数字60，+号保留在名称；5fl oz按模板148ml（官网150ml）；配方明确Fragrance；非无香；Drug Facts已定位但整版一致性未完成，榜单依据待核
+SU-US-021,target,4.09,356,356,Reviews,2026-10-20,https://www.target.com/p/-/A-83695787,只记录本次可读数字，空白不猜测
+SU-US-023,ulta,,,,,2026-10-20,https://www.ulta.com/p/clear-start-clearing-defense-moisturizer-spf-30-pimprod2006536?sku=2547226,只记录本次可读数字，空白不猜测
+SU-US-024,target,4.66,3498,3498,Reviews,2026-10-20,https://www.target.com/p/neutrogena-clear-face-liquid-sunscreen-lotion-3-fl-oz/-/A-1012287827,只记录本次可读数字，空白不猜测
+SU-US-035,target,,,,,2026-10-20,https://www.target.com/p/-/A-83695782,只记录本次可读数字，空白不猜测
+SU-US-036,target,4.29,2925,2925,Reviews,2026-10-20,https://www.target.com/p/-/A-80173090,只记录本次可读数字，空白不猜测
+SU-US-037,target,,,,,2026-10-20,https://www.target.com/p/-/A-89152875,只记录本次可读数字，空白不猜测
+SU-US-039,target,4.55,1494,1494,Reviews,2026-10-20,https://www.target.com/p/-/A-86936392,只记录本次可读数字，空白不猜测
+SU-US-040,target,4.43,1435,1435,Reviews,2026-10-20,https://www.target.com/p/-/A-80173035,只记录本次可读数字，空白不猜测

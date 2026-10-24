@@ -32,16 +32,16 @@
 | Alpha-Isomethyl Ionone | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 39665） | 未核对 |
 | Amyl Cinnamal | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 31923） | 未核对 |
 | Anthemis Nobilis Flower Oil | 精油 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING），INCI 名为植物油（CosIng 74310） | 已核对 |
-| Benzyl Alcohol | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 32153） | 未核对 |
-| Benzyl Alcohol | 欧盟香料致敏原 | ✅ 通过 | 法规 2023/1545 附录（docs/sources/eu_2023_1545.pdf）条目 45，Common Ingredients Glossary 名称为 Benzyl Alcohol | 未核对 |
+| Benzyl Alcohol | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 32153） | 已核对 |
+| Benzyl Alcohol | 欧盟香料致敏原 | ✅ 通过 | 法规 2023/1545 附录（docs/sources/eu_2023_1545.pdf）条目 45，Common Ingredients Glossary 名称为 Benzyl Alcohol | 已核对 |
 | Benzyl Benzoate | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 32154） | 未核对 |
 | Benzyl Salicylate | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 32159） | 未核对 |
 | Beta-Caryophyllene | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 54743） | 已核对 |
 | Cedrus Atlantica Bark Oil | 精油 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING），INCI 名为植物油（CosIng 55309） | 已核对 |
-| Citral | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 32857） | 未核对 |
-| Citral | 欧盟香料致敏原 | ✅ 通过 | 法规 2023/1545 附录（docs/sources/eu_2023_1545.pdf）条目 70，Common Ingredients Glossary 名称为 Citral | 未核对 |
-| Citronellol | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 32861） | 未核对 |
-| Citronellol | 欧盟香料致敏原 | ✅ 通过 | 法规 2023/1545 附录（docs/sources/eu_2023_1545.pdf）条目 86，Common Ingredients Glossary 名称为 Citronellol | 未核对 |
+| Citral | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 32857） | 已核对 |
+| Citral | 欧盟香料致敏原 | ✅ 通过 | 法规 2023/1545 附录（docs/sources/eu_2023_1545.pdf）条目 70，Common Ingredients Glossary 名称为 Citral | 已核对 |
+| Citronellol | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 32861） | 已核对 |
+| Citronellol | 欧盟香料致敏原 | ✅ 通过 | 法规 2023/1545 附录（docs/sources/eu_2023_1545.pdf）条目 86，Common Ingredients Glossary 名称为 Citronellol | 已核对 |
 | Citrus Aurantium Dulcis Flower Oil | 精油 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING），INCI 名为植物油（CosIng 75211） | 已核对 |
 | Citrus Aurantium Peel Oil | 精油 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING），INCI 名为植物油（CosIng 100219） | 已核对 |
 | Citrus Limon Peel Oil | 精油 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING），INCI 名为植物油（CosIng 85124） | 已核对 |
@@ -57,8 +57,8 @@
 | Illicium Verum Fruit/Seed Oil | 精油 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING），INCI 名为植物油（CosIng 82211） | 已核对 |
 | Juniperus Communis Fruit Oil | 精油 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING），INCI 名为植物油（CosIng 77977） | 已核对 |
 | Juniperus Virginiana Oil | 精油 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING），INCI 名为植物油（CosIng 78070） | 已核对 |
-| Limonene | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 57187） | 未核对 |
-| Limonene | 欧盟香料致敏原 | ✅ 通过 | 法规 2023/1545 附录（docs/sources/eu_2023_1545.pdf）条目 88，Common Ingredients Glossary 名称为 Limonene | 未核对 |
+| Limonene | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 57187） | 已核对 |
+| Limonene | 欧盟香料致敏原 | ✅ 通过 | 法规 2023/1545 附录（docs/sources/eu_2023_1545.pdf）条目 88，Common Ingredients Glossary 名称为 Limonene | 已核对 |
 | Linalool | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 35016） | 未核对 |
 | Linalyl Acetate | 加香成分 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING）（CosIng 77311） | 已核对 |
 | Melaleuca Alternifolia Leaf Oil | 精油 | ✅ 通过 | CosIng 登记功能含香料（PERFUMING），INCI 名为植物油（CosIng 102660） | 已核对 |
