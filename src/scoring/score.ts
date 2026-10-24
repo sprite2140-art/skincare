@@ -573,7 +573,7 @@ function scoreNeed(
  * 没有可评级的证据（只有品牌宣称、资料分类、尚无证据等级的成分，或没有依据）的需求按最低等级
  * （MISSING_EVIDENCE_LEVEL，C 级）计分，页面写"暂无证据，按最低等级计"。再按需求权重平均。
  */
-function scoreEvidence(needMatches: NeedMatch[], usage: UsageType | null): Dimension {
+function scoreEvidence(needMatches: NeedMatch[], usage: UsageType | null, product?: Product): Dimension {
   if (needMatches.length === 0) {
     return dimension('evidence', null, { zh: '你没有选择需求，此项不计分', en: 'No needs selected, so this is not scored' }, 'not_scored');
   }
@@ -587,7 +587,7 @@ function scoreEvidence(needMatches: NeedMatch[], usage: UsageType | null): Dimen
   for (const m of needMatches) {
     // 每个成分按这个需求的 targets 逐个读取证据等级（evidence_by_target），取最强的一个
     const best = m.ingredients
-      .flatMap((i) => m.targets.filter((t) => ingredientTargets(i, t)).map((t) => ({ ing: i, ev: evidenceFor(i, t, usage) })))
+      .flatMap((i) => m.targets.filter((t) => ingredientTargets(i, t)).map((t) => ({ ing: i, ev: evidenceFor(i, t, usage, product) })))
       .filter((x): x is { ing: Ingredient; ev: TargetEvidence } => x.ev !== null)
       .sort((a, b) => EVIDENCE_SCORES[b.ev.level] - EVIDENCE_SCORES[a.ev.level])[0];
     let score: number;
@@ -599,8 +599,12 @@ function scoreEvidence(needMatches: NeedMatch[], usage: UsageType | null): Dimen
       score = EVIDENCE_SCORES[best.ev.level];
       const n = ingredientName(best.ing, best.ing.inciName);
       const down = best.ev.downgraded
-        ? { zh: '（证据来自免洗产品，冲洗型降一级）', en: ' (evidence is from leave-on use, one level lower for rinse-off)' }
-        : { zh: '', en: '' };
+        ? usage === 'rinse_off'
+          ? { zh: '（证据来自免洗产品，冲洗型降一级）', en: ' (evidence is from leave-on use, one level lower for rinse-off)' }
+          : { zh: '（证据来自冲洗型产品，免洗型降一级）', en: ' (evidence is from rinse-off use, one level lower for leave-on)' }
+        : best.ev.concentrationDowngraded
+          ? { zh: `（证据对应 ${best.ing.evidenceMinConcentration}% 浓度，这款更低或没有公开，降一级）`, en: ` (evidence is at ${best.ing.evidenceMinConcentration}%; lower or undisclosed here, one level lower)` }
+          : { zh: '', en: '' };
       if (!zh.includes(`${n.zh} ${best.ev.level} 级${down.zh}`)) {
         zh.push(`${n.zh} ${best.ev.level} 级${down.zh}`);
         en.push(`${n.en} level ${best.ev.level}${down.en}`);
@@ -837,7 +841,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   } else {
     const need = scoreNeed(product, verified, specs, productKeyActiveTerms(product));
     needMatches = need.needMatches;
-    const evidence = scoreEvidence(needMatches, usageTypeOf(product));
+    const evidence = scoreEvidence(needMatches, usageTypeOf(product), product);
     const irr = scoreIrritation(verified, profile, product, items.filter((r): r is Resolved & { ingredient: Ingredient } => !r.nameUnverified && r.ingredient !== null));
     irritation = irr.detail;
     dimensions = {

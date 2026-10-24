@@ -552,6 +552,8 @@
   "data.evidence.2": "Evidence is rated per need: the same ingredient can have different levels for different needs (for example, salicylic acid is A for dandruff and C for oil control). Scoring only uses the levels for the needs you chose.",
   "data.evidence.3": "When an ingredient's evidence comes from leave-on products, it counts one level lower in rinse-off products (shampoo, conditioner, cleanser), for example caffeine.",
   "data.evidence.4": "How this was checked: an AI researched the published literature, and a second AI checked the PubMed abstracts. Not reviewed by a dermatologist. Reviewed ingredients show the review date.",
+  "data.evidence.5": "Face actives (from 2026-10-24) are checked the same way: researched by an AI, with PMIDs and sources checked by a second AI. Needs whose evidence is \"unknown\" count at the lowest level and never score higher for it.",
+  "data.evidence.6": "Zinc oxide and titanium dioxide count toward \"fine lines, firmness\" only as sunscreen actives in a sunscreen, not as colorants in other products. Azelaic acid's level A evidence is from a 15% prescription gel, so cosmetic strengths (below 15% or not disclosed) count one level lower.",
   "data.fragrance.title": "Fragrance-free",
   "data.fragrance.1": "\"Fragrance-free\" covers two cases: the label says fragrance-free, or no fragrance ingredient appears in the list. Card details say which.",
   "data.fragrance.2": "Fragrance ingredients include fragrance/parfum, EU-labelled fragrance allergens, ingredients on our fragrance list, and essential oils.",

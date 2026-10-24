@@ -145,7 +145,16 @@ export interface Ingredient {
    * 每个需求单独的证据等级（evidence_by_target，如 dandruff:A;scalp_oil:C）。
    * 填了这一列时，没写等级的需求按"暂无证据"计；整列为空的旧条目按 evidenceLevel 计。
    */
-  evidenceByTarget?: Partial<Record<Target, EvidenceLevel>>;
+  evidenceByTarget?: Partial<Record<Target, EvidenceLevel | 'unknown'>>;
+  /**
+   * 证据对应的最低浓度（%，evidence_min_concentration）：产品公开的浓度低于它、或没有公开时，按降一级计算
+   * （如壬二酸：A 级证据来自 15% 处方凝胶，化妆品浓度降一级）
+   */
+  evidenceMinConcentration?: number | null;
+  /** 孕期、光敏、美国监管的原文说明（核对资料原文，只供核对，不在页面显示） */
+  pregnancyText?: string;
+  photosensitizingText?: string;
+  usRegulatoryText?: string;
   /** 证据来自哪种使用方式的产品（evidence_usage）；用在另一种使用方式的产品上时降一级，both 不降 */
   evidenceUsage?: EvidenceUsage | null;
   /** 核对备注，只供核对，不显示 */
@@ -173,6 +182,8 @@ export interface Ingredient {
   chelator?: boolean;
   /** 通俗解释已核对（ingredient_explanations.csv 中 review_status = verified）；成分本身是否核对看 reviewStatus */
   explainReviewed?: boolean;
+  /** 通俗解释来自 ingredient_explanations.csv（成分库条目本身没写）；这时"是否核对"只看 explainReviewed */
+  explainFromList?: boolean;
   /** CosIng 登记的功能（小写），仅批量导入后才有；只用于展示，不参与打分 */
   cosingFunctions?: string[];
 }

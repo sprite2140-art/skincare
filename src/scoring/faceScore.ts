@@ -10,7 +10,7 @@ import type { FaceTarget, Product } from '../data/types';
 import { usageTypeOf } from '../data/types';
 import type { IngredientIndex } from '../data/ingredientIndex';
 import {
-  IRRITANT_ACTIVE_CLASSES, isUntintedMineral, productActiveClasses, type ActiveClass, type ActiveClassIndex,
+  IRRITANT_ACTIVE_CLASSES, isUntintedMineral, productScopedIndex, productActiveClasses, type ActiveClass, type ActiveClassIndex,
 } from '../data/faceActives';
 import { keyActiveTerms, matchesKeyActive } from '../data/keyActives';
 import type { FaceAnswers } from '../profile/faceQuestionnaire';
@@ -162,7 +162,8 @@ export const activeClassLabel = (c: ActiveClass) => CLASS_LABELS[c];
 
 export function scoreFaceProduct(product: Product, profile: ScoringProfile, data: ScoringData, ctx: FaceContext): FaceProductScore {
   const { product: adjusted, notes: concentrationNotes } = applyConcentrations(product, data.index);
-  const ps = scoreProduct(adjusted, profile, data);
+  // 氧化锌、二氧化钛的功效只在防晒且公开为活性成分时计入
+  const ps = scoreProduct(adjusted, profile, { ...data, index: productScopedIndex(data.index, product) });
   const classes = productActiveClasses(product, data.index, ctx.classes);
   const irritantClasses = IRRITANT_ACTIVE_CLASSES.filter((c) => classes.has(c));
   const leaveOn = usageTypeOf(product) !== 'rinse_off';

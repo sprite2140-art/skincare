@@ -71,6 +71,10 @@ export function parseIngredients(text: string): Ingredient[] {
     reviewedOn: r.reviewed_on ?? '',
     evidenceByTarget: parseEvidenceByTarget(r.evidence_by_target),
     evidenceUsage: (r.evidence_usage || null) as EvidenceUsage | null,
+    evidenceMinConcentration: r.evidence_min_concentration ? Number(r.evidence_min_concentration.replace('%', '')) : null,
+    pregnancyText: r.pregnancy_text ?? '',
+    photosensitizingText: r.photosensitizing_text ?? '',
+    usRegulatoryText: r.us_regulatory_text ?? '',
     notes: r.notes ?? '',
     usRegulatoryStatus: (r.us_regulatory_status || null) as UsRegulatoryStatus | null,
     pregnancyNote: (r.pregnancy_note || null) as PregnancyNote | null,
@@ -79,12 +83,17 @@ export function parseIngredients(text: string): Ingredient[] {
 }
 
 /** evidence_by_target：`dandruff:A;scalp_oil:C`。取值是否合法由 validate.ts 检查 */
-export function parseEvidenceByTarget(value: string | undefined): Partial<Record<Target, EvidenceLevel>> {
-  const out: Partial<Record<Target, EvidenceLevel>> = {};
+export function parseEvidenceByTarget(value: string | undefined): Partial<Record<Target, EvidenceLevel | 'unknown'>> {
+  const out: Partial<Record<Target, EvidenceLevel | 'unknown'>> = {};
   for (const entry of splitList(value)) {
     const idx = entry.lastIndexOf(':');
-    if (idx === -1) out[entry as Target] = '' as EvidenceLevel;
-    else out[entry.slice(0, idx).trim() as Target] = entry.slice(idx + 1).trim().toUpperCase() as EvidenceLevel;
+    if (idx === -1) {
+      out[entry as Target] = '' as EvidenceLevel;
+      continue;
+    }
+    const raw = entry.slice(idx + 1).trim();
+    // unknown / 未知：查证过但没有可评级的证据，按"暂无证据"（C 级）计，不能比 C 级高
+    out[entry.slice(0, idx).trim() as Target] = /^(unknown|未知)$/i.test(raw) ? 'unknown' : raw.toUpperCase() as EvidenceLevel;
   }
   return out;
 }

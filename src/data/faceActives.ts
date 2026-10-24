@@ -70,3 +70,64 @@ export function productActiveClasses(product: Product, index: IngredientIndex, c
 export function isUntintedMineral(found: Map<ActiveClass, string[]>): boolean {
   return found.has('sunscreen_mineral') && !found.has('sunscreen_organic') && !found.has('iron_oxide');
 }
+
+/**
+ * 只在防晒里作为防晒活性成分时才计功效的成分（氧化锌、二氧化钛的 aging:A 来自防晒证据）。
+ * 作为色料出现在其他产品中，或防晒里没有公开为活性成分时，不计功效目标。
+ */
+const SUNSCREEN_ACTIVE_ONLY = new Set(['zinc oxide', 'titanium dioxide']);
+
+/** 产品把这个成分公开为活性成分（active_concentrations 或主打成分 / Drug Facts 活性成分） */
+function declaredActive(product: Product, ing: Ingredient): boolean {
+  const names = new Set([ing.inciName, ...ing.aliases].map(normalizeName));
+  if ((product.face?.activeConcentrations ?? []).some((a) => names.has(normalizeName(a.inci)))) return true;
+  return product.keyActives.some((k) => names.has(normalizeName(k.replace(/\d+(\.\d+)?\s*%/g, '').trim())));
+}
+
+/** 按产品限制成分的功效目标：氧化锌、二氧化钛只在防晒且公开为活性成分时保留 */
+export function productScopedIndex(index: IngredientIndex, product: Product): IngredientIndex {
+  return {
+    ...index,
+    get(name: string) {
+      const ing = index.get(name);
+      if (!ing || !SUNSCREEN_ACTIVE_ONLY.has(normalizeName(ing.inciName))) return ing;
+      if (product.category === 'sunscreen' && declaredActive(product, ing)) return ing;
+      return { ...ing, targets: [], evidenceByTarget: {}, evidenceLevel: null };
+    },
+  };
+}
+
+/** 面部搭配提醒（data/face_conflicts.csv）：成分库 conflicts_with 的说明和出处。页面显示为"提醒"，不是禁用 */
+export interface FaceConflictNote {
+  id: string;
+  ingredient1: string;
+  ingredient2: string;
+  type: string;
+  /** 同一时段怎么用（原文） */
+  sameSessionRule: string;
+  sourceUrl: string;
+  notes: string;
+}
+
+export function parseFaceConflicts(text: string): FaceConflictNote[] {
+  return parseCsv(text).map((r) => ({
+    id: r.conflict_id ?? '',
+    ingredient1: r.ingredient_1 ?? '',
+    ingredient2: r.ingredient_2 ?? '',
+    type: r.conflict_type ?? '',
+    sameSessionRule: r.same_session_rule ?? '',
+    sourceUrl: r.source_url ?? '',
+    notes: r.notes ?? '',
+  }));
+}
+
+/** 两个成分对应的搭配提醒（不分先后） */
+export function findConflictNote(notes: FaceConflictNote[], a: Ingredient, b: Ingredient): FaceConflictNote | undefined {
+  const na = new Set([a.inciName, ...a.aliases].map(normalizeName));
+  const nb = new Set([b.inciName, ...b.aliases].map(normalizeName));
+  return notes.find((n) => {
+    const x = normalizeName(n.ingredient1);
+    const y = normalizeName(n.ingredient2);
+    return (na.has(x) && nb.has(y)) || (na.has(y) && nb.has(x));
+  });
+}
