@@ -23,7 +23,8 @@
 - 产品 40 款、购买链接 40 条、评分 43 条追加到 data/。入库依据用两份 inclusion 表覆盖：Ulta / Sephora 畅销榜填 retailer_bestseller，其余留空，由评分表自动判断 review_count。补查评分表（batch1_recheck19）19 行与第 1 批评分表重复，不再追加；三份自查报告移到 docs/data_batches/。
 - 按之前的规则标准化：acne-prone → acne_prone（6 款），emulsion → lotion（SE-US-003）。
 - 入库依据待补 10 款，不出现在推荐里：MO-US-012、SE-US-010、012、013、014、015、016（none）；MO-US-014、SE-US-017、018（只有 Bluemercury 的评价数，不在认可的 5 个平台内）。
-- 校验 99 个错误（claim_source、texture / subtype、use_time、transparency、water_resistance、skin_type_claim、awards、SE-US-005—008 的品牌宣称状态），按规则不改数据，列在 PR 说明里等作者决定。
+- 校验 99 个错误（claim_source、texture / subtype、use_time、transparency、water_resistance、skin_type_claim、awards、SE-US-005—008 的品牌宣称状态），作者同意按 PR 说明里的建议修改（2026-10-26）：claim_source → data_classification；AM;PM → both；not_applicable、误填的 subtype 清空；transparency 组合值 → high / medium；texture 归为 gel / cream / liquid；post-acne → acne_prone、extra-dry → dry、combination-to-dry → combination;dry；MO-US-012 奖项原文移到 formula_note；SE-US-005—008（version_mismatch）清空品牌宣称原文、摘录和对应需求。
+- 成分表末尾带句号（如 MO-US-020 的 "Fragrance."）时去掉句号再匹配（Codex 评审发现）。
 - 3 个新进入高频前 150 的成分补写通俗解释（草稿）：Polysorbate 60、Maltodextrin、Isohexadecane。
 
 ### 2026-10-26 风险成分 10 个核对完成
