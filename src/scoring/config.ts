@@ -16,8 +16,12 @@ export const NON_KEY_ACTIVE_CREDIT = 0.3;
 /** 有排序的困扰（面部，最多 3 个）：第 1/2/3 位的权重；超出的按最后一位算 */
 export const RANKED_CONCERN_WEIGHTS = [3, 2, 1];
 
-/** 计入刺激风险的标签，每个标签只扣一次 */
-export const IRRITANT_TAGS: RiskTag[] = ['fragrance', 'alcohol', 'essential_oil', 'strong_acid', 'sensitizer'];
+/**
+ * 计入刺激风险的标签，每个标签只扣一次。
+ * 酒精（alcohol）不扣分，只提示"高浓度酒精可能降低皮肤含水量"（2026-10-26 PubMed 核对：
+ * 60%–100% 乙醇斑贴不改变屏障和红斑，但降低含水量；见 docs/sources/risk_ingredients_sources.csv）
+ */
+export const IRRITANT_TAGS: RiskTag[] = ['fragrance', 'essential_oil', 'strong_acid', 'sensitizer'];
 export const IRRITANT_DEDUCTION = 15;
 /** 敏感肌或头皮易痒：扣分加倍 */
 export const SENSITIVE_MULTIPLIER = 2;

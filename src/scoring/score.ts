@@ -781,6 +781,28 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
       },
     });
   }
+  // 酒精不扣分，只提示；异丙醇与强清洁力表活同在一款免洗产品中时另加提示（系统综述：与洗涤剂合用时刺激增强）
+  const alcohol = withTag(items, 'alcohol');
+  if (alcohol.hits.length > 0) {
+    const suf = unverifiedSuffix(alcohol.unverified);
+    notices.push({
+      code: 'alcohol_drying',
+      unverified: alcohol.unverified,
+      text: { zh: `含${alcohol.names.zh}：高浓度酒精可能降低皮肤含水量${suf.zh}`, en: `Contains ${alcohol.names.en}: high concentrations of alcohol may reduce skin hydration${suf.en}` },
+    });
+    const ipa = alcohol.hits.filter((r) => r.ingredient.inciName === 'Isopropyl Alcohol');
+    const cleanser = withTag(items, 'strong_cleanser');
+    if (ipa.length > 0 && cleanser.hits.length > 0 && usageTypeOf(product) === 'leave_on') {
+      notices.push({
+        code: 'ipa_with_cleanser',
+        unverified: ipa.some((r) => !isVerified(r)) || cleanser.unverified,
+        text: {
+          zh: `异丙醇与强清洁力表活（${cleanser.names.zh}）同在一款免洗产品中，合用时刺激可能增强`,
+          en: `Isopropyl alcohol and a strong cleanser (${cleanser.names.en}) in the same leave-on product may be more irritating together`,
+        },
+      });
+    }
+  }
   // 测试模式下 draft 成分已参与打分，不算"暂无数据"
   const missing = unknownIngredients.length + nameUnverifiedIngredients.length + (data.allowDraft ? 0 : unverifiedIngredients.length);
   if (missing > 0) {
