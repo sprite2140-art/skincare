@@ -26,6 +26,12 @@
 - 校验 99 个错误（claim_source、texture / subtype、use_time、transparency、water_resistance、skin_type_claim、awards、SE-US-005—008 的品牌宣称状态），按规则不改数据，列在 PR 说明里等作者决定。
 - 3 个新进入高频前 150 的成分补写通俗解释（草稿）：Polysorbate 60、Maltodextrin、Isohexadecane。
 
+### 2026-10-26 风险成分 10 个核对完成
+- 依据第二个 AI 的 PubMed 核对（docs/sources/risk_ingredients_sources.csv），10 个全部标为已核对，出处并入 sources。
+- C14-16 烯烃磺酸钠：不再列为强清洁力刺激成分（OECD 评估不支持）；TEA-十二烷基苯磺酸盐：降为普通表活同级（本项目普通表活不扣分），两者改为基础成分。
+- 酒精、变性乙醇、异丙醇：不扣刺激分，只提示"高浓度酒精可能降低皮肤含水量"；异丙醇与强清洁力表活同在一款免洗产品中时另加提示。
+- SLS、ALS、MI、MCI、IPBC 维持现有扣分。默认档案下温和度变化 43 款（洗护 31、洁面 5、防晒 7），每天洗头时另有 18 款洗发水变化。
+
 ### 2026-10-24 测试模式影响（#16、#19、#20 合并后）
 - `npm run test-mode-impact -- --list` 逐个列出受影响产品。护肤 80 款中 20 款受影响，15 款温和度分数会变化；洗护 107 款中 85 款受影响，41 款会变化。
 - 原因只有两类未核对成分：10 个风险成分（酒精 3 种、C14-16 烯烃磺酸钠、MI、MCI、IPBC、SLS、ALS、TEA-DDBS）等出处；9 个欧盟香料致敏原等 1223/2009 附录 III 合并版原文。

@@ -3,7 +3,7 @@
 由 `npm run ingredient-review` 生成，请勿手改；数据更新后重新运行。核对结果请记在 data/ingredients.csv（review_status 改为 verified，填写 reviewed_on），再重新生成本表。
 
 只列影响打分的成分：有效成分（针对需求，影响需求匹配和证据强度）、风险成分（影响刺激风险、香味层级、孕期 / 处方药提示和想避开的成分）、螯合剂清单和加香清单上的成分。基础成分不列。
-共 104 个，出现在 227 个产品中；其中未核对 21 个。按影响的产品数排序。
+共 102 个，出现在 227 个产品中；其中未核对 11 个。按影响的产品数排序。
 
 核对时请逐项确认：中文名、声称的作用（针对的需求 / 风险标签）、证据等级（A / B / C）、有效浓度与法规限量、来源是否支持这些结论。
 "核对结果"栏留给核对人填写：✅ 通过 / ✏️ 需修改（写明改什么）/ ❌ 删除。
@@ -12,7 +12,7 @@
 
 | 产品数 | 成分 | 中文名 | 声称的作用 | 影响 | 证据等级 | 有效浓度 / 限量 | 来源 | 状态 | 核对结果 |
 |---:|---|---|---|---|---|---|---|---|---|
-| 105 | Fragrance | 香精 | 香精 | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj) | 已核对 |   |
+| 106 | Fragrance | 香精 | 香精 | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj) | 已核对 |   |
 | 68 | Disodium EDTA | EDTA 二钠 | 螯合剂（清单） | 环境适配、产品残留 | — | — | [CIR：EDTA 及其盐类安全评估（PMID 12396676）](https://pubmed.ncbi.nlm.nih.gov/12396676/)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 63 | Limonene | 柠檬烯 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 59 | Linalool | 芳樟醇 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
@@ -23,19 +23,18 @@
 | 38 | Panthenol | 泛醇 | 针对干燥、受损、头皮痒、泛红敏感 | 需求匹配、证据强度 | B | 面部：5%Dexpanthenol免洗配方有人体研究;泛醇所有异构体及所有基质统一有效范围未知；洗护：免洗皮肤保湿；冲洗型未知 | [PMID 28503966](https://pubmed.ncbi.nlm.nih.gov/28503966/)<br>[PMID 12113650](https://pubmed.ncbi.nlm.nih.gov/12113650/)<br>[PMID 14641355](https://pubmed.ncbi.nlm.nih.gov/14641355/)<br>[PMID 19753737](https://pubmed.ncbi.nlm.nih.gov/19753737/) | 已核对 |   |
 | 34 | Hexyl Cinnamal | 己基肉桂醛 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 32 | Benzyl Alcohol | 苯甲醇 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
-| 28 | Isopropyl Alcohol | 异丙醇 | 酒精 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
+| 28 | Isopropyl Alcohol | 异丙醇 | 酒精 | — | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[PMID 33063847](https://pubmed.ncbi.nlm.nih.gov/33063847/)<br>[PMID 17578437](https://pubmed.ncbi.nlm.nih.gov/17578437/) | 已核对 |   |
 | 26 | Ceramide EOP | 神经酰胺 EOP | 针对干燥 | 需求匹配、证据强度 | C | 面部：未知：未确认可独立归因于EOP的有效浓度；洗护：复配，单独浓度未披露 | [PMID 31585489](https://pubmed.ncbi.nlm.nih.gov/31585489/)<br>[PMID 34596254](https://pubmed.ncbi.nlm.nih.gov/34596254/)<br>[PMID 37151263](https://pubmed.ncbi.nlm.nih.gov/37151263/) | 已核对 |   |
 | 25 | Ceramide AP | 神经酰胺 AP | 针对干燥 | 需求匹配、证据强度 | C | 面部：未知：未确认可独立归因于AP的有效浓度；洗护：复配，单独浓度未披露 | [PMID 31585489](https://pubmed.ncbi.nlm.nih.gov/31585489/)<br>[PMID 34596254](https://pubmed.ncbi.nlm.nih.gov/34596254/)<br>[PMID 37151263](https://pubmed.ncbi.nlm.nih.gov/37151263/) | 已核对 |   |
 | 25 | Trisodium Ethylenediamine Disuccinate | 乙二胺二琥珀酸三钠 | 螯合剂（清单） | 环境适配、产品残留 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/details/59889)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 24 | Sodium Laureth Sulfate | 月桂醇聚醚硫酸酯钠 | 强清洁力表活 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[PMID 12641575](https://pubmed.ncbi.nlm.nih.gov/12641575/)<br>[PMID 11278060](https://pubmed.ncbi.nlm.nih.gov/11278060/) | 已核对 |   |
 | 23 | Tetrasodium EDTA | EDTA 四钠 | 螯合剂（清单） | 环境适配、产品残留 | — | — | [CIR：EDTA 及其盐类安全评估（PMID 12396676）](https://pubmed.ncbi.nlm.nih.gov/12396676/)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 22 | Zinc Oxide | 氧化锌 | 针对细纹松弛 | 需求匹配、证据强度 | A | 美国防晒专论允许最高25%；浓度不能代替成品SPF及广谱测试 | [fda.gov](https://www.fda.gov/drugs/cder-small-business-industry-assistance-sbia/sunscreen-labeling-and-testing-guide-industry)<br>[aad.org](https://www.aad.org/public/everyday-care/skin-care-secrets/routine/pregnancy) | 已核对 |   |
-| 21 | Sodium C14-16 Olefin Sulfonate | C14-16 烯烃磺酸钠 | 强清洁力表活 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 19 | Hydroxycitronellal | 羟基香茅醛 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 15 | Citronellol | 香茅醇 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 15 | Coumarin | 香豆素 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 15 | Menthol | 薄荷醇 | 针对头皮痒 | 需求匹配、证据强度 | C | 未知（化妆品浓度） | [PMID 27141849](https://pubmed.ncbi.nlm.nih.gov/27141849/) | 已核对 |   |
-| 13 | Alcohol Denat. | 变性乙醇 | 酒精 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
+| 13 | Alcohol Denat. | 变性乙醇 | 酒精 | — | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[PMID 17578437](https://pubmed.ncbi.nlm.nih.gov/17578437/)<br>[PMID 40954169](https://pubmed.ncbi.nlm.nih.gov/40954169/) | 已核对 |   |
 | 13 | Titanium Dioxide | 二氧化钛 | 针对细纹松弛 | 需求匹配、证据强度 | A | 美国防晒专论允许最高25%；浓度不能代替成品SPF及广谱测试 | [fda.gov](https://www.fda.gov/drugs/cder-small-business-industry-assistance-sbia/sunscreen-labeling-and-testing-guide-industry)<br>[aad.org](https://www.aad.org/public/everyday-care/skin-care-secrets/routine/pregnancy) | 已核对 |   |
 | 12 | Amyl Cinnamal | 戊基肉桂醛 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 12 | Lactic Acid | 乳酸 | 针对细纹松弛 | 需求匹配、证据强度 | B | 8%L-乳酸免洗霜每日2次持续22周 | [PMID 8651713](https://pubmed.ncbi.nlm.nih.gov/8651713/)<br>[fda.gov](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/guidance-industry-labeling-cosmetics-containing-alpha-hydroxy-acids) | 已核对 |   |
@@ -43,10 +42,10 @@
 | 12 | Sodium Phytate | 植酸钠 | 螯合剂（清单） | 环境适配、产品残留 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/details/79995)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 12 | Tetrasodium Glutamate Diacetate | 谷氨酸二乙酸四钠 | 螯合剂（清单） | 环境适配、产品残留 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/details/84400)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 11 | Benzyl Salicylate | 水杨酸苄酯 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
-| 10 | Alcohol | 乙醇 | 酒精 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
+| 10 | Alcohol | 乙醇 | 酒精 | — | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[PMID 17578437](https://pubmed.ncbi.nlm.nih.gov/17578437/)<br>[PMID 40954169](https://pubmed.ncbi.nlm.nih.gov/40954169/) | 已核对 |   |
 | 10 | Hydrolyzed Hyaluronic Acid | 水解透明质酸 | 针对干燥、细纹松弛 | 需求匹配、证据强度 | C | 未知：未核实该INCI的独立有效浓度 | [PMID 22052267](https://pubmed.ncbi.nlm.nih.gov/22052267/) | 已核对 |   |
-| 10 | Methylchloroisothiazolinone | 甲基氯异噻唑啉酮 | 致敏成分 | 刺激风险 | — | 欧盟仅允许用于冲洗型产品（与 MI 混合物 0.0015%） | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
-| 10 | Methylisothiazolinone | 甲基异噻唑啉酮 | 致敏成分 | 刺激风险 | — | 欧盟仅允许用于冲洗型产品，0.0015% | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
+| 10 | Methylchloroisothiazolinone | 甲基氯异噻唑啉酮 | 致敏成分 | 刺激风险 | — | 欧盟仅允许用于冲洗型产品（与 MI 混合物 0.0015%） | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[PMID 36652228](https://pubmed.ncbi.nlm.nih.gov/36652228/) | 已核对 |   |
+| 10 | Methylisothiazolinone | 甲基异噻唑啉酮 | 致敏成分 | 刺激风险 | — | 欧盟仅允许用于冲洗型产品，0.0015% | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[PMID 36652228](https://pubmed.ncbi.nlm.nih.gov/36652228/)<br>[PMID 24117738](https://pubmed.ncbi.nlm.nih.gov/24117738/) | 已核对 |   |
 | 9 | Ascorbic Acid | 抗坏血酸 | 针对暗沉色斑、细纹松弛 | 需求匹配、证据强度 | B | 未知:已核系统综述未确定最佳浓度;不能把常见5%至20%直接写成统一有效范围 | [PMID 37128827](https://pubmed.ncbi.nlm.nih.gov/37128827/)<br>[aad.org](https://www.aad.org/public/everyday-care/skin-care-secrets/routine/pregnancy-skin-care) | 已核对 |   |
 | 9 | Benzyl Benzoate | 苯甲酸苄酯 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 9 | Citrus Aurantium Peel Oil | 苦橙果皮油 | 精油；香精；加香（清单） | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/details/100219)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
@@ -56,10 +55,9 @@
 | 8 | Gluconolactone | 葡糖酸内酯 | 针对痘痘闭口 | 需求匹配、证据强度 | B | 14%免洗溶液;研究与5%BPO及基质比较 | [PMID 1303072](https://pubmed.ncbi.nlm.nih.gov/1303072/) | 已核对 |   |
 | 8 | Hydrolyzed Keratin | 水解角蛋白 | 针对受损、干枯毛躁 | 需求匹配、证据强度 | C | 未知 | — | 已核对 |   |
 | 8 | Sodium Ascorbyl Phosphate | 抗坏血酸磷酸酯钠 | 针对痘痘闭口、细纹松弛 | 需求匹配、证据强度 | B | acne:5%免洗研究配方;aging:独立有效浓度未知 | [PMID 19134126](https://pubmed.ncbi.nlm.nih.gov/19134126/)<br>[pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC13588479/) | 已核对 |   |
-| 8 | TEA-Dodecylbenzenesulfonate | 十二烷基苯磺酸 TEA 盐 | 强清洁力表活 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 7 | Ceramide NG | 神经酰胺 NG | 针对干燥 | 需求匹配、证据强度 | C | 未知 | — | 已核对 |   |
 | 7 | Glycolic Acid | 甘醇酸 | 针对细纹松弛 | 需求匹配、证据强度 | B | 8%免洗霜每日2次持续22周;浓度与pH及基质共同影响效果 | [PMID 8651713](https://pubmed.ncbi.nlm.nih.gov/8651713/)<br>[fda.gov](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/guidance-industry-labeling-cosmetics-containing-alpha-hydroxy-acids)<br>[aad.org](https://www.aad.org/public/everyday-care/skin-care-secrets/routine/pregnancy-skin-care) | 已核对 |   |
-| 7 | Sodium Lauryl Sulfate | 月桂醇硫酸酯钠 | 强清洁力表活 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
+| 7 | Sodium Lauryl Sulfate | 月桂醇硫酸酯钠 | 强清洁力表活 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[PMID 17578437](https://pubmed.ncbi.nlm.nih.gov/17578437/)<br>[PMID 31562780](https://pubmed.ncbi.nlm.nih.gov/31562780/)<br>[PMID 36856374](https://pubmed.ncbi.nlm.nih.gov/36856374/) | 已核对 |   |
 | 6 | Alpha-Isomethyl Ionone | α-异甲基紫罗兰酮 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
 | 6 | Linalyl Acetate | 乙酸芳樟酯 | 香精；加香（清单） | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/details/77311)<br>[eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 5 | Hydrolyzed Collagen | 水解胶原 | 针对受损、扁塌 | 需求匹配、证据强度 | C | 未知 | — | 已核对 |   |
@@ -69,7 +67,7 @@
 | 4 | Citral | 柠檬醛 | 香精；欧盟香料致敏原 | 刺激风险；香味层级 | — | — | [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 4 | Citrus Limon Peel Oil | 柠檬果皮油 | 精油 | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 4 | Eucalyptus Globulus Leaf Oil | 蓝桉叶油 | 精油 | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
-| 4 | Iodopropynyl Butylcarbamate | 碘丙炔醇丁基氨甲酸酯 | 致敏成分 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
+| 4 | Iodopropynyl Butylcarbamate | 碘丙炔醇丁基氨甲酸酯 | 致敏成分 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[PMID 23869727](https://pubmed.ncbi.nlm.nih.gov/23869727/)<br>[PMID 12022126](https://pubmed.ncbi.nlm.nih.gov/12022126/) | 已核对 |   |
 | 4 | Melaleuca Alternifolia Leaf Oil | 互生叶白千层叶油（茶树油） | 精油 | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 4 | Mentha Piperita Oil | 辣薄荷油 | 精油 | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 4 | Menthyl Lactate | 乳酸薄荷酯 | 针对头皮痒 | 需求匹配、证据强度 | C | 未知 | — | 已核对 |   |
@@ -81,7 +79,7 @@
 | 3 | Terpineol | 松油醇 | 香精；加香（清单） | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/details/80711)<br>[eur-lex.europa.eu](https://eur-lex.europa.eu/eli/reg/2023/1545/oj)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
 | 3 | Tetrahexyldecyl Ascorbate | 四己基癸醇抗坏血酸酯 | 针对暗沉色斑、细纹松弛 | 需求匹配、证据强度 | C | 未知:不能用原料复合物添加量代替纯成分有效浓度 | [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC13588479/) | 已核对 |   |
 | 3 | TRISODIUM HEDTA | — | 螯合剂（清单） | 环境适配、产品残留 | — | — | [CIR：EDTA 及其盐类安全评估（PMID 12396676）](https://pubmed.ncbi.nlm.nih.gov/12396676/)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
-| 2 | Ammonium Lauryl Sulfate | 月桂醇硫酸酯铵 | 强清洁力表活 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 未核对 |   |
+| 2 | Ammonium Lauryl Sulfate | 月桂醇硫酸酯铵 | 强清洁力表活 | 刺激风险 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/)<br>[PMID 36856374](https://pubmed.ncbi.nlm.nih.gov/36856374/)<br>[PMID 34921679](https://pubmed.ncbi.nlm.nih.gov/34921679/) | 已核对 |   |
 | 2 | Bis-Aminopropyl Diglycol Dimaleate | 双氨丙基二甘醇二马来酸酯 | 针对受损 | 需求匹配、证据强度 | C | 未知 | — | 已核对 |   |
 | 2 | Ceramide AG | 神经酰胺 AG | 针对干燥 | 需求匹配、证据强度 | C | 未知 | — | 已核对 |   |
 | 2 | COCOS NUCIFERA WATER | — | 香精；加香（清单） | 刺激风险；香味层级 | — | — | [CosIng](https://ec.europa.eu/growth/tools-databases/cosing/details/55635)<br>[CosIng](https://ec.europa.eu/growth/tools-databases/cosing/) | 已核对 |   |
@@ -150,7 +148,7 @@ data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 130 
 | 2026-10-21 | 9 | Dimethicone/Vinyl Dimethicone Crosspolymer | 聚二甲基硅氧烷/乙烯基聚二甲基硅氧烷交联聚合物，硅类成分，让质地顺滑、增加稠度。 | Dimethicone/vinyl dimethicone crosspolymer is a silicone that smooths and thickens the texture. |   |
 | 2026-10-21 | 8 | Caprylhydroxamic Acid | 辛酰羟肟酸，结合金属离子，常用来辅助防腐。 | Caprylhydroxamic acid binds metal ions and is often used to support preservation. |   |
 | 2026-10-17 | 144 | Citric Acid | 柠檬酸，常用来把产品调到偏弱酸性，让头发表面更平顺；也能结合水中的金属离子。 | Citric acid adjusts the product to a mildly acidic pH, which helps the hair surface lie flat; it also binds metal ions in water. |   |
-| 2026-10-17 | 133 | Phenoxyethanol | 苯氧乙醇，常见的防腐剂，用量有法规上限。 | Phenoxyethanol is a common preservative; its concentration is capped by regulation. |   |
+| 2026-10-17 | 135 | Phenoxyethanol | 苯氧乙醇，常见的防腐剂，用量有法规上限。 | Phenoxyethanol is a common preservative; its concentration is capped by regulation. |   |
 | 2026-10-17 | 95 | Sodium Chloride | 氯化钠，也就是食盐，在洗发水里主要用来让质地变稠。 | Sodium chloride is table salt; in shampoo it is mainly used to thicken the formula. |   |
 | 2026-10-17 | 91 | Sodium Benzoate | 苯甲酸钠，常见的防腐剂，防止产品开封后长细菌和霉菌。 | Sodium benzoate is a common preservative that keeps bacteria and mould from growing after opening. |   |
 | 2026-10-17 | 85 | Tocopherol | 生育酚，即维生素 E，主要用来防止配方中的油脂氧化变质。 | Tocopherol is vitamin E, mainly used to keep oils in the formula from going rancid. |   |

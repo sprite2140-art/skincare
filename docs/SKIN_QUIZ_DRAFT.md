@@ -152,7 +152,7 @@
 | 规则 | 出处 |
 |---|---|
 | F1 选"经常"：刺激风险扣分加倍（沿用 `SENSITIVE_MULTIPLIER = 2`）；免洗产品不减半，冲洗型（洁面）减半，沿用洗护 | 沿用 SCORING.md |
-| 刺激成分：沿用 fragrance、essential_oil、alcohol、strong_acid、sensitizer 五个标签。另外，A 醇类、过氧化苯甲酰、果酸、水杨酸类**只对敏感肌**计入刺激风险（每类扣 15 分，敏感肌加倍后为 30 分）；对非敏感肌不扣分，因为它们是针对困扰的功效成分 | A 醇类和过氧化苯甲酰会让皮肤更敏感：AAD How to safely exfoliate at home；只对敏感肌计入：本项目设计（见第 8 节决定 5） |
+| 刺激成分：沿用 fragrance、essential_oil、strong_acid、sensitizer 四个标签（alcohol 2026-10-26 起只提示，不扣分）。另外，A 醇类、过氧化苯甲酰、果酸、水杨酸类**只对敏感肌**计入刺激风险（每类扣 15 分，敏感肌加倍后为 30 分）；对非敏感肌不扣分，因为它们是针对困扰的功效成分 | A 醇类和过氧化苯甲酰会让皮肤更敏感：AAD How to safely exfoliate at home；只对敏感肌计入：本项目设计（见第 8 节决定 5） |
 | 敏感肌的去角质步骤不出现 | AAD How to safely exfoliate at home（干、敏感皮肤宜温和；有玫瑰痤疮的人不要去角质） |
 | 敏感肌在同等级内优先"标注无香"的产品（沿用洗护的香味层级排序） | AAD [How to test skin care products](https://www.aad.org/public/everyday-care/skin-care-secrets/prevent-skin-problems/test-skin-care-products)（选 fragrance-free；"unscented"可能只是遮盖了气味） |
 
