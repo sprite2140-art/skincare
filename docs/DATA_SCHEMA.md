@@ -32,7 +32,8 @@ targets 取值：
 
 risk_tags 取值：fragrance, essential_oil, alcohol, strong_acid, sensitizer, strong_cleanser, pregnancy_caution, rx_caution
 
-- fragrance / essential_oil / alcohol / strong_acid / sensitizer：计入刺激风险
+- fragrance / essential_oil / strong_acid / sensitizer：计入刺激风险
+- alcohol：不扣分，只在"需要注意"里提示"高浓度酒精可能降低皮肤含水量"；也用于"想避开的成分：酒精"（2026-10-26）
 - strong_cleanser：强清洁力表活，只对每天洗头的用户计入刺激风险
 - pregnancy_caution：孕期需注意。不计入刺激风险；对怀孕 / 备孕 / 哺乳用户排除，对其他人被动提示
 - rx_caution：与处方皮肤药需注意。对"正在用处方皮肤药"的用户排除
