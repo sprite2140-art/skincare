@@ -27,6 +27,9 @@
 - 成分表末尾带句号（如 MO-US-020 的 "Fragrance."）时去掉句号再匹配（Codex 评审发现）。
 - 3 个新进入高频前 150 的成分补写通俗解释（草稿）：Polysorbate 60、Maltodextrin、Isohexadecane。
 
+### 2026-10-26 关闭测试模式后的规则
+- 作者决定：10/29 关闭测试模式。关闭后未核对的风险成分照常扣分（卡片注明"成分数据未核对"），未核对的有效成分不加分（计入"暂无数据"）。本 PR 只改关闭后的规则，开关仍为 true；10/29 另开 PR 改为 false（已试过改为 false 后测试全部通过）。
+
 ### 2026-10-26 欧盟香料致敏原 9 个核对完成
 - 用作者提供的法规 1223/2009 合并版（docs/sources/eu_1223_2009_consolidated.pdf，2026-05-18 版）附录 III 核对剩余 9 个，记录在 data/eu_allergen_checks.csv（条目号见 DATA_SCHEMA.md），verify-list-ingredients --apply 标为已核对。13 个致敏原全部已核对。
 
