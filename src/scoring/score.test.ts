@@ -120,7 +120,9 @@ describe('data/ 真实数据', () => {
   });
 
   it('安全相关的过滤也看 draft 成分，并标注未核对', () => {
-    const r = scoreProduct(byId('SH-US-003'), profile({ avoidTags: ['fragrance'] }), strict);
+    // 真实数据的香料成分都已核对：把芳樟醇改成未核对来模拟
+    const draftIndex = { ...strict.index, get: (n: string) => { const i = strict.index.get(n); return i && i.inciName === 'Linalool' ? { ...i, reviewStatus: 'draft' as const } : i; } };
+    const r = scoreProduct({ ...byId('SH-US-003'), inciList: ['Water', 'Linalool'], inciNameUnverified: [] }, profile({ avoidTags: ['fragrance'] }), { ...strict, index: draftIndex });
     expect(r.excluded).toBe(true);
     expect(r.exclusions[0]).toMatchObject({ code: 'avoid_tag', unverified: true });
     expect(r.exclusions[0].text.zh).toContain('未核对');
