@@ -19,6 +19,9 @@
 
 **下一步**：10/28 前导入保湿、精华、去角质、点涂数据；10/29 关闭测试模式（关闭前补齐下面"测试模式影响"里的成分核对）；10/30–31 按试用反馈修改。
 
+### 2026-10-26 欧盟香料致敏原 9 个核对完成
+- 用作者提供的法规 1223/2009 合并版（docs/sources/eu_1223_2009_consolidated.pdf，2026-05-18 版）附录 III 核对剩余 9 个，记录在 data/eu_allergen_checks.csv（条目号见 DATA_SCHEMA.md），verify-list-ingredients --apply 标为已核对。13 个致敏原全部已核对。
+
 ### 2026-10-26 风险成分 10 个核对完成
 - 依据第二个 AI 的 PubMed 核对（docs/sources/risk_ingredients_sources.csv），10 个全部标为已核对，出处并入 sources。
 - C14-16 烯烃磺酸钠：不再列为强清洁力刺激成分（OECD 评估不支持）；TEA-十二烷基苯磺酸盐：降为普通表活同级（本项目普通表活不扣分），两者改为基础成分。
