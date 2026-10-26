@@ -185,6 +185,28 @@ SU-US-044,sephora,,,1K,reviews,2026-10-26,https://www.sephora.com/product/peter-
 SU-US-045,ulta,4.5,3403,"3,403",reviews,2026-10-26,https://www.ulta.com/p/protect-glow-daily-sunscreen-gel-broad-spectrum-spf-30-pimprod2016249,Direct PDP.
 SU-US-046,sephora,,,1.4K,reviews,2026-10-26,https://www.sephora.com/product/shiseido-urban-environment-oil-free-sunscreen-broad-spectrum-spf-42-P474390,"Direct Sephora product page opened; product title shown as Urban Environment Oil-Control Sunscreen SPF 40, 50 mL, $52, 1.4K reviews."
 SU-US-047,walmart,4.2,613,613,ratings,2026-10-26,https://www.walmart.com/ip/181312877,"Direct Walmart PDP; template platform enum lacks walmart, so platform not represented exactly. Inclusion is bestseller-page placement, not count."
-SU-US-048,sephora,,888,888,reviews,2026-10-26,https://www.sephora.com/product/mini-cicapair-tm-tiger-grass-color-correcting-treatment-spf-30-P517137?skuId=2882637,Direct mini PDP. Inclusion uses direct Sephora PDP 'bestselling color corrector' statement for same formula.
 SU-US-049,sephora,,,1.1K,reviews,2026-10-26,https://www.sephora.com/product/sunsuede-spf-50-lightweight-sunscreen-blurring-primer-stick-P522181?skuId=2973014,Direct PDP display; exact integer not exposed.
 SU-US-050,kohls,4.2,1006,"1,006",reviews,2026-10-26,https://www.kohls.com/product/prd-7562699/merit-the-uniform-tinted-mineral-sunscreen-broad-spectrum-spf-45.jsp,Sephora at Kohl's direct retailer PDP.
+SU-US-048,ulta,4.6,823,823,Reviews,2026-10-26,https://www.ulta.com/p/cc-red-correct-green-color-corrector-spf25-pimprod2005691?sku=2572682,不足1000，不单独作为入库依据。
+SU-US-048,amazon,4.4,2837,"2,837",Reviews (aria-label),2026-10-26,https://www.amazon.com/dp/B09TSS9XK6,直接商品页；1.5oz产品总体评价，不声称迷你SKU专属；非已核实品牌官方店购买链接。
+SE-US-021,ulta,4.4,3155,3155,Reviews,2026-10-26,https://www.target.com/p/-/A-51346324,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-021,target,4.41,6823,6823,star ratings,2026-10-26,https://www.target.com/p/-/A-51346324,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-022,amazon,4.3,6360,6360,Reviews (aria-label),2026-10-26,https://www.amazon.com/dp/B00V4PNAI4,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-023,ulta,4.5,649,649,Reviews,2026-10-26,https://www.ulta.com/p/effaclar-face-serum-with-salicylic-acid-pimprod2033423?sku=2597368,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-024,ulta,4.1,411,411,Reviews,2026-10-26,https://www.ulta.com/p/redness-relief-azelaic-acid-serum-pimprod2033306?sku=2597522,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-025,ulta,4.7,3232,3232,Reviews,2026-10-26,https://www.ulta.com/p/holy-hydration-thirst-burst-drops-dewy-brightening-pimprod2049550?sku=2631986,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-026,ulta,4.6,5937,5937,Reviews,2026-10-26,https://www.ulta.com/p/holy-hydration-triple-bounce-serum-pimprod2036595?sku=2605492,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-027,ulta,4.1,1615,1615,Reviews,2026-10-26,https://www.ulta.com/p/pure-12-vitamin-c-serum-wrinkle-reduction-radiance-pimprod2012322?sku=2556946,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-028,ulta,4.4,776,776,Reviews,2026-10-26,https://www.ulta.com/p/retinol-b3-face-serum-fine-lines-wrinkles-pimprod2013151?sku=2559628,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-029,ulta,4.5,22179,22179,Reviews,2026-10-26,https://www.ulta.com/p/advanced-night-repair-multi-recovery-complex-serum-with-hyaluronic-acid-peptides-pimprod2016818?sku=2568523,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-030,ulta,4.6,44660,44660,Reviews,2026-10-26,https://www.ulta.com/p/clinique-smart-clinical-repair-wrinkle-correcting-serum-pimprod2025268?sku=2582928,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-031,ulta,4.4,143,143,Reviews,2026-10-26,https://www.ulta.com/p/super-fade-discoloration-serum-pimprod2049581?sku=2634854,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-032,sephora,,,3.4K,页面仅显示缩略评价计数,2026-10-26,https://www.sephora.com/product/genifique-ultimate-serum-P515030,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-033,ulta,4.6,5071,5071,Reviews,2026-10-26,https://www.ulta.com/p/glass-skin-refining-serum-xlsImpprod18971035?sku=2532640,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-034,ulta,4.8,3454,3454,Reviews,2026-10-26,https://www.ulta.com/p/ceramide-barrier-nourishing-daily-serum-pimprod2032101?sku=2596547,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-035,ulta,4.7,4068,4068,Reviews,2026-10-26,https://www.ulta.com/p/advanced-snail-96-mucin-power-essence-xlsImpprod15641052?sku=2577440,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-036,ulta,4.5,811,811,Reviews,2026-10-26,https://www.ulta.com/p/niacinamide-10-txa-4-serum-brightening-dark-spots-pimprod2048921?sku=2644104,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-037,ulta,4.7,179,179,Reviews,2026-10-26,https://www.ulta.com/p/hydrating-serum-with-tri-ceramide-complex-pimprod2059308?sku=2654922,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-038,ulta,4.7,1388,1388,Reviews,2026-10-26,https://www.ulta.com/p/biolumin-c-vitamin-c-serum-xlsImpprod18521001?sku=2547336,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-039,ulta,4.5,787,787,Reviews,2026-10-26,https://www.ulta.com/p/ceo-15-vitamin-c-brightening-serum-pimprod2007847?sku=2550151,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
+SE-US-040,target,4.58,1542,1542,star ratings,2026-10-26,https://www.target.com/p/-/A-82403939,零售商PDP总体评分；可能跨规格/旧版或同步评价，不合并不同平台。
