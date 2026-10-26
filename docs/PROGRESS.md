@@ -27,6 +27,11 @@
 - 成分表末尾带句号（如 MO-US-020 的 "Fragrance."）时去掉句号再匹配（Codex 评审发现）。
 - 3 个新进入高频前 150 的成分补写通俗解释（草稿）：Polysorbate 60、Maltodextrin、Isohexadecane。
 
+### 2026-10-26 防晒入库依据补查
+- su_inclusion_recheck.csv 覆盖 SU-US-001—040 的 inclusion_basis（已有美容奖项依据的 SU-US-015、018 保留原依据）；su_recheck_retail_ratings.csv 30 条：同一产品同一平台的 17 条替换旧记录（新核对日期），13 条追加。
+- 只显示"数字K"的评价数按 ≥ N×1000 判定入库（SU-US-027：Sephora 约 2K）。
+- 防晒有入库依据 19 款（评价数 17、美容奖项 2）；入库依据待补 21 款：SU-US-005、006、007、010、014、017、019、020、021、023、025、026、028、029、030、031、033、034、035、037、038。
+
 ### 2026-10-26 作者决定：Bluemercury 评价数、TEA-十二烷基苯磺酸盐
 - Bluemercury 的评价数也算入库依据（review_count 认可 Ulta、Sephora、Target、Amazon、Nordstrom、Bluemercury）。MO-US-014、SE-US-017、SE-US-018 因此进入推荐；入库依据待补剩 7 款（MO-US-012、SE-US-010、012、013、014、015、016）。
 - TEA-Dodecylbenzenesulfonate 按普通表活处理、不额外扣分（#24 已是这样，作者确认）。
