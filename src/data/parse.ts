@@ -286,8 +286,9 @@ function withInclusion(p: Product): Product {
   if (p.inclusionBasisType !== null) return p;
   const basis = reviewCountBasis(p.ratings);
   if (basis) return { ...p, inclusionBasisType: 'review_count', inclusionBasis: basis };
-  // inclusion_basis 写 none 且评价数不足：入库依据待补
-  return p.inclusionBasis.trim().toLowerCase() === 'none' ? { ...p, inclusionPending: true } : p;
+  // inclusion_basis 写 none，或写的是评价数但不在认可的平台 / 不足 1,000 条：入库依据待补
+  const raw = p.inclusionBasis.trim().toLowerCase();
+  return raw === 'none' || /review count/.test(raw) ? { ...p, inclusionPending: true } : p;
 }
 
 export function parseExchangeRates(text: string): ExchangeRate[] {

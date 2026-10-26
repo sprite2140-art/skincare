@@ -82,7 +82,8 @@ export function buildIngredientIndex(ingredients: Ingredient[], aliases: InciAli
     get: (name) => {
       // 先查别名表（如 Red 4 → CI 14700），再按名称查
       const key = resolveAlias(name, alias);
-      const hit = map.get(key);
+      // 成分表最后一项常带句号（如 "Fragrance."）：查不到时去掉句号再查；"Alcohol Denat." 这类本身带句号的名称照常命中
+      const hit = map.get(key) ?? (key.endsWith('.') ? map.get(resolveAlias(key.slice(0, -1).trim(), alias)) : undefined);
       if (hit || !key.includes('/')) return hit;
       // "INCI 名/俗名"写法（如 Glycine Soja Oil/Soybean Oil）：整体查不到时，用斜杠前的部分查
       // 只用斜杠前的部分，避免 Hippophae Rhamnoides Fruit/Seed Oil 这类本身带斜杠的 INCI 名被拆错

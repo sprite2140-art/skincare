@@ -20,7 +20,8 @@ describe('护肤流程：每步 1 个首选 + 2 个备选', () => {
     expect(cleanser.primary).not.toBeNull();
     expect(cleanser.alternates).toHaveLength(2);
     expect(cleanser.alternates).not.toContain(cleanser.primary);
-    expect(r.steps.find((s) => s.step.id === 'moisturizer')!.status).toBe('no_data');
+    // 点涂还没有数据（保湿、精华 2026-10-26 已导入）
+    expect(r.steps.find((s) => s.step.id === 'spot')!.status).toBe('no_data');
   });
 
   it('用户替换首选后，原首选进入备选', () => {

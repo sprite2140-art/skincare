@@ -32,8 +32,8 @@ describe('入库依据：评价数 1,000 条以上', () => {
     expect(kept.inclusionBasis).toBe('Allure');
   });
 
-  it('现有产品中 11 款因此新获得依据', () => {
-    const ids = real.products.filter((p) => p.inclusionBasisType === 'review_count').map((p) => p.productId);
+  it('保湿、精华以外的现有产品中 11 款因此新获得依据', () => {
+    const ids = real.products.filter((p) => p.inclusionBasisType === 'review_count' && !/^(MO|SE)-/.test(p.productId)).map((p) => p.productId);
     expect(ids).toEqual(['SU-US-001', 'SU-US-002', 'SU-US-003', 'SU-US-009', 'SU-US-011', 'SU-US-012', 'SU-US-016', 'SU-US-024', 'SU-US-036', 'SU-US-039', 'SU-US-040']);
   });
 
@@ -50,7 +50,26 @@ describe('入库依据：评价数 1,000 条以上', () => {
     const data = { index: real.ingredientIndex, exchangeRates: real.exchangeRates, budgetCaps: computeBudgetCaps(real.products, real.exchangeRates), allowDraft: true };
     const ranked = rankProducts([pending, raw({ productId: 'Z' })], base.category, profile, data).map((r) => r.product.productId);
     expect(ranked).toEqual(['Z']);
+    // 依据写的是其他平台（如 Bluemercury）的评价数：也算待补
+    const [blue] = attachRetail([raw({ productId: 'B', inclusionBasisType: null, inclusionBasis: 'US retailer review count; bluemercury; 3051; 2026-10-24; https://bluemercury.com/x' })], [], []);
+    expect(blue.inclusionPending).toBe(true);
     // 现有产品没有写 none 的，不受影响
-    expect(real.products.filter((p) => p.inclusionPending)).toEqual([]);
+    expect(real.products.filter((p) => p.inclusionPending).map((p) => p.productId)).toEqual(
+      ['MO-US-012', 'MO-US-014', 'SE-US-010', 'SE-US-012', 'SE-US-013', 'SE-US-014', 'SE-US-015', 'SE-US-016', 'SE-US-017', 'SE-US-018']);
+  });
+});
+
+describe('成分表末尾的句号', () => {
+  it('"Fragrance." 能匹配香精（想避开香精时会被排除）；"Alcohol Denat." 照常匹配', () => {
+    expect(real.ingredientIndex.get('Fragrance.')?.inciName).toBe('Fragrance');
+    expect(real.ingredientIndex.get('Phenoxyethanol.')).toBeDefined();
+    expect(real.ingredientIndex.get('Alcohol Denat.')?.inciName).toBe('Alcohol Denat.');
+    const mo = real.products.find((p) => p.productId === 'MO-US-020')!;
+    const profile: ScoringProfile = {
+      concerns: [], concernsRanked: false, sensitive: false, specialStatus: 'none', avoidIngredients: [], avoidTags: ['fragrance'],
+      budget: 'none', fragrancePref: null, washFrequency: null, city: null, inUseProducts: [],
+    };
+    const data = { index: real.ingredientIndex, exchangeRates: real.exchangeRates, budgetCaps: computeBudgetCaps(real.products, real.exchangeRates), allowDraft: true };
+    expect(rankProducts([mo], 'moisturizer', profile, data)[0].excluded).toBe(true);
   });
 });
