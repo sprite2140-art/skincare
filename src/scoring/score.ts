@@ -4,6 +4,7 @@
 // - 打分（四个维度）只用已核对的成分：review_status = verified，或基础成分（category = base，不需要人工核对）。
 //   产品成分表里带 [待核对] 标记的成分（名称未核对）不参与打分。
 //   测试模式（ScoringData.allowDraft）下，draft 的有效成分和风险成分也参与打分，结果标注"测试数据，尚未核对"。
+//   正式模式下：未核对的风险成分照常扣分（卡片注明"成分数据未核对"），未核对的有效成分不加分。
 // - 安全相关（硬性过滤、孕期提示、搭配冲突）也看 draft 成分和名称未核对的成分，宁可多提示，结果里标注"未核对"。
 
 import { usageTypeOf } from '../data/types';
@@ -122,7 +123,7 @@ export interface IrritantHit {
   deduction: number;
   /** 是否计入温和度（强清洁力表活只在每天洗头且不常用造型产品时计入；未核对的成分在正式模式下不计入） */
   counted: boolean;
-  /** 依据的成分还没核对，未参与打分（只展示） */
+  /** 依据的成分还没核对：counted 为 true 时照常扣分，卡片注明未核对；为 false 时只展示 */
   unverified: boolean;
 }
 
@@ -663,7 +664,7 @@ function scoreIrritation(
     }
     const d = (tag === 'strong_cleanser' ? STRONG_CLEANSER_DEDUCTION : IRRITANT_DEDUCTION) * mult;
     deduction += d;
-    hitsOut.push({ tag, ingredients, deduction: d, counted: true, unverified: false });
+    hitsOut.push({ tag, ingredients, deduction: d, counted: true, unverified: hits.some((r) => !isVerified(r)) });
     const names = joinNames(hits.map((r) => ingredientName(r.ingredient, r.raw)));
     const why = tag === 'strong_cleanser' ? { zh: '，你每天洗头', en: ', and you wash daily' } : { zh: '', en: '' };
     found.push({
@@ -758,6 +759,8 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   const nameUnverifiedIngredients = items.filter((r) => r.nameUnverified).map((r) => r.raw);
   const unknownIngredients = items.filter((r) => !r.nameUnverified && !r.ingredient).map((r) => r.raw);
   const unverifiedIngredients = items.filter((r) => !r.nameUnverified && r.ingredient && !isVerified(r)).map((r) => r.raw);
+  // 风险判断用成分库里所有认得出的成分（含未核对）：未核对的风险成分照常扣分，偏保守
+  const known = items.filter((r): r is Resolved & { ingredient: Ingredient } => !r.nameUnverified && r.ingredient !== null);
 
   const caps = data.budgetCaps[product.category];
   const capUsd = capFor(profile.budget, caps, profile.customBudgetUsd ?? null);
@@ -782,7 +785,9 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     });
   }
   // 测试模式下 draft 成分已参与打分，不算"暂无数据"
-  const missing = unknownIngredients.length + nameUnverifiedIngredients.length + (data.allowDraft ? 0 : unverifiedIngredients.length);
+  // 正式模式下未核对的风险成分已计入温和度，不算"暂无数据"；未核对的有效成分不参与打分，算"暂无数据"
+  const unscoredDraft = data.allowDraft ? 0 : known.filter((r) => r.ingredient.reviewStatus !== 'verified' && r.ingredient.category === 'active').length;
+  const missing = unknownIngredients.length + nameUnverifiedIngredients.length + unscoredDraft;
   if (missing > 0) {
     notices.push({
       code: 'missing_data',
@@ -842,7 +847,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
     const need = scoreNeed(product, verified, specs, productKeyActiveTerms(product));
     needMatches = need.needMatches;
     const evidence = scoreEvidence(needMatches, usageTypeOf(product), product);
-    const irr = scoreIrritation(verified, profile, product, items.filter((r): r is Resolved & { ingredient: Ingredient } => !r.nameUnverified && r.ingredient !== null));
+    const irr = scoreIrritation(known, profile, product, known);
     irritation = irr.detail;
     dimensions = {
       need: need.dim,

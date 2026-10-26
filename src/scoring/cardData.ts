@@ -257,7 +257,7 @@ export function cautionItems(r: ProductScore, profile: Pick<ScoringProfile, 'was
   const { hits, rinseOff, sensitive } = r.irritation;
   return hits.map((h) => {
     const label = h.tag === 'fragrance' ? { zh: '香精 / 香料', en: 'Fragrance' } : capitalize(RISK_TAG_LABELS[h.tag]);
-    if (h.unverified) {
+    if (h.unverified && !h.counted) {
       return { label, ingredients: h.ingredients, note: { zh: '成分数据未核对，暂未计入温和度', en: 'Ingredient data not yet verified; not counted in gentleness yet' } };
     }
     if (!h.counted) {
@@ -276,6 +276,8 @@ export function cautionItems(r: ProductScore, profile: Pick<ScoringProfile, 'was
         : { zh: '你的头皮较敏感，扣分加倍', en: 'doubled because your scalp is sensitive' });
     }
     const pts = fmtPts(h.deduction);
+    // 正式模式下未核对的风险成分照常扣分，写明数据未核对
+    if (h.unverified) why.push({ zh: '成分数据未核对', en: 'ingredient data not yet verified' });
     return {
       label,
       ingredients: h.ingredients,

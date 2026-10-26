@@ -129,17 +129,21 @@ describe('卡片：需求对照、需要注意、评分明细', () => {
     expect(cautionItems(scoreProduct(p, daily, data), daily).find((x) => x.label.zh === '强清洁力表活')!.note.zh).toMatch(/^温和度扣/);
   });
 
-  it('正式模式（不用未核对数据打分）下，未核对的风险成分仍列在"需要注意"，注明未计入温和度', () => {
-    const strict = { ...data, allowDraft: false };
+  it('正式模式（关闭测试模式）下，未核对的风险成分照常扣分，"需要注意"注明成分数据未核对；未核对的有效成分不加分', () => {
+    // 用改成未核对的甲基异噻唑啉酮（风险）和吡硫鎓锌（有效成分）模拟
+    const draft = new Set(['Methylisothiazolinone', 'Pyrithione Zinc']);
+    const index = { ...data.index, get: (n: string) => { const i = data.index.get(n); return i && draft.has(i.inciName) ? { ...i, reviewStatus: 'draft' as const } : i; } };
+    const strict = { ...data, index, allowDraft: false };
     const profile = toScoringProfile(answers({ concerns: ['dandruff'] }), 'shampoo', ctx);
-    const p = real.products.find((x) => scoreProduct(x, profile, strict).fragrance.status === 'contains'
-      && scoreProduct(x, profile, strict).irritation.hits.some((h) => h.unverified))!;
-    expect(p).toBeDefined();
+    const p = { ...real.products[0], productId: 'T-DRAFT', usageType: 'leave_on' as const, inciList: ['Water', 'Methylisothiazolinone', 'Pyrithione Zinc'], inciNameUnverified: [], keyActives: [] };
     const r = scoreProduct(p, profile, strict);
-    const items = cautionItems(r, profile);
-    expect(items.length).toBeGreaterThan(0);
-    expect(items.some((x) => x.note.zh === '成分数据未核对，暂未计入温和度')).toBe(true);
-    expect(r.irritation.hits.filter((h) => h.unverified).every((h) => h.deduction === 0 && !h.counted)).toBe(true);
+    const hit = r.irritation.hits.find((h) => h.tag === 'sensitizer')!;
+    expect(hit).toMatchObject({ counted: true, unverified: true, deduction: 15 });
+    expect(r.dimensions.irritation.score).toBe(85);
+    expect(cautionItems(r, profile).find((x) => x.label.zh.includes('致敏'))!.note.zh).toBe('温和度扣 15 分（成分数据未核对）');
+    // 有效成分未核对：不加分，算"暂无数据"
+    expect(r.needMatches[0].ingredients.map((i) => i.inciName)).not.toContain('Pyrithione Zinc');
+    expect(r.notices.find((n) => n.code === 'missing_data')!.text.zh).toBe('有 1 个成分暂无数据，未参与打分');
   });
 
   it('评分明细：实际权重为重新归一化后的值，贡献合计等于总分', () => {
