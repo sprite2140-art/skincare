@@ -33,9 +33,10 @@ describe('入库依据：评价数 1,000 条以上', () => {
     expect(kept.inclusionBasis).toBe('Allure');
   });
 
-  it('保湿、精华以外：防晒 21 款按评价数获得依据（2026-10-26 防晒补查、Amazon 补查后）', () => {
+  it('保湿、精华以外：防晒 28 款按评价数获得依据（防晒补查、Amazon 补查、第 3 批后）', () => {
     const ids = real.products.filter((p) => p.inclusionBasisType === 'review_count' && !/^(MO|SE)-/.test(p.productId)).map((p) => p.productId);
-    expect(ids).toEqual(['SU-US-001', 'SU-US-002', 'SU-US-003', 'SU-US-004', 'SU-US-006', 'SU-US-008', 'SU-US-009', 'SU-US-010', 'SU-US-011', 'SU-US-012', 'SU-US-013', 'SU-US-016', 'SU-US-022', 'SU-US-024', 'SU-US-027', 'SU-US-032', 'SU-US-035', 'SU-US-036', 'SU-US-037', 'SU-US-039', 'SU-US-040']);
+    expect(ids).toEqual(['SU-US-001', 'SU-US-002', 'SU-US-003', 'SU-US-004', 'SU-US-006', 'SU-US-008', 'SU-US-009', 'SU-US-010', 'SU-US-011', 'SU-US-012', 'SU-US-013', 'SU-US-016', 'SU-US-022', 'SU-US-024', 'SU-US-027', 'SU-US-032', 'SU-US-035', 'SU-US-036', 'SU-US-037', 'SU-US-039', 'SU-US-040',
+      'SU-US-041', 'SU-US-043', 'SU-US-044', 'SU-US-045', 'SU-US-046', 'SU-US-049', 'SU-US-050']);
   });
 
   it('inclusion_basis 为 none 且评价数不足：入库依据待补，校验只提示，不出现在推荐里', () => {
@@ -58,7 +59,7 @@ describe('入库依据：评价数 1,000 条以上', () => {
     expect(real.products.filter((p) => p.inclusionPending).map((p) => p.productId)).toEqual(
       ['SU-US-005', 'SU-US-007', 'SU-US-014', 'SU-US-017', 'SU-US-019', 'SU-US-020', 'SU-US-021', 'SU-US-023', 'SU-US-025',
         'SU-US-026', 'SU-US-028', 'SU-US-029', 'SU-US-030', 'SU-US-031', 'SU-US-033', 'SU-US-034', 'SU-US-038',
-        'MO-US-012', 'SE-US-010', 'SE-US-012', 'SE-US-013', 'SE-US-014', 'SE-US-015', 'SE-US-016']);
+        'MO-US-012', 'SE-US-010', 'SE-US-012', 'SE-US-013', 'SE-US-014', 'SE-US-015', 'SE-US-016', 'SU-US-042', 'SU-US-048']);
     for (const id of ['MO-US-014', 'SE-US-017', 'SE-US-018']) {
       expect(real.products.find((p) => p.productId === id)!.inclusionBasis).toMatch(/^Bluemercury 评价数/);
     }
@@ -87,5 +88,19 @@ describe('评价数只显示"数字K"', () => {
     expect(reviewCountBasis(k)).toBe('Sephora 评价数 约 2K（页面显示，未取得精确数）（核对于 2026-10-25）https://www.sephora.com/p');
     expect(reviewCountBasis(parseRetailRatings(RATING_COLS + 'X,sephora,,,0.8K,2026-10-25,https://www.sephora.com/p\n'))).toBeNull();
     expect(reviewCountBasis(parseRetailRatings(RATING_COLS + 'X,sephora,,,many,2026-10-25,https://www.sephora.com/p\n'))).toBeNull();
+  });
+});
+
+describe('防晒第 3 批规则', () => {
+  it('Walmart、Kohl\'s 的评价数也算入库依据；没有成分表的产品按待补处理、只提示', () => {
+    expect(reviewCountBasis(parseRetailRatings(RATING_COLS + 'X,walmart,4.2,1200,1200,2026-10-26,https://www.walmart.com/ip/1\n'))).toMatch(/^Walmart 评价数 1,200/);
+    expect(real.products.find((p) => p.productId === 'SU-US-050')!.inclusionBasis).toMatch(/^Kohl's 评价数 1,006/);
+    expect(real.products.find((p) => p.productId === 'SU-US-047')!.purchaseLinks[0].platform).toBe('walmart');
+    const noInci = real.products.find((p) => p.productId === 'SU-US-042')!;
+    expect(noInci.inciList).toEqual([]);
+    expect(noInci.inclusionPending).toBe(true);
+    const issues = validateData(real.ingredients, [noInci], real.cities, real.exchangeRates);
+    expect(issues.filter((i) => i.level === 'error')).toEqual([]);
+    expect(issues.some((i) => i.level === 'warning' && i.message.startsWith('inci_list 为空'))).toBe(true);
   });
 });

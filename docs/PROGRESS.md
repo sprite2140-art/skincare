@@ -27,6 +27,14 @@
 - 成分表末尾带句号（如 MO-US-020 的 "Fragrance."）时去掉句号再匹配（Codex 评审发现）。
 - 3 个新进入高频前 150 的成分补写通俗解释（草稿）：Polysorbate 60、Maltodextrin、Isohexadecane。
 
+### 2026-10-26 导入防晒第 3 批（SU-US-041—050）
+- 产品 10 款、购买链接 10 条、评分 10 条追加到 data/，自查报告移到 docs/data_batches/sunscreen_batch_03_self_check.md。
+- 平台新增 walmart、kohls（购买链接、评分、review_count 入库依据都认）；SU-US-047 改为 walmart（Walmart 畅销榜依据有效，retailer_bestseller），SU-US-050 改为 kohls。
+- 标准化：acne-prone → acne_prone（SU-US-045、048）；mature、redness-prone、rosacea-prone 清空；key_actives 只保留 INCI 名称和品牌公开浓度，其他写法移到 formula_note（SU-US-042、044、050 全部移走，填 Not separately disclosed）。
+- SU-US-048 入库依据改为 none（888 条，Sephora 的 bestselling 是商品描述）；SU-US-042 没有成分表，按待补处理。两款都不出现在推荐里。
+- 2 个新进入高频前 150 的成分补写通俗解释（草稿）：Lecithin、Sodium PCA。
+- 防晒共 50 款，可推荐 31 款。
+
 ### 2026-10-26 防晒 Amazon 补查（4 款）
 - 第二个 AI 直接打开 Amazon 商品页核对产品名、SPF 和评价数：SU-US-006（4,480）、010（16,666）、035（5,098）、037（4,711）补上入库依据，评分记录追加 4 条（星级未读取，留空）。其余防晒入库依据不变。
 - 防晒有入库依据 23 款；入库依据待补 17 款：SU-US-005、007、014、017、019、020、021、023、025、026、028、029、030、031、033、034、038。

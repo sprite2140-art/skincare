@@ -155,6 +155,7 @@ const PLATFORM_ALIASES: Record<string, RetailPlatform> = {
   bergdorf: 'bergdorf_goodman',
   bergdorfgoodman: 'bergdorf_goodman',
   saksfifthavenue: 'saks',
+  "kohl's": 'kohls',
 };
 export const normalizePlatform = (value: string | undefined): RetailPlatform => {
   const v = (value ?? '').trim().toLowerCase();
@@ -260,6 +261,7 @@ export function parseFormulaVersionChecks(text: string): FormulaVersionCheck[] {
  */
 const REVIEW_PLATFORM_NAMES: Record<(typeof REVIEW_COUNT_PLATFORMS)[number], string> = {
   ulta: 'Ulta', sephora: 'Sephora', target: 'Target', amazon: 'Amazon', nordstrom: 'Nordstrom', bluemercury: 'Bluemercury',
+  walmart: 'Walmart', kohls: "Kohl's",
 };
 
 /**
@@ -296,6 +298,8 @@ export function attachRetail(products: Product[], ratings: RetailRating[], links
 }
 
 function withInclusion(p: Product): Product {
+  // 没有成分表：等数据收集方补上，和"入库依据待补"一样不出现在推荐里
+  if (p.inciList.length === 0) return { ...p, inclusionPending: true };
   if (p.inclusionBasisType !== null) return p;
   const basis = reviewCountBasis(p.ratings);
   if (basis) return { ...p, inclusionBasisType: 'review_count', inclusionBasis: basis };

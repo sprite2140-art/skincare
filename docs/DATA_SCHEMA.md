@@ -70,7 +70,7 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |
 | inclusion_basis | 入库依据（榜单/奖项），原文 | |
-| inclusion_basis_type | 入库依据类型：retailer_bestseller（零售商畅销榜 / 按畅销排序，如 Ulta、Sephora、Walgreens）/ department_store_bestseller（百货 / 买手渠道畅销榜：Nordstrom、Neiman Marcus、Saks Fifth Avenue、Bergdorf Goodman、Bluemercury）/ beauty_award（美容大奖，如 Allure Best of Beauty、Cosmopolitan、NewBeauty）/ review_count（在美国主要零售商 Ulta、Sephora、Target、Amazon、Nordstrom、Bluemercury 任一平台评价数达到 1,000 条以上；Bluemercury 2026-10-26 由作者加入）。可留空（依据待核验时）。**只决定产品能否入库，不参与打分。** 留空时按 retail_ratings.csv 自动判断 review_count：取上述平台中评价数最多、且 rating_count ≥ 1000 的一条，依据写为"平台 评价数 N（核对于 日期）链接"（2026-10-24 起）。rating_count 为空、但 rating_count_display 写作"数字K"（如 2K）时按至少 N×1000 条判定，依据写"约 2K（页面显示，未取得精确数）"；只用于入库判断，页面不当作精确评价数显示（2026-10-26）。补查表覆盖 inclusion_basis 时，已有 inclusion_basis_type（畅销榜、美容奖项）的产品保留原依据：补查表的 none 只表示评价数不足，不否定已核实的榜单或奖项（作者决定，2026-10-26）。inclusion_basis 写 none 且评价数不足 1,000 条：照常导入，标为"入库依据待补"，不出现在推荐结果里，校验只给提示 2026-10-19 按 inclusion_basis 原文回填：80 款 retailer_bestseller、18 款 beauty_award、9 款留空 | retailer_bestseller |
+| inclusion_basis_type | 入库依据类型：retailer_bestseller（零售商畅销榜 / 按畅销排序，如 Ulta、Sephora、Walgreens）/ department_store_bestseller（百货 / 买手渠道畅销榜：Nordstrom、Neiman Marcus、Saks Fifth Avenue、Bergdorf Goodman、Bluemercury）/ beauty_award（美容大奖，如 Allure Best of Beauty、Cosmopolitan、NewBeauty）/ review_count（在美国主要零售商 Ulta、Sephora、Target、Amazon、Nordstrom、Bluemercury、Walmart、Kohl's 任一平台评价数达到 1,000 条以上；Bluemercury、Walmart、Kohl's 2026-10-26 由作者加入）。可留空（依据待核验时）。**只决定产品能否入库，不参与打分。** 留空时按 retail_ratings.csv 自动判断 review_count：取上述平台中评价数最多、且 rating_count ≥ 1000 的一条，依据写为"平台 评价数 N（核对于 日期）链接"（2026-10-24 起）。rating_count 为空、但 rating_count_display 写作"数字K"（如 2K）时按至少 N×1000 条判定，依据写"约 2K（页面显示，未取得精确数）"；只用于入库判断，页面不当作精确评价数显示（2026-10-26）。补查表覆盖 inclusion_basis 时，已有 inclusion_basis_type（畅销榜、美容奖项）的产品保留原依据：补查表的 none 只表示评价数不足，不否定已核实的榜单或奖项（作者决定，2026-10-26）。inclusion_basis 写 none 且评价数不足 1,000 条：照常导入，标为"入库依据待补"，不出现在推荐结果里，校验只给提示 2026-10-19 按 inclusion_basis 原文回填：80 款 retailer_bestseller、18 款 beauty_award、9 款留空 | retailer_bestseller |
 | awards | 榜单与奖项，结果页显示为标签。每项格式 `来源\|年份\|名称\|链接`，多项用分号分隔；来源和 4 位年份必填 | Allure Best of Beauty\|2025\|敏感肌洗护组合获奖\|https://… |
 | claimed_benefits | 产品定位针对的困扰或效果，取 targets 的值，分号分隔。不从成分推断 | dandruff;sensitive_scalp |
 | claim_source | claimed_benefits 的来源：brand_text（产品页的品牌原文）/ data_classification（资料整理时的分类）。页面分别显示"品牌宣称"和"资料分类"，都按产品定位 0.7 计分。本轮 47 款美国产品来自资料中的"需求"字段，是整理时的分类，全部填 data_classification；"日常清洁"对应 clarifying，"去黄 / 去橙"拆为 tone_yellow / tone_orange。2026-10-17 第 1 批扩充（20 款）的资料里 claim_source 写的是 brand_text，但资料说明写明 claimed_benefits 是项目的需求映射、不是品牌原话，导入时改为 data_classification；紫色洗发水（SH-US-057）的 tone_correction 记为 tone_yellow | data_classification |
@@ -81,7 +81,7 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 | fragrance_free_claim | 产品是否明确标注 fragrance-free：yes / no / unknown。留空视为 unknown（未确认，不等于含香） | unknown |
 | fragrance_free_source_url | 无香声明出处；fragrance_free_claim = yes 时必填 | |
 | inci_list | 完整成分表，**英文 INCI 名**，按包装顺序，分号分隔。打分用这一列，解析时统一写法（见下方"成分名称统一"） | Aqua;Glycerin;Piroctone Olamine |
-| key_actives | 品牌宣称的主打成分，**按品牌原文**保存（可带浓度、复数、复配物或技术名称，美国药品标签上的 Active Ingredient 也算），分号分隔。匹配规则见下方"主打成分匹配"。对应不上成分表的写法只作为品牌宣称展示，`validate-data` 给提示不报错。留空表示还没填写，暂按全部满分计算并提示；品牌没有单独公布时填 `Not separately disclosed`，所有有效成分按非主打计 | Pyrithione Zinc 1%; Ceramides |
+| key_actives | 品牌宣称的主打成分，**按品牌原文**保存（可带浓度、复数、复配物或技术名称，美国药品标签上的 Active Ingredient 也算），分号分隔。匹配规则见下方"主打成分匹配"。对应不上成分表的写法只作为品牌宣称展示，`validate-data` 给提示不报错。留空表示还没填写，暂按全部满分计算并提示；品牌没有单独公布时填 `Not separately disclosed`，所有有效成分按非主打计。防晒第 3 批起（2026-10-26）只保留 INCI 名称（成分库 INCI 名或产品成分表里的写法）和品牌公开浓度，其他写法（如 Ceramides、Pro-Vitamin B5、SPF 50+ UVA/UVB filters）移到 formula_note；全部移走时填 `Not separately disclosed`。inci_list 为空的产品只提示，按"成分表待补"处理，不出现在推荐里 | Pyrithione Zinc 1%; Ceramides |
 | inci_list_original | 包装原文成分表（中文、日文、韩文等），原样保存，只用于展示和核对，不参与打分 | 水、甘油、吡罗克酮乙醇胺盐 |
 | price / currency | 当地价格和货币代码，按销售地区存当地价格；price 必须为正数，currency 必须在 exchange_rates.csv 中 | 12 / USD |
 | size_ml | 规格（毫升），正数，可留空。美国产品原始规格为 fl oz 时按 1 fl oz = 29.5735 ml 换算后取整，原文规格保留在 formula_note | 355 |
@@ -267,7 +267,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | 字段 | 含义 |
 |---|---|
 | product_id | 对应 products.csv |
-| platform | ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks / bergdorf_goodman / bluemercury（与 purchase_links 共用平台取值，还有 brand）。也接受 neimanmarcus、bergdorf、bergdorfgoodman、saksfifthavenue 的写法，读取时统一为左边的代码 |
+| platform | ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks / bergdorf_goodman / bluemercury / walmart / kohls（与 purchase_links 共用平台取值，还有 brand；walmart、kohls 2026-10-26 新增）。也接受 neimanmarcus、bergdorf、bergdorfgoodman、saksfifthavenue 的写法，读取时统一为左边的代码 |
 | rating | 星级 0–5，取页面可见值。页面没有显示星级时留空（不填 0），这条评分不显示，校验只提示 |
 | rating_count | 精确评价数；页面只显示缩写（如 5.5K）时留空，不推算 |
 | rating_count_display | 页面显示的原文（如 1,346、5.5K、(6,395)） |
@@ -285,12 +285,12 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | 字段 | 含义 |
 |---|---|
 | product_id | 对应 products.csv |
-| platform | brand（品牌官网）/ ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks（Saks Fifth Avenue）/ bergdorf_goodman / bluemercury。也接受 neimanmarcus、bergdorf、bergdorfgoodman、saksfifthavenue 的写法，读取时统一为左边的代码 |
+| platform | brand（品牌官网）/ ulta / sephora / target / amazon / nordstrom / neiman_marcus / saks（Saks Fifth Avenue）/ bergdorf_goodman / bluemercury / walmart / kohls（Kohl's）。也接受 neimanmarcus、bergdorf、bergdorfgoodman、saksfifthavenue 的写法，读取时统一为左边的代码 |
 | url | 平台上的产品页（不用搜索结果页） |
 | status | in_stock / purchasable / listed / official_store_listed_pdp_blocked（品牌店目录已确认，详情页和库存未确认）/ unknown / out_of_stock 等，空白不等于不销售。**out_of_stock**："在哪买"里显示"缺货"、不能点，不作为主购买按钮；**unknown**（库存未确认）：照常列出，但不作为主购买按钮。只有缺货或库存未确认的链接时，卡片不显示主购买按钮，改写"库存未确认，购买渠道见详情" |
 | checked_on / note | 核对日期、说明（如 Target Plus 第三方卖家） |
 
-页面详情"在哪买"按固定顺序每个平台一行：品牌官网 → Ulta → Sephora → Target → Amazon → Nordstrom → Neiman Marcus → Saks Fifth Avenue → Bergdorf Goodman → Bluemercury（`RETAIL_PLATFORMS`）→ 其他网站。平台由链接域名识别（`RETAIL_PLATFORM_DOMAINS`）。收起状态的主购买按钮默认指向评价数最多的平台，没有评分时用 products.csv 的 purchase_url。当前洗护 20 款、63 条链接；美国洁面 40 款、100 条链接（2026-10-19）。
+页面详情"在哪买"按固定顺序每个平台一行：品牌官网 → Ulta → Sephora → Target → Amazon → Nordstrom → Neiman Marcus → Saks Fifth Avenue → Bergdorf Goodman → Bluemercury → Walmart → Kohl's（`RETAIL_PLATFORMS`）→ 其他网站。平台由链接域名识别（`RETAIL_PLATFORM_DOMAINS`）。收起状态的主购买按钮默认指向评价数最多的平台，没有评分时用 products.csv 的 purchase_url。当前洗护 20 款、63 条链接；美国洁面 40 款、100 条链接（2026-10-19）。
 
 ## exchange_rates.csv（固定汇率表）
 
