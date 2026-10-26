@@ -259,7 +259,7 @@ export function parseFormulaVersionChecks(text: string): FormulaVersionCheck[] {
  * 自动记为 review_count，依据写明平台、评价数、核对日期和链接（取评价数最多的一条）。评价数只决定能否入库，不参与打分。
  */
 const REVIEW_PLATFORM_NAMES: Record<(typeof REVIEW_COUNT_PLATFORMS)[number], string> = {
-  ulta: 'Ulta', sephora: 'Sephora', target: 'Target', amazon: 'Amazon', nordstrom: 'Nordstrom',
+  ulta: 'Ulta', sephora: 'Sephora', target: 'Target', amazon: 'Amazon', nordstrom: 'Nordstrom', bluemercury: 'Bluemercury',
 };
 
 export function reviewCountBasis(ratings: RetailRating[]): string | null {

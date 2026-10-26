@@ -27,6 +27,10 @@
 - 成分表末尾带句号（如 MO-US-020 的 "Fragrance."）时去掉句号再匹配（Codex 评审发现）。
 - 3 个新进入高频前 150 的成分补写通俗解释（草稿）：Polysorbate 60、Maltodextrin、Isohexadecane。
 
+### 2026-10-26 作者决定：Bluemercury 评价数、TEA-十二烷基苯磺酸盐
+- Bluemercury 的评价数也算入库依据（review_count 认可 Ulta、Sephora、Target、Amazon、Nordstrom、Bluemercury）。MO-US-014、SE-US-017、SE-US-018 因此进入推荐；入库依据待补剩 7 款（MO-US-012、SE-US-010、012、013、014、015、016）。
+- TEA-Dodecylbenzenesulfonate 按普通表活处理、不额外扣分（#24 已是这样，作者确认）。
+
 ### 2026-10-26 关闭测试模式后的规则
 - 作者决定：10/29 关闭测试模式。关闭后未核对的风险成分照常扣分（卡片注明"成分数据未核对"），未核对的有效成分不加分（计入"暂无数据"）。本 PR 只改关闭后的规则，开关仍为 true；10/29 另开 PR 改为 false（已试过改为 false 后测试全部通过）。
 

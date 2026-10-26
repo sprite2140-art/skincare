@@ -17,7 +17,8 @@ describe('入库依据：评价数 1,000 条以上', () => {
       + 'X,ulta,4.5,3495,"3,495",2026-10-24,https://www.ulta.com/p/a\n'
       + 'X,target,4.4,5001,"5,001",2026-10-23,https://www.target.com/p/a\n'
       + 'X,bluemercury,4.8,9000,9000,2026-10-24,https://bluemercury.com/a\n');
-    expect(reviewCountBasis(ratings)).toBe('Target 评价数 5,001（核对于 2026-10-23）https://www.target.com/p/a');
+    // Bluemercury 2026-10-26 起也认
+    expect(reviewCountBasis(ratings)).toBe('Bluemercury 评价数 9,000（核对于 2026-10-24）https://bluemercury.com/a');
     expect(reviewCountBasis(parseRetailRatings(RATING_COLS + 'X,ulta,4.5,999,999,2026-10-24,https://www.ulta.com/p/a\n'))).toBeNull();
     // 品牌官网和其他百货不算
     expect(reviewCountBasis(parseRetailRatings(RATING_COLS + 'X,brand,4.5,5000,5000,2026-10-24,https://brand.example\n'))).toBeNull();
@@ -50,12 +51,15 @@ describe('入库依据：评价数 1,000 条以上', () => {
     const data = { index: real.ingredientIndex, exchangeRates: real.exchangeRates, budgetCaps: computeBudgetCaps(real.products, real.exchangeRates), allowDraft: true };
     const ranked = rankProducts([pending, raw({ productId: 'Z' })], base.category, profile, data).map((r) => r.product.productId);
     expect(ranked).toEqual(['Z']);
-    // 依据写的是其他平台（如 Bluemercury）的评价数：也算待补
+    // 依据写的是评价数、但评分表里没有达到 1,000 条的认可平台：也算待补
     const [blue] = attachRetail([raw({ productId: 'B', inclusionBasisType: null, inclusionBasis: 'US retailer review count; bluemercury; 3051; 2026-10-24; https://bluemercury.com/x' })], [], []);
     expect(blue.inclusionPending).toBe(true);
     // 现有产品没有写 none 的，不受影响
     expect(real.products.filter((p) => p.inclusionPending).map((p) => p.productId)).toEqual(
-      ['MO-US-012', 'MO-US-014', 'SE-US-010', 'SE-US-012', 'SE-US-013', 'SE-US-014', 'SE-US-015', 'SE-US-016', 'SE-US-017', 'SE-US-018']);
+      ['MO-US-012', 'SE-US-010', 'SE-US-012', 'SE-US-013', 'SE-US-014', 'SE-US-015', 'SE-US-016']);
+    for (const id of ['MO-US-014', 'SE-US-017', 'SE-US-018']) {
+      expect(real.products.find((p) => p.productId === id)!.inclusionBasis).toMatch(/^Bluemercury 评价数/);
+    }
   });
 });
 

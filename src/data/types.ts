@@ -450,7 +450,7 @@ export interface City {
 export const INCLUSION_BASIS_TYPES = ['retailer_bestseller', 'department_store_bestseller', 'beauty_award', 'review_count'] as const;
 export type InclusionBasisType = (typeof INCLUSION_BASIS_TYPES)[number];
 /** 评价数入库依据：认哪些零售商、至少多少条评价 */
-export const REVIEW_COUNT_PLATFORMS = ['ulta', 'sephora', 'target', 'amazon', 'nordstrom'] as const;
+export const REVIEW_COUNT_PLATFORMS = ['ulta', 'sephora', 'target', 'amazon', 'nordstrom', 'bluemercury'] as const;
 export const REVIEW_COUNT_MIN = 1000;
 
 /**
