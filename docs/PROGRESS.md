@@ -31,6 +31,7 @@
 - 防晒第 3 批以修正版为准：SU-US-041—050 的产品、购买链接、评分整行替换（SU-US-048 换成 Erborian CC Red Correct，SPF 25，不达 SPF 30，按规则不进推荐，等数据收集方替换；SU-US-042 补上成分表）。
 - 精华第 2 批 20 款、购买链接 39 条、评分 21 条追加。SE-US-038 的入库依据和 Ulta 评分链接改为 Ulta 商品页（原为品牌官网）。SE-US-029、035、037、039 没有品牌原文（not_collected），需求只按成分匹配。
 - key_actives 规则补充（作者决定）：去掉粒径、形态等描述词，保留 INCI 名和浓度，如 SU-US-050 Non-nano Zinc Oxide 15% → Zinc Oxide 15%。
+- 早晚流程：use_time 写 both 但 use_frequency 写明每天一次的（SE-US-021 Differin "once daily AM or PM"），不放早晚两次，按成分决定时段（A 醇类 → 晚上）。Codex 评审发现。
 - 可推荐：洁面 40、防晒 32、保湿 19、精华 34；去角质、点涂还没有数据。
 
 ### 2026-10-26 导入防晒第 3 批（SU-US-041—050）

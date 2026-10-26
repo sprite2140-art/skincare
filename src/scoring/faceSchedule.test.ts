@@ -40,6 +40,11 @@ describe('早晚流程', () => {
     expect(productTimes('treatment', step('treatment', ['Water', 'Niacinamide']).primary)).toEqual(['pm']);
     expect(productTimes('treatment', step('treatment', ['Water', 'Retinol'], { useTime: 'both' }).primary)).toEqual(['am', 'pm']);
     expect(productTimes('treatment', step('treatment', ['Water', 'Ascorbic Acid'], { useTime: 'pm' }).primary)).toEqual(['pm']);
+    // use_time 写 both 但每天只用一次（如 Differin "once daily AM or PM"）：不放早晚两次，按成分决定（A 醇类 → 晚上）
+    expect(productTimes('treatment', step('treatment', ['Water', 'Adapalene'], { useTime: 'both', useFrequency: 'once daily AM or PM' }).primary)).toEqual(['pm']);
+    const differin = real.products.find((p) => p.productId === 'SE-US-021')!;
+    expect(differin.face!.useTime).toBe('both');
+    expect(productTimes('treatment', step('treatment', differin.inciList, { useTime: 'both', useFrequency: differin.face!.useFrequency }).primary)).toEqual(['pm']);
   });
 
   it('晚上有 A 醇类时，过氧化苯甲酰点涂移到早上并写明原因；品牌限定晚上用的不移', () => {

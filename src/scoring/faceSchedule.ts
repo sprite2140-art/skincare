@@ -1,6 +1,6 @@
 // 早晚流程（草案 3.3）：每个步骤的首选放在早上、晚上或早晚都用。
 // - 洁面、保湿：早晚；防晒：早上；去角质：晚上（每周 1–2 次）；点涂：晚上。
-// - 功效精华：品牌说明的使用时间（use_time）优先；未知时 A 醇类放晚上（AAD）、维生素 C 放早上（AAD）、
+// - 功效精华：品牌说明的使用时间（use_time）优先（写 both 但 use_frequency 写明每天一次的，不放早晚两次，按成分决定时段）；未知时 A 醇类放晚上（AAD）、维生素 C 放早上（AAD）、
 //   果酸 / 水杨酸类放晚上（行业惯例；FDA：果酸增加日晒敏感）；仍无法确定时放晚上。
 // - 过氧化苯甲酰与 A 醇类：A 醇类在晚上时，含过氧化苯甲酰的产品放早上（品牌限定只能晚上用的除外；只含阿达帕林时不错开）。
 
@@ -29,6 +29,8 @@ export interface Schedule {
 }
 
 const has = (p: FaceProductScore | null, c: ActiveClass) => !!p?.faceExtras.classes.has(c);
+/** use_frequency 写明每天一次（如 "once daily AM or PM"）：早晚任选其一，不是两次都用 */
+const onceDaily = (p: FaceProductScore | null) => /once (a )?daily|once per day|每天一次|每日一次/i.test(p?.product.face?.useFrequency ?? '');
 
 /** 按成分和品牌说明决定一个产品用在哪个时段 */
 export function productTimes(stepId: FaceStepId, p: FaceProductScore | null): TimeOfDay[] {
@@ -38,7 +40,7 @@ export function productTimes(stepId: FaceStepId, p: FaceProductScore | null): Ti
   const useTime = p?.product.face?.useTime ?? 'unknown';
   if (useTime === 'am') return ['am'];
   if (useTime === 'pm') return ['pm'];
-  if (useTime === 'both' && stepId === 'treatment') return ['am', 'pm'];
+  if (useTime === 'both' && stepId === 'treatment' && !onceDaily(p)) return ['am', 'pm'];
   if (stepId === 'spot') return ['pm'];
   if (has(p, 'retinoid')) return ['pm'];
   if (has(p, 'vitamin_c')) return ['am'];
