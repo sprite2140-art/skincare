@@ -1,6 +1,6 @@
 # 规则清单类成分核对
 
-由 `npm run verify-list-ingredients` 生成（2026-10-24），请勿手改。
+由 `npm run verify-list-ingredients` 生成（2026-10-26），请勿手改。
 
 核对依据：CosIng 官方导出（2026-10-17，data/cosing_export_2026-10-17.csv）；欧盟香料致敏原：法规 2023/1545 官方原文（docs/sources/eu_2023_1545.pdf）的逐条记录 data/eu_allergen_checks.csv。
 

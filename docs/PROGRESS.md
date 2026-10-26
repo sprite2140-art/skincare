@@ -19,6 +19,13 @@
 
 **下一步**：10/28 前导入保湿、精华、去角质、点涂数据；10/29 关闭测试模式（关闭前补齐下面"测试模式影响"里的成分核对）；10/30–31 按试用反馈修改。
 
+### 2026-10-26 导入保湿 20 款、精华 20 款（MO-US-001—020、SE-US-001—020）
+- 产品 40 款、购买链接 40 条、评分 43 条追加到 data/。入库依据用两份 inclusion 表覆盖：Ulta / Sephora 畅销榜填 retailer_bestseller，其余留空，由评分表自动判断 review_count。补查评分表（batch1_recheck19）19 行与第 1 批评分表重复，不再追加；三份自查报告移到 docs/data_batches/。
+- 按之前的规则标准化：acne-prone → acne_prone（6 款），emulsion → lotion（SE-US-003）。
+- 入库依据待补 10 款，不出现在推荐里：MO-US-012、SE-US-010、012、013、014、015、016（none）；MO-US-014、SE-US-017、018（只有 Bluemercury 的评价数，不在认可的 5 个平台内）。
+- 校验 99 个错误（claim_source、texture / subtype、use_time、transparency、water_resistance、skin_type_claim、awards、SE-US-005—008 的品牌宣称状态），按规则不改数据，列在 PR 说明里等作者决定。
+- 3 个新进入高频前 150 的成分补写通俗解释（草稿）：Polysorbate 60、Maltodextrin、Isohexadecane。
+
 ### 2026-10-24 测试模式影响（#16、#19、#20 合并后）
 - `npm run test-mode-impact -- --list` 逐个列出受影响产品。护肤 80 款中 20 款受影响，15 款温和度分数会变化；洗护 107 款中 85 款受影响，41 款会变化。
 - 原因只有两类未核对成分：10 个风险成分（酒精 3 种、C14-16 烯烃磺酸钠、MI、MCI、IPBC、SLS、ALS、TEA-DDBS）等出处；9 个欧盟香料致敏原等 1223/2009 附录 III 合并版原文。
