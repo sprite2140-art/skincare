@@ -1,0 +1,11 @@
+inci_name,risk_type,claim_supported,key_sources,notes,scoring_recommendation
+Sodium Lauryl Sulfate,strong_surfactant_irritation,yes,https://pubmed.ncbi.nlm.nih.gov/17578437/;https://pubmed.ncbi.nlm.nih.gov/31562780/;https://pubmed.ncbi.nlm.nih.gov/36856374/,人体斑贴与洗涤试验中0.5% SLS作为标准阳性刺激对照，可升高TEWL、引起红斑；综述确认表活刺激风险。冲洗型产品接触时间短，风险低于免洗,维持现有扣分（冲洗型按现有规则减半）；标为已核对
+Ammonium Lauryl Sulfate,strong_surfactant_irritation,partial,https://pubmed.ncbi.nlm.nih.gov/36856374/;https://pubmed.ncbi.nlm.nih.gov/34921679/,与SLS同属烷基硫酸盐，综述按类别讨论刺激风险；未找到专门针对ALS的人体斑贴数据,维持扣分但按类别证据标注；标为已核对，备注写明为类别证据
+Sodium C14-16 Olefin Sulfonate,strong_surfactant_irritation,no,https://pubmed.ncbi.nlm.nih.gov/21463896/,OECD高产量化学品评估（含α-烯烃磺酸盐）认为消费者使用条件下不预期出现皮肤刺激；未找到支持"强清洁力导致刺激"的人体证据,取消扣分，不再列为强清洁力刺激成分；可保留为普通表活；标为已核对
+TEA-Dodecylbenzenesulfonate,strong_surfactant_irritation,partial,https://pubmed.ncbi.nlm.nih.gov/21164075/,美国CIR安全评估：刺激性与其他洗涤剂相似，取决于浓度和pH（15%在兔皮上重度刺激，为动物数据）,维持扣分但降为与普通表活同级；标为已核对，备注写明为CIR评估与动物数据
+Methylisothiazolinone,contact_allergen,yes,https://pubmed.ncbi.nlm.nih.gov/36652228/;https://pubmed.ncbi.nlm.nih.gov/24117738/,北美与欧洲斑贴数据库：2017–2018年北美MI阳性率15.0%，欧洲3.4%–5.5%；欧盟已禁止用于免洗产品,维持致敏扣分；标为已核对
+Methylchloroisothiazolinone,contact_allergen,yes,https://pubmed.ncbi.nlm.nih.gov/36652228/,北美2017–2018年MCI/MI阳性率10.8%；为常见接触致敏原,维持致敏扣分；标为已核对
+Iodopropynyl Butylcarbamate,contact_allergen,yes,https://pubmed.ncbi.nlm.nih.gov/23869727/;https://pubmed.ncbi.nlm.nih.gov/12022126/,斑贴数据与病例报告确认为接触致敏原，阳性率低于MI,维持致敏扣分（可低于MI一级）；标为已核对
+Alcohol,drying_irritation,partial,https://pubmed.ncbi.nlm.nih.gov/17578437/;https://pubmed.ncbi.nlm.nih.gov/40954169/,60%–100%乙醇斑贴不改变屏障（TEWL）和红斑，但降低皮肤含水量；12%乙醇面霜在特应性皮炎非皮损皮肤上30天无显著不良影响（9人小样本）,取消刺激扣分；只做提示"高浓度酒精可能降低皮肤含水量"；标为已核对
+Alcohol Denat.,drying_irritation,partial,https://pubmed.ncbi.nlm.nih.gov/17578437/;https://pubmed.ncbi.nlm.nih.gov/40954169/,变性乙醇的主体为乙醇，证据同 Alcohol,同 Alcohol
+Isopropyl Alcohol,drying_irritation,partial,https://pubmed.ncbi.nlm.nih.gov/33063847/;https://pubmed.ncbi.nlm.nih.gov/17578437/,系统综述：单独使用刺激性低，与SLS等洗涤剂合用时刺激增强；仍低于频繁用洗涤剂洗手,取消单独扣分；与强清洁力表活同在一款免洗产品中时提示；标为已核对
