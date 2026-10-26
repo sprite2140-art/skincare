@@ -1,0 +1,11 @@
+﻿product_id,platform,url,status,checked_on,note
+SU-US-041,sephora,https://www.sephora.com/product/dreambeam-moisturizing-mineral-sunscreen-spf-40-with-ceramides-and-peptides-P505327?skuId=2761633,listed,2026-10-26,Direct retailer PDP opened.
+SU-US-042,sephora,https://www.sephora.com/product/kiehls-better-screen-tm-uv-serum-spf-50-facial-sunscreen-with-collagen-peptide-P509517?skuId=2880805,listed,2026-10-26,100 mL value size; direct retailer PDP opened.
+SU-US-043,sephora,https://www.sephora.com/product/it-cosmetics-hello-sunshine-spf-P510412/,listed,2026-10-26,Direct retailer PDP opened.
+SU-US-044,sephora,https://www.sephora.com/product/peter-thomas-roth-water-drench-hyaluronic-hydrating-moisturizer-spf-45-P458576?skuId=2354629,listed,2026-10-26,Direct retailer PDP opened.
+SU-US-045,ulta,https://www.ulta.com/p/protect-glow-daily-sunscreen-gel-broad-spectrum-spf-30-pimprod2016249,listed,2026-10-26,Direct retailer PDP opened; supersize 3.38 oz selected.
+SU-US-046,sephora,https://www.sephora.com/product/shiseido-urban-environment-oil-free-sunscreen-broad-spectrum-spf-42-P474390,listed,2026-10-26,"Direct Sephora product page opened; product shown as Urban Environment Oil-Control Sunscreen SPF 40, 50 mL, $52."
+SU-US-047,brand,https://www.walmart.com/ip/181312877,listed,2026-10-26,"Walmart direct PDP opened; template platform enum has no walmart value, so retailer link retained while platform is conservatively set to brand only in this auxiliary table. See self-check."
+SU-US-048,sephora,https://www.sephora.com/product/mini-cicapair-tm-tiger-grass-color-correcting-treatment-spf-30-P517137?skuId=2882637,listed,2026-10-26,Direct mini PDP opened.
+SU-US-049,sephora,https://www.sephora.com/product/sunsuede-spf-50-lightweight-sunscreen-blurring-primer-stick-P522181?skuId=2973014,listed,2026-10-26,Direct retailer PDP opened.
+SU-US-050,sephora,https://www.kohls.com/product/prd-7562699/merit-the-uniform-tinted-mineral-sunscreen-broad-spectrum-spf-45.jsp,listed,2026-10-26,"Sephora at Kohl's direct PDP; template has no kohls platform value, stored as sephora."
