@@ -200,10 +200,11 @@ describe('#17 遗留：香料核对', () => {
     }
   });
 
-  it('在法规 2023/1545 原文中核对到的 4 个欧盟香料致敏原已核对，其余 9 个仍未核对', () => {
+  it('欧盟香料致敏原 13 个：4 个按 2023/1545、9 个按 1223/2009 合并版核对', () => {
     const lib = (n: string) => real.ingredients.find((i) => i.inciName === n)!;
     for (const n of ['Benzyl Alcohol', 'Citral', 'Citronellol', 'Limonene']) expect(lib(n).reviewStatus).toBe('verified');
-    for (const n of ['Linalool', 'Coumarin', 'Geraniol']) expect(lib(n).reviewStatus).toBe('draft');
+    // 其余 9 个 2026-10-26 用 1223/2009 合并版核对
+    for (const n of ['Linalool', 'Coumarin', 'Geraniol', 'Alpha-Isomethyl Ionone', 'Amyl Cinnamal', 'Benzyl Benzoate', 'Benzyl Salicylate', 'Hexyl Cinnamal', 'Hydroxycitronellal']) expect(lib(n).reviewStatus).toBe('verified');
   });
 });
 

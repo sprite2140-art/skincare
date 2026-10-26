@@ -258,7 +258,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 
 `npm run verify-list-ingredients` 核对欧盟香料致敏原时读这个文件。列：inci_name、status（found / not_in_document）、document（原文文件）、entry（附录 III 条目号）、glossary_name（原文"Common Ingredients Glossary"一栏的名称）、checked_on、note。
 
-原文为修订法规 (EU) 2023/1545（`docs/sources/eu_2023_1545.pdf`，作者提供的官方 PDF）。PDF 表格在文本提取时各列会交错，自动查找容易误判（例如"6-Methyl Coumarin"含有"Coumarin"），所以逐条记下条目号和名称。2023/1545 只替换了附录 III 的部分条目（45、46、70、73、86、88 等）并新增了一批；成分库的 13 个致敏原中，Benzyl Alcohol（45）、Citral（70）、Citronellol（86）、Limonene（88）在这份原文里，其余 9 个是 1223/2009 附录 III 中没有被替换的原条目，要用合并版原文核对，在那之前保持未核对。
+原文为修订法规 (EU) 2023/1545（`docs/sources/eu_2023_1545.pdf`，作者提供的官方 PDF）。PDF 表格在文本提取时各列会交错，自动查找容易误判（例如"6-Methyl Coumarin"含有"Coumarin"），所以逐条记下条目号和名称。2023/1545 只替换了附录 III 的部分条目（45、46、70、73、86、88 等）并新增了一批；成分库的 13 个致敏原中，Benzyl Alcohol（45）、Citral（70）、Citronellol（86）、Limonene（88）在这份原文里，其余 9 个是 1223/2009 附录 III 中没有被替换的原条目，2026-10-26 用作者提供的合并版原文（`docs/sources/eu_1223_2009_consolidated.pdf`，02009R1223，2026-05-18 版）核对：Amyl Cinnamal（67）、Hydroxycitronellal（72）、Benzyl Salicylate（75）、Coumarin（77）、Geraniol（78）、Linalool（84）、Benzyl Benzoate（85）、Hexyl Cinnamal（87）、Alpha-Isomethyl Ionone（90），13 个全部已核对。
 
 ## retail_ratings.csv（零售商评分）
 

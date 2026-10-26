@@ -3,7 +3,7 @@
 //
 // 做法：对照官方原文确认每个成分确实在对应清单里。
 // - 欧盟香料致敏原：按本地官方原文逐条核对的记录 data/eu_allergen_checks.csv
-//   （修订法规 (EU) 2023/1545 原文 PDF 在 docs/sources/eu_2023_1545.pdf，作者提供）。
+//   （修订法规 (EU) 2023/1545 原文 PDF 在 docs/sources/eu_2023_1545.pdf；法规 1223/2009 合并版在 docs/sources/eu_1223_2009_consolidated.pdf，均为作者提供）。
 //   PDF 表格各列在文本提取时会交错，自动查找容易误判（如"6-Methyl Coumarin"含"Coumarin"），
 //   所以按 PDF 的附录表格逐条记下条目号和"Common Ingredients Glossary"名称。
 //   2023/1545 只替换了附录 III 的部分条目并新增了一批；没有替换的原条目要用法规 1223/2009 附录 III 合并版原文核对，
@@ -110,10 +110,10 @@ async function main() {
       if (kind === 'eu_allergen') {
         const rec = names(ing).map((n) => allergenChecks.get(normalizeName(n))).find(Boolean);
         if (!rec || rec.status !== 'found') {
-          checks.push({ ing, kind, ok: null, detail: rec ? `法规 2023/1545 原文（${rec.document}）中没有这一条目：${rec.note}；未核对` : '没有核对记录（data/eu_allergen_checks.csv），未核对' });
+          checks.push({ ing, kind, ok: null, detail: rec ? `法规原文（${rec.document}）中没有这一条目：${rec.note}；未核对` : '没有核对记录（data/eu_allergen_checks.csv），未核对' });
           continue;
         }
-        checks.push({ ing, kind, ok: true, detail: `法规 2023/1545 附录（${rec.document}）条目 ${rec.entry}，Common Ingredients Glossary 名称为 ${rec.glossaryName}` });
+        checks.push({ ing, kind, ok: true, detail: `${rec.document.includes('1223') ? '法规 1223/2009 合并版附录 III' : '法规 2023/1545 附录'}（${rec.document}）条目 ${rec.entry}，Common Ingredients Glossary 名称为 ${rec.glossaryName}` });
         continue;
       }
       const rule = COSING_RULE[kind]!;
@@ -150,7 +150,7 @@ async function main() {
     '',
     `由 \`npm run verify-list-ingredients\` 生成（${TODAY}），请勿手改。`,
     '',
-    `核对依据：${cosingSource}；欧盟香料致敏原：法规 2023/1545 官方原文（docs/sources/eu_2023_1545.pdf）的逐条记录 data/eu_allergen_checks.csv。`,
+    `核对依据：${cosingSource}；欧盟香料致敏原：法规 2023/1545 官方原文（docs/sources/eu_2023_1545.pdf）和 1223/2009 合并版（docs/sources/eu_1223_2009_consolidated.pdf）的逐条记录 data/eu_allergen_checks.csv。`,
     '',
     `共 ${byIng.size} 个成分：通过 ${passed.length} 个，对不上 ${failed.length} 个，无法核对 ${pending.length} 个。`,
     '一个成分属于多个清单时，每项都通过才算通过。',
