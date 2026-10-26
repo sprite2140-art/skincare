@@ -262,12 +262,25 @@ const REVIEW_PLATFORM_NAMES: Record<(typeof REVIEW_COUNT_PLATFORMS)[number], str
   ulta: 'Ulta', sephora: 'Sephora', target: 'Target', amazon: 'Amazon', nordstrom: 'Nordstrom', bluemercury: 'Bluemercury',
 };
 
+/**
+ * 入库判断用的评价数下限：有精确评价数用精确数；没有、但页面显示"数字K"（如 2K、5.5K）时按"至少 N 千"计。
+ * 只用于入库判断，页面不把它当作精确评价数显示。
+ */
+export function reviewCountAtLeast(r: Pick<RetailRating, 'ratingCount' | 'ratingCountDisplay'>): number | null {
+  if (r.ratingCount !== null) return r.ratingCount;
+  const k = /^\s*(\d+(?:\.\d+)?)\s*[kK]\+?\s*$/.exec(r.ratingCountDisplay);
+  return k ? Math.floor(Number(k[1]) * 1000) : null;
+}
+
 export function reviewCountBasis(ratings: RetailRating[]): string | null {
   const best = ratings
-    .filter((r) => (REVIEW_COUNT_PLATFORMS as readonly string[]).includes(r.platform) && r.ratingCount !== null && r.ratingCount >= REVIEW_COUNT_MIN)
-    .sort((a, b) => b.ratingCount! - a.ratingCount!)[0];
+    .map((r) => ({ r, n: reviewCountAtLeast(r) }))
+    .filter(({ r, n }) => (REVIEW_COUNT_PLATFORMS as readonly string[]).includes(r.platform) && n !== null && n >= REVIEW_COUNT_MIN)
+    .sort((a, b) => b.n! - a.n!)[0];
   if (!best) return null;
-  return `${REVIEW_PLATFORM_NAMES[best.platform as keyof typeof REVIEW_PLATFORM_NAMES]} 评价数 ${best.ratingCount!.toLocaleString('en-US')}（核对于 ${best.checkedOn}）${best.url}`;
+  const { r } = best;
+  const count = r.ratingCount !== null ? r.ratingCount.toLocaleString('en-US') : `约 ${r.ratingCountDisplay.trim()}（页面显示，未取得精确数）`;
+  return `${REVIEW_PLATFORM_NAMES[r.platform as keyof typeof REVIEW_PLATFORM_NAMES]} 评价数 ${count}（核对于 ${r.checkedOn}）${r.url}`;
 }
 
 export function attachRetail(products: Product[], ratings: RetailRating[], links: PurchaseLink[], checks: FormulaVersionCheck[] = []): Product[] {
