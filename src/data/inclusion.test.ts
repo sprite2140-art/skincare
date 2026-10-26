@@ -58,3 +58,18 @@ describe('入库依据：评价数 1,000 条以上', () => {
       ['MO-US-012', 'MO-US-014', 'SE-US-010', 'SE-US-012', 'SE-US-013', 'SE-US-014', 'SE-US-015', 'SE-US-016', 'SE-US-017', 'SE-US-018']);
   });
 });
+
+describe('成分表末尾的句号', () => {
+  it('"Fragrance." 能匹配香精（想避开香精时会被排除）；"Alcohol Denat." 照常匹配', () => {
+    expect(real.ingredientIndex.get('Fragrance.')?.inciName).toBe('Fragrance');
+    expect(real.ingredientIndex.get('Phenoxyethanol.')).toBeDefined();
+    expect(real.ingredientIndex.get('Alcohol Denat.')?.inciName).toBe('Alcohol Denat.');
+    const mo = real.products.find((p) => p.productId === 'MO-US-020')!;
+    const profile: ScoringProfile = {
+      concerns: [], concernsRanked: false, sensitive: false, specialStatus: 'none', avoidIngredients: [], avoidTags: ['fragrance'],
+      budget: 'none', fragrancePref: null, washFrequency: null, city: null, inUseProducts: [],
+    };
+    const data = { index: real.ingredientIndex, exchangeRates: real.exchangeRates, budgetCaps: computeBudgetCaps(real.products, real.exchangeRates), allowDraft: true };
+    expect(rankProducts([mo], 'moisturizer', profile, data)[0].excluded).toBe(true);
+  });
+});
