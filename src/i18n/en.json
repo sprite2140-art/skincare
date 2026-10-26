@@ -564,7 +564,7 @@
   "data.fragrance.2": "Fragrance ingredients include fragrance/parfum, EU-labelled fragrance allergens, ingredients on our fragrance list, and essential oils.",
   "data.fragrance.3": "This is based on the ingredient list and does not guarantee the absence of allergens. If you are prone to allergies, patch test first.",
   "data.gentle.title": "Gentleness",
-  "data.gentle.1": "Gentleness looks for common irritants in the ingredient list: fragrance, essential oils, alcohol, strong acids and sensitizers, plus strong cleansers if you wash daily.",
+  "data.gentle.1": "Gentleness looks for common irritants in the ingredient list: fragrance, essential oils, strong acids and sensitizers, plus strong cleansers if you wash daily. Alcohol is not deducted; the card notes that high concentrations may reduce skin hydration.",
   "data.gentle.2": "Rinse-off products stay on the scalp briefly, so their effect counts half; it counts double for a sensitive scalp.",
   "data.gentle.3": "\"Things to note\" lists each kind of ingredient to watch, how many points it took off gentleness and why it was halved or doubled; when strong cleansers are not counted, the reason is given.",
   "data.ratings.title": "Retailer ratings",

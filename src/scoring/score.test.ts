@@ -100,8 +100,11 @@ describe('data/ 真实数据', () => {
     const r = scoreProduct(byId('SH-US-001'), profile({ concerns: ['dandruff'] }), testMode);
     expect(r.dimensions.need.score).toBe(100);
     expect(r.dimensions.evidence.score).toBe(100); // 吡硫鎓锌 A 级
-    expect(r.usesDraftData).toBe(true);
-    expect(r.notices.find((n) => n.code === 'test_data')?.text.zh).toContain('测试数据，尚未核对');
+    // 用到未核对成分的产品标注测试数据（风险成分 2026-10-26 已核对，用一个改成未核对的成分模拟）
+    const draftIndex = { ...testMode.index, get: (n: string) => { const i = testMode.index.get(n); return i && i.inciName === 'Fragrance' ? { ...i, reviewStatus: 'draft' as const } : i; } };
+    const d = scoreProduct({ ...byId('SH-US-001'), inciList: [...byId('SH-US-001').inciList, 'Fragrance'] }, profile({ concerns: ['dandruff'] }), { ...testMode, index: draftIndex });
+    expect(d.usesDraftData).toBe(true);
+    expect(d.notices.find((n) => n.code === 'test_data')?.text.zh).toContain('测试数据，尚未核对');
     // [待核对] 的成分即使在测试模式下也不参与打分
     const jp = scoreProduct(byId('SH-JP-001'), profile({}), testMode);
     expect(jp.nameUnverifiedIngredients).toEqual(['Bis-Methoxypropylamido Isodocosane', 'Gamma-Docosalactone', 'Sodium Dilauramidoglutamide Lysine']);

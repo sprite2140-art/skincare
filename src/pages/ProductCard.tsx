@@ -178,6 +178,7 @@ function ExternalIcon() {
 const CAUTION_NOTICE_CODES = [
   'pregnancy_notice', 'rx_notice', 'budget_unchecked',
   'sunscreen_incomplete', 'water_resistance', 'active_start_slow', 'pregnancy_caution_use', 'below_range', 'above_range', 'rx_bpo_note',
+  'alcohol_drying', 'ipa_with_cleanser',
 ];
 
 function firstSentence(s: string) {

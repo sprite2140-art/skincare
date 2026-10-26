@@ -130,11 +130,11 @@ describe('卡片：需求对照、需要注意、评分明细', () => {
   });
 
   it('正式模式（不用未核对数据打分）下，未核对的风险成分仍列在"需要注意"，注明未计入温和度', () => {
-    const strict = { ...data, allowDraft: false };
+    // 真实数据的风险成分都已核对：把甲基异噻唑啉酮改成未核对来模拟
+    const index = { ...data.index, get: (n: string) => { const i = data.index.get(n); return i && i.inciName === 'Methylisothiazolinone' ? { ...i, reviewStatus: 'draft' as const } : i; } };
+    const strict = { ...data, index, allowDraft: false };
     const profile = toScoringProfile(answers({ concerns: ['dandruff'] }), 'shampoo', ctx);
-    const p = real.products.find((x) => scoreProduct(x, profile, strict).fragrance.status === 'contains'
-      && scoreProduct(x, profile, strict).irritation.hits.some((h) => h.unverified))!;
-    expect(p).toBeDefined();
+    const p = { ...real.products[0], productId: 'T-DRAFT', inciList: ['Water', 'Fragrance', 'Methylisothiazolinone'], inciNameUnverified: [] };
     const r = scoreProduct(p, profile, strict);
     const items = cautionItems(r, profile);
     expect(items.length).toBeGreaterThan(0);
