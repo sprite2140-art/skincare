@@ -33,9 +33,9 @@ describe('入库依据：评价数 1,000 条以上', () => {
     expect(kept.inclusionBasis).toBe('Allure');
   });
 
-  it('保湿、精华以外：防晒 17 款按评价数获得依据（2026-10-26 防晒补查后）', () => {
+  it('保湿、精华以外：防晒 21 款按评价数获得依据（2026-10-26 防晒补查、Amazon 补查后）', () => {
     const ids = real.products.filter((p) => p.inclusionBasisType === 'review_count' && !/^(MO|SE)-/.test(p.productId)).map((p) => p.productId);
-    expect(ids).toEqual(['SU-US-001', 'SU-US-002', 'SU-US-003', 'SU-US-004', 'SU-US-008', 'SU-US-009', 'SU-US-011', 'SU-US-012', 'SU-US-013', 'SU-US-016', 'SU-US-022', 'SU-US-024', 'SU-US-027', 'SU-US-032', 'SU-US-036', 'SU-US-039', 'SU-US-040']);
+    expect(ids).toEqual(['SU-US-001', 'SU-US-002', 'SU-US-003', 'SU-US-004', 'SU-US-006', 'SU-US-008', 'SU-US-009', 'SU-US-010', 'SU-US-011', 'SU-US-012', 'SU-US-013', 'SU-US-016', 'SU-US-022', 'SU-US-024', 'SU-US-027', 'SU-US-032', 'SU-US-035', 'SU-US-036', 'SU-US-037', 'SU-US-039', 'SU-US-040']);
   });
 
   it('inclusion_basis 为 none 且评价数不足：入库依据待补，校验只提示，不出现在推荐里', () => {
@@ -56,8 +56,8 @@ describe('入库依据：评价数 1,000 条以上', () => {
     expect(blue.inclusionPending).toBe(true);
     // 现有产品没有写 none 的，不受影响
     expect(real.products.filter((p) => p.inclusionPending).map((p) => p.productId)).toEqual(
-      ['SU-US-005', 'SU-US-006', 'SU-US-007', 'SU-US-010', 'SU-US-014', 'SU-US-017', 'SU-US-019', 'SU-US-020', 'SU-US-021', 'SU-US-023', 'SU-US-025',
-        'SU-US-026', 'SU-US-028', 'SU-US-029', 'SU-US-030', 'SU-US-031', 'SU-US-033', 'SU-US-034', 'SU-US-035', 'SU-US-037', 'SU-US-038',
+      ['SU-US-005', 'SU-US-007', 'SU-US-014', 'SU-US-017', 'SU-US-019', 'SU-US-020', 'SU-US-021', 'SU-US-023', 'SU-US-025',
+        'SU-US-026', 'SU-US-028', 'SU-US-029', 'SU-US-030', 'SU-US-031', 'SU-US-033', 'SU-US-034', 'SU-US-038',
         'MO-US-012', 'SE-US-010', 'SE-US-012', 'SE-US-013', 'SE-US-014', 'SE-US-015', 'SE-US-016']);
     for (const id of ['MO-US-014', 'SE-US-017', 'SE-US-018']) {
       expect(real.products.find((p) => p.productId === id)!.inclusionBasis).toMatch(/^Bluemercury 评价数/);
