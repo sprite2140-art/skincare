@@ -70,7 +70,7 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |
 | inclusion_basis | 入库依据（榜单/奖项），原文 | |
-| inclusion_basis_type | 入库依据类型：retailer_bestseller（零售商畅销榜 / 按畅销排序，如 Ulta、Sephora、Walgreens）/ department_store_bestseller（百货 / 买手渠道畅销榜：Nordstrom、Neiman Marcus、Saks Fifth Avenue、Bergdorf Goodman、Bluemercury）/ beauty_award（美容大奖，如 Allure Best of Beauty、Cosmopolitan、NewBeauty）/ review_count（在美国主要零售商 Ulta、Sephora、Target、Amazon、Nordstrom、Bluemercury 任一平台评价数达到 1,000 条以上；Bluemercury 2026-10-26 由作者加入）。可留空（依据待核验时）。**只决定产品能否入库，不参与打分。** 留空时按 retail_ratings.csv 自动判断 review_count：取上述平台中评价数最多、且 rating_count ≥ 1000 的一条，依据写为"平台 评价数 N（核对于 日期）链接"（2026-10-24 起）。rating_count 为空、但 rating_count_display 写作"数字K"（如 2K）时按至少 N×1000 条判定，依据写"约 2K（页面显示，未取得精确数）"；只用于入库判断，页面不当作精确评价数显示（2026-10-26）。inclusion_basis 写 none 且评价数不足 1,000 条：照常导入，标为"入库依据待补"，不出现在推荐结果里，校验只给提示 2026-10-19 按 inclusion_basis 原文回填：80 款 retailer_bestseller、18 款 beauty_award、9 款留空 | retailer_bestseller |
+| inclusion_basis_type | 入库依据类型：retailer_bestseller（零售商畅销榜 / 按畅销排序，如 Ulta、Sephora、Walgreens）/ department_store_bestseller（百货 / 买手渠道畅销榜：Nordstrom、Neiman Marcus、Saks Fifth Avenue、Bergdorf Goodman、Bluemercury）/ beauty_award（美容大奖，如 Allure Best of Beauty、Cosmopolitan、NewBeauty）/ review_count（在美国主要零售商 Ulta、Sephora、Target、Amazon、Nordstrom、Bluemercury 任一平台评价数达到 1,000 条以上；Bluemercury 2026-10-26 由作者加入）。可留空（依据待核验时）。**只决定产品能否入库，不参与打分。** 留空时按 retail_ratings.csv 自动判断 review_count：取上述平台中评价数最多、且 rating_count ≥ 1000 的一条，依据写为"平台 评价数 N（核对于 日期）链接"（2026-10-24 起）。rating_count 为空、但 rating_count_display 写作"数字K"（如 2K）时按至少 N×1000 条判定，依据写"约 2K（页面显示，未取得精确数）"；只用于入库判断，页面不当作精确评价数显示（2026-10-26）。补查表覆盖 inclusion_basis 时，已有 inclusion_basis_type（畅销榜、美容奖项）的产品保留原依据：补查表的 none 只表示评价数不足，不否定已核实的榜单或奖项（作者决定，2026-10-26）。inclusion_basis 写 none 且评价数不足 1,000 条：照常导入，标为"入库依据待补"，不出现在推荐结果里，校验只给提示 2026-10-19 按 inclusion_basis 原文回填：80 款 retailer_bestseller、18 款 beauty_award、9 款留空 | retailer_bestseller |
 | awards | 榜单与奖项，结果页显示为标签。每项格式 `来源\|年份\|名称\|链接`，多项用分号分隔；来源和 4 位年份必填 | Allure Best of Beauty\|2025\|敏感肌洗护组合获奖\|https://… |
 | claimed_benefits | 产品定位针对的困扰或效果，取 targets 的值，分号分隔。不从成分推断 | dandruff;sensitive_scalp |
 | claim_source | claimed_benefits 的来源：brand_text（产品页的品牌原文）/ data_classification（资料整理时的分类）。页面分别显示"品牌宣称"和"资料分类"，都按产品定位 0.7 计分。本轮 47 款美国产品来自资料中的"需求"字段，是整理时的分类，全部填 data_classification；"日常清洁"对应 clarifying，"去黄 / 去橙"拆为 tone_yellow / tone_orange。2026-10-17 第 1 批扩充（20 款）的资料里 claim_source 写的是 brand_text，但资料说明写明 claimed_benefits 是项目的需求映射、不是品牌原话，导入时改为 data_classification；紫色洗发水（SH-US-057）的 tone_correction 记为 tone_yellow | data_classification |
@@ -275,6 +275,8 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | checked_on / url / note | 核对日期、产品页、口径和卖家说明 |
 
 页面规则（`src/data/retail.ts`）：评价数少于 50 的不显示（只有缩写时按缩写判断门槛，显示原文）；按平台固定顺序列在详情里，注明"评分只作参考，不计入适配分；部分评价可能来自赠品试用；不同规格、香型可能合并统计"。不计算跨平台平均分。
+
+补查的评分记录与已有记录是同一产品、同一平台时，用核对日期更新的记录替换旧记录，不重复追加（作者决定，2026-10-26）。
 
 当前数据：美国洗护零售元数据第 1 批（SH-US-001—010、CO-US-001—010），2026-10-17 核对，41 条（Ulta 18、Sephora 4、Target 18、Amazon 1）。美国洁面 CL-US-001—040，2026-10-19 核对，54 条（Ulta 34、Target 11、Sephora 7、Bluemercury 1、Nordstrom 1），其中 8 条星级留空。
 
