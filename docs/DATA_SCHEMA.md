@@ -1,6 +1,6 @@
 # 数据格式说明
 
-所有数据为 CSV（UTF-8）。多个值用分号 `;` 分隔。参与打分的成分：`review_status = verified` 的成分，以及基础成分（`category = base`，不需要人工核对）。开发测试阶段可以打开测试模式，让 draft 成分也参与打分（见 SCORING.md）。
+所有数据为 CSV（UTF-8）。多个值用分号 `;` 分隔。参与打分的成分：`review_status = verified` 的成分，以及基础成分（`category = base`，不需要人工核对）；风险成分（`category = risk`）未核对时也照常扣分。开发测试阶段可以打开测试模式，让 draft 成分也参与打分（见 SCORING.md）。
 
 ## ingredients.csv（成分知识库）
 
