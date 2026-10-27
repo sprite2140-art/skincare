@@ -65,7 +65,7 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 | zone | face / scalp / hair / body | scalp |
 | category | 品类编号（取值见下） | shampoo |
 | usage_type | 使用方式：rinse_off（冲洗型）/ leave_on（免洗型）。留空则用品类默认值；卸妆、去角质、面膜必须填写 | |
-| subtype | 细分类型，普通产品留空。co_wash = 清洁型护发素：代替洗发水使用，category 必须为 shampoo（清洁步骤），页面显示"Co-wash · 清洁型护发素"标签和单独的使用说明，不能当作洗后护发素 | co_wash |
+| subtype | 细分类型，普通产品留空。co_wash = 清洁型护发素：代替洗发水使用，category 必须为 shampoo（清洁步骤），页面显示"Co-wash · 清洁型护发素"标签和单独的使用说明，不能当作洗后护发素。面部产品误填的类型（如 chemical、hydrocolloid_patch、otc_acne_treatment）导入时清空，原值记入 formula_note（2026-10-27） | co_wash |
 | region | US / JP / KR / CN | US |
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |
@@ -80,7 +80,7 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 | tested_claims | 可靠的成品测试（第三方或公开方法），每项格式 `困扰\|测试说明\|年份\|链接`，链接必填。目前没有数据 | |
 | fragrance_free_claim | 产品是否明确标注 fragrance-free：yes / no / unknown。留空视为 unknown（未确认，不等于含香） | unknown |
 | fragrance_free_source_url | 无香声明出处；fragrance_free_claim = yes 时必填 | |
-| inci_list | 完整成分表，**英文 INCI 名**，按包装顺序，分号分隔。打分用这一列，解析时统一写法（见下方"成分名称统一"） | Aqua;Glycerin;Piroctone Olamine |
+| inci_list | 完整成分表，**英文 INCI 名**，按包装顺序，分号分隔。打分用这一列，解析时统一写法（见下方"成分名称统一"）。成分表只有材料名称、没有有效成分的物理产品（目前只认 Hydrocolloid，如痘痘贴）：不因成分库查不到而报错或计入"暂无数据"，需求匹配只按品牌宣称计算（2026-10-27） | Aqua;Glycerin;Piroctone Olamine |
 | key_actives | 品牌宣称的主打成分，**按品牌原文**保存（可带浓度、复数、复配物或技术名称，美国药品标签上的 Active Ingredient 也算），分号分隔。匹配规则见下方"主打成分匹配"。对应不上成分表的写法只作为品牌宣称展示，`validate-data` 给提示不报错。留空表示还没填写，暂按全部满分计算并提示；品牌没有单独公布时填 `Not separately disclosed`，所有有效成分按非主打计。防晒第 3 批起（2026-10-26）只保留 INCI 名称（成分库 INCI 名或产品成分表里的写法）和品牌公开浓度，其他写法（如 Ceramides、Pro-Vitamin B5、SPF 50+ UVA/UVB filters）移到 formula_note；全部移走时填 `Not separately disclosed`。带粒径、形态等描述词的（如 Non-nano Zinc Oxide 15%、Hyaluronic Acid 1.7% (three molecular weights)）去掉描述词，保留 INCI 名和浓度（Zinc Oxide 15%），原文移到 formula_note；有浓度的同时写入 active_concentrations（作者决定，2026-10-26）。inci_list 为空的产品只提示，按"成分表待补"处理，不出现在推荐里 | Pyrithione Zinc 1%; Ceramides |
 | inci_list_original | 包装原文成分表（中文、日文、韩文等），原样保存，只用于展示和核对，不参与打分 | 水、甘油、吡罗克酮乙醇胺盐 |
 | price / currency | 当地价格和货币代码，按销售地区存当地价格；price 必须为正数，currency 必须在 exchange_rates.csv 中 | 12 / USD |
@@ -123,7 +123,7 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 | spf | 正数，**只有 sunscreen 填写**（其他品类填了报错；防晒没填给提示） | 未知 |
 | broad_spectrum | yes / no / unknown（广谱防晒标注，只用于防晒） | unknown |
 | water_resistance | 40 / 80 / none / unknown（防水分钟数，只用于防晒） | unknown |
-| active_concentrations | 品牌公开的有效成分浓度，每项 `INCI\|浓度\|链接`，分号分隔；三项都必填，浓度含数字（如 2%），链接为出处。INCI 在 inci_list 中找不到时给提示 | 未公开 |
+| active_concentrations | 品牌公开的有效成分浓度，每项 `INCI\|浓度\|链接`，分号分隔；三项都必填，浓度含数字（如 2%），链接为出处。INCI 在 inci_list 中找不到时给提示。"AHA blend"这类不是 INCI 名的条目导入时移到 formula_note（2026-10-27） | 未公开 |
 | use_time | am / pm / both / unknown（品牌说明的使用时间） | unknown |
 | use_frequency | 品牌原文的使用频率，如 "Use 2–3 times a week" | — |
 | non_comedogenic_claim | yes / no / unknown；填 yes 时出处为 brand_claims_source_url（必填） | unknown |

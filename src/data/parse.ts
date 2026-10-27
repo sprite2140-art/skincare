@@ -162,6 +162,11 @@ export const normalizePlatform = (value: string | undefined): RetailPlatform => 
   return PLATFORM_ALIASES[v] ?? (v as RetailPlatform);
 };
 
+/** 物理产品的材料名（不是化妆品成分）：成分表只有这些时按"无有效成分的物理产品"处理 */
+const PHYSICAL_MATERIALS = [/^(100%\s*)?hydrocolloid( patch(es)?)?$/i];
+export const isPhysicalOnly = (names: string[]) =>
+  names.length > 0 && names.every((n) => PHYSICAL_MATERIALS.some((re) => re.test(n.trim())));
+
 export function parseProducts(text: string): Product[] {
   return parseCsv(text).map((r) => {
     const inci = parseInciList(r.inci_list);
@@ -194,6 +199,7 @@ export function parseProducts(text: string): Product[] {
     fragranceFreeSourceUrl: r.fragrance_free_source_url ?? '',
     inciList: inci.names,
     inciNameUnverified: inci.unverified,
+    physicalOnly: isPhysicalOnly(inci.names),
     keyActives: (r.key_actives ?? '').trim().toLowerCase() === NOT_DISCLOSED ? [] : splitList(r.key_actives),
     keyActivesDisclosed: (r.key_actives ?? '').trim().toLowerCase() !== NOT_DISCLOSED,
     inciListOriginal: r.inci_list_original ?? '',
