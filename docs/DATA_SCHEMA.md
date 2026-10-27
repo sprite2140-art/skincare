@@ -65,7 +65,7 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 | zone | face / scalp / hair / body | scalp |
 | category | 品类编号（取值见下） | shampoo |
 | usage_type | 使用方式：rinse_off（冲洗型）/ leave_on（免洗型）。留空则用品类默认值；卸妆、去角质、面膜必须填写 | |
-| subtype | 细分类型，普通产品留空。co_wash = 清洁型护发素：代替洗发水使用，category 必须为 shampoo（清洁步骤），页面显示"Co-wash · 清洁型护发素"标签和单独的使用说明，不能当作洗后护发素。面部产品误填的类型（如 chemical、hydrocolloid_patch、otc_acne_treatment）导入时清空，原值记入 formula_note（2026-10-27） | co_wash |
+| subtype | 细分类型，普通产品留空。co_wash = 清洁型护发素：代替洗发水使用，category 必须为 shampoo（清洁步骤），页面显示"Co-wash · 清洁型护发素"标签和单独的使用说明，不能当作洗后护发素。kids = 儿童 / 婴儿产品：照常入库，不出现在推荐结果里，覆盖表也不计入（2026-10-27）。面部产品误填的类型（如 chemical、hydrocolloid_patch、otc_acne_treatment）导入时清空，原值记入 formula_note（2026-10-27） | co_wash |
 | region | US / JP / KR / CN | US |
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |

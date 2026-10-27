@@ -932,7 +932,7 @@ export function rankProducts(
   const noNeeds = profile.concerns.length === 0;
   return products
     // 入库依据待补的产品不出现在推荐结果里
-    .filter((p) => p.category === category && !p.inclusionPending)
+    .filter((p) => p.category === category && !p.inclusionPending && p.subtype !== 'kids')
     .map((p) => scoreProduct(p, profile, data))
     .sort((a, b) =>
       group(a) - group(b)

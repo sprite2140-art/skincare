@@ -406,6 +406,8 @@
   "basis.brandSummaryNote": "品牌产品页说法的中文概括，不是逐字翻译，也不是独立验证的效果。",
   "basis.keyActives": "主打成分",
   "basis.ingredientNote": "成分功能只做辅助匹配，不代表实际柔顺程度或留香时长。",
+  "subtype.kids": "儿童 / 婴儿产品",
+  "usage.kids": "儿童 / 婴儿专用产品，请按包装说明使用。",
   "subtype.co_wash": "Co-wash · 清洁型护发素",
   "usage.co_wash": "这是 co-wash（清洁型护发素），用来代替洗发水清洁头皮和头发，不是洗后用的普通护发素。湿发后取适量在头皮按摩，再冲洗干净。",
   "ing.explainDraft": "通俗解释为起草稿，未核对",

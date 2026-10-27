@@ -109,7 +109,7 @@ describe('data/ 中导入的 CosIng（2026-10-17）', () => {
     for (const n of ['Glycerin', 'Citric Acid', 'Butylene Glycol', 'Caffeine', 'Arginine', 'Salicylic Acid', 'Cocos Nucifera Oil', 'Menthol']) {
       expect(tagged(n), n).toBe(false);
     }
-    const p = { ...real.products[0], inciList: ['Water', 'Glycerin', 'Citric Acid', 'Butylene Glycol', 'Caffeine', 'Arginine'], inciNameUnverified: [] };
+    const p = { ...real.products[0], fragranceFreeClaim: 'unknown' as const, inciList: ['Water', 'Glycerin', 'Citric Acid', 'Butylene Glycol', 'Caffeine', 'Arginine'], inciNameUnverified: [] };
     expect(fragranceInfo(p, index)).toMatchObject({ status: 'none_found', fragrance: [] });
   });
 

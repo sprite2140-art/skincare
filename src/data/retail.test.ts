@@ -7,8 +7,8 @@ const real = loadDataFromDisk();
 const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
 describe('零售商评分与购买链接（只展示，不计分）', () => {
-  it('导入第 1 批 41 条评分、按平台固定顺序挂到产品上', () => {
-    expect(real.products.filter((p) => p.zone !== 'face').reduce((n, p) => n + p.ratings.length, 0)).toBe(41);
+  it('洗护评分 80 条（第 1 批 41 条 + 2026-10-27 补缺 39 条）、按平台固定顺序挂到产品上', () => {
+    expect(real.products.filter((p) => p.zone !== 'face').reduce((n, p) => n + p.ratings.length, 0)).toBe(80);
     const order = byId('SH-US-003').ratings.map((r) => RETAIL_PLATFORMS.indexOf(r.platform));
     expect(order).toEqual([...order].sort((a, b) => a - b));
   });

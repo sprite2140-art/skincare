@@ -72,7 +72,8 @@ function minimalProfile(need: NeedChoice, category: string, budget: BudgetChoice
 
 export function coverageCell(products: Product[], category: string, need: NeedChoice, budget: BudgetChoice, data: ScoringData): CoverageCell {
   const scored = products
-    .filter((p) => p.category === category && inMarket(p, DEFAULT_MARKET))
+    // 与推荐结果一致：入库依据待补、儿童 / 婴儿产品不计入
+    .filter((p) => p.category === category && inMarket(p, DEFAULT_MARKET) && !p.inclusionPending && p.subtype !== 'kids')
     .map((p) => scoreProduct(p, minimalProfile(need, category, budget), data))
     .filter((r) => !r.excluded && !r.lowMatch && (r.dimensions.need.score ?? 0) > 0);
   // 满足：这一项需求有满分依据（主打成分或成品测试），才能达到"适合"及以上；只有部分依据的最高为"一般"
