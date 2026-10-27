@@ -35,9 +35,9 @@ describe('data/ 真实数据', () => {
   const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
   it('CSV 能正确解析，名称已统一', () => {
-    // 洗发水 70 款（美国 60、日韩中 10），护发素 37 款
-    expect(real.products.filter((p) => p.zone !== 'face')).toHaveLength(107);
-    expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(37);
+    // 洗发水 90 款（美国 80、日韩中 10），护发素 57 款（2026-10-27 补缺各 20 款）
+    expect(real.products.filter((p) => p.zone !== 'face')).toHaveLength(147);
+    expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(57);
     // 保留原有产品 ID
     for (const id of ['SH-US-001', 'SH-US-008', 'SH-JP-001', 'SH-KR-003', 'SH-CN-002']) expect(byId(id)).toBeDefined();
     const us1 = byId('SH-US-001');
@@ -48,7 +48,9 @@ describe('data/ 真实数据', () => {
     expect(us1.sizeMl).toBe(355);
     expect(us1.purchaseUrl).toContain('ulta.com/p/');
     expect(us1.imageUrl).toBe('');
-    expect(us1.fragranceFreeClaim).toBe('unknown');
+    // 2026-10-27 数据收集方核实品牌页写明 free of fragrance
+    expect(us1.fragranceFreeClaim).toBe('yes');
+    expect(us1.fragranceFreeSourceUrl).toBe('https://www.cerave.com/haircare/shampoo/anti-dandruff-hydrating-shampoo');
     // 品牌没有单独公布主打成分
     expect(byId('SH-US-014').keyActivesDisclosed).toBe(false);
     expect(byId('SH-US-014').keyActives).toEqual([]);
@@ -72,7 +74,7 @@ describe('data/ 真实数据', () => {
   });
 
   it('没有价格的产品不参与三分位计算', () => {
-    expect(budgetCaps.shampoo!.sampleSize).toBe(67);
+    expect(budgetCaps.shampoo!.sampleSize).toBe(87);
   });
 
   it('关闭测试模式时，draft 有效成分不参与需求匹配（只剩资料分类的产品定位）；基础成分无需核对即可使用', () => {
@@ -160,13 +162,13 @@ describe('按市场筛选', () => {
     expect(marketForCity(null)).toBe('US');
     const us = filterByMarket(shampoos, 'US', false);
     expect(ids(us.shown).every((id) => id.startsWith('SH-US'))).toBe(true);
-    expect(us.shown).toHaveLength(60);
+    expect(us.shown).toHaveLength(80);
     expect(us.hiddenCount).toBe(10);
     expect(filterByMarket(shampoos, 'JP', false).shown).toHaveLength(4);
   });
 
   it('打开"显示其他地区版本"后显示全部；没有市场时不筛选', () => {
-    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(70);
+    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(90);
     expect(filterByMarket(shampoos, null, false)).toEqual({ shown: shampoos, hiddenCount: 0 });
   });
 

@@ -198,7 +198,8 @@ describe('场景 4：跳过城市和所有可跳过的题', () => {
   it('默认美国市场，城市为空，不计需求匹配，仍能出结果', () => {
     expect(profile.city).toBeNull();
     expect(marketForCity(null)).toBe('US');
-    expect(ok.length).toBe(60);
+    // 美国洗发水 80 款，儿童 / 婴儿产品 4 款不进推荐
+    expect(ok.length).toBe(76);
     expect(ok.every((r) => r.product.region === 'US')).toBe(true);
     expect(ok[0].dimensions.need.score).toBeNull();
     expect(recommendReasons(ok[0], profile, false).length).toBeGreaterThan(0);
@@ -314,8 +315,8 @@ describe('护发素数据', () => {
   const co = real.products.filter((p) => p.category === 'conditioner');
   const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
-  it('37 款，冲洗型；需求标签为资料分类；品牌宣称是产品页概括或原文摘录，带出处', () => {
-    expect(co).toHaveLength(37);
+  it('57 款，冲洗型；需求标签为资料分类；品牌宣称是产品页概括或原文摘录，带出处', () => {
+    expect(co).toHaveLength(57);
     expect(co.filter((p) => p.claimedBenefits.length > 0).every((p) => p.claimSource === 'data_classification')).toBe(true);
     // 第 1 批扩充（CO-US-031 起）的品牌宣称是英文原文摘录
     expect(byId('CO-US-031').brandClaims).toMatchObject({ status: 'brand_page_quote', targets: ['tangling'] });
@@ -330,8 +331,8 @@ describe('护发素数据', () => {
     expect(byId('SH-US-001').brandClaims.status).toBe('not_collected');
   });
 
-  it('无香声明有四款，并有出处；"无香优先"时它们排在前面', () => {
-    expect(co.filter((p) => p.fragranceFreeClaim === 'yes').map((p) => p.productId)).toEqual(['CO-US-001', 'CO-US-029', 'CO-US-031', 'CO-US-032']);
+  it('无香声明有八款，并有出处；"无香优先"时它们排在前面', () => {
+    expect(co.filter((p) => p.fragranceFreeClaim === 'yes').map((p) => p.productId)).toEqual(['CO-US-001', 'CO-US-029', 'CO-US-031', 'CO-US-032', 'CO-US-050', 'CO-US-051', 'CO-US-052', 'CO-US-053']);
     const prof = toScoringProfile(answers({ hair: { fragrancePref: 'free_first' } }), 'conditioner', ctx);
     const ranked = rankProducts(co, 'conditioner', prof, data).filter((r) => !r.excluded);
     // 没有选需求：按温和程度和价格排序，不按香味层级；标注无香的产品都在无香层级
@@ -384,7 +385,16 @@ describe('美国洗护扩充第 1 批（2026-10-17）', () => {
   it('co-wash 归入洗发水（清洁步骤），带 co_wash 标记', () => {
     const p = byId('SH-US-060');
     expect(p).toMatchObject({ category: 'shampoo', subtype: 'co_wash' });
-    expect(real.products.filter((x) => x.subtype !== null).map((x) => x.productId)).toEqual(['SH-US-060']);
+    expect(real.products.filter((x) => x.subtype === 'co_wash').map((x) => x.productId)).toEqual(['SH-US-060']);
+  });
+
+  it('儿童 / 婴儿产品（2026-10-27 补缺）：照常入库，带 kids 标记，不进推荐', () => {
+    const kids = real.products.filter((x) => x.subtype === 'kids').map((x) => x.productId);
+    expect(kids).toEqual(['SH-US-062', 'SH-US-065', 'SH-US-070', 'SH-US-074']);
+    const prof = toScoringProfile(answers({}), 'shampoo', ctx);
+    const ranked = rankProducts(real.products, 'shampoo', prof, data).map((r) => r.product.productId);
+    expect(ranked.some((id) => kids.includes(id))).toBe(false);
+    expect(ranked).toContain('SH-US-061');
   });
 
   it('claimed_benefits 是项目映射（资料分类）；紫色洗发水的 tone_correction 记为去黄', () => {

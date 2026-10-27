@@ -177,6 +177,15 @@
 
 ## 记录
 
+### 2026-10-27（Claude Code：洗护补缺导入 SH-US-061—080、CO-US-038—057；新 PR）
+- 追加洗发水 20 款、护发素 20 款，购买链接 84 条，评分 38 条；原有 107 款只改 SH-US-001（见下）。入库依据：Ulta 按畅销排序的填 retailer_bestseller，其余由评分表自动判断 review_count（Walmart、Target、Amazon 评价数 ≥ 1,000）。两份自查报告移到 docs/data_batches/。
+- 儿童 / 婴儿产品 SH-US-062、065、070、074：subtype 新增 kids，照常入库，不进推荐，覆盖表也不计入（作者决定）。
+- CO-US-040 与 CO-US-056 写了同一个 Ulta SKU 2635427：该链接是 Living Proof Full Conditioner 的页面，属于 CO-US-040；CO-US-056（Oribe Gold Lust）错用了它。已删除 CO-US-056 的这条 Ulta 购买链接和 Ulta 评分（4.8 / 286 条，实为 Living Proof 的数据），formula_note 去掉该 SKU；购买链接保留 Nordstrom 和品牌官网，入库依据（Ulta 畅销榜）不变。
+- Codex 评审发现同类问题：SH-US-077（Oribe Gold Lust 洗发水）的 Ulta 链接和评分（4.7 / 309 条，SKU 2635424）是 Living Proof Full Shampoo 的，已同样删除，保留 Nordstrom 和品牌官网；逐条核对其余 38 款的链接，没有发现别的错配。
+- SH-US-001：fragrance_free_claim 改为 yes，出处为 CeraVe 品牌页（数据收集方核实写明 free of fragrance）。
+- 共用代码最小改动：types.ts 增加 kids；score.ts 的 rankProducts 和 coverage.ts 过滤 kids（coverage 同时过滤入库依据待补，与推荐一致，洗护目前没有待补产品）；validate.ts 给提示；zh/en 增加 kids 标签和用法文字。
+- 重新生成 docs/COVERAGE.md：少于 3 款的格子由 87 个降为 84 个。
+
 ### 2026-10-21（Claude Code：上线阻塞项）
 - 完成：
   1. 新增 `npm run verify-list-ingredients`：规则清单类成分对照官方原文自动核对。加香、精油、螯合剂按 CosIng 官方导出（作者 2026-10-17 获取）的登记功能核对；欧盟香料致敏原只在 EUR-Lex 附录 III 原文里查找；强清洁力表活、致敏防腐剂、酒精除了 CosIng 功能，还要有 CosIng 以外的文献出处。报告在 `docs/LIST_VERIFICATION.md`。本次 57 个成分：通过 34 个（33 个标为已核对，notes 写明依据），对不上 0 个，无法核对 23 个（13 个欧盟香料致敏原：本环境下载不了 EUR-Lex；10 个强清洁力表活 / 致敏防腐剂 / 酒精：缺文献出处）。
