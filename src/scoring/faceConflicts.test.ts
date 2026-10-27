@@ -57,6 +57,13 @@ describe('整套流程的搭配检查', () => {
     expect(rules([step('cleanser', ['Water', 'Salicylic Acid']), step('exfoliator', ['Water', 'Glycolic Acid']), sunscreen()])).toContain('multi_exfoliant:pm');
   });
 
+  it('冲洗型去角质（磨砂、冲洗型酸类面膜）放在去角质步骤时参与搭配检查（草案规则 2 含磨砂）；冲洗型酸类洁面只算同时段多重去角质', () => {
+    const rinse = (s: RoutineStep) => { s.primary!.product.usageType = 'rinse_off'; return s; };
+    expect(rules([rinse(step('exfoliator', ['Water', 'Glycolic Acid'])), step('treatment', ['Water', 'Retinol']), sunscreen()])).toContain('retinoid_exfoliant:pm');
+    expect(rules([rinse(step('exfoliator', ['Water', 'Silica'])), step('treatment', ['Water', 'Retinol']), sunscreen()])).toContain('retinoid_exfoliant:pm');
+    expect(rules([rinse(step('cleanser', ['Water', 'Glycolic Acid'])), step('treatment', ['Water', 'Retinol']), sunscreen()])).not.toContain('retinoid_exfoliant:pm');
+  });
+
   it('PHA（Gluconolactone）算去角质类：参与搭配检查，但不算刺激成分', () => {
     expect(rules([step('cleanser', ['Water', 'Gluconolactone']), step('exfoliator', ['Water', 'Glycolic Acid']), sunscreen()])).toContain('multi_exfoliant:pm');
     expect(rules([step('treatment', ['Water', 'Gluconolactone']), step('moisturizer', ['Water', 'Retinol']), sunscreen()])).toContain('retinoid_exfoliant:pm');

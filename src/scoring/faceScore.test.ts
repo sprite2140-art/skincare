@@ -155,3 +155,18 @@ describe('真实洁面数据', () => {
     expect(ranked[0].needMatches.map((m) => m.id)).toEqual(['acne', 'oil']);
   });
 });
+
+describe('无有效成分的物理产品（痘痘贴）', () => {
+  it('成分表只有材料名称：不报"暂无数据"，需求匹配只按品牌宣称', () => {
+    for (const id of ['ST-US-001', 'ST-US-002', 'ST-US-003', 'ST-US-015']) {
+      const p = real.products.find((x) => x.productId === id)!;
+      expect(p.physicalOnly).toBe(true);
+      const r = run(p, { concerns: ['acne'] }, 'spot');
+      expect(r.notices.map((n) => n.code)).not.toContain('missing_data');
+      expect(r.dimensions.need.score).not.toBeNull();
+      expect(r.needMatches.find((m) => m.id === 'acne')!.bases).toEqual(['brand_claim', 'claim']);
+    }
+    // 含药物成分的点涂产品不算物理产品
+    expect(real.products.find((x) => x.productId === 'ST-US-004')!.physicalOnly).toBe(false);
+  });
+});

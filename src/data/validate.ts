@@ -259,6 +259,8 @@ export function validateData(
     const aliases = aliasMap(extra.aliases ?? []);
     const missing = new Map<string, Set<string>>();
     for (const p of products) {
+      // 物理产品（痘痘贴）只写材料名，不是 INCI，不提示
+      if (p.physicalOnly) continue;
       for (const n of p.inciList) {
         // 成分库登记的别名也算（如美国写法 Fragrance ↔ 欧盟 Parfum、Pyrithione Zinc ↔ Zinc Pyrithione）
         const lib = libraryIndex.get(n);

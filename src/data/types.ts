@@ -273,6 +273,8 @@ export interface Product {
   inclusionBasisType: InclusionBasisType | null;
   /** 入库依据待补（inclusion_basis 写 none、评价数也不足 1,000 条），或成分表待补（inci_list 为空）：照常导入，但不出现在推荐结果里 */
   inclusionPending?: boolean;
+  /** 没有有效成分的物理产品（如痘痘贴：成分表只有 Hydrocolloid 这类材料名）：需求只按品牌宣称计算，不算"成分暂无数据" */
+  physicalOnly?: boolean;
   awards: Award[];
   /** 产品定位针对的困扰 / 效果 */
   claimedBenefits: Target[];

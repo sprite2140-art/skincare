@@ -809,7 +809,8 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   // 测试模式下 draft 成分已参与打分，不算"暂无数据"
   // 正式模式下未核对的风险成分已计入温和度，不算"暂无数据"；未核对的有效成分不参与打分，算"暂无数据"
   const unscoredDraft = data.allowDraft ? 0 : known.filter((r) => r.ingredient.reviewStatus !== 'verified' && r.ingredient.category === 'active').length;
-  const missing = unknownIngredients.length + nameUnverifiedIngredients.length + unscoredDraft;
+  // 物理产品（痘痘贴）的材料名不是成分，不算"暂无数据"
+  const missing = product.physicalOnly ? 0 : unknownIngredients.length + nameUnverifiedIngredients.length + unscoredDraft;
   if (missing > 0) {
     notices.push({
       code: 'missing_data',
@@ -858,7 +859,7 @@ export function scoreProduct(product: Product, profile: ScoringProfile, data: Sc
   let dimensions: Record<DimensionKey, Dimension>;
   let needMatches: NeedMatch[] = [];
   let irritation: IrritationDetail = { hits: [], rinseOff: usageTypeOf(product) === 'rinse_off', sensitive: profile.sensitive };
-  if (verified.length === 0) {
+  if (verified.length === 0 && !product.physicalOnly) {
     dimensions = {
       need: dimension('need', null, noData),
       irritation: dimension('irritation', null, noData),
