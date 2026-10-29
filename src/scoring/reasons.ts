@@ -6,6 +6,7 @@
 import { TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
 import { positioningLabel, type NeedMatch, type ProductScore, type ScoringProfile } from './score';
 import type { Product, Target } from '../data/types';
+import { plantKind, type FragranceInfo } from './fragrance';
 
 /** 成分针对某需求时的通俗说法："含{去屑}成分吡硫鎓锌" */
 const ACTION: Partial<Record<Target, Text>> = {
@@ -55,6 +56,19 @@ function needReason(m: NeedMatch, product: Product): Reason {
   return { zh: `成分表里有${a.zh}成分${n.zh}，但不是主打`, en: `Lists ${a.en} ingredient ${n.en}, though not as a key ingredient`, basis: 'ingredients' };
 }
 
+/** 品牌标注无香、但含精油或芳香植物成分（所有品类同一写法） */
+export function labeledWithPlants(f: FragranceInfo): { zh: string; en: string } {
+  return plantKind(f) === 'oil'
+    ? { zh: '品牌标注无香，但含植物精油', en: 'Labeled fragrance-free by the brand, but contains plant essential oils' }
+    : { zh: '品牌标注无香，但含芳香植物成分', en: 'Labeled fragrance-free by the brand, but contains aromatic plant ingredients' };
+}
+
+function containsPlants(f: FragranceInfo): { zh: string; en: string } {
+  return plantKind(f) === 'oil'
+    ? { zh: '含精油', en: 'Contains essential oils' }
+    : { zh: '含芳香植物成分', en: 'Contains aromatic plant ingredients' };
+}
+
 function fragranceReason(r: ProductScore): Reason {
   const f = r.fragrance;
   const unknown = f.unknownCount > 0
@@ -63,7 +77,8 @@ function fragranceReason(r: ProductScore): Reason {
   const b = { basis: 'ingredients' as const };
   if (f.status === 'labeled_free') return { zh: `标注无香${unknown.zh}`, en: `Labeled fragrance-free${unknown.en}`, ...b };
   if (f.status === 'none_found') return { zh: `成分表中没有发现加香成分${unknown.zh}`, en: `No fragrance ingredient found in the list${unknown.en}`, ...b };
-  if (f.fragrance.length === 0) return { zh: '含精油', en: 'Contains essential oils', ...b };
+  if (f.labeledFreeWithPlants) return { ...labeledWithPlants(f), ...b };
+  if (f.fragrance.length === 0) return { ...containsPlants(f), ...b };
   return { zh: '含香精', en: 'Contains fragrance', ...b };
 }
 
@@ -86,7 +101,9 @@ export function recommendReasons(r: ProductScore, profile: ScoringProfile, scent
   } else if (scentGoal && r.fragrance.status === 'contains') {
     out.push(r.fragrance.fragrance.length > 0
       ? { zh: '含香精，气味和留香因人而异，建议自己闻一闻', en: 'Contains fragrance; scent and how long it lasts vary, so try it yourself' }
-      : { zh: '含精油，气味和留香因人而异，建议自己闻一闻', en: 'Contains essential oils; scent and how long it lasts vary, so try it yourself' });
+      : plantKind(r.fragrance) === 'oil'
+        ? { zh: '含精油，气味和留香因人而异，建议自己闻一闻', en: 'Contains essential oils; scent and how long it lasts vary, so try it yourself' }
+        : { zh: '含芳香植物成分，气味因人而异，建议自己闻一闻', en: 'Contains aromatic plant ingredients; scent varies, so try it yourself' });
   } else if (needs[1]) {
     out.push(needReason(needs[1], r.product));
   } else if (r.dimensions.irritation.level === 'high') {

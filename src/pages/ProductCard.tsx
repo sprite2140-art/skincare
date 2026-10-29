@@ -22,7 +22,7 @@ import {
 } from '../scoring/cardData';
 import { spaceCjk } from '../scoring/labels';
 import { inMarket } from '../scoring/market';
-import { recommendReasons } from '../scoring/reasons';
+import { labeledWithPlants, recommendReasons } from '../scoring/reasons';
 import { ingredientStatuses, type IngredientStatus, type ProductScore, type ScoringProfile } from '../scoring/score';
 import type { FaceProductScore } from '../scoring/faceScore';
 /** 卡片上最多显示的标签数 */
@@ -205,11 +205,12 @@ export default function ProductCard({ r, market, profile, scentGoal, compact, de
   const rows = storeRows(p);
   const free = f.status !== 'contains';
   // 标签统一样式、最多两个：co-wash > 无香 > 一个奖项
+  // 细分类型和香味提示要能读全，窄屏下折行；奖项名可能很长，仍按一行省略
   const tags = [
-    p.subtype ? t(`subtype.${p.subtype}` as Key) : null,
-    free ? t('scentTag.free') : null,
-    p.awards[0] ? `${p.awards[0].source} ${p.awards[0].year}` : null,
-  ].filter((x): x is string => !!x).slice(0, MAX_CARD_TAGS);
+    p.subtype ? { text: t(`subtype.${p.subtype}` as Key), wrap: true } : null,
+    free ? { text: t('scentTag.free'), wrap: true } : f.labeledFreeWithPlants ? { text: tx(labeledWithPlants(f)), wrap: true } : null,
+    p.awards[0] ? { text: `${p.awards[0].source} ${p.awards[0].year}`, wrap: false } : null,
+  ].filter((x): x is { text: string; wrap: boolean } => !!x).slice(0, MAX_CARD_TAGS);
   const gentleLevel = r.dimensions.irritation.level;
 
   return (
@@ -232,7 +233,7 @@ export default function ProductCard({ r, market, profile, scentGoal, compact, de
               <span aria-hidden="true">★</span> {top.rating.toFixed(1)} · <span className="nowrap">{t('card.ratingLine', { platform: t(`platform.${top.platform}` as Key), n: ratingCountText(top) })}</span>
             </div>
           )}
-          {tags.length > 0 && <div className="tags">{tags.map((x, i) => <span key={i} className="tag">{x}</span>)}</div>}
+          {tags.length > 0 && <div className="tags">{tags.map((x, i) => <span key={i} className={x.wrap ? 'tag wrap' : 'tag'}>{x.text}</span>)}</div>}
           {p.formulaVersionPending && <p className="note">{t('card.formulaPending')}</p>}
         </div>
         {r.score !== null && !compact && (r.noNeeds ? (
@@ -380,6 +381,8 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
           {f.status !== 'contains' && (
             <li>{f.status === 'labeled_free' ? t('card.scent.labeled_free') : f.unknownCount > 0 ? t('card.scent.none_found_unknown', { n: f.unknownCount }) : t('card.scent.none_found')}</li>
           )}
+          {f.labeledFreeWithPlants && <li>{tx(labeledWithPlants(f))}{lang === 'zh' ? '：' : ': '}{[...f.essentialOils, ...f.botanicals].join(lang === 'zh' ? '、' : ', ')}</li>}
+          {!f.labeledFreeWithPlants && f.botanicals.length > 0 && <li>{t('card.scent.botanicals')}{lang === 'zh' ? '：' : ': '}{f.botanicals.join(lang === 'zh' ? '、' : ', ')}</li>}
           {cautions.map((c, i) => (
             <li key={i}>
               {tx(c.label)} · <IngNames list={c.ingredients} />

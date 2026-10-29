@@ -16,6 +16,7 @@
 | long-name | 名称很长 | CO-US-030 | 护发素；柔顺 |
 | unverified | 含未核对成分 | CO-US-032 | 护发素；柔顺 |
 | routine | 洗护搭配 | SH-US-001 + CO-US-001 | 洗护都买；头皮屑；柔顺 |
+| labeled-plants | 品牌标注无香但含植物精油；洗护二合一（co-wash） | SH-US-084 | 洗发水；头皮敏感；无香优先 |
 | skin-minimal | 护肤：没有选困扰（基础 3 步） | CL-US-002 | 护肤；无困扰 |
 | skin-full | 护肤：痘痘、暗沉色斑、细纹 | CL-US-013 | 护肤；痘痘、暗沉色斑、细纹 |
 | skin-sensitive | 护肤：经常敏感 + 泛红（功效成分计入刺激） | CL-US-006 | 护肤；泛红；经常敏感 |
@@ -27,7 +28,7 @@
 
 ## 截图矩阵
 
-每个案例都要截以下 8 种组合（14 个案例共 112 张）：
+每个案例都要截以下 8 种组合（15 个案例共 120 张）：
 
 - 宽度：390px、1280px
 - 语言：中文、英文
@@ -41,7 +42,7 @@
 2. 临时安装 `npm i --no-save playwright-core`，然后运行：
    `node scripts/design-qa.mjs docs/screenshots/<日期>-qa`
    如果需要指定浏览器路径，设置环境变量 `CHROMIUM_PATH`。
-3. 脚本会截下全部 112 张图，并自动检查下列项目。有问题时，脚本列出问题并以非 0 状态退出。
+3. 脚本会截下全部 120 张图，并自动检查下列项目。有问题时，脚本列出问题并以非 0 状态退出。
    - 页面是否横向溢出
    - 最小字号是否小于 13px
    - 是否出现连续两个冒号
@@ -70,3 +71,4 @@
 | 2026-10-19 | 卡片一致性、"适合"等级规则、设计自查清单 | `docs/screenshots/2026-10-19-qa/` |
 | 2026-10-21 | 导入防晒 40 款（新增 skin-sunscreen-missing、skin-sunscreen-stock） | `docs/screenshots/2026-10-21-sunscreen-qa/` |
 | 2026-10-21 | 上线阻塞项：价格旁提示"价格以零售商页面为准"（收起状态 3 个案例） | `docs/screenshots/2026-10-21-price-note/` |
+| 2026-10-29 | 洗护补丁："品牌标注无香，但含植物精油"、洗护二合一标签（新增 labeled-plants） | `docs/screenshots/2026-10-29-labeled-plants/` |

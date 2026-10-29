@@ -177,6 +177,15 @@
 
 ## 记录
 
+### 2026-10-29（Claude Code：洗护补丁 SH-US-081—084 + 5 行修正；"品牌标注无香，但含植物精油"）
+- 新增 4 款成人无香头皮类洗发水（SH-US-081—084），替代不进推荐的 4 款儿童产品（SH-US-062、065、070、074 仍为 kids）。入库依据：SH-US-081 由 Amazon 评价数 1,382 条自动记为 review_count；082—084 为 Ulta 无香洗发分类按畅销排序，填 retailer_bestseller。
+- 修正 5 行（SH-US-076、078、CO-US-055、056、057）：按 product_id 覆盖主记录（inclusion_basis_type 沿用原值，CO-US-056 改为 Nordstrom 评价数 2,970 条，自动记为 review_count）；这 5 个编号原有的购买链接 14 条、评分 4 条整组删除，换成补丁里的 10 条、5 条。Bumble 4 款改为常规瓶（$36—38，198—251 mL）。
+- SH-US-084 是洗护二合一的清洁霜：subtype 填 co_wash，formula_note 开头注明；co_wash 标签改为"洗护二合一（co-wash）"（SH-US-060 同样显示）。
+- 新增 data/aromatic_botanicals.csv：(EU) 2023/1545 附件中列为香料致敏原的植物精油 / 提取物（41 行，按物种 + 部位 + 形态匹配）。含这些成分的产品和含精油的一样不算无香；品牌标注无香但含精油或芳香植物成分时，卡片标签和"需要注意"写"品牌标注无香，但含植物精油"（只有提取物时写"……但含芳香植物成分"）并列出成分。受影响：标注无香的 SH-US-084、SU-US-005、SU-US-024；未标注无香、原先显示"无香（成分表中没有加香成分）"的 CL-US-009、CL-US-012、CL-US-018 也改为含加香成分。
+- 产品卡片的细分类型和香味标签窄屏下折行，不再省略。设计自查新增 labeled-plants 案例，截图在 docs/screenshots/2026-10-29-labeled-plants/。
+- 重新生成 COVERAGE、INGREDIENT_REVIEW。补丁自查报告移到 docs/data_batches/hair_patch_self_check.md，6 个原始文件已删除。
+- 下一步：本 PR 合并后关闭测试模式（单独 PR）。
+
 ### 2026-10-27（Claude Code：洗护补缺导入 SH-US-061—080、CO-US-038—057；新 PR）
 - 追加洗发水 20 款、护发素 20 款，购买链接 84 条，评分 38 条；原有 107 款只改 SH-US-001（见下）。入库依据：Ulta 按畅销排序的填 retailer_bestseller，其余由评分表自动判断 review_count（Walmart、Target、Amazon 评价数 ≥ 1,000）。两份自查报告移到 docs/data_batches/。
 - 儿童 / 婴儿产品 SH-US-062、065、070、074：subtype 新增 kids，照常入库，不进推荐，覆盖表也不计入（作者决定）。

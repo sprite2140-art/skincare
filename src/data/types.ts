@@ -178,6 +178,8 @@ export interface Ingredient {
   euAllergen?: boolean;
   /** 在本项目维护的加香成分清单（data/fragrance_ingredients.csv）上 */
   fragranceListed?: boolean;
+  /** 芳香植物成分（data/aromatic_botanicals.csv）：(EU) 2023/1545 附件中的附录 III 条目号 */
+  aromaticEntry?: string;
   /** 在本项目维护的螯合剂清单（data/chelators.csv）上 */
   chelator?: boolean;
   /** 通俗解释已核对（ingredient_explanations.csv 中 review_status = verified）；成分本身是否核对看 reviewStatus */
