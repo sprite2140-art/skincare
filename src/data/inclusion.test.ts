@@ -33,10 +33,10 @@ describe('入库依据：评价数 1,000 条以上', () => {
     expect(kept.inclusionBasis).toBe('Allure');
   });
 
-  it('保湿、精华以外：防晒 30 款按评价数获得依据（防晒补查、Amazon 补查、第 3 批修正版后）', () => {
+  it('保湿、精华以外：防晒 29 款按评价数获得依据（防晒补查、Amazon 补查、第 3 批修正版后；SU-US-048 替换后改为 Ulta 畅销榜）', () => {
     const ids = real.products.filter((p) => p.inclusionBasisType === 'review_count' && /^SU-/.test(p.productId)).map((p) => p.productId);
     expect(ids).toEqual(['SU-US-001', 'SU-US-002', 'SU-US-003', 'SU-US-004', 'SU-US-006', 'SU-US-008', 'SU-US-009', 'SU-US-010', 'SU-US-011', 'SU-US-012', 'SU-US-013', 'SU-US-016', 'SU-US-022', 'SU-US-024', 'SU-US-027', 'SU-US-032', 'SU-US-035', 'SU-US-036', 'SU-US-037', 'SU-US-039', 'SU-US-040',
-      'SU-US-041', 'SU-US-042', 'SU-US-043', 'SU-US-044', 'SU-US-045', 'SU-US-046', 'SU-US-048', 'SU-US-049', 'SU-US-050']);
+      'SU-US-041', 'SU-US-042', 'SU-US-043', 'SU-US-044', 'SU-US-045', 'SU-US-046', 'SU-US-049', 'SU-US-050']);
   });
 
   it('去角质、点涂第 1 批：评价数依据（Sephora 1.6K 按"数字 K"规则）', () => {
