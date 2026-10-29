@@ -46,9 +46,9 @@ export const RINSE_OFF_MULTIPLIER = 0.5;
 
 /**
  * 测试模式：允许 review_status = draft 的有效成分和风险成分参与打分，结果页标注"测试数据，尚未核对"。
- * 仅用于开发测试阶段看推荐效果。**正式上线前必须改为 false。**
+ * 仅用于开发测试阶段看推荐效果。2026-10-29 已按计划关闭（未核对的风险成分照常扣分，未核对的有效成分不加分）。
  */
-export const TEST_MODE_DRAFT_SCORING = true;
+export const TEST_MODE_DRAFT_SCORING = false;
 
 // ---------- 效果依据（需求匹配与证据强度） ----------
 // 依据分三类，可靠程度从高到低：可靠的成品测试 > 品牌宣称 > 成分功能。
