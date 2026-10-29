@@ -177,6 +177,11 @@
 
 ## 记录
 
+### 2026-10-29（Claude Code：key_actives 清理；MO-US-034 Linaloo → Linalool）
+- 全库检查 key_actives：对应不上成分表的品牌技术 / 配方名称（155 款产品、316 项）移到 formula_note，注明原文；其中 58 款全部移走，填 Not separately disclosed（有效成分按非主打计，与清理前一样）。痘痘贴 ST-US-002 的材料名 Hydrocolloid 不动。356 款产品的需求匹配、适合等级和总分清理前后完全相同。
+- 能对应到成分表的俗名（67 项，53 款，如 Ceramides、Vitamin E、Coconut Oil）暂时保留：它们参与主打成分匹配，改成 INCI 写法或移走会改变打分，等作者决定。
+- MO-US-034 成分表的"Linaloo [待核对]"改为 Linalool（formula_note 注明原文拼写），现在识别为欧盟香料致敏原。SH-KR-001 不处理（作者决定）。
+
 ### 2026-10-29（Claude Code：保湿第 2 批 MO-US-021—040；SU-US-048 替换）
 - 保湿 20 款、购买链接 42 条、评分 22 条追加。入库依据：MO-US-030、038 为 Ulta 保湿分类畅销榜第 1 页主商品卡（评价数不足 1,000），填 retailer_bestseller；其余 18 款由评分表自动记为 review_count（MO-US-022 用 Walmart 5,684 条，MO-US-027 用 Kohl's 1,723 条）。
 - SU-US-048 按 product_id 覆盖：原 Erborian CC Red Correct（SPF 25）撤掉，换成 SPF 50 广谱的 Ultra-Lightweight Face Fluid；原有购买链接 2 条、评分 2 条整组换成新文件的 2 条、1 条。入库依据为 Ulta 保湿分类畅销榜主商品卡（380 条评价），填 retailer_bestseller。key_actives 里的"Cerasun Technology"是品牌技术名称，移到 formula_note。
