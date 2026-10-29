@@ -382,6 +382,7 @@ details.more[open] summary::after { content: '−'; }
 .detail-score { margin-top: 12px; }
 .ratings { list-style: none; padding: 0; margin: 8px 0 6px; font-size: var(--fs-small); display: grid; gap: 4px; }
 .product .tag { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; border-radius: 6px; }
+.product .tag.wrap { white-space: normal; }
 .pimg.placeholder svg { width: 40px; height: 54px; }
 
 

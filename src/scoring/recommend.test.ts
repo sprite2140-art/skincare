@@ -198,8 +198,8 @@ describe('场景 4：跳过城市和所有可跳过的题', () => {
   it('默认美国市场，城市为空，不计需求匹配，仍能出结果', () => {
     expect(profile.city).toBeNull();
     expect(marketForCity(null)).toBe('US');
-    // 美国洗发水 80 款，儿童 / 婴儿产品 4 款不进推荐
-    expect(ok.length).toBe(76);
+    // 美国洗发水 84 款，儿童 / 婴儿产品 4 款不进推荐
+    expect(ok.length).toBe(80);
     expect(ok.every((r) => r.product.region === 'US')).toBe(true);
     expect(ok[0].dimensions.need.score).toBeNull();
     expect(recommendReasons(ok[0], profile, false).length).toBeGreaterThan(0);
@@ -385,7 +385,7 @@ describe('美国洗护扩充第 1 批（2026-10-17）', () => {
   it('co-wash 归入洗发水（清洁步骤），带 co_wash 标记', () => {
     const p = byId('SH-US-060');
     expect(p).toMatchObject({ category: 'shampoo', subtype: 'co_wash' });
-    expect(real.products.filter((x) => x.subtype === 'co_wash').map((x) => x.productId)).toEqual(['SH-US-060']);
+    expect(real.products.filter((x) => x.subtype === 'co_wash').map((x) => x.productId)).toEqual(['SH-US-060', 'SH-US-084']);
   });
 
   it('儿童 / 婴儿产品（2026-10-27 补缺）：照常入库，带 kids 标记，不进推荐', () => {

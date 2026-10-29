@@ -89,6 +89,43 @@ export function parseIngredientList(text: string): ListEntry[] {
 export interface IngredientLists {
   chelators?: ListEntry[];
   fragrances?: ListEntry[];
+  aromatics?: AromaticBotanical[];
+}
+
+/**
+ * 芳香植物成分（data/aromatic_botanicals.csv）：法规 (EU) 2023/1545 附件中列为香料致敏原的植物精油 / 提取物，
+ * 原文 PDF 在 docs/sources/eu_2023_1545.pdf。按物种 + 部位 + 形态匹配（如条目 360 是"Lavandula angustifolia oil/extract"，
+ * 所以 Lavandula Angustifolia Flower Extract 也算）。只用于"品牌标注无香，但含植物精油"的提示和无香排序。
+ */
+export interface AromaticBotanical {
+  /** 拉丁学名，如 Lavandula Angustifolia */
+  species: string;
+  /** 限定的部位（flower、peel、leaf 等）；空 = 不限 */
+  parts: string[];
+  /** oil / extract / water / resin */
+  forms: string[];
+  /** 2023/1545 附件中的附录 III 条目号 */
+  entry: string;
+}
+
+export function parseAromaticBotanicals(text: string): AromaticBotanical[] {
+  const list = (s: string | undefined) => (s ?? '').split(';').map((x) => x.trim().toLowerCase()).filter(Boolean);
+  return parseCsv(text).map((r) => ({ species: r.species.trim(), parts: list(r.parts), forms: list(r.forms), entry: r.entry.trim() }));
+}
+
+/** 成分名是否属于芳香植物成分，返回 2023/1545 的条目号；不是则返回 null */
+export function aromaticEntry(name: string, list: AromaticBotanical[]): string | null {
+  // 去掉括号里的俗名，如 Lavandula Angustifolia (Lavender) Flower Extract
+  const n = name.toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+  for (const a of list) {
+    const sp = a.species.toLowerCase();
+    if (!n.startsWith(sp + ' ')) continue;
+    const words = n.slice(sp.length).split(/[\s/]+/).filter(Boolean);
+    if (!a.forms.includes(words[words.length - 1])) continue;
+    if (a.parts.length > 0 && !words.some((w) => a.parts.includes(w))) continue;
+    return a.entry;
+  }
+  return null;
 }
 
 /** data/cosing_ingredients.csv（已转换的格式） */
@@ -207,6 +244,7 @@ export function expandIngredients(
   const fragranceKeys = keys(lists.fragrances);
   const isChelator = (names: string[]) => names.some((n) => chelatorKeys.has(normalizeName(n)));
   const isListedFragrance = (names: string[]) => names.some((n) => fragranceKeys.has(normalizeName(n)));
+  const aromatic = (names: string[]) => names.map((n) => aromaticEntry(n, lists.aromatics ?? [])).find(Boolean) ?? undefined;
   const explained = new Map(explanations.map((e) => [normalizeName(e.inciName), e]));
   const verifiedFragrance = new Map((lists.fragrances ?? []).filter((e) => e.reviewStatus === 'verified').map((e) => [normalizeName(e.inciName), e]));
   const known = new Map<string, Ingredient>();
@@ -226,6 +264,7 @@ export function expandIngredients(
     const listed = !ing.explainZh ? names.map((n) => explained.get(normalizeName(n))).find(Boolean) : undefined;
     const full: Ingredient = {
       ...ing, riskTags, origin: 'library', euAllergen: allergen, chelator: isChelator(names), fragranceListed: isListedFragrance(names),
+      aromaticEntry: aromatic(names),
       cosingFunctions: c?.functions,
       ...(listed ? { explainZh: listed.explainZh, explainEn: listed.explainEn, explainFromList: true, explainReviewed: listed.reviewStatus === 'verified' } : {}),
     };
@@ -262,6 +301,7 @@ export function expandIngredients(
       euAllergen: allergen,
       chelator: isChelator([c.inciName]),
       fragranceListed: isListedFragrance([c.inciName]),
+      aromaticEntry: aromatic([c.inciName]),
       cosingFunctions: c.functions,
     };
     known.set(key, ing);

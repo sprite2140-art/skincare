@@ -4,10 +4,16 @@
 // 基础成分不需要人工核对，不算。
 // 另外按"没有选需求"的档案打分，统计温和度分数会变化的产品数。
 // 加 --list 时逐个列出受影响的产品、涉及的成分，以及温和度分数是否会变化。
+// 最后列出各品类可推荐的数量（测试模式开 / 关）：美国市场、入库依据齐全、不是儿童产品，
+// 按"没有选需求"的档案打分后没有被排除、能打分（防晒另外要求 SPF 和广谱信息齐全），与结果页的"可推荐"一组相同。
 
 import { loadDataFromDisk } from '../src/data/node';
 import { computeBudgetCaps } from '../src/scoring/budget';
-import { scoreProduct, type ScoringProfile } from '../src/scoring/score';
+import { rankProducts, scoreProduct, type ScoringProfile } from '../src/scoring/score';
+import { faceScoringProfile, rankFaceStep } from '../src/scoring/faceScore';
+import { STEP_CATEGORY, type FaceStep, type FaceStepId } from '../src/scoring/faceSteps';
+import { EMPTY_FACE } from '../src/profile/faceQuestionnaire';
+import { filterByMarket } from '../src/scoring/market';
 import type { Ingredient } from '../src/data/types';
 
 const real = loadDataFromDisk();
@@ -44,4 +50,21 @@ for (const [label, zone] of [['洗护', (z: string) => z !== 'face'], ['护肤',
   const top = [...byIngredient].sort((a, b) => b[1].size - a[1].size || a[0].localeCompare(b[0]));
   console.log(`  涉及未核对成分 ${top.length} 个：${top.map(([n, s]) => `${n}（${s.size}）`).join('、')}`);
   if (list) console.log(lines.join('\n'));
+}
+
+console.log('各品类可推荐数量（美国市场；测试模式开 → 关）：');
+const us = filterByMarket(real.products, 'US', false).shown;
+for (const [label, cat] of [['洗发水', 'shampoo'], ['护发素', 'conditioner']] as const) {
+  const ok = (draft: boolean) => rankProducts(us, cat, neutral, data(draft)).filter((s) => !s.excluded && s.score !== null).length;
+  console.log(`  ${label}：共 ${us.filter((p) => p.category === cat).length} 款，可推荐 ${ok(true)} → ${ok(false)}`);
+}
+const FACE_LABELS: Record<FaceStepId, string> = {
+  cleanser: '洁面', treatment: '精华', spot: '点涂', exfoliator: '去角质', moisturizer: '保湿', sunscreen: '防晒',
+};
+for (const id of Object.keys(STEP_CATEGORY) as FaceStepId[]) {
+  const step: FaceStep = { id, category: STEP_CATEGORY[id], tier: 'optional', needs: [], becauseOf: [], weekly: false };
+  const profile = faceScoringProfile(EMPTY_FACE, step, { specialStatus: 'none', avoidIngredients: [], avoidTags: [] });
+  const ok = (draft: boolean) => rankFaceStep(us, profile, data(draft), { face: EMPTY_FACE, step, classes: real.faceActiveClasses }).ranked
+    .filter((s) => !s.excluded && s.score !== null && s.faceExtras.sunscreen !== 'incomplete').length;
+  console.log(`  ${FACE_LABELS[id]}：共 ${us.filter((p) => p.category === step.category).length} 款，可推荐 ${ok(true)} → ${ok(false)}`);
 }

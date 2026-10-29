@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parseCities, parseExchangeRates, parseFormulaVersionChecks, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
-import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseInciAliases, parseIngredientList } from './cosing';
+import { expandIngredients, parseAllergens, parseAromaticBotanicals, parseCosingTable, parseExplanations, parseInciAliases, parseIngredientList } from './cosing';
 import { buildIngredientIndex } from './ingredientIndex';
 import { buildActiveClassIndex, parseActiveClasses, parseFaceConflicts } from './faceActives';
 
@@ -18,6 +18,7 @@ export function loadDataFromDisk() {
   const lists = {
     chelators: parseIngredientList(read('chelators.csv')),
     fragrances: parseIngredientList(read('fragrance_ingredients.csv')),
+    aromatics: parseAromaticBotanicals(read('aromatic_botanicals.csv')),
   };
   const aliases = parseInciAliases(read('inci_aliases.csv'));
   /** 配方版本待核对的产品（formula_version_checks.csv） */
@@ -31,7 +32,7 @@ export function loadDataFromDisk() {
     allergens,
     /** 常见成分通俗解释（起草稿，未核对） */
     explanations,
-    /** 本项目维护的判断清单：螯合剂、加香成分 */
+    /** 本项目维护的判断清单：螯合剂、加香成分、芳香植物成分 */
     lists,
     /** 非 INCI 写法 → INCI 名的别名表（inci_aliases.csv），匹配时先查 */
     aliases,

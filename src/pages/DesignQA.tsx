@@ -40,6 +40,7 @@ export const QA_CASES: QaCase[] = [
   { id: 'long-name', title: '6 名称很长', productIds: ['CO-US-030'], answers: answers('conditioner', {}, { goals: ['smooth'] }) },
   { id: 'unverified', title: '7 含未核对成分', productIds: ['CO-US-032'], answers: answers('conditioner', {}, { goals: ['smooth'] }) },
   { id: 'routine', title: '8 洗护搭配', productIds: ['SH-US-001', 'CO-US-001'], answers: answers('set', { concerns: ['dandruff'] }, { goals: ['smooth'] }), routine: true },
+  { id: 'labeled-plants', title: '9 品牌标注无香但含植物精油（SH-US-084，洗护二合一）；无香优先', productIds: ['SH-US-084'], answers: answers('shampoo', { concerns: ['sensitive'] }, { fragrancePref: 'free_first' }) },
 ];
 
 interface FaceQaCase {

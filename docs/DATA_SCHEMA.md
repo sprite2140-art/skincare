@@ -65,7 +65,7 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 | zone | face / scalp / hair / body | scalp |
 | category | 品类编号（取值见下） | shampoo |
 | usage_type | 使用方式：rinse_off（冲洗型）/ leave_on（免洗型）。留空则用品类默认值；卸妆、去角质、面膜必须填写 | |
-| subtype | 细分类型，普通产品留空。co_wash = 清洁型护发素：代替洗发水使用，category 必须为 shampoo（清洁步骤），页面显示"Co-wash · 清洁型护发素"标签和单独的使用说明，不能当作洗后护发素。kids = 儿童 / 婴儿产品：照常入库，不出现在推荐结果里，覆盖表也不计入（2026-10-27）。面部产品误填的类型（如 chemical、hydrocolloid_patch、otc_acne_treatment）导入时清空，原值记入 formula_note（2026-10-27） | co_wash |
+| subtype | 细分类型，普通产品留空。co_wash = 清洁型护发素：代替洗发水使用，category 必须为 shampoo（清洁步骤），页面显示"洗护二合一（co-wash）"标签（2026-10-29 起，原为"Co-wash · 清洁型护发素"）和单独的使用说明，不能当作洗后护发素。kids = 儿童 / 婴儿产品：照常入库，不出现在推荐结果里，覆盖表也不计入（2026-10-27）。面部产品误填的类型（如 chemical、hydrocolloid_patch、otc_acne_treatment）导入时清空，原值记入 formula_note（2026-10-27） | co_wash |
 | region | US / JP / KR / CN | US |
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |
@@ -253,6 +253,16 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 加香判断规则 (c) 用的清单：inci_name、basis（列入依据，目前都是 cosing_perfuming_only = CosIng 只登记了香料功能）、cosing_ref、source_url、added_on。2026-10-17 由原规则"CosIng 功能只有香料类"在产品中识别出的 12 个成分转入，判断结果与原规则相同。新产品中出现 CosIng 只登记了香料功能、但不在清单上的成分时，`npm run validate-data` 会提示，由人工决定是否加入。
 
 2026-10-24 新增 review_status、reviewed_on、notes 三列：只核对"是否加香"，核对过的条目为 verified，这个成分在打分中按已核对的加香成分计。首批 5 个（Curcuma Longa Root Extract、Cocos Nucifera Water、Rosmarinus Officinalis Leaf Water、Lavandula Oil/Extract、Viola Odorata Leaf Extract）依据 CosIng 官方导出（2026-10-17）的登记功能：Curcuma 为 FRAGRANCE、PERFUMING，其余 4 个为 FRAGRANCE。
+
+## aromatic_botanicals.csv（芳香植物成分，2026-10-29）
+
+"品牌标注无香，但含植物精油"提示用的清单。来源：修订法规 (EU) 2023/1545 附件（`docs/sources/eu_2023_1545.pdf`）中列为香料致敏原的植物精油 / 提取物，逐条从 PDF 表格抄录。列：species（拉丁学名）、parts（条目限定的部位，分号分隔，空 = 不限）、forms（oil / extract / water / resin）、entry（附录 III 条目号）、glossary_names（原文"Common Ingredients Glossary"一栏的名称，只作对照）。
+
+匹配规则：成分名以学名开头（括号里的俗名去掉），最后一个词是 forms 之一，有部位限定时成分名里要有其中一个部位。例如条目 360 是"Lavandula angustifolia oil/extract"，所以 Lavandula Angustifolia Flower Extract 算；条目 366 只列玫瑰花油 / 提取物，Rosa Damascena Flower Water（花水）不算；条目 353 是柠檬皮油，Citrus Limon Fruit Extract 不算。
+
+用途（所有品类同一规则）：
+- 含芳香植物成分的产品和含精油的一样，不算"无香"，"无香优先"时排在"只含精油"一层；温和度不因此扣分。
+- 品牌标注无香（fragrance_free_claim = yes）、但成分表含精油或芳香植物成分时，卡片标签和"需要注意"里写"品牌标注无香，但含植物精油"（只有提取物时写"……但含芳香植物成分"），并列出成分，不显示"无香"。
 
 ## eu_allergen_checks.csv（欧盟香料致敏原逐条核对记录）
 

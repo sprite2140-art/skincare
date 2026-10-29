@@ -13,13 +13,14 @@ import allergensCsv from '../../data/eu_fragrance_allergens.csv?raw';
 import explanationsCsv from '../../data/ingredient_explanations.csv?raw';
 import chelatorsCsv from '../../data/chelators.csv?raw';
 import fragrancesCsv from '../../data/fragrance_ingredients.csv?raw';
+import aromaticsCsv from '../../data/aromatic_botanicals.csv?raw';
 import aliasesCsv from '../../data/inci_aliases.csv?raw';
 import formulaChecksCsv from '../../data/formula_version_checks.csv?raw';
 import faceClassesCsv from '../../data/face_active_classes.csv?raw';
 import faceConflictsCsv from '../../data/face_conflicts.csv?raw';
 // CosIng 全表很大，构建时只保留产品成分表中出现的成分（见 vite.config.ts）
 import cosingCsv from 'virtual:cosing-used';
-import { expandIngredients, parseAllergens, parseCosingTable, parseExplanations, parseInciAliases, parseIngredientList } from './cosing';
+import { expandIngredients, parseAllergens, parseAromaticBotanicals, parseCosingTable, parseExplanations, parseInciAliases, parseIngredientList } from './cosing';
 import { parseCities, parseExchangeRates, parseFormulaVersionChecks, parseIngredients, attachRetail, parseProducts, parsePurchaseLinks, parseReferenceWater, parseRetailRatings, parseWaterRecords } from './parse';
 import { buildIngredientIndex } from './ingredientIndex';
 import { buildActiveClassIndex, parseActiveClasses, parseFaceConflicts } from './faceActives';
@@ -34,6 +35,7 @@ export const exchangeRates = parseExchangeRates(exchangeRatesCsv);
 export const ingredientIndex = buildIngredientIndex(expandIngredients(ingredients, parseCosingTable(cosingCsv), parseAllergens(allergensCsv), parseExplanations(explanationsCsv), {
   chelators: parseIngredientList(chelatorsCsv),
   fragrances: parseIngredientList(fragrancesCsv),
+  aromatics: parseAromaticBotanicals(aromaticsCsv),
 }), parseInciAliases(aliasesCsv));
 /** 面部有效成分类别清单（本项目维护） */
 export const faceActiveClasses = buildActiveClassIndex(parseActiveClasses(faceClassesCsv));

@@ -35,8 +35,8 @@ describe('data/ 真实数据', () => {
   const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
   it('CSV 能正确解析，名称已统一', () => {
-    // 洗发水 90 款（美国 80、日韩中 10），护发素 57 款（2026-10-27 补缺各 20 款）
-    expect(real.products.filter((p) => p.zone !== 'face')).toHaveLength(147);
+    // 洗发水 94 款（美国 84、日韩中 10），护发素 57 款（2026-10-27 补缺各 20 款，2026-10-29 成人补位 SH-US-081—084）
+    expect(real.products.filter((p) => p.zone !== 'face')).toHaveLength(151);
     expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(57);
     // 保留原有产品 ID
     for (const id of ['SH-US-001', 'SH-US-008', 'SH-JP-001', 'SH-KR-003', 'SH-CN-002']) expect(byId(id)).toBeDefined();
@@ -74,7 +74,7 @@ describe('data/ 真实数据', () => {
   });
 
   it('没有价格的产品不参与三分位计算', () => {
-    expect(budgetCaps.shampoo!.sampleSize).toBe(87);
+    expect(budgetCaps.shampoo!.sampleSize).toBe(91);
   });
 
   it('关闭测试模式时，draft 有效成分不参与需求匹配（只剩资料分类的产品定位）；基础成分无需核对即可使用', () => {
@@ -162,13 +162,13 @@ describe('按市场筛选', () => {
     expect(marketForCity(null)).toBe('US');
     const us = filterByMarket(shampoos, 'US', false);
     expect(ids(us.shown).every((id) => id.startsWith('SH-US'))).toBe(true);
-    expect(us.shown).toHaveLength(80);
+    expect(us.shown).toHaveLength(84);
     expect(us.hiddenCount).toBe(10);
     expect(filterByMarket(shampoos, 'JP', false).shown).toHaveLength(4);
   });
 
   it('打开"显示其他地区版本"后显示全部；没有市场时不筛选', () => {
-    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(90);
+    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(94);
     expect(filterByMarket(shampoos, null, false)).toEqual({ shown: shampoos, hiddenCount: 0 });
   });
 
