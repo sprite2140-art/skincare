@@ -42,7 +42,8 @@ describe('data/ 真实数据', () => {
     for (const id of ['SH-US-001', 'SH-US-008', 'SH-JP-001', 'SH-KR-003', 'SH-CN-002']) expect(byId(id)).toBeDefined();
     const us1 = byId('SH-US-001');
     expect(us1.inciList[0]).toBe('Pyrithione Zinc');
-    expect(us1.keyActives).toEqual(['Pyrithione Zinc 1%', 'Ceramides', 'Hyaluronic Acid', 'Niacinamide']);
+    // 2026-10-29 起 key_actives 用成分表里的 INCI 名（原写 Ceramides、Hyaluronic Acid）
+    expect(us1.keyActives).toEqual(['Pyrithione Zinc 1%', 'Ceramide NP', 'Ceramide AP', 'Ceramide EOP', 'Sodium Hyaluronate', 'Niacinamide']);
     expect(us1.claimedBenefits).toEqual(['dandruff', 'sensitive_scalp']);
     expect(us1.awards[0]).toMatchObject({ source: 'Cosmopolitan Holy Grail Beauty Awards', year: '2025' });
     expect(us1.sizeMl).toBe(355);

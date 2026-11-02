@@ -177,6 +177,12 @@
 
 ## 记录
 
+### 2026-10-29（Claude Code：key_actives 俗名改为 INCI 名，作者选 A）
+- 75 款产品的 101 项俗名改为成分表里的 INCI 写法：对应唯一的直接改（如 Vitamin E → Tocopherol、Hyaluronic Acid → Sodium Hyaluronate、Coconut Oil → Cocos Nucifera Oil）；对应多个的改成成分表里实际出现的几个（8 款的 Ceramides → Ceramide NP、AP、EOP；SE-US-026、033 的 Hyaluronic Acid → 两三种透明质酸盐）。原写法记在 formula_note。
+- SE-US-026 的"Hyaluronic Acid 1.7%"对应两种成分，1.7% 是合计，不能分到单个成分：key_actives 只写成分名，浓度说明放在 formula_note。
+- SH-US-060 的 Castor Oil 在成分表里只有 PEG-40 Castor Oil（衍生物，不是同一种成分），不猜，移到 formula_note。痘痘贴的材料名 Hydrocolloid 不动。
+- 356 款产品的需求匹配、适合等级、总分改动前后完全相同。
+
 ### 2026-10-29（Claude Code：key_actives 清理；MO-US-034 Linaloo → Linalool）
 - 全库检查 key_actives：对应不上成分表的品牌技术 / 配方名称（155 款产品、316 项）移到 formula_note，注明原文；其中 58 款全部移走，填 Not separately disclosed（有效成分按非主打计，与清理前一样）。痘痘贴 ST-US-002 的材料名 Hydrocolloid 不动。356 款产品的需求匹配、适合等级和总分清理前后完全相同。
 - 能对应到成分表的俗名（67 项，53 款，如 Ceramides、Vitamin E、Coconut Oil）暂时保留：它们参与主打成分匹配，改成 INCI 写法或移走会改变打分，等作者决定。
