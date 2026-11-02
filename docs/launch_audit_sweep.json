@@ -12554,6 +12554,138 @@
   {
    "zone": "hair",
    "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "none",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "none",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "pregnant",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "pregnant",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "trying",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "trying",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "breastfeeding",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "breastfeeding",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "rx",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "rx",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "isotretinoin",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "shine",
+    "status": "isotretinoin",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
    "count": 1,
    "answers": {
     "concerns": [],
@@ -13075,6 +13207,138 @@
    "answers": {
     "concerns": [],
     "goal": "tone_orange",
+    "status": "isotretinoin",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
+    "status": "none",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
+    "status": "none",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
+    "status": "pregnant",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
+    "status": "pregnant",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
+    "status": "trying",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
+    "status": "trying",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
+    "status": "breastfeeding",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
+    "status": "breastfeeding",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
+    "status": "rx",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
+    "status": "rx",
+    "budget": "q2"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
+    "status": "isotretinoin",
+    "budget": "q1"
+   }
+  },
+  {
+   "zone": "hair",
+   "step": "shampoo",
+   "count": 2,
+   "answers": {
+    "concerns": [],
+    "goal": "color_care",
     "status": "isotretinoin",
     "budget": "q2"
    }
@@ -20533,474 +20797,6 @@
   },
   {
    "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "none",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "pregnant",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "trying",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "breastfeeding",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "rx",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "smooth",
-    "status": "isotretinoin",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "none",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "pregnant",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "trying",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "breastfeeding",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "rx",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "moisture",
-    "status": "isotretinoin",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "none",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "pregnant",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "trying",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "breastfeeding",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "rx",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "less_frizz",
-    "status": "isotretinoin",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
    "step": "conditioner",
    "count": 0,
    "answers": {
@@ -21397,318 +21193,6 @@
     "concerns": [
      "dry_tight"
     ],
-    "goal": "shine",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "shine",
-    "status": "none",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "shine",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "shine",
-    "status": "pregnant",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "shine",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "shine",
-    "status": "trying",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "shine",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "shine",
-    "status": "breastfeeding",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "shine",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "shine",
-    "status": "rx",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "shine",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "shine",
-    "status": "isotretinoin",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "none",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "pregnant",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "trying",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "breastfeeding",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "rx",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "curl",
-    "status": "isotretinoin",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
     "goal": "scent",
     "status": "none",
     "budget": "q1"
@@ -22321,318 +21805,6 @@
      "dry_tight"
     ],
     "goal": "tone_orange",
-    "status": "isotretinoin",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "none",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "pregnant",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "trying",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "breastfeeding",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "rx",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "repair",
-    "status": "isotretinoin",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
-    "status": "none",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
-    "status": "pregnant",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
-    "status": "trying",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
-    "status": "breastfeeding",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
-    "status": "rx",
-    "budget": "q2"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight"
-    ],
-    "goal": "color_care",
     "status": "isotretinoin",
     "budget": "q2"
    }
@@ -24067,258 +23239,6 @@
   },
   {
    "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
    "step": "conditioner",
    "count": 0,
    "answers": {
@@ -24733,174 +23653,6 @@
      "sensitive"
     ],
     "goal": "volume",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "curl",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "curl",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "curl",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "curl",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "curl",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "curl",
     "status": "isotretinoin",
     "budget": "q1"
    }
@@ -25363,174 +24115,6 @@
      "sensitive"
     ],
     "goal": "tone_orange",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "color_care",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "color_care",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "color_care",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "color_care",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "color_care",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 2,
-   "answers": {
-    "concerns": [
-     "dry_tight",
-     "sensitive"
-    ],
-    "goal": "color_care",
     "status": "isotretinoin",
     "budget": "q1"
    }
@@ -28879,240 +27463,6 @@
   },
   {
    "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "smooth",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "moisture",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "less_frizz",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
    "step": "conditioner",
    "count": 0,
    "answers": {
@@ -29497,162 +27847,6 @@
      "sensitive"
     ],
     "goal": "volume",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "shine",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "curl",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "curl",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "curl",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "curl",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "curl",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "curl",
     "status": "isotretinoin",
     "budget": "q1"
    }
@@ -30121,162 +28315,6 @@
      "sensitive"
     ],
     "goal": "tone_orange",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "repair",
-    "status": "isotretinoin",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "color_care",
-    "status": "none",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "color_care",
-    "status": "pregnant",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "color_care",
-    "status": "trying",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "color_care",
-    "status": "breastfeeding",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "color_care",
-    "status": "rx",
-    "budget": "q1"
-   }
-  },
-  {
-   "zone": "hair",
-   "step": "shampoo",
-   "count": 1,
-   "answers": {
-    "concerns": [
-     "sensitive"
-    ],
-    "goal": "color_care",
     "status": "isotretinoin",
     "budget": "q1"
    }
