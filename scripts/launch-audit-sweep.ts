@@ -84,7 +84,8 @@ for (const concerns of combos(SCALP, 2)) {
       hair: { ...EMPTY_HAIR, goals, conditions: goal && COLOR_GOALS.includes(goal) ? ['colored'] : [] },
     };
     for (const cat of ['shampoo', 'conditioner'] as const) {
-      const profile = toScoringProfile(answers, cat, { cities: d.cities, exchangeRates: d.exchangeRates });
+      // 与结果页单品列表相同：按单买打分（score(false)），期望效果也计入洗发水的需求
+      const profile = toScoringProfile(answers, cat, { cities: d.cities, exchangeRates: d.exchangeRates, routine: false });
       const ranked = rankProducts(us, cat, profile, data);
       const n = ranked.filter((r) => !r.excluded && !r.lowMatch && r.score !== null).length;
       hairRuns++;

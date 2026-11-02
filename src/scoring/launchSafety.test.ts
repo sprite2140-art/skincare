@@ -41,7 +41,7 @@ const scalp = (concerns: ScalpAnswers['concerns']): ScalpAnswers => ({ oilTiming
 for (const status of STATUSES) for (const concerns of [[], ['dandruff'], ['sensitive'], ['hair_loss'], ['oily']] as ScalpAnswers['concerns'][]) {
   const answers: Answers = { base: { ...base, scope: 'set', specialStatus: status, specialStatuses: statusList(status) }, scalp: scalp(concerns), hair: EMPTY_HAIR };
   for (const cat of ['shampoo', 'conditioner'] as const) {
-    const ranked = rankProducts(us, cat, toScoringProfile(answers, cat, { cities: real.cities, exchangeRates: real.exchangeRates }), data);
+    const ranked = rankProducts(us, cat, toScoringProfile(answers, cat, { cities: real.cities, exchangeRates: real.exchangeRates, routine: false }), data);
     for (const r of ranked.filter((x) => !x.excluded && !x.lowMatch && x.score !== null)) hairPicks.push({ status, step: cat, product: r.product, primary: false });
   }
 }
