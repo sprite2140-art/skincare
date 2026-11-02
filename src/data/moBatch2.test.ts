@@ -22,7 +22,7 @@ describe('保湿第 2 批、SU-US-048 替换（2026-10-29）', () => {
     expect(p.face).toMatchObject({ spf: 50, broadSpectrum: 'yes' });
     expect(p.inclusionBasisType).toBe('retailer_bestseller');
     expect(p.keyActives).not.toContain('Cerasun Technology');
-    expect(p.keyActives).toContain('Hyaluronic Acid');
+    expect(p.keyActives).toContain('Sodium Hyaluronate');
     expect(p.formulaNote).toContain('Cerasun Technology');
     // 原有购买链接和评分整组替换为新文件里的 2 条、1 条
     expect(p.purchaseLinks).toHaveLength(2);
