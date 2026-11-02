@@ -16,7 +16,9 @@
     "import-cosing": "tsx scripts/import-cosing.ts",
     "coverage": "tsx scripts/coverage.ts",
     "verify-list-ingredients": "tsx scripts/verify-list-ingredients.ts",
-    "test-mode-impact": "tsx scripts/test-mode-impact.ts"
+    "test-mode-impact": "tsx scripts/test-mode-impact.ts",
+    "launch-audit-sweep": "tsx scripts/launch-audit-sweep.ts",
+    "launch-audit-links": "tsx scripts/launch-audit-links.ts"
   },
   "dependencies": {
     "papaparse": "^5.4.1",
