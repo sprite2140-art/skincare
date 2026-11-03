@@ -1,0 +1,16 @@
+{
+  "README.md": "a26cebe45ee859ae131eab096a574e7cc622c90eccc85713ceb84f65fbe5d1ab",
+  "artifact_verification.json": "aa85b3288d44388bd9aa952f0461fbbe2db9c3a445da93b7fed0ec37a024480b",
+  "cl_budget_supplement_products.csv": "3da0620a8f50434c705549c919f74f6c8c1fc504aef53a2fb4d7491e415e6c4a",
+  "cl_budget_supplement_purchase_links.csv": "c63f495ecfa45735f250b31bf621b567d94c4e0ef8031b1b29a6ab5e2b901584",
+  "cl_budget_supplement_retail_ratings.csv": "22d0d9b1c1cde126b46c87182a01433eea503125ebe656d6c21e236ce230c434",
+  "ex_budget_supplement_products.csv": "58dddf50339c972a5b3e03d044974db70572612bd76283f58f14925cadddb16b",
+  "ex_budget_supplement_purchase_links.csv": "5e00296c10d1b1029a2eeb5571988142bcedda7594d68f4b12e109aeccb6a665",
+  "ex_budget_supplement_retail_ratings.csv": "f07fc36ffd77f813d65d8461ed27e6d29036f5bc1ae05244bb0c02f5f26501d8",
+  "mo_budget_supplement_products.csv": "22982e5d246b144fd4a208498e5cb47afc577e3923574a134912d72667322aa5",
+  "mo_budget_supplement_purchase_links.csv": "1dd038128179bfde1e981f0a83b43c60b749b4f5bc50c9ae04fbaff5c92372f6",
+  "mo_budget_supplement_retail_ratings.csv": "a1c2c995e1ea6e3beefb7a3b11c40ce140c813f092eec5e6352797040428e282",
+  "self_check.md": "f3cc3b12e8608ea52690f500711b5215d28d69f0a31c9069316c47569855caa5",
+  "source_audit.json": "2c2e3e2d22f5e2f9fec6c71b1133bc71696857831df95ba87ba7d85e66f48d17",
+  "validation_report.json": "2c94573715ef1860865e0eec7cd0134ad196588bfd0394bf1c2d4c2aeecc1d27"
+}

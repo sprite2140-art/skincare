@@ -1,0 +1,56 @@
+[
+  {
+    "name": "ex_budget_supplement_products.csv",
+    "rows": 6,
+    "columns": 50,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "ex_budget_supplement_purchase_links.csv",
+    "rows": 12,
+    "columns": 6,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "ex_budget_supplement_retail_ratings.csv",
+    "rows": 7,
+    "columns": 9,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "cl_budget_supplement_products.csv",
+    "rows": 6,
+    "columns": 50,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "cl_budget_supplement_purchase_links.csv",
+    "rows": 12,
+    "columns": 6,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "cl_budget_supplement_retail_ratings.csv",
+    "rows": 7,
+    "columns": 9,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "mo_budget_supplement_products.csv",
+    "rows": 6,
+    "columns": 50,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "mo_budget_supplement_purchase_links.csv",
+    "rows": 12,
+    "columns": 6,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "mo_budget_supplement_retail_ratings.csv",
+    "rows": 7,
+    "columns": 9,
+    "cellRoundTrip": true
+  }
+]

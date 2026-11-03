@@ -1,0 +1,209 @@
+{
+  "checked_on": "2026-11-02",
+  "status": "passed_with_disclosed_source_limitations",
+  "products": 18,
+  "product_schema_columns": 50,
+  "CSV_checks": [
+    {
+      "file": "ex_budget_supplement_products.csv",
+      "rows": 6,
+      "columns": 50,
+      "roundtrip": "pass"
+    },
+    {
+      "file": "ex_budget_supplement_purchase_links.csv",
+      "rows": 12,
+      "columns": 6,
+      "roundtrip": "pass"
+    },
+    {
+      "file": "ex_budget_supplement_retail_ratings.csv",
+      "rows": 7,
+      "columns": 9,
+      "roundtrip": "pass"
+    },
+    {
+      "file": "cl_budget_supplement_products.csv",
+      "rows": 6,
+      "columns": 50,
+      "roundtrip": "pass"
+    },
+    {
+      "file": "cl_budget_supplement_purchase_links.csv",
+      "rows": 12,
+      "columns": 6,
+      "roundtrip": "pass"
+    },
+    {
+      "file": "cl_budget_supplement_retail_ratings.csv",
+      "rows": 7,
+      "columns": 9,
+      "roundtrip": "pass"
+    },
+    {
+      "file": "mo_budget_supplement_products.csv",
+      "rows": 6,
+      "columns": 50,
+      "roundtrip": "pass"
+    },
+    {
+      "file": "mo_budget_supplement_purchase_links.csv",
+      "rows": 12,
+      "columns": 6,
+      "roundtrip": "pass"
+    },
+    {
+      "file": "mo_budget_supplement_retail_ratings.csv",
+      "rows": 7,
+      "columns": 9,
+      "roundtrip": "pass"
+    }
+  ],
+  "coverage": {
+    "EX": {
+      "count": 6,
+      "price_cap": 13,
+      "highest_reference_price": 10.99,
+      "skin_types": {
+        "oily": [
+          "EX-US-024",
+          "EX-US-026"
+        ],
+        "dry": [
+          "EX-US-021"
+        ],
+        "combination": [
+          "EX-US-024"
+        ],
+        "sensitive": [
+          "EX-US-021",
+          "EX-US-024"
+        ]
+      },
+      "concerns": {
+        "acne": [
+          "EX-US-021",
+          "EX-US-022",
+          "EX-US-023"
+        ],
+        "redness": [
+          "EX-US-021"
+        ],
+        "dryness": [
+          "EX-US-024",
+          "EX-US-025"
+        ]
+      },
+      "explicit_fragrance_free": [
+        "EX-US-023"
+      ]
+    },
+    "CL": {
+      "count": 6,
+      "price_cap": 15,
+      "highest_reference_price": 12.59,
+      "skin_types": {
+        "oily": [
+          "CL-US-041",
+          "CL-US-046"
+        ],
+        "dry": [
+          "CL-US-042",
+          "CL-US-046"
+        ],
+        "combination": [
+          "CL-US-041",
+          "CL-US-046"
+        ],
+        "sensitive": [
+          "CL-US-041",
+          "CL-US-042",
+          "CL-US-043",
+          "CL-US-044",
+          "CL-US-046"
+        ]
+      },
+      "concerns": {
+        "acne": [
+          "CL-US-045"
+        ],
+        "redness": [
+          "CL-US-045"
+        ],
+        "dryness": [
+          "CL-US-042",
+          "CL-US-043",
+          "CL-US-044",
+          "CL-US-046"
+        ]
+      },
+      "explicit_fragrance_free": [
+        "CL-US-041",
+        "CL-US-042",
+        "CL-US-043",
+        "CL-US-044",
+        "CL-US-045"
+      ]
+    },
+    "MO": {
+      "count": 6,
+      "price_cap": 14,
+      "highest_reference_price": 9.97,
+      "skin_types": {
+        "oily": [
+          "MO-US-044"
+        ],
+        "dry": [
+          "MO-US-041",
+          "MO-US-042",
+          "MO-US-045",
+          "MO-US-046"
+        ],
+        "combination": [
+          "MO-US-044"
+        ],
+        "sensitive": [
+          "MO-US-041",
+          "MO-US-042",
+          "MO-US-046"
+        ]
+      },
+      "concerns": {
+        "acne": [
+          "MO-US-044"
+        ],
+        "redness": [
+          "MO-US-042"
+        ],
+        "dryness": [
+          "MO-US-041",
+          "MO-US-042",
+          "MO-US-043",
+          "MO-US-044",
+          "MO-US-045",
+          "MO-US-046"
+        ]
+      },
+      "explicit_fragrance_free": [
+        "MO-US-041",
+        "MO-US-042",
+        "MO-US-044",
+        "MO-US-046"
+      ]
+    }
+  },
+  "acid_leave_on": [
+    "EX-US-021",
+    "EX-US-022",
+    "EX-US-023"
+  ],
+  "deduplication": "18 names and IDs checked against accepted 20 EX, 40 CL and 40 MO baselines; no exact normalized brand/name duplicate; resulting per-category brand count <=4",
+  "limitations": [
+    "Manufacturer spelling anomalies retained and marked in formula_note, not corrected by inference",
+    "MO-US-042, MO-US-044 and MO-US-045 have disclosed manufacturer/retailer formula differences",
+    "MO-US-044 regular price is a Walgreens category product card; that PDP returned 403",
+    "MO-US-041 retailer shows rounded 38K; exact rating_count blank",
+    "Some qualifying rating pages pool product sizes; ratings are not asserted to be reference-size-only",
+    "Amazon pages used as direct rating evidence only; official buy-box seller not verified"
+  ]
+}
