@@ -2,6 +2,7 @@
 
 import Papa from 'papaparse';
 import { cleanInciName } from './ingredientIndex';
+import { hasUsablePurchaseLink } from './retail';
 import { RETAIL_PLATFORMS, REVIEW_COUNT_MIN, REVIEW_COUNT_PLATFORMS } from './types';
 import type {
   PregnancyNote, UsRegulatoryStatus, ActiveConcentration, FaceAttributes, SkinTypeClaim, Texture, UseTime, WaterResistance, YesNoUnknown,
@@ -303,7 +304,8 @@ export function attachRetail(products: Product[], ratings: RetailRating[], links
   }));
 }
 
-function withInclusion(p: Product): Product {
+function withInclusion(product: Product): Product {
+  const p = hasUsablePurchaseLink(product) ? product : { ...product, purchasePending: true };
   // 没有成分表：等数据收集方补上，和"入库依据待补"一样不出现在推荐里
   if (p.inciList.length === 0) return { ...p, inclusionPending: true };
   if (p.inclusionBasisType !== null) return p;

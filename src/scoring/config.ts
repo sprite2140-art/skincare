@@ -82,6 +82,11 @@ export const MISSING_EVIDENCE_LEVEL = 'C' as const;
  * - 只买洗发水时仍参与洗发水匹配，权重为 SHAMPOO_HAIR_EFFECT_WEIGHT。
  */
 export const SHAMPOO_OWN_HAIR_TARGETS = ['clarifying', 'flat_hair', 'tone_yellow', 'tone_orange', 'buildup'] as const;
+/**
+ * 只由洗发水实现的期望效果：护发素没有以此为定位的产品（2026-11-03 上线审计：选"清爽洁净"时护发素列表为空）。
+ * 护发素等其他品类不按这些需求推荐，结果页说明"主要由洗发水实现"。
+ */
+export const SHAMPOO_ONLY_HAIR_TARGETS = ['clarifying', 'buildup'] as const;
 export const SHAMPOO_HAIR_EFFECT_WEIGHT = 0.5;
 
 /** 洗发水侧重头皮与清洁：头皮相关困扰的权重；发丝状态和期望效果权重为 1 */

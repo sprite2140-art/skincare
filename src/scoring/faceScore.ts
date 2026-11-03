@@ -7,7 +7,7 @@
 // - 同等级内排序：敏感肌的香味层级 → 防水（户外久或出汗时）→ 品牌标注不致痘（选了痘痘或出油时）→ 品牌标注肤质。
 
 import type { FaceTarget, Product } from '../data/types';
-import { usageTypeOf } from '../data/types';
+import { isRecommendable, usageTypeOf } from '../data/types';
 import type { IngredientIndex } from '../data/ingredientIndex';
 import {
   IRRITANT_ACTIVE_CLASSES, isUntintedMineral, productScopedIndex, productActiveClasses, type ActiveClass, type ActiveClassIndex,
@@ -336,7 +336,7 @@ export function rankFaceStep(
 ): { ranked: FaceProductScore[]; hidden: number } {
   const scored = products
     // 入库依据待补的产品不出现在推荐结果里
-    .filter((p) => p.category === ctx.step.category && !p.inclusionPending)
+    .filter((p) => p.category === ctx.step.category && isRecommendable(p))
     .map((p) => scoreFaceProduct(p, profile, data, ctx));
   const hide = opts.hideUntintedMineral && ctx.step.id === 'sunscreen';
   const shown = hide ? scored.filter((s) => !s.faceExtras.untintedMineral) : scored;

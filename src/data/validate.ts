@@ -168,6 +168,7 @@ export function validateData(
     oneOf(F_PRD, key, 'region', p.region, REGIONS);
     if (p.inclusionBasisType !== null) oneOf(F_PRD, key, 'inclusion_basis_type', p.inclusionBasisType, INCLUSION_BASIS_TYPES);
     if (p.subtype === 'kids') warn(F_PRD, key, '儿童 / 婴儿产品：照常入库，不出现在推荐结果里');
+    if (p.purchasePending) warn(F_PRD, key, '没有可用的购买链接（购买链接表和 purchase_url 都没有，或只有与在售版本不一致的品牌官网）：不出现在推荐结果里，待补链接');
     if (p.inclusionPending && p.inciList.length > 0) warn(F_PRD, key, '入库依据待补：inclusion_basis 为 none（或只写了其他平台的评价数），美国主要零售商评价数也不足 1,000 条；不出现在推荐结果里');
     oneOf(F_PRD, key, 'available_in_cn', p.availableInCn, CN_AVAILABILITY);
     oneOf(F_PRD, key, 'transparency', p.transparency, TRANSPARENCY);

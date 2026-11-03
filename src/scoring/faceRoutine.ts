@@ -56,7 +56,7 @@ export interface FaceRoutine {
   overBudget: boolean;
 }
 
-const isEligible = (r: FaceProductScore) => !r.excluded && r.score !== null && !r.lowMatch && r.faceExtras.sunscreen !== 'incomplete';
+export const isEligible = (r: FaceProductScore) => !r.excluded && r.score !== null && !r.lowMatch && r.faceExtras.sunscreen !== 'incomplete';
 
 export function buildFaceRoutine(input: FaceRoutineInput): FaceRoutine {
   const steps = buildFaceSteps(input.face, { statuses: input.statuses, basicOnly: input.basicOnly });

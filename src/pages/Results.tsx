@@ -5,14 +5,16 @@ import ProductCard from './ProductCard';
 import { Link } from 'react-router-dom';
 import { budgetCaps, cities, exchangeRates, ingredientIndex, products } from '../data/load';
 import { LIST_CATEGORIES, productsForList, type ListCategory } from '../scoring/listProducts';
-import type { Category } from '../data/types';
+import { isRecommendable, type Category } from '../data/types';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import {
-  EMPTY_HAIR, adviseCare, cityKey, cityName, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, toScoringProfile, type Answers, type ScalpAnswers,
+  EMPTY_HAIR, adviseCare, cityKey, cityName, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, shampooOnlyGoals, toScoringProfile, type Answers, type ScalpAnswers,
 } from '../profile/questionnaire';
 import { newProfile } from '../profile/storage';
-import { formatMoney } from '../scoring/budget';
+import { formatMoney, nextBudgetChoice } from '../scoring/budget';
+import { FEW_OPTIONS } from '../scoring/shortfall';
+import { EmptyNotice, FewOptions, ShortfallReasons } from './Shortfall';
 import { TEST_MODE_DRAFT_SCORING } from '../scoring/config';
 import { filterByMarket, marketForCity } from '../scoring/market';
 import { buildRoutine, routineTotal } from '../scoring/routine';
@@ -23,6 +25,9 @@ import {
 const EMPTY_SCALP: ScalpAnswers = { oilTiming: null, concerns: [], washFrequency: null };
 type View = ListCategory | 'set';
 type SortBy = 'fit' | 'price';
+
+/** 进入推荐主列表：不被排除、能打分、不是"不太匹配" */
+const isListed = (r: ProductScore) => !r.excluded && !r.lowMatch && r.score !== null;
 
 function usdLabel(usd: number) {
   return formatMoney(usd, 'USD', false);
@@ -44,6 +49,8 @@ export default function Results() {
   const [showOthers, setShowOthers] = useState(false);
   /** 搭配中用户替换或移除的单品：productId，null 表示已移除 */
   const [picks, setPicks] = useState<Partial<Record<Category, string | null>>>({});
+  /** 打开了"看看稍高预算的选择"的品类 */
+  const [nextTierOpen, setNextTierOpen] = useState<Partial<Record<ListCategory, boolean>>>({});
 
   const city = cities.find((c) => cityKey(c) === base.cityKey) ?? null;
   const market = marketForCity(city);
@@ -55,7 +62,8 @@ export default function Results() {
     const out = {} as Record<ListCategory, { ranked: ProductScore[]; total: number; hidden: number; profile: ScoringProfile }>;
     for (const cat of LIST_CATEGORIES) {
       const all = productsForList(products, cat);
-      const { shown, hiddenCount } = filterByMarket(all, market, showOthers);
+      // "显示其他地区版本"的款数只算能进入推荐的产品（缺购买链接、入库依据待补的不算）
+      const { shown, hiddenCount } = filterByMarket(all.filter(isRecommendable), market, showOthers);
       const scoring = toScoringProfile(answers, cat, { cities, exchangeRates, routine: routineMode });
       const ranked = rankProducts(shown, cat, scoring, { index: ingredientIndex, exchangeRates, budgetCaps, allowDraft: TEST_MODE_DRAFT_SCORING });
       out[cat] = { ranked, total: all.length, hidden: hiddenCount, profile: scoring };
@@ -64,6 +72,19 @@ export default function Results() {
   };
   // answers 来自 profile，profile 变化时重新计算
   const data = useMemo(() => score(false), [profile, market, showOthers]);
+  /** 高一档预算的说明和那一档里多出来的可推荐产品（只在用户点了按钮后计算，不改变主列表） */
+  const nextTier = (cat: ListCategory) => {
+    const d = data[cat];
+    const next = nextBudgetChoice(d.profile.budget, budgetCaps[cat], d.profile.customBudgetUsd ?? null);
+    if (next === null) return null;
+    const caps = budgetCaps[cat];
+    const label = next === 'none' || !caps ? t('few.noLimit') : t('few.within', { cap: usdLabel(caps[next as 'q1' | 'q2' | 'q3']) });
+    if (!nextTierOpen[cat]) return { label, extra: [] as ProductScore[] };
+    const { shown } = filterByMarket(productsForList(products, cat).filter(isRecommendable), market, showOthers);
+    const current = new Set(d.ranked.filter(isListed).map((r) => r.product.productId));
+    const ranked = rankProducts(shown, cat, { ...d.profile, budget: next, customBudgetUsd: null }, { index: ingredientIndex, exchangeRates, budgetCaps, allowDraft: TEST_MODE_DRAFT_SCORING });
+    return { label, extra: ranked.filter((r) => isListed(r) && !current.has(r.product.productId)) };
+  };
   const setData = useMemo(() => score(true), [profile, market, showOthers]);
 
   const setCap = base.budgetMode === 'set' ? moneyToUsd(base.setBudget, exchangeRates) : null;
@@ -90,7 +111,13 @@ export default function Results() {
         </div>
       );
     }
-    const shown = sorted(d.ranked.filter((r) => !r.excluded && !r.lowMatch && r.score !== null));
+    const shown = sorted(d.ranked.filter(isListed));
+    const shampooOnly = shampooOnlyGoals(answers, cat);
+    // 推荐少于 3 款：提示，可以看看高一档预算（不自动放宽）
+    const tier = shown.length < FEW_OPTIONS ? nextTier(cat) : null;
+    const few = tier && (
+      <FewOptions empty={shown.length === 0} nextCap={tier.label} open={!!nextTierOpen[cat]} onToggle={() => setNextTierOpen({ ...nextTierOpen, [cat]: !nextTierOpen[cat] })} />
+    );
     // 选了需求但需求匹配为 0 的产品：不进入推荐列表，放在"不太匹配"
     const lowMatch = sorted(d.ranked.filter((r) => !r.excluded && r.lowMatch && r.score !== null));
     // 没有可用成分数据、无法评分的产品单独列出
@@ -99,14 +126,22 @@ export default function Results() {
     return (
       <>
         <p className="small muted" style={{ marginTop: 4 }}>{t('results.count', { n: d.ranked.length, ok: shown.length })}</p>
-        {shown.length === 0 && (
-          <div className="notice" role="status">
-            <strong>{t('results.noMatch')}</strong>
-            <p>{t('results.noMatchBody')}</p>
-            <Link to="/quiz">{t('results.editQuiz')}</Link>
-          </div>
+        {shampooOnly.length > 0 && (
+          <p className="small muted">
+            {t(d.profile.concerns.length === 0 ? 'results.goalShampooOnlyAll' : 'results.goalShampooOnly', { goals: shampooOnly.map((n) => tx(n.label)).join(lang === 'zh' ? '、' : ', ') })}
+          </p>
         )}
+        {shown.length === 0 ? (
+          <EmptyNotice ranked={d.ranked} quizPath="/quiz">{few}</EmptyNotice>
+        ) : shown.length < FEW_OPTIONS && few}
         {shown.map((r) => <ProductCard key={r.product.productId} r={r} market={market} profile={d.profile} scentGoal={scentGoal} />)}
+        {tier && nextTierOpen[cat] && tier.extra.length === 0 && <p className="small muted">{t('few.none', { cap: tier.label })}</p>}
+        {tier && tier.extra.length > 0 && (
+          <>
+            <p className="label" style={{ marginTop: 16 }}>{t('few.heading', { cap: tier.label })}</p>
+            {tier.extra.map((r) => <ProductCard key={r.product.productId} r={r} market={market} profile={d.profile} scentGoal={scentGoal} overBudget />)}
+          </>
+        )}
         {lowMatch.length > 0 && (
           <details className="excluded-list">
             <summary>{t('results.lowMatch', { n: lowMatch.length })}</summary>
@@ -164,7 +199,9 @@ export default function Results() {
               )}
             </div>
             {slot.status === 'no_data' && <p className="small muted">{t(`empty.${slot.category}` as Key)}</p>}
-            {slot.status === 'no_match' && !removed && <p className="small muted">{t('set.slotNoMatch')}</p>}
+            {slot.status === 'no_match' && !removed && (
+              <div className="small muted">{t('set.slotNoMatch')}<ShortfallReasons ranked={setData[slot.category as ListCategory].ranked} /></div>
+            )}
             {removed && <p className="small muted">{t('set.removed')}</p>}
             {item && !removed && (
               <>
@@ -214,7 +251,7 @@ export default function Results() {
         <h1 className="h1" style={{ marginTop: 8 }}>{t(`results.title.${view}` as Key)}</h1>
         <div className="chips">
           <span className="tag">{city ? cityName(city, lang) : t('results.noCity')}</span>
-          <span className="tag">{t('results.marketTag', { market })}</span>
+          <span className="tag">{t('results.marketTag', { market: t(`region.${market}` as Key) })}</span>
           {profile && <span className="tag">{profile.name}</span>}
           <Link className="tag" to="/quiz">{t('results.editQuiz')}</Link>
         </div>
@@ -248,7 +285,8 @@ export default function Results() {
         )}
         {(view === 'set'
           ? setData.shampoo.profile.concerns.length === 0 && setData.conditioner.profile.concerns.length === 0
-          : data[view].profile.concerns.length === 0) && (
+          // 只选了由洗发水实现的目标时，护发素列表另有说明，不说"没有选择具体需求"
+          : data[view].profile.concerns.length === 0 && shampooOnlyGoals(answers, view).length === 0) && (
           <p className="small muted">{t('results.noNeeds')}</p>
         )}
         {!profile?.scalp && <p className="small muted">{t('results.noProfile')}</p>}
@@ -277,7 +315,7 @@ export default function Results() {
           <span>
             {t('results.showOthers', { n: hiddenCount })}
             <br />
-            <span className="muted">{t('results.marketHint', { market })}</span>
+            <span className="muted">{t('results.marketHint', { market: t(`region.${market}` as Key) })}</span>
           </span>
           <label className="switch">
             <input type="checkbox" checked={showOthers} onChange={(e) => setShowOthers(e.target.checked)} aria-label={t('results.showOthers', { n: hiddenCount })} />

@@ -8,7 +8,7 @@
 //   所以格子按满足数统计、标红；只有部分依据（资料分类、品牌宣称、非主打成分）的另外列出。
 // 价格上限与问卷一致：按品类价格的 25% / 50% / 75% 分位数，每列包含更便宜的产品（累计），另加不限。
 
-import type { Product } from '../data/types';
+import { isRecommendable, type Product } from '../data/types';
 import { EMPTY_HAIR, hairNeeds, scalpNeeds, type NeedChoice } from '../profile/questionnaire';
 import { SHAMPOO_SCALP_WEIGHT } from './config';
 import { fragranceTier } from './fragrance';
@@ -73,7 +73,7 @@ function minimalProfile(need: NeedChoice, category: string, budget: BudgetChoice
 export function coverageCell(products: Product[], category: string, need: NeedChoice, budget: BudgetChoice, data: ScoringData): CoverageCell {
   const scored = products
     // 与推荐结果一致：入库依据待补、儿童 / 婴儿产品不计入
-    .filter((p) => p.category === category && inMarket(p, DEFAULT_MARKET) && !p.inclusionPending && p.subtype !== 'kids')
+    .filter((p) => p.category === category && inMarket(p, DEFAULT_MARKET) && isRecommendable(p))
     .map((p) => scoreProduct(p, minimalProfile(need, category, budget), data))
     .filter((r) => !r.excluded && !r.lowMatch && (r.dimensions.need.score ?? 0) > 0);
   // 满足：这一项需求有满分依据（主打成分或成品测试），才能达到"适合"及以上；只有部分依据的最高为"一般"

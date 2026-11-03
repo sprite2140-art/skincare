@@ -190,8 +190,10 @@ function storeName(row: Pick<StoreRow, 'platform' | 'host'>, t: (k: Key) => stri
   return row.platform === 'other' ? row.host : t(`platform.${row.platform}` as Key);
 }
 
-export default function ProductCard({ r, market, profile, scentGoal, compact, defaultOpen = false }: {
+export default function ProductCard({ r, market, profile, scentGoal, compact, defaultOpen = false, overBudget = false }: {
   r: ProductScore; market: Region; profile: ScoringProfile; scentGoal: boolean; compact?: boolean;
+  /** "看看稍高预算的选择"里的产品：标注"超出预算" */
+  overBudget?: boolean;
   /** 设计自查页（/qa）用：初始就展开详情 */
   defaultOpen?: boolean;
 }) {
@@ -204,9 +206,10 @@ export default function ProductCard({ r, market, profile, scentGoal, compact, de
   const primary = primaryStore(p);
   const rows = storeRows(p);
   const free = f.status !== 'contains';
-  // 标签统一样式、最多两个：co-wash > 无香 > 一个奖项
+  // 标签统一样式、最多两个：超出预算 > co-wash > 无香 > 一个奖项
   // 细分类型和香味提示要能读全，窄屏下折行；奖项名可能很长，仍按一行省略
   const tags = [
+    overBudget ? { text: t('card.overBudget'), wrap: true } : null,
     p.subtype ? { text: t(`subtype.${p.subtype}` as Key), wrap: true } : null,
     free ? { text: t('scentTag.free'), wrap: true } : f.labeledFreeWithPlants ? { text: tx(labeledWithPlants(f)), wrap: true } : null,
     p.awards[0] ? { text: `${p.awards[0].source} ${p.awards[0].year}`, wrap: false } : null,
@@ -224,7 +227,7 @@ export default function ProductCard({ r, market, profile, scentGoal, compact, de
             <span>
               {p.price !== null ? formatMoney(p.price, p.currency, false) : t('results.noPrice')}
               {p.sizeMl !== null ? ` · ${t('results.size', { n: p.sizeMl })}` : ''}
-              {!inMarket(p, market) && ` · ${t('results.region')} ${p.region}`}
+              {!inMarket(p, market) && ` · ${t('results.region')} ${t(`region.${p.region}` as Key)}`}
             </span>
             {p.price !== null && <span className="price-note">{t('card.priceNote')}</span>}
           </div>

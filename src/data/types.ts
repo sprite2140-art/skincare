@@ -275,6 +275,8 @@ export interface Product {
   inclusionBasisType: InclusionBasisType | null;
   /** 入库依据待补（inclusion_basis 写 none、评价数也不足 1,000 条），或成分表待补（inci_list 为空）：照常导入，但不出现在推荐结果里 */
   inclusionPending?: boolean;
+  /** 没有可以列出的购买链接（见 data/retail.ts 的 hasUsablePurchaseLink）：照常导入，但不出现在推荐结果里，校验时列出 */
+  purchasePending?: boolean;
   /** 没有有效成分的物理产品（如痘痘贴：成分表只有 Hydrocolloid 这类材料名）：需求只按品牌宣称计算，不算"成分暂无数据" */
   physicalOnly?: boolean;
   awards: Award[];
@@ -513,3 +515,7 @@ export interface PurchaseLink {
   note: string;
 }
 
+
+/** 能否出现在推荐结果里：入库依据齐全、有可用的购买链接、不是儿童产品 */
+export const isRecommendable = (p: Pick<Product, 'inclusionPending' | 'purchasePending' | 'subtype'>) =>
+  !p.inclusionPending && !p.purchasePending && p.subtype !== 'kids';

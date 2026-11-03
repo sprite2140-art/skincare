@@ -177,6 +177,15 @@
 
 ## 记录
 
+### 2026-11-03（Claude Code：上线审计 5 项处理）
+- "清爽洁净""去除造型产品残留"只由洗发水实现，护发素按其他回答推荐；结果页说明"清爽洁净主要由洗发水实现，护发素按发质推荐"。
+- 空列表按真实原因计数说明（超出预算、含避开成分、特殊状态、没有针对所选需求的依据等），不再一律归因于预算（`src/scoring/shortfall.ts`、`src/pages/Shortfall.tsx`）。
+- 可推荐少于 3 款时显示"这个预算内选择较少"和"看看稍高预算的选择"，点了才列出高一档的产品，标"超出预算"；不自动放宽。缺的低价产品写在 data/todo_hair.csv、data/todo_skin.csv（`npm run budget-gaps`）。
+- 没有可用购买链接的产品不进入推荐（SE-US-005—008，以及 10 款日韩中洗发水），validate-data 列出。
+- LAUNCH_AUDIT.md 记录作者外部检查的 572 个链接结果；被拦截的 80 个导出在 docs/launch_blocked_links.csv。
+- 中文"US 市场"改为"美国市场"，地区名统一用 region.* 文案。
+- **下一步**：等 ChatGPT 补低价产品和 SE-US-005—008 的链接；作者抽查被拦截的链接。
+
 ### 2026-10-29（Claude Code：key_actives 俗名改为 INCI 名，作者选 A）
 - 75 款产品的 101 项俗名改为成分表里的 INCI 写法：对应唯一的直接改（如 Vitamin E → Tocopherol、Hyaluronic Acid → Sodium Hyaluronate、Coconut Oil → Cocos Nucifera Oil）；对应多个的改成成分表里实际出现的几个（8 款的 Ceramides → Ceramide NP、AP、EOP；SE-US-026、033 的 Hyaluronic Acid → 两三种透明质酸盐）。原写法记在 formula_note。
 - SE-US-026 的"Hyaluronic Acid 1.7%"对应两种成分，1.7% 是合计，不能分到单个成分：key_actives 只写成分名，浓度说明放在 formula_note。

@@ -2,7 +2,7 @@
 
 import type { Category, City, ExchangeRate, Product, RiskTag, Target } from '../data/types';
 import type { BudgetChoice } from '../scoring/budget';
-import { SHAMPOO_HAIR_EFFECT_WEIGHT, SHAMPOO_OWN_HAIR_TARGETS, SHAMPOO_SCALP_WEIGHT } from '../scoring/config';
+import { SHAMPOO_HAIR_EFFECT_WEIGHT, SHAMPOO_ONLY_HAIR_TARGETS, SHAMPOO_OWN_HAIR_TARGETS, SHAMPOO_SCALP_WEIGHT } from '../scoring/config';
 import type { Text } from '../scoring/labels';
 import { toUsd } from '../scoring/price';
 import type { FragrancePref, NeedSpec, ScoringProfile, SpecialStatus, WashFrequency } from '../scoring/score';
@@ -438,6 +438,14 @@ export function isRoutine(scope: PurchaseScope | null, hair: HairAnswers): boole
   return cats.includes('shampoo') && cats.includes('conditioner');
 }
 
+const isShampooOnly = (n: NeedChoice) => n.targets.every((t) => (SHAMPOO_ONLY_HAIR_TARGETS as readonly Target[]).includes(t));
+
+/** 用户选了、但这个品类不按它推荐的期望效果（只由洗发水实现，如"清爽洁净"）；结果页据此说明 */
+export function shampooOnlyGoals(answers: Answers, category: Category): NeedChoice[] {
+  if (category === 'shampoo' || category === 'scalp_care') return [];
+  return hairNeeds(answers.hair, answers.base.scope === 'conditioner' ? null : answers.scalp).filter(isShampooOnly);
+}
+
 export function toScoringProfile(
   answers: Answers,
   category: Category,
@@ -451,9 +459,9 @@ export function toScoringProfile(
   const routine = ctx.routine ?? isRoutine(base.scope, hair);
   const needs: NeedSpec[] = [];
   if (forScalp) for (const n of scalpNeeds(scalp)) needs.push({ ...n, weight: SHAMPOO_SCALP_WEIGHT });
-  // "去除造型产品残留"只看造型频率题（只买护发素时不问）；只分配给洗发水，护发素不匹配
+  // "去除造型产品残留"只看造型频率题（只买护发素时不问）；"清爽洁净""去除造型产品残留"只分配给洗发水，护发素不按这些推荐
   for (const n of hairNeeds(hair, base.scope === 'conditioner' ? null : scalp)) {
-    if (n.id === 'buildup' && category !== 'shampoo') continue;
+    if (category !== 'shampoo' && isShampooOnly(n)) continue;
     if (category !== 'shampoo') {
       needs.push({ ...n, weight: 1 });
       continue;

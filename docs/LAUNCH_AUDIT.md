@@ -25,6 +25,17 @@
 
 安全规则（第 2 节）8 个测试全部通过。**没有发现阻塞上线的问题**；应修的 5 项建议在上线前处理或确认。
 
+## 处理结果（2026-11-03）
+
+| 原问题 | 处理 |
+|---|---|
+| 护发素 + "清爽洁净"推荐为空 | 已修。"清爽洁净"和"去除造型产品残留"只由洗发水实现（`SHAMPOO_ONLY_HAIR_TARGETS`），护发素按用户的其他回答推荐；只选了这类目标时，护发素列表上方写"清爽洁净主要由洗发水实现，护发素按发质推荐"，同时选了其他目标时写"…护发素不按这一项推荐"。重新检查其他目标：不限预算时，没有别的"品类 × 单项目标"为空（见 `data/todo_hair.csv` 的 available_no_budget_limit 列，最少 3 款）。 |
+| 空列表的提示归因于预算 | 已修。洗护单品列表、洗护搭配的空位、护肤每一步为空时，按每款产品没有进入推荐的真实原因计数列出（如"12 款超出你的预算""3 款含你要避开的成分""5 款没有针对你所选需求的依据"），不再一律写"没有符合预算或筛选条件的商品"，也不自动放宽条件（`src/scoring/shortfall.ts`）。 |
+| 低预算下选择不足 | 已修（不自动放宽）。某一步可推荐的少于 3 款、且预算不是"不限"时，显示"这个预算内选择较少"和按钮"看看稍高预算的选择（$x 以内 / 不限预算）"；点了之后在下面列出高一档预算里多出来的产品，卡片标"超出预算"。高一档：最低档 → 第二档 → 第三档 → 不限；自填上限取比它高的第一个分位数。缺的低价产品清单在 `data/todo_hair.csv`（16 行）和 `data/todo_skin.csv`（6 行），用 `npm run budget-gaps` 重新生成。 |
+| SE-US-005—008 没有可用的购买链接 | 已修。没有可用购买链接的产品不进入推荐列表（`purchasePending`），validate-data 以警告列出，待补链接：SE-US-005—008，以及只在"显示其他地区版本"时出现的 10 款日本、韩国、中国洗发水（SH-JP-001—004、SH-KR-001—004、SH-CN-001—002）。 |
+| 购买链接没有实际请求过 | 已由作者在外部环境检查（见第 3 节）。被网站拦截、需要手动抽查的 80 个链接导出在 `docs/launch_blocked_links.csv`。 |
+| 中文界面"US 市场" | 已修，改为"美国市场"。地区名统一由 `region.*` 文案给出（美国、日本、韩国、中国），结果页的市场标签、"显示其他地区版本"的说明和产品卡的地区版本说明都用这一套。 |
+
 ## 1. 推荐结果：问卷组合遍历
 
 脚本 `scripts/launch-audit-sweep.ts`（`npm run launch-audit-sweep`），结果全文在 `docs/launch_audit_sweep.json`。用的是结果页同样的函数，美国市场：
@@ -96,7 +107,19 @@
 
 **SE-US-005—008（Good Molecules 精华 4 款）**：purchase_links 里只有品牌官网 v1 旧版页面，品牌宣称状态为 version_mismatch（2026-10-26 作者决定：官网卖的版本与打分用的成分表不同）。按规则这时不列出品牌官网链接，所以卡片上没有购买按钮。处理方式二选一：补一个在售版本与成分表一致的零售商链接；或在补上之前不推荐这 4 款。
 
-**链接请求**：`npm run launch-audit-links` 对 572 个不同的购买链接（purchase_links.csv 和 products.csv 的 purchase_url）逐个用 GET 请求，结果写在 `docs/launch_audit_links.json`。本次在云端环境运行，网络代理拒绝连接所有零售商和品牌网站（`CONNECT tunnel failed, response 403`），572 个都没有发出请求，记为"本环境代理不允许"。所以**这一项没有结果**，不能说明链接有效或失效。需要在能访问这些网站的环境（本地电脑，或放开网络限制的云端环境）重新运行；脚本会把结果分为正常、404 / 410、被网站拦截（401 / 403 / 405 / 429 / 503，零售商常拦截脚本）和其他错误。
+**链接请求**：`npm run launch-audit-links` 对 572 个不同的购买链接（purchase_links.csv 和 products.csv 的 purchase_url）逐个用 GET 请求，结果写在 `docs/launch_audit_links.json`。在云端环境运行时网络代理拒绝连接所有零售商和品牌网站，没有结果。
+
+**外部环境检查结果（2026-11-03，作者提供）**：572 个链接全部检查完：
+
+| 结果 | 链接数 |
+|---|---:|
+| 404 / 410（页面不存在） | **0** |
+| 正常 | 约 490（Ulta 225、Target 54 全部正常） |
+| 被网站拦截，无法自动确认 | 约 80 |
+
+被拦截的主要是 Sephora 26、laroche-posay.us 15、Walgreens 10，以及 bumbleandbumble、joico、kohls、esteelauder、cremedelamer、skinceuticals、kiehls、lancome-usa、aveneusa、redken、pureology、fresh、skinbetter、hellobubble 等品牌官网和零售商。
+
+按这些网站从 572 个链接中导出的清单在 `docs/launch_blocked_links.csv`，正好 80 个，供手动抽查：每行一个链接，列出网站、平台、对应产品、品牌和英文名，`spot_check_result` 和 `checked_on` 两列留空，抽查后填写。`no_other_link = yes` 的 34 个链接是对应产品唯一的购买链接（32 款产品），排在最前，建议优先抽查：这些链接失效时，产品卡片就没有可用的购买按钮。上面"等"如果还包括没有列出的网站，清单需要补上这些网站的链接。
 
 ## 4. 界面
 
@@ -108,7 +131,7 @@
 
 **中文界面里未翻译的英文和内部字段名**：
 - 没有出现内部字段名（形如 `xxx_yyy` 或 `card.xxx`）。
-- "US 市场"（两个结果页的标签）：`results.marketTag` 把地区代码 US 直接填进"{market} 市场"。英文界面"US market"没有问题。→ 应修
+- "US 市场"（两个结果页的标签）：`results.marketTag` 把地区代码 US 直接填进"{market} 市场"。英文界面"US market"没有问题。→ 应修（2026-11-03 已改为"美国市场"）
 - "Ulta Best Sellers 2026"（洗护结果页的奖项标签）：奖项名按数据原文显示，窄屏下被截断成"Ulta Best Sellers 2…"。→ 可延后
 - 其他英文都是专有名词，不需要翻译：品牌名和英文产品名、成分 INCI 名、零售商名（Target、Ulta）、站名 skincare、语言切换 English、AAD（问卷里注明了"美国皮肤科学会"）、关于页的 AI、Cookie、Cloudflare Pages、IP。
 

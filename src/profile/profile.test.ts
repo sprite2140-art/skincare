@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   EMPTY_HAIR, adviseCare, goalAvailable, hairNeeds, hairTargets, isSensitiveScalp, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, scalpNeeds, scalpTargets, scopeCategories,
-  migrateHair, migrateScalp, toScoringProfile, toneGoalAvailable,
+  migrateHair, migrateScalp, shampooOnlyGoals, toScoringProfile, toneGoalAvailable,
   type Answers, type BaseAnswers, type HairAnswers, type ScalpAnswers,
 } from './questionnaire';
 import {
@@ -184,7 +184,10 @@ describe('转换为打分输入', () => {
     expect(sh.concerns).toEqual(['dandruff', 'clarifying', 'flat_hair', 'tone_yellow']);
     expect(sh.needs!.map((n) => [n.id, n.weight])).toEqual([['dandruff', 2], ['clean', 1], ['volume', 1], ['tone_yellow', 1]]);
     const co = toScoringProfile(a, 'conditioner', ctx);
-    expect(co.needs!.map((n) => n.id)).toEqual(['clean', 'volume', 'tone_yellow']);
+    // "清爽洁净"只由洗发水实现，护发素不按它推荐（2026-11-03）
+    expect(co.needs!.map((n) => n.id)).toEqual(['volume', 'tone_yellow']);
+    expect(shampooOnlyGoals(a, 'conditioner').map((n) => n.id)).toEqual(['clean']);
+    expect(shampooOnlyGoals(a, 'shampoo')).toEqual([]);
     expect(co.concerns).not.toContain('dryness');
     expect(co.concerns).not.toContain('damage');
     // 结果页按显示的视图传入：选了洗护搭配、但打开洗发水标签时按单买（非洗发水自己的效果权重 0.5）
