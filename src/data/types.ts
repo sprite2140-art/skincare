@@ -103,7 +103,7 @@ export interface BrandClaims {
 }
 
 /** 产品细分类型：co_wash = 清洁型护发素（代替洗发水使用，归入 shampoo 品类，按清洁步骤使用）；kids = 儿童 / 婴儿产品（照常入库，不进推荐） */
-export const PRODUCT_SUBTYPES = ['co_wash', 'kids'] as const;
+export const PRODUCT_SUBTYPES = ['co_wash', 'kids', 'ointment'] as const;
 export type ProductSubtype = (typeof PRODUCT_SUBTYPES)[number];
 
 /** 榜单 / 奖项，结果页显示为标签，详情注明来源与年份 */

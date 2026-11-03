@@ -177,6 +177,14 @@
 
 ## 记录
 
+### 2026-11-03（Claude Code：低价补缺 18 款入库）
+- 去角质 EX-US-021—026、洁面 CL-US-041—046、保湿 MO-US-041—046 追加入库（产品 18、购买链接 36、评分 21）。产品表是旧的 50 列模板，补 inclusion_basis_type = review_count（18 款在认可平台都有 1,000 条以上评价，测试逐款检查）。去角质误填的 subtype（chemical / physical）清空记入 formula_note；MO-US-046 subtype = ointment。key_actives 按作者选 A 的规则改成 INCI 名，对应不上的（Micelles、Occlusives / Humectants、Licorice Extract、Hyaluronic Acid Complex 1%）移到 formula_note。
+- 成分别名：Purified Water → Aqua、Masking Fragrance → Fragrance（成分库 aliases）；ethylhexlglycerin、Magnessium Aluminum Silicate 用新的别名类型 source_misspelling 对应到正确 INCI，原文和 [待核对] 保留。MO-US-042、044、045 的 retail_mismatch 保留。
+- 新规则：粗颗粒物理磨砂（face_active_classes 的 coarse_scrub，9 种壳粉 / 果核粉）不推荐给容易敏感、长痘、泛红的人；厚重药膏（ointment）只推荐给干性或选了干燥的人，油性不推荐。MO-US-044（0.5% 水杨酸免洗保湿）按现有类别规则自动参与搭配冲突和孕期提示，测试覆盖。
+- 标准表头放在 docs/templates/，测试检查与 data/ 同步。覆盖表新增护肤最低一档预算的肤质 × 困扰表。
+- 上传文件放在了仓库根目录（不是 data/incoming/），并覆盖了 README.md：README 已恢复，自查报告和来源核查移到 docs/data_batches/，其余原始文件删除。包内 manifest 列了 validation_report.json，但上传里没有这个文件。
+- **下一步**：低价档仍不足的步骤见 data/todo_skin.csv；作者决定是否加"质地偏好""屏障受损"题。
+
 ### 2026-11-03（Claude Code：上线审计 5 项处理）
 - "清爽洁净""去除造型产品残留"只由洗发水实现，护发素按其他回答推荐；结果页说明"清爽洁净主要由洗发水实现，护发素按发质推荐"。
 - 空列表按真实原因计数说明（超出预算、含避开成分、特殊状态、没有针对所选需求的依据等），不再一律归因于预算（`src/scoring/shortfall.ts`、`src/pages/Shortfall.tsx`）。

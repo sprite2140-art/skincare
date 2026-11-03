@@ -7,7 +7,8 @@ const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
 describe('保湿第 2 批、SU-US-048 替换（2026-10-29）', () => {
   it('保湿共 40 款；第 2 批入库依据：Ulta 畅销榜 2 款，其余 18 款按评价数', () => {
-    expect(real.products.filter((p) => p.category === 'moisturizer')).toHaveLength(40);
+    // 2026-11-03 低价补缺又加了 6 款（MO-US-041—046）
+    expect(real.products.filter((p) => p.category === 'moisturizer')).toHaveLength(46);
     const batch = real.products.filter((p) => /^MO-US-0(2[1-9]|3\d|40)$/.test(p.productId));
     expect(batch).toHaveLength(20);
     expect(batch.filter((p) => p.inclusionBasisType === 'retailer_bestseller').map((p) => p.productId)).toEqual(['MO-US-030', 'MO-US-038']);

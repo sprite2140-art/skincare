@@ -162,6 +162,7 @@ const CLASS_LABELS: Record<ActiveClass, Text> = {
   sunscreen_mineral: { zh: '物理防晒剂', en: 'mineral sunscreen filters' },
   sunscreen_organic: { zh: '化学防晒剂', en: 'chemical sunscreen filters' },
   iron_oxide: { zh: '氧化铁', en: 'iron oxides' },
+  coarse_scrub: { zh: '粗颗粒物理磨砂', en: 'coarse physical scrub particles' },
 };
 export const activeClassLabel = (c: ActiveClass) => CLASS_LABELS[c];
 
@@ -214,6 +215,42 @@ export function scoreFaceProduct(product: Product, profile: ScoringProfile, data
       unverified: false,
       text: { zh: `含${n.zh}，你在用处方药，叠加可能加重刺激，请按医生的方案`, en: `Contains ${n.en}; with your prescription treatment this may add irritation, so follow your doctor's plan` },
     });
+  }
+
+  // 粗颗粒物理磨砂（坚果壳粉、果核粉等不规则颗粒，data/face_active_classes.csv 的 coarse_scrub）：
+  // 不推荐给敏感（偶尔或经常）、选了痘痘或泛红的人（作者决定 2026-11-03；AAD 去角质页）
+  const scrub = classes.get('coarse_scrub');
+  if (scrub) {
+    const who: Text[] = [
+      ...(ctx.face.sensitivity === 'sometimes' || ctx.face.sensitivity === 'often' ? [{ zh: '容易敏感', en: 'sensitive skin' }] : []),
+      ...(ctx.face.concerns.includes('acne') ? [{ zh: '长痘', en: 'breakouts' }] : []),
+      ...(ctx.face.concerns.includes('redness') ? [{ zh: '泛红', en: 'redness' }] : []),
+    ];
+    if (who.length > 0) {
+      const w = joinNames(who);
+      exclusions.push({
+        code: 'coarse_scrub',
+        unverified: false,
+        text: {
+          zh: `含粗颗粒物理磨砂（${scrub.join('、')}），颗粒不规则，可能磨伤皮肤，不推荐给${w.zh}的皮肤`,
+          en: `Contains coarse scrub particles (${scrub.join(', ')}); irregular particles can damage skin, so not recommended with ${w.en}`,
+        },
+      });
+    }
+  }
+  // 药膏质地（subtype = ointment，如凡士林类修复膏）：只推荐给干性皮肤或选了"干燥、脱皮"的人；油性皮肤不推荐（作者决定 2026-11-03）
+  if (product.subtype === 'ointment') {
+    const dry = ctx.face.skinType === 'dry' || ctx.face.concerns.includes('dryness');
+    if (!dry || ctx.face.skinType === 'oily') {
+      exclusions.push({
+        code: 'ointment_texture',
+        unverified: false,
+        text: {
+          zh: '厚重的药膏质地，只推荐给很干或选了"干燥、脱皮"的皮肤',
+          en: 'Heavy ointment texture; only recommended for very dry skin or when you chose dryness',
+        },
+      });
+    }
   }
 
   // 防晒：SPF 30 以上且广谱

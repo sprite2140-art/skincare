@@ -1,5 +1,5 @@
 // npm run coverage：统计洗发水、护发素在各需求 × 价格上限下可推荐的产品数量（含无香数量），
-// 以及有同系列护发素的洗发水数量，写入 docs/COVERAGE.md。每次数据更新后重新运行。
+// 有同系列护发素的洗发水数量，以及护肤去角质、洁面、保湿在最低一档预算下按肤质 × 困扰的可推荐数量，写入 docs/COVERAGE.md。每次数据更新后重新运行。
 // 口径见 src/scoring/coverage.ts。
 
 import { writeFileSync } from 'node:fs';
@@ -9,6 +9,11 @@ import { computeBudgetCaps, type BudgetChoice } from '../src/scoring/budget';
 import { TEST_MODE_DRAFT_SCORING } from '../src/scoring/config';
 import { COVERAGE_BUDGETS, coverageCell, coverageGroups, shampoosWithPairedConditioner } from '../src/scoring/coverage';
 import type { ScoringData } from '../src/scoring/score';
+import { buildFaceRoutine, isEligible } from '../src/scoring/faceRoutine';
+import { FACE_NEED_LABELS } from '../src/scoring/faceScore';
+import { filterByMarket } from '../src/scoring/market';
+import { EMPTY_FACE, FACE_CONCERNS, type FaceAnswers, type Sensitivity, type SkinType } from '../src/profile/faceQuestionnaire';
+import type { FaceTarget } from '../src/data/types';
 
 /** 少于此数的格子标红 */
 const MIN_PER_CELL = 3;
@@ -75,6 +80,50 @@ for (const cat of CATEGORIES) {
   out.push('');
 }
 
+// 护肤：去角质、洁面、保湿在最低一档预算下，按肤质 × 困扰（单选）数可推荐的款数（与结果页每一步的规则相同）
+const FACE_CATS = [
+  { key: 'exfoliator', zh: '去角质' },
+  { key: 'cleanser', zh: '洁面' },
+  { key: 'moisturizer', zh: '保湿' },
+] as const;
+const SKIN: { key: SkinType; zh: string }[] = [
+  { key: 'dry', zh: '干性' }, { key: 'normal', zh: '中性' }, { key: 'combination', zh: '混合' }, { key: 'oily', zh: '油性' }, { key: 'unsure', zh: '不确定' },
+];
+const SENS: { key: Sensitivity; zh: string }[] = [{ key: 'rarely', zh: '很少敏感' }, { key: 'sometimes', zh: '偶尔敏感' }];
+const faceProducts = filterByMarket(d.products.filter((p) => p.zone === 'face'), 'US', false).shown;
+const faceCount = (skinType: SkinType, sensitivity: Sensitivity, concerns: FaceTarget[], category: string): number | null => {
+  const f: FaceAnswers = { ...EMPTY_FACE, skinType, sensitivity, concerns, noConcerns: concerns.length === 0, budget: 'q1', acneSeverity: concerns.includes('acne') ? 'occasional' : null };
+  const routine = buildFaceRoutine({ products: faceProducts, face: f, statuses: [], avoidIngredients: [], avoidTags: [], data, classes: d.faceActiveClasses });
+  const s = routine.steps.find((x) => x.step.category === category);
+  return s ? s.ranked.filter(isEligible).length : null;
+};
+let faceGaps = 0;
+out.push(
+  '## 护肤：最低一档预算',
+  '',
+  '- **格子**：最低一档预算（各品类价格的 25% 分位数）下，结果页这一步可推荐的款数（不含排除、无法评分、"不太匹配"），美国市场，没有特殊状态。困扰只选一项（痘痘程度按"偶尔"）。',
+  '- **—**：这种答案下流程里没有这一步（如没选困扰时没有去角质步骤；经常敏感时不出现去角质步骤，所以不列"经常敏感"）。',
+  '- 肤质只影响同等级内的排序，但厚重药膏（subtype = ointment）只推荐给干性或选了"干燥、脱皮"的人；粗颗粒物理磨砂不推荐给容易敏感、长痘、泛红的人，所以各列可能不同。',
+  '',
+);
+for (const cat of FACE_CATS) {
+  const cap = budgetCaps[cat.key]?.q1;
+  out.push(`### ${cat.zh}（${cap !== undefined ? `${usd(cap)} 以内` : '无价格上限'}）`, '');
+  for (const sens of SENS) {
+    out.push(`**${sens.zh}**`, '', `| 困扰 | ${SKIN.map((k) => k.zh).join(' | ')} |`, `|---|${SKIN.map(() => '---:').join('|')}|`);
+    for (const c of [null, ...FACE_CONCERNS]) {
+      const cells = SKIN.map((k) => {
+        const n = faceCount(k.key, sens.key, c ? [c] : [], cat.key);
+        if (n === null) return '—';
+        if (n < MIN_PER_CELL) faceGaps++;
+        return `${n < MIN_PER_CELL ? '🔴 ' : ''}${n}`;
+      });
+      out.push(`| ${c ? FACE_NEED_LABELS[c].zh : '不选困扰'} | ${cells.join(' | ')} |`);
+    }
+    out.push('');
+  }
+}
+
 const pairs = shampoosWithPairedConditioner(d.products);
 out.push(
   '## 同系列护发素',
@@ -91,4 +140,4 @@ out.push(
 
 const target = fileURLToPath(new URL('../docs/COVERAGE.md', import.meta.url));
 writeFileSync(target, out.join('\n'));
-console.log(`已写入 docs/COVERAGE.md：少于 ${MIN_PER_CELL} 款的格子 ${gapCount} 个；有同系列护发素的洗发水 ${pairs.paired}/${pairs.total}`);
+console.log(`已写入 docs/COVERAGE.md：洗护少于 ${MIN_PER_CELL} 款的格子 ${gapCount} 个，护肤最低档少于 ${MIN_PER_CELL} 款的格子 ${faceGaps} 个；有同系列护发素的洗发水 ${pairs.paired}/${pairs.total}`);

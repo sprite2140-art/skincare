@@ -65,7 +65,7 @@ verified 成分必须填写 reviewed_on（YYYY-MM-DD）和 sources；查证后�
 | zone | face / scalp / hair / body | scalp |
 | category | 品类编号（取值见下） | shampoo |
 | usage_type | 使用方式：rinse_off（冲洗型）/ leave_on（免洗型）。留空则用品类默认值；卸妆、去角质、面膜必须填写 | |
-| subtype | 细分类型，普通产品留空。co_wash = 清洁型护发素：代替洗发水使用，category 必须为 shampoo（清洁步骤），页面显示"洗护二合一（co-wash）"标签（2026-10-29 起，原为"Co-wash · 清洁型护发素"）和单独的使用说明，不能当作洗后护发素。kids = 儿童 / 婴儿产品：照常入库，不出现在推荐结果里，覆盖表也不计入（2026-10-27）。面部产品误填的类型（如 chemical、hydrocolloid_patch、otc_acne_treatment）导入时清空，原值记入 formula_note（2026-10-27） | co_wash |
+| subtype | 细分类型，普通产品留空。co_wash = 清洁型护发素：代替洗发水使用，category 必须为 shampoo（清洁步骤），页面显示"洗护二合一（co-wash）"标签（2026-10-29 起，原为"Co-wash · 清洁型护发素"）和单独的使用说明，不能当作洗后护发素。kids = 儿童 / 婴儿产品：照常入库，不出现在推荐结果里，覆盖表也不计入（2026-10-27）。面部产品误填的类型（如 chemical、hydrocolloid_patch、otc_acne_treatment）导入时清空，原值记入 formula_note（2026-10-27）。ointment = 厚重药膏（面部保湿，如凡士林类修复膏）：只推荐给干性皮肤或选了"干燥、脱皮"的人，油性皮肤不推荐（2026-11-03） | co_wash |
 | region | US / JP / KR / CN | US |
 | formula_note | 配方版本说明 | 美国版 |
 | channels | 入库渠道 | Ulta |
@@ -206,11 +206,11 @@ usage_type 品类默认值（冲洗型产品的刺激风险扣分减半）。个
 | 字段 | 含义 |
 |---|---|
 | inci_name | INCI 名或美国药品标签写法（如 Avobenzone 和 Butyl Methoxydibenzoylmethane 各一行） |
-| active_class | retinoid（A 醇类）/ benzoyl_peroxide / aha（果酸）/ bha（水杨酸类）/ pha（多羟基酸，温和去角质）/ vitamin_c（只收 Ascorbic Acid）/ sunscreen_mineral（氧化锌、二氧化钛）/ sunscreen_organic（美国获准的化学防晒剂）/ iron_oxide（CI 77491 / 77492 / 77499，含 Iron Oxides 写法） |
+| active_class | retinoid（A 醇类）/ benzoyl_peroxide / aha（果酸）/ bha（水杨酸类）/ pha（多羟基酸，温和去角质）/ vitamin_c（只收 Ascorbic Acid）/ sunscreen_mineral（氧化锌、二氧化钛）/ sunscreen_organic（美国获准的化学防晒剂）/ iron_oxide（CI 77491 / 77492 / 77499，含 Iron Oxides 写法）/ coarse_scrub（粗颗粒物理磨砂：坚果壳粉、果核粉等不规则颗粒；不推荐给容易敏感、长痘、泛红的人） |
 | source_url | 列入依据：A 醇类 AAD Retinoid or retinol?；过氧化苯甲酰 FDA 痤疮 OTC 专论（21 CFR 333 Subpart D）；果酸、水杨酸类 FDA AHA / BHA 页面；维生素 C AAD 20 多岁护肤页；防晒剂 FDA 防晒 OTC 专论 M020；氧化铁 21 CFR 73.2250。没有权威出处、按行业惯例列入的写"行业惯例"（目前只有 PHA） |
 | added_on | 加入日期 |
 
-2026-10-20 首批 46 行。2026-10-21 按作者决定加入 PHA（Gluconolactone、Lactobionic Acid），出处为"行业惯例"：算去角质类，参与搭配冲突检查（第 5 节第 2–4 条），但不算刺激成分，也不算光敏成分。
+2026-10-20 首批 46 行。2026-11-03 按作者决定加入 coarse_scrub 9 行（Juglans Regia、Prunus Amygdalus Dulcis、Cocos Nucifera、Argania Spinosa、Corylus Avellana、Carya Illinoinensis 的壳粉，Prunus Armeniaca、Prunus Persica、Olea Europaea 的果核粉；CosIng 功能都是 abrasive），出处 AAD 去角质页。2026-10-21 按作者决定加入 PHA（Gluconolactone、Lactobionic Acid），出处为"行业惯例"：算去角质类，参与搭配冲突检查（第 5 节第 2–4 条），但不算刺激成分，也不算光敏成分。
 
 ## cosing_ingredients.csv 与 eu_fragrance_allergens.csv（欧盟成分基础分类）
 
@@ -290,6 +290,10 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 
 当前数据：美国洗护零售元数据第 1 批（SH-US-001—010、CO-US-001—010），2026-10-17 核对，41 条（Ulta 18、Sephora 4、Target 18、Amazon 1）。美国洁面 CL-US-001—040，2026-10-19 核对，54 条（Ulta 34、Target 11、Sephora 7、Bluemercury 1、Nordstrom 1），其中 8 条星级留空。
 
+## 标准表头
+
+交给数据收集方的新批次用 `docs/templates/` 里的表头（products、purchase_links、retail_ratings），列名和顺序必须与 data/ 中的表一致；`src/data/templates.test.ts` 检查两边是否同步。2026-11-03 起产品表为 51 列（旧模板 50 列缺 inclusion_basis_type）。
+
 ## purchase_links.csv（多平台购买链接）
 
 | 字段 | 含义 |
@@ -366,6 +370,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | us_drug_name | 美国药品标签（USP–NF）写法 | Polyoxyl 40 Stearate → PEG-40 Stearate |
 | us_color_name | 美国色素名（FD&C / D&C / Ext. D&C，可省略前缀和 "No."） | Red 4 → CI 14700 |
 | plant_oil_short | 植物油省略了部位的写法；只收 CosIng 中对应唯一的情况（同一植物有果皮油、种子油等多种时不收） | — |
+| source_misspelling | 来源原文的拼写错误，作者确认对应关系后登记（2026-11-03 起）；products.csv 原文和 [待核对] 标记保留，source_url 写出现这个拼写的来源页 | ethylhexlglycerin → Ethylhexylglycerin |
 
 | 字段 | 含义 |
 |---|---|
@@ -374,7 +379,7 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 | alias_type | 见上表 |
 | source_url | 对应关系的出处 |
 
-对应关系不唯一的写法（如 Iron Oxides 对应 CI 77491 / 77492 / 77499，Citrus Paradisi Oil 对应果皮油或种子油）不收录，保持未匹配。拼写错误、多语言写法（如 `Mel/Honey/Miel`）不在别名表处理，由数据收集方修正原文或在成分库 aliases 登记。2026-10-20 在成分库登记了 4 个：Coco Glucoside → Coco-Glucoside、Mel/Honey/Miel → Mel、Sea Salt\Maris Sal\Sel Marin → Maris Sal、CI 77891/ Titanium Dioxide → CI 77891；Carbomer Interpolymer Type A、Citrus Paradisi Oil、Citrus Sinensis Oil、Olea Europaea Oil、Chlorella Pyrenoidosa、Yucca Schidigera Extract、Iron Oxides、Disodium Cocoyl Glycinate 对应关系不唯一或不确定，保持未匹配。出处：色素用 FDA UNII 页面（precision.fda.gov），药品名用 FDA 页面（UNII 或 FDA 食品接触物质清单）。校验会检查别名重复、类型、出处、INCI 名能否找到。
+对应关系不唯一的写法（如 Iron Oxides 对应 CI 77491 / 77492 / 77499，Citrus Paradisi Oil 对应果皮油或种子油）不收录，保持未匹配。多语言写法（如 `Mel/Honey/Miel`）不在别名表处理，在成分库 aliases 登记；拼写错误原则上由数据收集方修正原文，作者确认后也可以用 source_misspelling 登记（目标成分只在 CosIng、不在成分库时只能这样处理）。2026-11-03 登记 ethylhexlglycerin → Ethylhexylglycerin（EX-US-022 品牌页）、Magnessium Aluminum Silicate → Magnesium Aluminum Silicate（MO-US-044 FDA 标签）；同日在成分库登记 Aqua 的别名 Purified Water、Fragrance 的别名 Masking Fragrance（遮味香精按 Parfum 计，产品不算无香）。2026-10-20 在成分库登记了 4 个：Coco Glucoside → Coco-Glucoside、Mel/Honey/Miel → Mel、Sea Salt\Maris Sal\Sel Marin → Maris Sal、CI 77891/ Titanium Dioxide → CI 77891；Carbomer Interpolymer Type A、Citrus Paradisi Oil、Citrus Sinensis Oil、Olea Europaea Oil、Chlorella Pyrenoidosa、Yucca Schidigera Extract、Iron Oxides、Disodium Cocoyl Glycinate 对应关系不唯一或不确定，保持未匹配。出处：色素用 FDA UNII 页面（precision.fda.gov），药品名用 FDA 页面（UNII 或 FDA 食品接触物质清单）。校验会检查别名重复、类型、出处、INCI 名能否找到。
 
 ## formula_version_checks.csv（配方版本待核对）
 

@@ -124,7 +124,8 @@ describe('data/ 中导入的 CosIng（2026-10-17）', () => {
     const withFn = [...names].filter((n) => index.get(n)?.cosingFunctions?.some((f) => f === 'perfuming' || f === 'fragrance'));
     const counted = withFn.filter((n) => tagged(n));
     expect(withFn.length).toBeGreaterThan(100);
-    expect(counted.length).toBeLessThan(40);
+    // 成分表原文的写法各算一个（如 Fragrance、FRAGRANCE (PARFUM)、Masking Fragrance），所以随产品增加略有增长
+    expect(counted.length).toBeLessThan(50);
   });
 });
 

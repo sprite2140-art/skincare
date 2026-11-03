@@ -5,7 +5,7 @@
 import type { ProductScore } from './score';
 import type { Text } from './labels';
 
-export type ShortfallReason = 'overBudget' | 'avoid' | 'special' | 'conflict' | 'standard' | 'incomplete' | 'lowMatch' | 'unscored' | 'other';
+export type ShortfallReason = 'overBudget' | 'avoid' | 'special' | 'skinFit' | 'conflict' | 'standard' | 'incomplete' | 'lowMatch' | 'unscored' | 'other';
 
 const CODE_REASON: Record<string, ShortfallReason> = {
   over_budget: 'overBudget',
@@ -15,6 +15,8 @@ const CODE_REASON: Record<string, ShortfallReason> = {
   rx_actives: 'special',
   severe_conflict: 'conflict',
   sunscreen_standard: 'standard',
+  coarse_scrub: 'skinFit',
+  ointment_texture: 'skinFit',
 };
 
 /** 一款产品没有进入推荐的原因；能推荐时为 null */
@@ -48,6 +50,7 @@ export const SHORTFALL_TEXT: Record<ShortfallReason, Text> = {
   overBudget: { zh: '{n} 款超出你的预算', en: '{n} over your budget' },
   avoid: { zh: '{n} 款含你要避开的成分', en: '{n} contain ingredients you want to avoid' },
   special: { zh: '{n} 款因你的特殊状态（如怀孕、在用处方药）不推荐', en: '{n} not recommended for your situation (e.g. pregnancy, prescription treatment)' },
+  skinFit: { zh: '{n} 款的质地或颗粒不适合你的皮肤状态（如粗颗粒磨砂、厚重药膏）', en: '{n} have a texture or particles that do not suit your skin (e.g. coarse scrubs, heavy ointments)' },
   conflict: { zh: '{n} 款与你在用的产品有严重冲突', en: '{n} clash with a product you already use' },
   standard: { zh: '{n} 款防晒不符合 SPF 30 以上、广谱的建议', en: '{n} sunscreens below SPF 30 or not broad spectrum' },
   incomplete: { zh: '{n} 款防晒信息不全', en: '{n} sunscreens with incomplete information' },
