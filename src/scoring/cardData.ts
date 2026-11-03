@@ -3,7 +3,7 @@
 
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
 import { FACE_TARGETS, RETAIL_PLATFORMS, RETAIL_PLATFORM_DOMAINS, type Ingredient, type Product, type RetailPlatform, type RetailRating, type Target } from '../data/types';
-import { ratingCountForThreshold, visibleRatings } from '../data/retail';
+import { ratingCountForThreshold, usablePurchaseLinks, visibleRatings } from '../data/retail';
 import { productActiveClasses, type ActiveClassIndex } from '../data/faceActives';
 import { SHAMPOO_OWN_HAIR_TARGETS, WEIGHTS, type DimensionKey } from './config';
 import { RISK_TAG_LABELS, TARGET_LABELS, ingredientName, joinNames, type Text } from './labels';
@@ -55,8 +55,7 @@ export function storeRows(p: Product): StoreRow[] {
   const shown = new Set(visibleRatings(p).map((r) => r.platform));
   const ratingOf = (pl: StorePlatform) => (pl === 'other' ? null : p.ratings.find((r) => r.platform === pl) ?? null);
   // 品牌页与在售版本不一致（version_mismatch）时，品牌官网卖的不是打分用的配方，不列出
-  const mismatch = p.brandClaims.status === 'version_mismatch';
-  const links = mismatch ? p.purchaseLinks.filter((l) => l.platform !== 'brand') : p.purchaseLinks;
+  const links = usablePurchaseLinks(p);
   const rows: StoreRow[] = links.map((l) => {
     const r = ratingOf(l.platform);
     return { platform: l.platform, host: '', url: l.url, rating: r && shown.has(r.platform) ? r : null, lowCount: !!r && !shown.has(r.platform), availability: availabilityOf(l.status) };

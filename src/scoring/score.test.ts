@@ -118,8 +118,13 @@ describe('data/ 真实数据', () => {
     const need = ranked.map((r) => r.dimensions.need.score);
     expect(need).toEqual([...need].sort((a, b) => (b ?? 0) - (a ?? 0)));
     const matched = ranked.filter((r) => r.dimensions.need.score === 100).map((r) => r.product.productId);
-    for (const id of ['SH-US-001', 'SH-US-042', 'SH-US-043', 'SH-US-044', 'SH-KR-004', 'SH-CN-001']) expect(matched).toContain(id);
+    for (const id of ['SH-US-001', 'SH-US-042', 'SH-US-043', 'SH-US-044']) expect(matched).toContain(id);
     expect(ranked[0].dimensions.need.score).toBe(100);
+    // 日韩中版本还没有购买链接，不进入推荐列表（2026-11-03）；成分匹配本身照常
+    for (const id of ['SH-KR-004', 'SH-CN-001']) {
+      expect(ranked.some((r) => r.product.productId === id)).toBe(false);
+      expect(scoreProduct(byId(id), profile({ concerns: ['dandruff'] }), testMode).dimensions.need.score).toBe(100);
+    }
   });
 
   it('安全相关的过滤也看 draft 成分，并标注未核对', () => {

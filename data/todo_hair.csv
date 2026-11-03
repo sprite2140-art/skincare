@@ -1,0 +1,17 @@
+category,need,need_zh,budget_tier,budget_cap_usd,available,available_no_budget_limit,missing,note
+shampoo,scalp:dry_tight,头皮干、紧绷,q1,10.99,2,6,1,需补 1 款价格不超过上限的产品
+shampoo,scalp:dry_tight,头皮干、紧绷,q2,20,2,6,1,需补 1 款价格不超过上限的产品
+shampoo,scalp:sensitive,头皮敏感、容易刺激,q1,10.99,1,9,2,需补 2 款价格不超过上限的产品
+shampoo,goal:volume,蓬松,q1,10.99,2,6,1,需补 1 款价格不超过上限的产品
+shampoo,goal:shine,光泽,q1,10.99,2,5,1,需补 1 款价格不超过上限的产品
+shampoo,goal:shine,光泽,q2,20,2,5,1,需补 1 款价格不超过上限的产品
+shampoo,goal:tone_yellow,去黄（金发、漂浅的头发）,q1,10.99,1,3,2,需补 2 款价格不超过上限的产品
+shampoo,goal:tone_yellow,去黄（金发、漂浅的头发）,q2,20,1,3,2,需补 2 款价格不超过上限的产品
+shampoo,goal:tone_orange,去橙（染浅的棕发）,q1,10.99,0,3,3,需补 3 款价格不超过上限的产品
+shampoo,goal:tone_orange,去橙（染浅的棕发）,q2,20,0,3,3,需补 3 款价格不超过上限的产品
+shampoo,goal:color_care,护色,q1,10.99,2,9,1,需补 1 款价格不超过上限的产品
+shampoo,goal:color_care,护色,q2,20,2,9,1,需补 1 款价格不超过上限的产品
+conditioner,goal:volume,蓬松,q1,10.99,2,8,1,需补 1 款价格不超过上限的产品
+conditioner,goal:tone_yellow,去黄（金发、漂浅的头发）,q1,10.99,1,3,2,需补 2 款价格不超过上限的产品
+conditioner,goal:tone_yellow,去黄（金发、漂浅的头发）,q2,24.5,2,3,1,需补 1 款价格不超过上限的产品
+conditioner,goal:tone_orange,去橙（染浅的棕发）,q1,10.99,1,4,2,需补 2 款价格不超过上限的产品

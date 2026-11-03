@@ -9,15 +9,17 @@ import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import { faceMedicalAlerts, isFaceSensitive, migrateFace, wearsMakeup } from '../profile/faceQuestionnaire';
 import { baseStatuses, cityKey, moneyToUsd } from '../profile/questionnaire';
-import { formatMoney } from '../scoring/budget';
+import { formatMoney, nextBudgetChoice } from '../scoring/budget';
 import { TEST_MODE_DRAFT_SCORING } from '../scoring/config';
-import { buildScheduledRoutine } from '../scoring/faceRoutine';
-import { FACE_NEED_LABELS } from '../scoring/faceScore';
+import { buildScheduledRoutine, isEligible, type RoutineStep } from '../scoring/faceRoutine';
+import { FACE_NEED_LABELS, rankFaceStep, type FaceProductScore } from '../scoring/faceScore';
+import { FEW_OPTIONS } from '../scoring/shortfall';
 import type { ScheduledStep, TimeOfDay } from '../scoring/faceSchedule';
 import type { FaceStepId } from '../scoring/faceSteps';
 import { filterByMarket, marketForCity } from '../scoring/market';
 import type { RiskTag } from '../data/types';
 import ProductCard from './ProductCard';
+import { EmptyNotice, FewOptions } from './Shortfall';
 
 const usd = (n: number) => formatMoney(n, 'USD', false);
 
@@ -29,6 +31,8 @@ export default function FaceResults() {
   const [basicOnly, setBasicOnly] = useState(false);
   const [hideMineral, setHideMineral] = useState(false);
   const [picks, setPicks] = useState<Partial<Record<FaceStepId, string>>>({});
+  /** 打开了"看看稍高预算的选择"的步骤 */
+  const [nextTierOpen, setNextTierOpen] = useState<Partial<Record<FaceStepId, boolean>>>({});
 
   const face = profile?.face ? migrateFace(profile.face) : null;
   const city = cities.find((c) => cityKey(c) === profile?.base.cityKey) ?? null;
@@ -36,15 +40,16 @@ export default function FaceResults() {
   const statuses = profile ? baseStatuses(profile.base) : [];
   const setBudgetUsd = face?.budget === 'set' && face.setBudget && face.setBudget.amount > 0 ? moneyToUsd(face.setBudget, exchangeRates) : null;
 
+  const faceProducts = useMemo(() => filterByMarket(products.filter((p) => p.zone === 'face'), market, false).shown, [market]);
+  const scoringData = { index: ingredientIndex, exchangeRates, budgetCaps, allowDraft: TEST_MODE_DRAFT_SCORING };
   const result = useMemo(() => {
     if (!face || !profile) return null;
-    const { shown } = filterByMarket(products.filter((p) => p.zone === 'face'), market, false);
     return buildScheduledRoutine({
-      products: shown, face, statuses, avoidIngredients: profile.base.avoidIngredients, avoidTags: profile.base.avoid as RiskTag[],
-      data: { index: ingredientIndex, exchangeRates, budgetCaps, allowDraft: TEST_MODE_DRAFT_SCORING },
+      products: faceProducts, face, statuses, avoidIngredients: profile.base.avoidIngredients, avoidTags: profile.base.avoid as RiskTag[],
+      data: scoringData,
       classes: faceActiveClasses, conflictNotes: faceConflictNotes, basicOnly, hideUntintedMineral: hideMineral, setBudgetUsd, picks,
     });
-  }, [profile, basicOnly, hideMineral, picks, market]);
+  }, [profile, basicOnly, hideMineral, picks, faceProducts]);
 
   if (!face || !profile || !result) {
     return (
@@ -60,9 +65,27 @@ export default function FaceResults() {
   const slot = schedule[time];
   const hasOptional = routine.steps.some((s) => s.step.tier === 'optional') || basicOnly;
 
+  /** 高一档预算的说明和那一档里多出来的可推荐产品（只在用户点了按钮后计算，不改变推荐） */
+  const nextTier = (rs: RoutineStep) => {
+    const caps = budgetCaps[rs.step.category];
+    const next = nextBudgetChoice(rs.profile.budget, caps, rs.profile.customBudgetUsd ?? null);
+    if (next === null) return null;
+    const label = next === 'none' || !caps ? t('few.noLimit') : t('few.within', { cap: usd(caps[next as 'q1' | 'q2' | 'q3']) });
+    if (!nextTierOpen[rs.step.id] || !face) return { label, extra: [] as FaceProductScore[] };
+    const current = new Set(rs.eligible.map((r) => r.product.productId));
+    const { ranked } = rankFaceStep(faceProducts, { ...rs.profile, budget: next, customBudgetUsd: null }, scoringData,
+      { face, step: rs.step, classes: faceActiveClasses }, { hideUntintedMineral: hideMineral });
+    return { label, extra: ranked.filter((r) => isEligible(r) && !current.has(r.product.productId)) };
+  };
+
   const stepView = (s: ScheduledStep) => {
     const { step } = s.step;
     const rs = s.step;
+    // 可推荐的少于 3 款：提示，可以看看高一档预算（不自动放宽）
+    const tier = rs.status !== 'no_data' && rs.eligible.length < FEW_OPTIONS ? nextTier(rs) : null;
+    const few = tier && (
+      <FewOptions empty={rs.eligible.length === 0} nextCap={tier.label} open={!!nextTierOpen[step.id]} onToggle={() => setNextTierOpen({ ...nextTierOpen, [step.id]: !nextTierOpen[step.id] })} />
+    );
     const because = step.becauseOf.map((c) => tx(FACE_NEED_LABELS[c])).join(lang === 'zh' ? '、' : ', ');
     return (
       <section key={step.id} className="slot">
@@ -84,7 +107,9 @@ export default function FaceResults() {
           </div>
         )}
         {rs.status === 'no_data' && <p className="small muted">{t('skinResults.noData')}</p>}
-        {rs.status === 'no_match' && <p className="small muted">{t('set.slotNoMatch')}</p>}
+        {rs.status === 'no_match' ? (
+          <EmptyNotice ranked={rs.ranked} quizPath="/skin/quiz">{few}</EmptyNotice>
+        ) : rs.status === 'ok' && rs.eligible.length < FEW_OPTIONS && few}
         {s.product && (
           <>
             {s.bothTimes && <p className="small muted">{t('skinResults.bothTimes')}</p>}
@@ -104,6 +129,17 @@ export default function FaceResults() {
             )}
           </>
         )}
+        {tier && nextTierOpen[step.id] && tier.extra.length === 0 && <p className="small muted">{t('few.none', { cap: tier.label })}</p>}
+        {tier && tier.extra.length > 0 && (
+          <details className="sub" open style={{ marginTop: 8 }}>
+            <summary>{t('few.heading', { cap: tier.label })}</summary>
+            {tier.extra.map((r) => (
+              <div key={r.product.productId} style={{ marginTop: 8 }}>
+                <ProductCard r={r} market={market} profile={rs.profile} scentGoal={false} compact overBudget />
+              </div>
+            ))}
+          </details>
+        )}
       </section>
     );
   };
@@ -115,7 +151,7 @@ export default function FaceResults() {
         <h1 className="h1" style={{ marginTop: 8 }}>{t('skinResults.title')}</h1>
         <div className="chips">
           {profile && <span className="tag">{profile.name}</span>}
-          <span className="tag">{t('results.marketTag', { market })}</span>
+          <span className="tag">{t('results.marketTag', { market: t(`region.${market}` as Key) })}</span>
           <Link className="tag" to="/skin/quiz">{t('results.editQuiz')}</Link>
         </div>
       </header>

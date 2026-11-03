@@ -302,6 +302,12 @@ EDTA 及其盐类（9 个）的来源为 CIR 安全评估（Final report on the 
 
 页面详情"在哪买"按固定顺序每个平台一行：品牌官网 → Ulta → Sephora → Target → Amazon → Nordstrom → Neiman Marcus → Saks Fifth Avenue → Bergdorf Goodman → Bluemercury → Walmart → Kohl's（`RETAIL_PLATFORMS`）→ 其他网站。平台由链接域名识别（`RETAIL_PLATFORM_DOMAINS`）。收起状态的主购买按钮默认指向评价数最多的平台，没有评分时用 products.csv 的 purchase_url。当前洗护 20 款、63 条链接；美国洁面 40 款、100 条链接（2026-10-19）。
 
+**没有可用购买链接的产品不进入推荐结果**（2026-11-03，`purchasePending`）：可用的链接指 purchase_links 里的链接（品牌宣称状态为 version_mismatch 时品牌官网链接不算，因为官网卖的版本与成分表不同）或 products.csv 的 purchase_url。validate-data 以警告列出这些产品，补上链接后自动恢复推荐。
+
+## todo_hair.csv / todo_skin.csv（低预算下选择不足的清单）
+
+`npm run budget-gaps` 生成，不要手改：每个品类（护肤为每个步骤）× 每个单项需求（含不选），在最低两档预算下按结果页规则数可推荐的款数，少于 3 款的列出，供补充低价产品。只看没有特殊状态、不常敏感、不避开成分的答案。列：category、need（需求代码）、need_zh、budget_tier、budget_cap_usd（这一档的价格上限）、available（这一档可推荐的款数）、available_no_budget_limit（不限预算时的款数）、missing（还差几款到 3 款）、note。补产品后重新运行即可更新。
+
 ## exchange_rates.csv（固定汇率表）
 
 用于把产品的当地价格换算成 USD，与用户的单件预算上限比较；给用户展示预算选项时再换算成当地货币。

@@ -63,6 +63,20 @@ export function capFor(choice: BudgetChoice, caps: BudgetCaps | undefined, custo
   return caps[choice];
 }
 
+/**
+ * 高一档的预算：q1 → q2 → q3 → 不限；自填上限取比它高的第一个分位数上限，没有则不限。已经不限时为 null。
+ * 用于"看看稍高预算的选择"（不自动放宽，用户点了才看）
+ */
+export function nextBudgetChoice(choice: BudgetChoice, caps: BudgetCaps | undefined, customUsd: number | null = null): BudgetChoice | null {
+  if (choice === 'none') return null;
+  if (choice === 'custom') {
+    if (customUsd === null || customUsd <= 0) return null;
+    return BUDGET_QUARTILES.find((q) => caps && caps[q] > customUsd + 1e-9) ?? 'none';
+  }
+  const i = BUDGET_QUARTILES.indexOf(choice);
+  return i < BUDGET_QUARTILES.length - 1 ? BUDGET_QUARTILES[i + 1] : 'none';
+}
+
 /** 旧档案保存的预算档（p33 / p67）和前一版的区间（q4）已不对应现在的上限，迁移时去掉，需要重新选择 */
 export function isBudgetChoice(v: unknown): v is BudgetChoice {
   return v === 'none' || v === 'custom' || (BUDGET_QUARTILES as readonly unknown[]).includes(v);

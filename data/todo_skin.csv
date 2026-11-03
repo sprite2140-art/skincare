@@ -1,0 +1,7 @@
+category,need,need_zh,budget_tier,budget_cap_usd,available,available_no_budget_limit,missing,note
+cleanser,acne,痘痘、闭口,q1,15.49,2,13,1,需补 1 款价格不超过上限的产品
+cleanser,oil,出油,q1,15.49,1,18,2,需补 2 款价格不超过上限的产品
+exfoliator,oil,出油,q1,13.5,0,3,3,需补 3 款价格不超过上限的产品
+moisturizer,oil,出油,q1,14.37,1,7,2,需补 2 款价格不超过上限的产品
+exfoliator,oil,出油,q2,31,2,3,1,需补 1 款价格不超过上限的产品
+exfoliator,pigmentation,暗沉、色斑,q1,13.5,2,14,1,需补 1 款价格不超过上限的产品

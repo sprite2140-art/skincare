@@ -1,6 +1,6 @@
 // 零售商评分和购买链接的展示规则（只展示，不计入任何分数）。
 
-import type { Product, RetailRating } from './types';
+import type { Product, PurchaseLink, RetailRating } from './types';
 
 /** 评价数少于此值的评分不显示 */
 export const MIN_RATING_COUNT = 50;
@@ -22,4 +22,19 @@ export function visibleRatings(p: Product): RetailRating[] {
 /** 评价数的显示文字：保留页面原文（如 5.5K），去掉括号 */
 export function ratingCountText(r: RetailRating): string {
   return r.ratingCountDisplay.replace(/[()]/g, '') || (r.ratingCount !== null ? r.ratingCount.toLocaleString('en-US') : '');
+}
+
+/**
+ * 卡片"在哪买"可以列出的购买链接：品牌页与在售版本不一致（version_mismatch）时，品牌官网卖的不是打分用的配方，不列出
+ */
+export function usablePurchaseLinks(p: Pick<Product, 'purchaseLinks' | 'brandClaims'>): PurchaseLink[] {
+  return p.brandClaims.status === 'version_mismatch' ? p.purchaseLinks.filter((l) => l.platform !== 'brand') : p.purchaseLinks;
+}
+
+/** 至少有一个可以列出的购买链接（购买链接表，或产品表的 purchase_url 且没有因版本不一致被去掉）；没有时不进入推荐 */
+export function hasUsablePurchaseLink(p: Pick<Product, 'purchaseLinks' | 'brandClaims' | 'purchaseUrl'>): boolean {
+  const links = usablePurchaseLinks(p);
+  if (links.length > 0) return true;
+  const dropped = new Set(p.purchaseLinks.map((l) => l.url));
+  return !!p.purchaseUrl && !dropped.has(p.purchaseUrl);
 }

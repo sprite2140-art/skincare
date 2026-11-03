@@ -7,7 +7,7 @@
 //   正式模式下：未核对的风险成分照常扣分（卡片注明"成分数据未核对"），未核对的有效成分不加分。
 // - 安全相关（硬性过滤、孕期提示、搭配冲突）也看 draft 成分和名称未核对的成分，宁可多提示，结果里标注"未核对"。
 
-import { usageTypeOf } from '../data/types';
+import { isRecommendable, usageTypeOf } from '../data/types';
 import { evidenceFor, type TargetEvidence } from './evidence';
 import type { Category, City, ExchangeRate, Ingredient, Product, RiskTag, Target, UsageType } from '../data/types';
 import { normalizeName, type IngredientIndex } from '../data/ingredientIndex';
@@ -932,7 +932,7 @@ export function rankProducts(
   const noNeeds = profile.concerns.length === 0;
   return products
     // 入库依据待补的产品不出现在推荐结果里
-    .filter((p) => p.category === category && !p.inclusionPending && p.subtype !== 'kids')
+    .filter((p) => p.category === category && isRecommendable(p))
     .map((p) => scoreProduct(p, profile, data))
     .sort((a, b) =>
       group(a) - group(b)
