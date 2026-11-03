@@ -150,7 +150,7 @@ describe('真实洁面数据', () => {
     const step = buildFaceSteps(face, { statuses: [] }).find((s) => s.id === 'cleanser')!;
     const profile = faceScoringProfile(face, step, { specialStatus: 'none', avoidIngredients: [], avoidTags: [] });
     const { ranked } = rankFaceStep(real.products, profile, data, { face, step, classes: real.faceActiveClasses });
-    expect(ranked).toHaveLength(40);
+    expect(ranked).toHaveLength(46);
     expect(ranked[0].dimensions.environment.score).toBeNull();
     expect(ranked[0].needMatches.map((m) => m.id)).toEqual(['acne', 'oil']);
   });

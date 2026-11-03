@@ -45,8 +45,8 @@ export interface IngredientIndex {
   all: Ingredient[];
 }
 
-/** 别名类型：美国药品标签写法、美国色素名、植物油的省略写法（只收 CosIng 中对应唯一的） */
-export const INCI_ALIAS_TYPES = ['us_drug_name', 'us_color_name', 'plant_oil_short'] as const;
+/** 别名类型：美国药品标签写法、美国色素名、植物油的省略写法（只收 CosIng 中对应唯一的）、来源原文的拼写错误（作者确认；products.csv 原文和 [待核对] 标记保留） */
+export const INCI_ALIAS_TYPES = ['us_drug_name', 'us_color_name', 'plant_oil_short', 'source_misspelling'] as const;
 export type InciAliasType = (typeof INCI_ALIAS_TYPES)[number];
 
 /** data/inci_aliases.csv 的一行：产品成分表里的非 INCI 写法 → INCI 名。products.csv 的原文不改 */

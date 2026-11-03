@@ -7,6 +7,8 @@ import type { Ingredient, Product } from './types';
 
 export const ACTIVE_CLASSES = [
   'retinoid', 'benzoyl_peroxide', 'aha', 'bha', 'pha', 'vitamin_c', 'sunscreen_mineral', 'sunscreen_organic', 'iron_oxide',
+  // 粗颗粒物理磨砂：坚果壳粉、果核粉等不规则颗粒（2026-11-03 作者决定），不推荐给敏感、长痘、泛红的皮肤
+  'coarse_scrub',
 ] as const;
 export type ActiveClass = (typeof ACTIVE_CLASSES)[number];
 
