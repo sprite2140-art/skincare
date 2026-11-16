@@ -12,8 +12,7 @@ export default function About() {
   const { t } = useI18n();
   return (
     <main className="shell about">
-      <div className="label">{t('about.kicker')}</div>
-      <h1 className="h1" style={{ marginTop: 8 }}>{t('about.title')}</h1>
+      <h1 className="h1">{t('about.title')}</h1>
 
       <section>
         <h2 className="h2">{t('about.disclaimer')}</h2>

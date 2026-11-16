@@ -15,6 +15,8 @@ interface ProfileApi {
   switchTo: (id: string) => void;
   add: (name: string) => Profile;
   remove: (id: string) => void;
+  /** 撤销删除：整体恢复到删除前的档案列表 */
+  restore: (store: ProfileStore) => void;
 }
 
 const ProfileContext = createContext<ProfileApi | null>(null);
@@ -39,10 +41,11 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     [commit, store],
   );
   const remove = useCallback((id: string) => commit(removeProfile(store, id)), [commit, store]);
+  const restore = useCallback((prev: ProfileStore) => commit(prev), [commit]);
 
   const value = useMemo(
-    () => ({ store, profile: activeProfile(store), saveFailed, save, switchTo, add, remove }),
-    [store, saveFailed, save, switchTo, add, remove],
+    () => ({ store, profile: activeProfile(store), saveFailed, save, switchTo, add, remove, restore }),
+    [store, saveFailed, save, switchTo, add, remove, restore],
   );
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }

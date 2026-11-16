@@ -16,7 +16,7 @@ import {
 import { newProfile } from '../profile/storage';
 import { DandruffIllo, HairLossIllo } from './Illustrations';
 import WaterInfo from './WaterInfo';
-import { AvoidQuestion, MoneyInput, Multi, Single } from './quizParts';
+import { AvoidQuestion, MoneyInput, Multi, Single, useFocusHeading } from './quizParts';
 import { budgetOptions, type BudgetChoice } from '../scoring/budget';
 import { currencyForCountry } from '../scoring/price';
 import type { FragrancePref, WashFrequency } from '../scoring/score';
@@ -54,6 +54,7 @@ export default function Quiz() {
   const [stepIndex, setStepIndex] = useState(0);
   const timer = useRef<number | null>(null);
   useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
+  useFocusHeading(stepIndex);
 
   const city = cities.find((c) => cityKey(c) === base.cityKey) ?? null;
   const currency = currencyForCountry(city?.country ?? 'US');

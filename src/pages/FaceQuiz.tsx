@@ -16,7 +16,7 @@ import { newProfile } from '../profile/storage';
 import { budgetOptions, type BudgetChoice } from '../scoring/budget';
 import { buildFaceSteps } from '../scoring/faceSteps';
 import { currencyForCountry } from '../scoring/price';
-import { AvoidQuestion, MoneyInput, Multi, Single } from './quizParts';
+import { AvoidQuestion, MoneyInput, Multi, Single, useFocusHeading } from './quizParts';
 
 const AUTO_ADVANCE_MS = 220;
 
@@ -35,6 +35,7 @@ export default function FaceQuiz() {
   const [stepIndex, setStepIndex] = useState(0);
   const timer = useRef<number | null>(null);
   useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
+  useFocusHeading(stepIndex);
 
   const city = cities.find((c) => cityKey(c) === base.cityKey) ?? null;
   const currency = currencyForCountry(city?.country ?? 'US');

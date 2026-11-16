@@ -1,22 +1,53 @@
 // 档案页：多份档案切换（"我" / "帮别人测"）、改名、删除、特殊状态（单独入口，不在首次问卷中出现）。
 
+import { useEffect, useRef, useState } from 'react';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
+import { profileDisplayName } from '../profile/displayName';
+import type { ProfileStore } from '../profile/storage';
 import { baseStatuses } from '../profile/questionnaire';
 import type { SpecialStatus } from '../scoring/score';
 
 const STATUSES: SpecialStatus[] = ['pregnant', 'trying', 'breastfeeding', 'rx', 'isotretinoin'];
+/** 删除后"撤销"提示保留的时间 */
+const UNDO_MS = 10000;
+
+/** 删除后的提示：可撤销，10 秒后自动消失 */
+function UndoBar({ name, onUndo, onDone }: { name: string; onUndo: () => void; onDone: () => void }) {
+  const { t } = useI18n();
+  useEffect(() => {
+    const id = window.setTimeout(onDone, UNDO_MS);
+    return () => window.clearTimeout(id);
+  }, [onDone]);
+  return (
+    <div className="notice undo-bar" role="status">
+      <span>{t('profile.deleted', { name })}</span>
+      <button type="button" className="textbtn" onClick={onUndo}>{t('profile.undo')}</button>
+    </div>
+  );
+}
 
 export default function ProfilePage() {
   const { t } = useI18n();
-  const { store, profile, save, remove, add, switchTo } = useProfiles();
+  const { store, profile, save, remove, add, switchTo, restore } = useProfiles();
+  const [confirming, setConfirming] = useState(false);
+  /** 刚删除的档案：名称 + 删除前的档案列表，用于撤销 */
+  const [undo, setUndo] = useState<{ name: string; prev: ProfileStore } | null>(null);
+  const clearUndo = useRef(() => setUndo(null)).current;
+  useEffect(() => setConfirming(false), [profile?.id]);
+
+  const undoBar = undo && (
+    <UndoBar name={undo.name} onDone={clearUndo} onUndo={() => { restore(undo.prev); setUndo(null); }} />
+  );
 
   if (!profile) {
     return (
       <main className="shell stack-lg" style={{ paddingTop: 32 }}>
         <h1 className="h1">{t('profile.title')}</h1>
+        {undoBar}
+        <p className="muted">{t('profile.emptyBody')}</p>
         <button type="button" className="btn btn-primary" onClick={() => add(t('profile.defaultName'))}>
-          + {t('profile.defaultName')}
+          + {t('profile.create')}
         </button>
       </main>
     );
@@ -29,6 +60,7 @@ export default function ProfilePage() {
   return (
     <main className="shell stack-lg" style={{ paddingTop: 32 }}>
       <h1 className="h1">{t('profile.title')}</h1>
+      {undoBar}
 
       <section>
         <div className="label">{t('profile.current')}</div>
@@ -36,7 +68,7 @@ export default function ProfilePage() {
           {store.profiles.map((x) => (
             <button key={x.id} type="button" role="radio" aria-checked={x.id === p.id} className="option" onClick={() => switchTo(x.id)}>
               <span className="mark" aria-hidden="true" />
-              <span className="opt-text">{x.name}</span>
+              <span className="opt-text">{profileDisplayName(x.name, t)}</span>
             </button>
           ))}
         </div>
@@ -84,7 +116,24 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <button type="button" className="btn btn-danger" onClick={() => remove(p.id)}>{t('profile.delete')}</button>
+      {confirming ? (
+        <div className="panel danger-confirm" role="group" aria-label={t('profile.delete')}>
+          <p>{t('profile.deleteHint')}</p>
+          <div className="card-actions">
+            <button
+              type="button"
+              className="btn btn-danger-solid"
+              autoFocus
+              onClick={() => { setUndo({ name: profileDisplayName(p.name, t), prev: store }); remove(p.id); setConfirming(false); }}
+            >
+              {t('profile.deleteConfirm')}
+            </button>
+            <button type="button" className="btn" onClick={() => setConfirming(false)}>{t('profile.deleteCancel')}</button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" className="btn btn-danger" onClick={() => setConfirming(true)}>{t('profile.delete')}</button>
+      )}
     </main>
   );
 }

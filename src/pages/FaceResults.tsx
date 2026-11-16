@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { cities, exchangeRates, faceActiveClasses, faceConflictNotes, budgetCaps, ingredientIndex, products } from '../data/load';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
+import { profileDisplayName } from '../profile/displayName';
 import { faceMedicalAlerts, isFaceSensitive, migrateFace, wearsMakeup } from '../profile/faceQuestionnaire';
 import { baseStatuses, cityKey, moneyToUsd } from '../profile/questionnaire';
 import { formatMoney, nextBudgetChoice } from '../scoring/budget';
@@ -54,8 +55,9 @@ export default function FaceResults() {
   if (!face || !profile || !result) {
     return (
       <main className="shell stack-lg" style={{ paddingTop: 32 }}>
-        <p>{t('skinResults.empty')}</p>
-        <Link className="btn btn-primary" to="/skin/quiz">{t('home.startSkin')}</Link>
+        <h1 className="h1">{t('skinResults.emptyTitle')}</h1>
+        <p className="muted">{t('skinResults.empty')}</p>
+        <Link className="btn btn-primary" to="/skin/quiz">{t('skinResults.startQuiz')}</Link>
       </main>
     );
   }
@@ -150,8 +152,8 @@ export default function FaceResults() {
         <div className="label">{t('skinQuiz.intro.kicker')}</div>
         <h1 className="h1" style={{ marginTop: 8 }}>{t('skinResults.title')}</h1>
         <div className="chips">
-          {profile && <span className="tag">{profile.name}</span>}
-          <span className="tag">{t('results.marketTag', { market: t(`region.${market}` as Key) })}</span>
+          {profile && <span className="tag info">{profileDisplayName(profile.name, t)}</span>}
+          <span className="tag info">{t('results.marketTag', { market: t(`region.${market}` as Key) })}</span>
           <Link className="tag" to="/skin/quiz">{t('results.editQuiz')}</Link>
         </div>
       </header>
