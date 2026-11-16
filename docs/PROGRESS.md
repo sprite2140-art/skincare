@@ -19,6 +19,16 @@
 
 **下一步**：测试模式已于 10/29 关闭；SU-US-048 已替换（10/29）；10/30–31 按试用反馈修改。
 
+### 2026-11-15 导入护肤低价补缺（EX-US-021—026、CL-US-041—046、MO-US-041—046）；恢复 README
+- 11-02 上传在仓库根目录的 9 个 CSV 追加到 data/（产品 18、购买链接 36、评分 21）；inclusion_basis_type 留空，按评分表自动判断（18 款都按评价数入库）。自查报告移到 docs/data_batches/budget_supplement_self_check.md，来源核验 json 和包说明移到 docs/data_batches/budget_supplement_2026-11-02/。
+- 同一次上传覆盖了 README.md，已从上一版恢复，并把"当前阶段"更新为洗护 + 面部护肤、测试模式已关闭。
+- 按以前的规则标准化：EX 的 subtype（chemical / physical）清空，原值记入 formula_note；key_actives 俗名改为成分表里的 INCI 名，品牌技术名（Micelles、Hyaluronic Acid Complex 1%、Occlusives / Humectants）移到 formula_note 并填 Not separately disclosed；MO-US-042 的 Licorice Extract 成分表只有衍生物 dipotassium glycyrrhizate，移到 formula_note；CL-US-046 的 Hyaluronic Acid Complex 1% 不是 INCI 条目，从 active_concentrations 移到 formula_note。
+- 2 处官方拼写错误更正（原文记入 formula_note）：EX-US-022 ethylhexlglycerin → ethylhexylglycerin，MO-US-044 Magnessium → Magnesium Aluminum Silicate。
+- 成分库别名：Fragrance 加 Masking Fragrance（EX-US-024 原来会被当作没有加香），Aqua 加 Purified Water。
+- retail_mismatch 3 行（MO-US-042、044、045）：自查报告说明的是品牌页与零售页成分表写法不同，每行只用一个完整来源，按原样导入。
+- 低价缺口：护肤最低档预算的价格上限按品类价格的第一个四分位计算，加入低价产品后上限本身也会下降（洁面 15.49 → 12.99，去角质 13.50 → 9.49）。保湿"出油"缺口已补上；去角质"出油"最低档从 0 款变为 1 款，仍有 5 行缺口（data/todo_skin.csv）。
+- 测试：按新数量更新 4 处计数；CosIng 香料功能成分里算加香的上限 40 → 50（新产品带来 43 个）；新增 src/data/budgetSupplement.test.ts。
+
 ### 2026-10-27 导入去角质第 1 批（EX-US-001—020）、点涂第 1 批（ST-US-001—015）、精华第 2 批修正
 - 产品 35 款、购买链接 68 条、评分 36 条追加；精华第 2 批修正版按 product_id 覆盖 20 款产品和评分（SE-US-038 改为 Ulta 4.6 / 3,387 条）。两份自查报告移到 docs/data_batches/。
 - 标准化：ST-US-014 usage_type → leave_on；active_concentrations 里"AHA blend""AHA+BHA+PHA blend"等非 INCI 条目移到 formula_note（EX-US-002、014、015）；key_actives 按 INCI 规则（EX-US-013 "Blue Algae" → Algae）；33 款误填的 subtype（chemical、physical_chemical_enzymatic、physical_enzymatic、hydrocolloid_patch、otc_acne_treatment）清空，原值记入 formula_note（与 #23 同样处理）。
