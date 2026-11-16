@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useI18n, type Key } from '../i18n';
 import { useProfiles } from '../profile/ProfileContext';
 import { profileDisplayName } from '../profile/displayName';
-import type { ProfileStore } from '../profile/storage';
+import type { Profile } from '../profile/storage';
 import { baseStatuses } from '../profile/questionnaire';
 import type { SpecialStatus } from '../scoring/score';
 
@@ -31,13 +31,13 @@ export default function ProfilePage() {
   const { t } = useI18n();
   const { store, profile, save, remove, add, switchTo, restore } = useProfiles();
   const [confirming, setConfirming] = useState(false);
-  /** 刚删除的档案：名称 + 删除前的档案列表，用于撤销 */
-  const [undo, setUndo] = useState<{ name: string; prev: ProfileStore } | null>(null);
+  /** 刚删除的档案，用于撤销；seq 让每次删除都重新计时 */
+  const [undo, setUndo] = useState<{ name: string; profile: Profile; seq: number } | null>(null);
   const clearUndo = useRef(() => setUndo(null)).current;
   useEffect(() => setConfirming(false), [profile?.id]);
 
   const undoBar = undo && (
-    <UndoBar name={undo.name} onDone={clearUndo} onUndo={() => { restore(undo.prev); setUndo(null); }} />
+    <UndoBar key={undo.seq} name={undo.name} onDone={clearUndo} onUndo={() => { restore(undo.profile); setUndo(null); }} />
   );
 
   if (!profile) {
@@ -124,7 +124,7 @@ export default function ProfilePage() {
               type="button"
               className="btn btn-danger-solid"
               autoFocus
-              onClick={() => { setUndo({ name: profileDisplayName(p.name, t), prev: store }); remove(p.id); setConfirming(false); }}
+              onClick={() => { setUndo({ name: profileDisplayName(p.name, t), profile: p, seq: Date.now() }); remove(p.id); setConfirming(false); }}
             >
               {t('profile.deleteConfirm')}
             </button>
