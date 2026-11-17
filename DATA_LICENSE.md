@@ -13,7 +13,8 @@ Content compiled, classified or written by the authors of this project in the fi
 - `data/ingredients.csv`、`data/ingredient_explanations.csv`
 - `data/chelators.csv`、`data/fragrance_ingredients.csv`
 - `data/cities.csv`、`data/water_hardness.csv`、`data/water_hardness_reference.csv`（整理与分级；数值来自各供水机构的公开报告，每条记录附来源）
-- `data/retail_ratings.csv`、`data/purchase_links.csv`（整理与核对；评分数字来自零售商页面，每条附链接和日期）
+- `data/purchase_links.csv`（链接的整理与核对记录）
+- `data/retail_ratings.csv` 中本项目添加的部分（链接、核对日期、备注）。**评分和评价数这两个数字本身不在 CC BY 授权范围内**，见下方"第三方数据"
 
 ## 第三方数据：按原来源条款
 
@@ -21,12 +22,12 @@ Third-party data follows the terms of its original source. Sources are credited 
 
 | 文件 / 内容 | 来源 | 条款 |
 |---|---|---|
-| `data/cosing_export_2026-10-17.csv`、`data/cosing_ingredients.csv` | 欧盟委员会 CosIng 数据库，https://ec.europa.eu/growth/tools-databases/cosing/ ，2026-10-17 获取 | © European Union。按欧盟委员会文件重用政策（Commission Decision 2011/833/EU）重用，须注明来源；本项目已转换格式，内容未改动 |
+| `data/cosing_export_2026-10-17.csv`、`data/cosing_ingredients.csv` | 欧盟委员会 CosIng 数据库，https://ec.europa.eu/growth/tools-databases/cosing/ ，2026-10-17 获取 | © European Union。按欧盟委员会文件重用政策（Commission Decision 2011/833/EU）重用，须注明来源；本项目已转换格式（改列名和列顺序），内容未改动。欧盟委员会说明 CosIng 仅供参考，不具法律效力 |
 | `data/eu_fragrance_allergens.csv` | 欧盟化妆品法规（EC）No 1223/2009 附录 III | 欧盟法规文本，按 EUR-Lex 的重用条款，须注明来源 |
 | `data/exchange_rates.csv` | 美联储 H.10 汇率，https://www.federalreserve.gov/releases/h10/current/ | 按美联储网站的使用条款 |
 | 产品图片（`products.csv` 的 image_* 列） | Open Beauty Facts，每张图片的来源、许可和署名记录在对应行 | 目前全部为 CC BY-SA 3.0（https://creativecommons.org/licenses/by-sa/3.0/ ）。展示时保留署名和许可链接；修改图片须注明并以相同方式共享。图片许可不包括品牌商标 |
 | 成分表原文、品牌宣称原文短摘（`products.csv` 的 inci_list_original、brand_claims_quote 等） | 各品牌产品页和包装 | 著作权归原权利人；本项目只为说明产品信息而引用并附来源链接 |
-| 零售商评分 | Ulta、Sephora、Target、Amazon 等产品页 | 只作展示、附链接和核对日期；数字归原平台 |
+| 零售商评分和评价数（`data/retail_ratings.csv` 的 rating、rating_count、rating_count_display 列） | Ulta、Sephora、Target、Walmart、Amazon 等产品页 | 数字归原平台，本项目不授予任何许可。网站只作为事实信息展示，并附原页面链接和核对日期。复用这些数字前请自行确认相应平台的使用条款 |
 
 如果你是权利人并对某项内容的使用有疑问，请在仓库中提 issue。
 If you are a rights holder and have concerns about any content, please open an issue in the repository.

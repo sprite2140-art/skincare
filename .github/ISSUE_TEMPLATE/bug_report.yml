@@ -1,0 +1,34 @@
+name: 页面问题 / Bug report
+description: 页面显示或功能有误 / Something on the site looks or works wrong
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: 发生了什么 / What happened
+      description: 包括你期望看到什么 / Include what you expected instead
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      placeholder: |
+        1. 打开 / Open ...
+        2. 点击 / Click ...
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: 页面地址 / Page URL
+  - type: input
+    id: browser
+    attributes:
+      label: 浏览器和设备 / Browser and device
+      placeholder: Safari 18, iPhone
+  - type: textarea
+    id: extra
+    attributes:
+      label: 截图或其他信息 / Screenshots or other details
+      description: 请不要贴出你的个人健康信息 / Please do not include personal health information

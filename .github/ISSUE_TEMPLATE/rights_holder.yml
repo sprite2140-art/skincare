@@ -1,0 +1,22 @@
+name: 权利人问题 / Rights-holder concern
+description: 你是权利人，对本项目使用的某项内容有疑问 / You hold rights to content used in this project and have a concern
+labels: [rights]
+body:
+  - type: input
+    id: content
+    attributes:
+      label: 涉及的内容 / Content concerned
+      description: 文件、产品 ID、图片或页面地址 / File, product ID, image or page URL
+    validations:
+      required: true
+  - type: textarea
+    id: concern
+    attributes:
+      label: 问题说明 / Your concern
+    validations:
+      required: true
+  - type: input
+    id: relation
+    attributes:
+      label: 你与该内容的关系 / Your relationship to the content
+      placeholder: 品牌方、图片作者 / Brand owner, photographer

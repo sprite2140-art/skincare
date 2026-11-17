@@ -1,6 +1,6 @@
 # skincare（开发期内部名称）
 
-[English](README.en.md)
+[English](README.en.md) · 网站：https://lauraskincare.pages.dev
 
 一个免费、开源的护肤 / 头皮 / 头发产品推荐工具：根据你的状态、需求和所在城市，以成分为依据推荐具体产品，并解释每一项评分的原因。不接广告，不拿返佣，打分规则公开。
 
@@ -27,7 +27,7 @@ A free, open-source tool that recommends skincare, scalp and hair products based
 
 ## 本地开发
 
-需要 Node.js 20 或以上版本。
+需要 Node.js 22.12 或以上版本（与 `.node-version` 一致）。
 
 ```bash
 npm install
@@ -46,6 +46,10 @@ npm run build          # 构建静态网页到 dist/
 ## 当前阶段
 
 v0.1：头皮与头发（洗发水、护发素、洗护搭配）和面部护肤（洁面、保湿、精华、防晒、去角质、点涂，早晚流程），面向美国用户，中英文界面。`src/scoring/config.ts` 的 `TEST_MODE_DRAFT_SCORING` 已于 2026-10-29 关闭（上线必须保持 false）。上线前审计见 [docs/LAUNCH_AUDIT.md](docs/LAUNCH_AUDIT.md)。免责声明与隐私说明见网站的 /about 页，打分和数据的判断方法见 /data 页。
+
+## 参与贡献
+
+欢迎提 issue 和 PR，数据来源规则见 [CONTRIBUTING.md](CONTRIBUTING.md)。安全问题请按 [SECURITY.md](SECURITY.md) 私密报告。
 
 ## 许可
 

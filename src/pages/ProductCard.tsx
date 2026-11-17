@@ -536,7 +536,7 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
         {p.sourceUrls[0] && <> · <a href={p.sourceUrls[0]} target="_blank" rel="noreferrer">{t('results.dataSource')}</a></>}
         {p.imageUrl && p.imageAttribution && (
           <>
-            {' · '}{t('results.imageCredit')}：{p.imageAttribution}，<a href={p.imageSource} target="_blank" rel="noreferrer">{t('results.imageSource')}</a>，<a href={p.imageLicenseUrl} target="_blank" rel="noreferrer">{p.imageLicense}</a>
+            {' · '}{t('results.imageCredit')}{lang === 'zh' ? '：' : ': '}{p.imageAttribution}{lang === 'zh' ? '，' : ', '}<a href={p.imageSource} target="_blank" rel="noreferrer">{t('results.imageSource')}</a>{lang === 'zh' ? '，' : ', '}<a href={p.imageLicenseUrl} target="_blank" rel="noreferrer">{p.imageLicense}</a>
           </>
         )}
       </p>
