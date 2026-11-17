@@ -2,17 +2,28 @@
 
 [中文](README.md)
 
-A free, open-source tool that recommends scalp and hair products based on ingredients, your needs and your city's water. Every score is explained. No ads, no affiliate links, and the scoring rules are public. Recommendations come from fixed rules, not AI.
+A free, open-source tool that recommends scalp, hair and face skincare products based on ingredients, your needs and your city's climate and water. Every score is explained. No ads, no affiliate links, and the scoring rules are public. Recommendations come from fixed rules, not AI.
 
 ## What it does
 
+**Hair care (shampoo and conditioner)**
+
 - A short quiz covers your scalp (oiliness, dandruff, itch, redness, hair loss), your hair (thickness, texture, damage), the effects you want, fragrance preference, budget and city.
 - Products are scored on four dimensions: need match (50%), irritation risk (25%), evidence (15%) and environment, meaning water hardness (10%). A dimension that does not apply to you, or has no data, is left out and the remaining weights are renormalized.
-- Each product card shows two short reasons, the price and size, and a purchase link. The details list the score for each dimension, the support for each claim, fragrance information, ingredients with plain-language explanations, and usage notes.
 - Results include shampoos, conditioners, and a shampoo + conditioner set that fits a total budget.
-- Health notes ("consider seeing a dermatologist") appear for certain scalp answers. They never name a disease.
 
-Details: [docs/SCORING.md](docs/SCORING.md) (scoring), [docs/QUIZ.md](docs/QUIZ.md) (questions and mappings) and [docs/PRODUCT.md](docs/PRODUCT.md) (product plan). These documents are in Chinese.
+**Face skincare**
+
+- A separate quiz covers skin type, sensitivity, up to three ranked concerns (breakouts, oiliness, dryness, redness, dark spots, fine lines, visible pores), makeup, time outdoors, sweating or swimming, special situations (pregnancy, trying to conceive, breastfeeding, prescription topicals or oral isotretinoin), fragrance preference and budget.
+- It builds the fewest steps that work together, following the American Academy of Dermatology's basic order (cleanse → treatment → moisturizer and sunscreen), with separate morning and evening routines. Categories: cleanser, moisturizer, serum, sunscreen, exfoliator and spot treatment.
+- Concerns are weighted 3 / 2 / 1 by your ranking. Combinations of actives that should not be layered are flagged, and products that conflict with a special situation (for example retinoids during pregnancy) are left out with the reason shown. Water hardness is not used for face products.
+
+**Both**
+
+- Each product card shows two short reasons, the price and size, and a purchase link. The details list the score for each dimension, the support for each claim, fragrance information, ingredients with plain-language explanations, and usage notes.
+- Health notes ("consider seeing a dermatologist") appear for certain answers, such as a red, painful scalp or widespread, painful breakouts. They never name a disease.
+
+Details: [docs/SCORING.md](docs/SCORING.md) (scoring), [docs/QUIZ.md](docs/QUIZ.md) (hair quiz), [docs/SKIN_QUIZ_DRAFT.md](docs/SKIN_QUIZ_DRAFT.md) (skincare quiz and rules) and [docs/PRODUCT.md](docs/PRODUCT.md) (product plan). These documents are in Chinese.
 
 ## Data principles
 
@@ -34,7 +45,7 @@ Details: [docs/SCORING.md](docs/SCORING.md) (scoring), [docs/QUIZ.md](docs/QUIZ.
 
 ## Development
 
-Requires Node.js 20 or later.
+Requires Node.js 20.19 or later (22 recommended, as in `.node-version`).
 
 ```bash
 npm install
@@ -53,6 +64,10 @@ Stack: Vite + React + TypeScript. The site reads `data/*.csv` at build time. It 
 ## Status
 
 v0.1 covers scalp and hair (shampoo, conditioner, sets) and face skincare (cleanser, moisturizer, serum, sunscreen, exfoliator, spot treatment, with AM/PM routines) for US users, with Chinese and English interfaces. Test mode was turned off on 2026-10-29; the pre-launch audit is in [docs/LAUNCH_AUDIT.md](docs/LAUNCH_AUDIT.md) (Chinese). The disclaimer and privacy notes are on the site's /about page; how scores and data are judged is explained on /data.
+
+## Contributing
+
+Issues and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md) for the data sourcing rules. Please report security issues privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 

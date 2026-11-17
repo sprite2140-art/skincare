@@ -1,0 +1,30 @@
+name: 数据纠错 / Data correction
+description: 成分表、价格、链接、证据等级等数据有误 / An ingredient list, price, link or evidence level is wrong
+labels: [data]
+body:
+  - type: input
+    id: product
+    attributes:
+      label: 产品或成分 / Product or ingredient
+      description: 产品名或 product_id（如 SH-US-001），或成分 INCI 名 / Product name or product_id (e.g. SH-US-001), or INCI name
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: 哪里不对 / What is wrong
+    validations:
+      required: true
+  - type: textarea
+    id: correct
+    attributes:
+      label: 正确的信息 / Correct information
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: 来源链接 / Source link
+      description: 品牌官网、包装照片、文献或权威机构页面 / Brand page, packaging photo, paper or authority page
+    validations:
+      required: true

@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.19"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -25,17 +28,17 @@
     "papaparse": "^5.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0"
+    "react-router-dom": "^7.18.5"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",
     "@types/papaparse": "^5.3.15",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.4",
-    "tsx": "^4.19.2",
+    "@vitejs/plugin-react": "^5.2.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.6.3",
-    "vite": "^5.4.11",
-    "vitest": "^2.1.8"
+    "vite": "^7.3.8",
+    "vitest": "^5.1.0"
   }
 }
