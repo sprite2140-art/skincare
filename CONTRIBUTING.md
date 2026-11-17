@@ -12,7 +12,7 @@
 
 ## 本地开发
 
-需要 Node.js 20.19 或以上（推荐 22）。
+需要 Node.js 22.12 或以上（与 `.node-version` 一致）。
 
 ```bash
 npm install
@@ -52,7 +52,7 @@ npm run build          # 构建
 
 Issues and pull requests are welcome. The core of this project is **public, verifiable data and fixed scoring rules**, so data sourcing matters even more than code. Most documentation is in Chinese; feel free to write issues and PRs in English.
 
-**Development.** Node.js 20.19+ (22 recommended). Before opening a PR, make sure `npm run typecheck`, `npm run validate-data`, `npm test` and `npm run build` all pass; CI runs the same checks.
+**Development.** Node.js 22.12+. Before opening a PR, make sure `npm run typecheck`, `npm run validate-data`, `npm test` and `npm run build` all pass; CI runs the same checks.
 
 **Data rules.**
 

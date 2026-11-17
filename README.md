@@ -27,7 +27,7 @@ A free, open-source tool that recommends skincare, scalp and hair products based
 
 ## 本地开发
 
-需要 Node.js 20.19 或以上版本（推荐 22，与 `.node-version` 一致）。
+需要 Node.js 22.12 或以上版本（与 `.node-version` 一致）。
 
 ```bash
 npm install

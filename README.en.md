@@ -45,7 +45,7 @@ Details: [docs/SCORING.md](docs/SCORING.md) (scoring), [docs/QUIZ.md](docs/QUIZ.
 
 ## Development
 
-Requires Node.js 20.19 or later (22 recommended, as in `.node-version`).
+Requires Node.js 22.12 or later (see `.node-version`).
 
 ```bash
 npm install
