@@ -1,6 +1,6 @@
 # skincare（开发期内部名称）
 
-[English](README.en.md)
+[English](README.en.md) · 网站：https://lauraskincare.pages.dev
 
 一个免费、开源的护肤 / 头皮 / 头发产品推荐工具：根据你的状态、需求和所在城市，以成分为依据推荐具体产品，并解释每一项评分的原因。不接广告，不拿返佣，打分规则公开。
 

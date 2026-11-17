@@ -1,6 +1,6 @@
 # skincare (working name)
 
-[中文](README.md)
+[中文](README.md) · Website: https://lauraskincare.pages.dev
 
 A free, open-source tool that recommends scalp, hair and face skincare products based on ingredients, your needs and your city's climate and water. Every score is explained. No ads, no affiliate links, and the scoring rules are public. Recommendations come from fixed rules, not AI.
 
