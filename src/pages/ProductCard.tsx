@@ -28,6 +28,24 @@ import type { FaceProductScore } from '../scoring/faceScore';
 /** 卡片上最多显示的标签数 */
 const MAX_CARD_TAGS = 2;
 
+/** 榜单 / 奖项来源的简短显示名（卡片标签用，完整名称在悬停提示和数据里） */
+const AWARD_SHORT: [RegExp, Key][] = [
+  [/^Ulta Best Sellers/i, 'award.ulta_best_sellers'],
+  [/^Allure Readers/i, 'award.allure_readers_choice'],
+  [/^Allure/i, 'award.allure_best_of_beauty'],
+  [/^Cosmopolitan Holy Grail/i, 'award.cosmo_holy_grail'],
+  [/^Cosmopolitan Readers/i, 'award.cosmo_readers_choice'],
+  [/Sephora/i, 'award.cew_sephora'],
+  [/^Shop TODAY/i, 'award.shop_today'],
+  [/^NewBeauty/i, 'award.newbeauty'],
+  [/^Women.s Health/i, 'award.womens_health'],
+];
+
+export function awardLabel(source: string, year: string | number, t: (k: Key) => string) {
+  const hit = AWARD_SHORT.find(([re]) => re.test(source));
+  return `${hit ? t(hit[1]) : source} ${year}`.trim();
+}
+
 export function productName(p: Product, lang: string) {
   return lang === 'zh' ? spaceCjk(p.nameZh || p.nameEn) : p.nameEn || p.nameZh;
 }
@@ -212,8 +230,8 @@ export default function ProductCard({ r, market, profile, scentGoal, compact, de
     overBudget ? { text: t('card.overBudget'), wrap: true } : null,
     p.subtype ? { text: t(`subtype.${p.subtype}` as Key), wrap: true } : null,
     free ? { text: t('scentTag.free'), wrap: true } : f.labeledFreeWithPlants ? { text: tx(labeledWithPlants(f)), wrap: true } : null,
-    p.awards[0] ? { text: `${p.awards[0].source} ${p.awards[0].year}`, wrap: false } : null,
-  ].filter((x): x is { text: string; wrap: boolean } => !!x).slice(0, MAX_CARD_TAGS);
+    p.awards[0] ? { text: awardLabel(p.awards[0].source, p.awards[0].year, t), wrap: true, title: `${p.awards[0].source} ${p.awards[0].year}` } : null,
+  ].filter((x): x is { text: string; wrap: boolean; title?: string } => !!x).slice(0, MAX_CARD_TAGS);
   const gentleLevel = r.dimensions.irritation.level;
 
   return (
@@ -222,7 +240,9 @@ export default function ProductCard({ r, market, profile, scentGoal, compact, de
         <ProductImage key={p.productId} p={p} />
         <div className="product-main">
           <div className="brand">{p.brand}</div>
-          <h3 className="name">{productName(p, lang)}</h3>
+          {/* 品牌已显示在上一行，名称开头的品牌名去掉；中文界面没有中文名的产品，在英文原名下补一行中文品类 */}
+          <h2 className="name">{seriesName(p, lang)}</h2>
+          {lang === 'zh' && !p.nameZh && <div className="name-kind">{t(`card.kind.${p.category}` as Key)}</div>}
           <div className="meta">
             <span>
               {p.price !== null ? formatMoney(p.price, p.currency, false) : t('results.noPrice')}
@@ -233,10 +253,11 @@ export default function ProductCard({ r, market, profile, scentGoal, compact, de
           </div>
           {top && (
             <div className="rating-line">
-              <span aria-hidden="true">★</span> {top.rating.toFixed(1)} · <span className="nowrap">{t('card.ratingLine', { platform: t(`platform.${top.platform}` as Key), n: ratingCountText(top) })}</span>
+              <span className="nowrap"><span aria-hidden="true">★</span> {top.rating.toFixed(1)}</span>{' '}
+              <span className="nowrap">{lang === 'zh' ? '（' : '('}{t('card.ratingLine', { platform: t(`platform.${top.platform}` as Key), n: ratingCountText(top) })}{lang === 'zh' ? '）' : ')'}</span>
             </div>
           )}
-          {tags.length > 0 && <div className="tags">{tags.map((x, i) => <span key={i} className={x.wrap ? 'tag wrap' : 'tag'}>{x.text}</span>)}</div>}
+          {tags.length > 0 && <div className="tags">{tags.map((x, i) => <span key={i} className={x.wrap ? 'tag wrap' : 'tag'} title={x.title}>{x.text}</span>)}</div>}
           {p.formulaVersionPending && <p className="note">{t('card.formulaPending')}</p>}
         </div>
         {r.score !== null && !compact && (r.noNeeds ? (
@@ -247,7 +268,10 @@ export default function ProductCard({ r, market, profile, scentGoal, compact, de
             </div>
           )
         ) : r.fitLevel && (
-          <div className={`fitbadge ${r.fitLevel}`}><strong>{t(`fit.${r.fitLevel}` as Key)}</strong></div>
+          <div className={`fitbadge ${r.fitLevel}`}>
+            <span className="fit-label">{t('results.fitLabel')}</span>
+            <strong>{t(`fit.${r.fitLevel}` as Key)}</strong>
+          </div>
         ))}
       </div>
 
@@ -331,7 +355,7 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
       {/* ② 需求对照：每个已选需求一行；洗发水分"头皮与清洁""发丝效果（主要看护发素）"两组 */}
       {needs.length > 0 && (
         <section>
-          <h4 className="sec-title">{t('card.needTable')}</h4>
+          <h3 className="sec-title">{t('card.needTable')}</h3>
           <table className="tbl need-tbl">
             <thead>
               <tr><th>{t('card.need.col.need')}</th><th>{t('card.need.col.result')}</th><th>{t('card.need.col.basis')}</th></tr>
@@ -371,7 +395,7 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
 
       {/* ③ 需要注意：风险成分只在这里列一次，说明与温和度的扣分一致 */}
       <section>
-        <h4 className="sec-title">{t('card.cautions')}</h4>
+        <h3 className="sec-title">{t('card.cautions')}</h3>
         <ul className="list">
           {r.dimensions.irritation.level && (
             <li>
@@ -400,7 +424,7 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
       {/* ④ 在哪买：评分和评价数只在这里出现；没有评分的平台只显示平台名 */}
       {rows.length > 0 && (
         <section>
-          <h4 className="sec-title">{t('card.where')}</h4>
+          <h3 className="sec-title">{t('card.where')}</h3>
           <ul className="stores">
             {rows.map((row) => (
               <li key={row.platform + row.url}>
@@ -439,7 +463,7 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
 
       {/* ⑤ 成分：关键成分 → 全部成分（折叠）→ 包装原文 */}
       <section>
-        <h4 className="sec-title">{t('card.ingredients')}</h4>
+        <h3 className="sec-title">{t('card.ingredients')}</h3>
         {keys.length + filters.length > 0 ? (
           <ul className="list">
             {/* 防晒剂：美国标签写法（如 Avobenzone）不在成分库，按原文和公布的浓度列出 */}
@@ -459,7 +483,7 @@ function CardDetails({ r, profile, rows, foldsOpen }: { r: ProductScore; profile
 
       {/* ⑥ 怎么用：只有含去屑有效成分的洗发水才显示去屑说明 */}
       <section>
-        <h4 className="sec-title">{t('card.usage')}</h4>
+        <h3 className="sec-title">{t('card.usage')}</h3>
         <p>{t((p.subtype ? `usage.${p.subtype}` : `usage.${p.category}`) as Key)}</p>
         {p.category === 'shampoo' && !p.subtype && hasAntiDandruffActive(p, ingredientIndex) && <p>{t('usage.antiDandruff')}</p>}
         {/* 面部产品：品牌原文的用法（不从成分推测） */}

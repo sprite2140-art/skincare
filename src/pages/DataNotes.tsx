@@ -26,8 +26,7 @@ export default function DataNotes() {
   }, [hash]);
   return (
     <main className="shell about">
-      <div className="label">{t('data.kicker')}</div>
-      <h1 className="h1" style={{ marginTop: 8 }}>{t('data.title')}</h1>
+      <h1 className="h1">{t('data.title')}</h1>
       <p className="lead">{t('data.intro')}</p>
       {SECTIONS.map((s) => (
         <section key={s.id} id={s.id}>

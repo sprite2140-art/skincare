@@ -122,6 +122,12 @@ export function removeProfile(store: ProfileStore, id: string): ProfileStore {
   return { ...store, profiles, activeId: store.activeId === id ? (profiles[0]?.id ?? null) : store.activeId };
 }
 
+/** 撤销删除：只把删掉的那份档案放回当前列表并设为当前档案，不改动删除之后对其他档案的修改 */
+export function restoreProfile(store: ProfileStore, profile: Profile): ProfileStore {
+  const exists = store.profiles.some((p) => p.id === profile.id);
+  return { ...store, activeId: profile.id, profiles: exists ? store.profiles : [...store.profiles, profile] };
+}
+
 export function activeProfile(store: ProfileStore): Profile | null {
   return store.profiles.find((p) => p.id === store.activeId) ?? null;
 }

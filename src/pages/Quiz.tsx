@@ -16,7 +16,7 @@ import {
 import { newProfile } from '../profile/storage';
 import { DandruffIllo, HairLossIllo } from './Illustrations';
 import WaterInfo from './WaterInfo';
-import { AvoidQuestion, MoneyInput, Multi, Single } from './quizParts';
+import { AvoidQuestion, MoneyInput, Multi, Single, useFocusHeading } from './quizParts';
 import { budgetOptions, type BudgetChoice } from '../scoring/budget';
 import { currencyForCountry } from '../scoring/price';
 import type { FragrancePref, WashFrequency } from '../scoring/score';
@@ -54,6 +54,7 @@ export default function Quiz() {
   const [stepIndex, setStepIndex] = useState(0);
   const timer = useRef<number | null>(null);
   useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current); }, []);
+  useFocusHeading(stepIndex);
 
   const city = cities.find((c) => cityKey(c) === base.cityKey) ?? null;
   const currency = currencyForCountry(city?.country ?? 'US');
@@ -155,7 +156,6 @@ export default function Quiz() {
       continueLabel = t('quiz.start');
       body = (
         <>
-          <div className="label">{t('quiz.intro.kicker')}</div>
           <h1 className="h1">{t('quiz.intro.title')}</h1>
           <ul className="intro-list">
             {(['oil', 'dandruff', 'hair', 'env'] as const).map((k) => (
@@ -597,7 +597,7 @@ export default function Quiz() {
 
   return (
     <main className="shell quiz">
-      <div className="progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
+      <div className="progress" aria-hidden="true"><span style={{ transform: `scaleX(${progress / 100})` }} /></div>
       <div className="quiz-head">
         <button type="button" className="textbtn" onClick={back}>← {t('quiz.back')}</button>
         {stepIndex > 0 && <span className="label">{t('quiz.counter', { n: stepIndex, total: questionCount })}</span>}

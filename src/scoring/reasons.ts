@@ -40,8 +40,10 @@ function needReason(m: NeedMatch, product: Product): Reason {
   const c = positioningLabel(m, product);
   const t = m.label;
   const a = ACTION[m.target] ?? TARGET_LABELS[m.target];
+  // 需求名来自选项（如 "Smooth"），放进英文句子时首字母小写并加引号
+  const q = `“${t.en.charAt(0).toLowerCase()}${t.en.slice(1)}”`;
   if (m.bases.includes('tested')) {
-    return { zh: `有产品测试支持改善${t.zh}`, en: `A product test supports it for ${t.en}`, basis: 'tested' };
+    return { zh: `有产品测试支持改善${t.zh}`, en: `A product test supports it for ${q}`, basis: 'tested' };
   }
   if (m.keyIngredients.length > 0) {
     const n = joinNames(m.keyIngredients.slice(0, 2).map((i) => ingredientName(i, i.inciName)));
@@ -49,8 +51,8 @@ function needReason(m: NeedMatch, product: Product): Reason {
   }
   if (c) {
     return m.bases.includes('brand_claim') || product.claimSource === 'brand_text'
-      ? { zh: `品牌说明针对${t.zh}`, en: `The brand says it targets ${t.en}`, basis: 'brand_claim' }
-      : { zh: `定位为针对${t.zh}的产品`, en: `Positioned for ${t.en}`, basis: 'classification' };
+      ? { zh: `品牌说明针对${t.zh}`, en: `The brand says it helps with ${q}`, basis: 'brand_claim' }
+      : { zh: `定位为针对${t.zh}的产品`, en: `Listed as a ${q} product`, basis: 'classification' };
   }
   const n = joinNames(m.ingredients.slice(0, 2).map((i) => ingredientName(i, i.inciName)));
   return { zh: `成分表里有${a.zh}成分${n.zh}，但不是主打`, en: `Lists ${a.en} ingredient ${n.en}, though not as a key ingredient`, basis: 'ingredients' };

@@ -12,6 +12,7 @@ import {
   EMPTY_HAIR, adviseCare, cityKey, cityName, moneyToUsd, scalpInfoNotes, scalpMedicalAlerts, shampooOnlyGoals, toScoringProfile, type Answers, type ScalpAnswers,
 } from '../profile/questionnaire';
 import { newProfile } from '../profile/storage';
+import { profileDisplayName } from '../profile/displayName';
 import { formatMoney, nextBudgetChoice } from '../scoring/budget';
 import { FEW_OPTIONS } from '../scoring/shortfall';
 import { EmptyNotice, FewOptions, ShortfallReasons } from './Shortfall';
@@ -28,6 +29,10 @@ type SortBy = 'fit' | 'price';
 
 /** 进入推荐主列表：不被排除、能打分、不是"不太匹配" */
 const isListed = (r: ProductScore) => !r.excluded && !r.lowMatch && r.score !== null;
+/** 适合度"一般"的产品不算推荐，单独列在推荐之后 */
+const isFair = (r: ProductScore) => !r.noNeeds && r.fitLevel === 'low';
+/** 还没填问卷时，默认列表先显示的款数 */
+const PREVIEW_COUNT = 10;
 
 function usdLabel(usd: number) {
   return formatMoney(usd, 'USD', false);
@@ -47,6 +52,9 @@ export default function Results() {
   const [view, setView] = useState<View>(initialView);
   const [sortBy, setSortBy] = useState<SortBy>('fit');
   const [showOthers, setShowOthers] = useState(false);
+  /** 还没填问卷时，是否展开全部产品 */
+  const [showAll, setShowAll] = useState(false);
+  const noQuiz = !profile?.scalp;
   /** 搭配中用户替换或移除的单品：productId，null 表示已移除 */
   const [picks, setPicks] = useState<Partial<Record<Category, string | null>>>({});
   /** 打开了"看看稍高预算的选择"的品类 */
@@ -111,10 +119,14 @@ export default function Results() {
         </div>
       );
     }
-    const shown = sorted(d.ranked.filter(isListed));
+    const listed = sorted(d.ranked.filter(isListed));
+    const shown = listed.filter((r) => !isFair(r));
+    const fair = listed.filter(isFair);
+    // 没填问卷：默认列表只先显示前几款
+    const preview = noQuiz && !showAll ? shown.slice(0, PREVIEW_COUNT) : shown;
     const shampooOnly = shampooOnlyGoals(answers, cat);
     // 推荐少于 3 款：提示，可以看看高一档预算（不自动放宽）
-    const tier = shown.length < FEW_OPTIONS ? nextTier(cat) : null;
+    const tier = listed.length < FEW_OPTIONS ? nextTier(cat) : null;
     const few = tier && (
       <FewOptions empty={shown.length === 0} nextCap={tier.label} open={!!nextTierOpen[cat]} onToggle={() => setNextTierOpen({ ...nextTierOpen, [cat]: !nextTierOpen[cat] })} />
     );
@@ -125,16 +137,30 @@ export default function Results() {
     const excluded = d.ranked.filter((r) => r.excluded);
     return (
       <>
-        <p className="small muted" style={{ marginTop: 4 }}>{t('results.count', { n: d.ranked.length, ok: shown.length })}</p>
+        <p className="small muted" style={{ marginTop: 4 }}>
+          {noQuiz ? t('results.countAll', { n: d.ranked.length }) : t('results.count', { n: d.ranked.length, ok: shown.length })}
+        </p>
         {shampooOnly.length > 0 && (
           <p className="small muted">
             {t(d.profile.concerns.length === 0 ? 'results.goalShampooOnlyAll' : 'results.goalShampooOnly', { goals: shampooOnly.map((n) => tx(n.label)).join(lang === 'zh' ? '、' : ', ') })}
           </p>
         )}
-        {shown.length === 0 ? (
+        {listed.length === 0 ? (
           <EmptyNotice ranked={d.ranked} quizPath="/quiz">{few}</EmptyNotice>
-        ) : shown.length < FEW_OPTIONS && few}
-        {shown.map((r) => <ProductCard key={r.product.productId} r={r} market={market} profile={d.profile} scentGoal={scentGoal} />)}
+        ) : listed.length < FEW_OPTIONS && few}
+        {preview.map((r) => <ProductCard key={r.product.productId} r={r} market={market} profile={d.profile} scentGoal={scentGoal} />)}
+        {preview.length < shown.length && (
+          <button type="button" className="btn btn-block" onClick={() => setShowAll(true)}>
+            {t('results.showMore', { n: shown.length - preview.length })}
+          </button>
+        )}
+        {fair.length > 0 && (
+          <section className="fair-group">
+            <h2 className="label">{t(shown.length === 0 ? 'results.fairOnlyHeading' : 'results.fairHeading')}</h2>
+            <p className="small muted">{t('results.fairBody')}</p>
+            {fair.map((r) => <ProductCard key={r.product.productId} r={r} market={market} profile={d.profile} scentGoal={scentGoal} />)}
+          </section>
+        )}
         {tier && nextTierOpen[cat] && tier.extra.length === 0 && <p className="small muted">{t('few.none', { cap: tier.label })}</p>}
         {tier && tier.extra.length > 0 && (
           <>
@@ -247,13 +273,12 @@ export default function Results() {
   return (
     <main className="shell">
       <header className="results-head">
-        <div className="label">{t('results.kicker')}</div>
-        <h1 className="h1" style={{ marginTop: 8 }}>{t(`results.title.${view}` as Key)}</h1>
+        <h1 className="h1">{t(`results.title.${view}` as Key)}</h1>
         <div className="chips">
-          <span className="tag">{city ? cityName(city, lang) : t('results.noCity')}</span>
-          <span className="tag">{t('results.marketTag', { market: t(`region.${market}` as Key) })}</span>
-          {profile && <span className="tag">{profile.name}</span>}
-          <Link className="tag" to="/quiz">{t('results.editQuiz')}</Link>
+          <span className="tag info">{city ? cityName(city, lang) : t('results.noCity')}</span>
+          <span className="tag info">{t('results.marketTag', { market: t(`region.${market}` as Key) })}</span>
+          {profile && <span className="tag info">{profileDisplayName(profile.name, t)}</span>}
+          {!noQuiz && <Link className="tag" to="/quiz">{t('results.editQuiz')}</Link>}
         </div>
       </header>
 
@@ -283,13 +308,19 @@ export default function Results() {
             {t('results.testBanner')}
           </div>
         )}
-        {(view === 'set'
+        {noQuiz && (
+          <div className="notice">
+            <strong>{t('results.noQuizTitle')}</strong>
+            <p>{t('results.noQuizBody')}</p>
+            <Link className="btn btn-primary quiz-cta" to="/quiz">{t('results.startQuiz')}</Link>
+          </div>
+        )}
+        {!noQuiz && (view === 'set'
           ? setData.shampoo.profile.concerns.length === 0 && setData.conditioner.profile.concerns.length === 0
           // 只选了由洗发水实现的目标时，护发素列表另有说明，不说"没有选择具体需求"
           : data[view].profile.concerns.length === 0 && shampooOnlyGoals(answers, view).length === 0) && (
           <p className="small muted">{t('results.noNeeds')}</p>
         )}
-        {!profile?.scalp && <p className="small muted">{t('results.noProfile')}</p>}
       </div>
 
       <div className="segmented tabs" role="tablist" style={{ marginTop: 20 }}>

@@ -1,8 +1,21 @@
 // 问卷共用的选项组件：洗护问卷和护肤问卷都用。
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { AvoidOption, BaseAnswers, Money } from '../profile/questionnaire';
 import { useI18n, type Key } from '../i18n';
+
+/** 换题后把焦点移到新题标题上，键盘和读屏用户不用从页面顶部重新开始（第一次进入时不移动） */
+export function useFocusHeading(step: unknown) {
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    const h = document.querySelector<HTMLElement>('main h1');
+    if (!h) return;
+    h.setAttribute('tabindex', '-1');
+    h.focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  }, [step]);
+}
 
 export function Single<T extends string>(props: { options: readonly T[]; value: T | null; label: (v: T) => string; sub?: (v: T) => string; onPick: (v: T) => void }) {
   return (
