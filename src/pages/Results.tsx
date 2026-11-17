@@ -273,8 +273,7 @@ export default function Results() {
   return (
     <main className="shell">
       <header className="results-head">
-        <div className="label">{t('results.kicker')}</div>
-        <h1 className="h1" style={{ marginTop: 8 }}>{t(`results.title.${view}` as Key)}</h1>
+        <h1 className="h1">{t(`results.title.${view}` as Key)}</h1>
         <div className="chips">
           <span className="tag info">{city ? cityName(city, lang) : t('results.noCity')}</span>
           <span className="tag info">{t('results.marketTag', { market: t(`region.${market}` as Key) })}</span>

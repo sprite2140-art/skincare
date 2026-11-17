@@ -21,8 +21,7 @@ function Home() {
   return (
     <main className="shell">
       <section className="hero">
-        <div className="label">{t('home.kicker')}</div>
-        <h1 className="display" style={{ marginTop: 12 }}>{t('home.title')}</h1>
+        <h1 className="display">{t('home.title')}</h1>
         <p>{t('app.tagline')}</p>
         <div className="stack" style={{ marginTop: 28 }}>
           <Link className="btn btn-primary btn-block" to="/quiz">{t('home.startHair')}</Link>

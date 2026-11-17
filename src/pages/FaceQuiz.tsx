@@ -72,7 +72,6 @@ export default function FaceQuiz() {
       continueLabel = t('quiz.start');
       body = (
         <>
-          <div className="label">{t('skinQuiz.intro.kicker')}</div>
           <h1 className="h1">{t('skinQuiz.intro.title')}</h1>
           <p className="lead">{t('skinQuiz.intro.body')}</p>
           <p className="hint">{t('quiz.intro.privacy')}</p>
@@ -193,7 +192,7 @@ export default function FaceQuiz() {
 
   return (
     <main className="shell quiz">
-      <div className="progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
+      <div className="progress" aria-hidden="true"><span style={{ transform: `scaleX(${progress / 100})` }} /></div>
       <div className="quiz-head">
         <button type="button" className="textbtn" onClick={back}>← {t('quiz.back')}</button>
         {stepIndex > 0 && <span className="label">{t('quiz.counter', { n: stepIndex, total: questionCount })}</span>}

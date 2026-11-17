@@ -156,7 +156,6 @@ export default function Quiz() {
       continueLabel = t('quiz.start');
       body = (
         <>
-          <div className="label">{t('quiz.intro.kicker')}</div>
           <h1 className="h1">{t('quiz.intro.title')}</h1>
           <ul className="intro-list">
             {(['oil', 'dandruff', 'hair', 'env'] as const).map((k) => (
@@ -598,7 +597,7 @@ export default function Quiz() {
 
   return (
     <main className="shell quiz">
-      <div className="progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
+      <div className="progress" aria-hidden="true"><span style={{ transform: `scaleX(${progress / 100})` }} /></div>
       <div className="quiz-head">
         <button type="button" className="textbtn" onClick={back}>← {t('quiz.back')}</button>
         {stepIndex > 0 && <span className="label">{t('quiz.counter', { n: stepIndex, total: questionCount })}</span>}

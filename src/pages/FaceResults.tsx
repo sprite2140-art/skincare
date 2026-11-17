@@ -149,8 +149,7 @@ export default function FaceResults() {
   return (
     <main className="shell">
       <header className="results-head">
-        <div className="label">{t('skinQuiz.intro.kicker')}</div>
-        <h1 className="h1" style={{ marginTop: 8 }}>{t('skinResults.title')}</h1>
+        <h1 className="h1">{t('skinResults.title')}</h1>
         <div className="chips">
           {profile && <span className="tag info">{profileDisplayName(profile.name, t)}</span>}
           <span className="tag info">{t('results.marketTag', { market: t(`region.${market}` as Key) })}</span>
