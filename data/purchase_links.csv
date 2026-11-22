@@ -218,7 +218,7 @@ MO-US-011,brand,https://skinfix.com/products/lipid-peptide-cream,listed,2026-10-
 MO-US-012,brand,https://skinfix.com/products/barrier-balancing-water-cream,listed,2026-10-24,已打开对应商品页；listed只表示页面列出，不保证库存或配方版本匹配
 MO-US-013,brand,https://tatcha.com/products/the-dewy-skin-cream,listed,2026-10-24,已打开对应商品页；listed只表示页面列出，不保证库存或配方版本匹配
 MO-US-014,brand,https://www.skinceuticals.com/skincare/anti-aging-creams/triple-lipid-restore-2-4-2/S09.html,listed,2026-10-24,已打开对应商品页；listed只表示页面列出，不保证库存或配方版本匹配
-MO-US-015,brand,https://m.cremedelamer.com/product/5834/12343/face/moisturizers/creme-de-la-mer,listed,2026-10-24,已打开对应商品页；listed只表示页面列出，不保证库存或配方版本匹配
+MO-US-015,brand,https://www.cremedelamer.com/product/5834/12343/face/moisturizers/creme-de-la-mer,listed,2026-11-22,已打开对应商品页；listed只表示页面列出，不保证库存或配方版本匹配；2026-11-22：m. 子域名会跳转到 www，改为 www 地址
 MO-US-016,brand,https://www.clinique.com/products/moisture-surge-100h-auto-replenishing-hydrator,listed,2026-10-24,已打开对应商品页；listed只表示页面列出，不保证库存或配方版本匹配
 MO-US-017,ulta,https://www.ulta.com/p/calm-restore-oat-gel-moisturizer-pimprod2017659?sku=2570004,listed,2026-10-24,已打开对应商品页；listed只表示页面列出，不保证库存或配方版本匹配
 MO-US-018,target,https://www.target.com/p/cetaphil-rich-hydrating-face-cream-with-hyaluronic-acid-1-7oz/-/A-51257202,listed,2026-10-24,已打开对应商品页；listed只表示页面列出，不保证库存或配方版本匹配
@@ -249,7 +249,7 @@ SU-US-042,sephora,https://www.sephora.com/product/kiehls-better-screen-tm-uv-ser
 SU-US-043,sephora,https://www.sephora.com/product/it-cosmetics-hello-sunshine-spf-P510412/,listed,2026-10-26,Direct retailer PDP opened.
 SU-US-044,sephora,https://www.sephora.com/product/peter-thomas-roth-water-drench-hyaluronic-hydrating-moisturizer-spf-45-P458576?skuId=2354629,listed,2026-10-26,Direct retailer PDP opened.
 SU-US-045,ulta,https://www.ulta.com/p/protect-glow-daily-sunscreen-gel-broad-spectrum-spf-30-pimprod2016249,listed,2026-10-26,Direct retailer PDP opened; supersize 3.38 oz selected.
-SU-US-046,sephora,https://www.sephora.com/product/shiseido-urban-environment-oil-free-sunscreen-broad-spectrum-spf-42-P474390,listed,2026-10-26,"Direct Sephora product page opened; product shown as Urban Environment Oil-Control Sunscreen SPF 40, 50 mL, $52."
+SU-US-046,sephora,https://www.sephora.com/product/shiseido-urban-environment-oil-free-spf-42-face-sunscreen-with-hyaluronic-acid-P482739,listed,2026-11-22,"原商品页 P474390 已下架（2026-11-22 打开跳转到""Sorry, this product is not available""）；换成 Sephora 现行商品页，标题同为 Urban Environment Oil-Control Sunscreen SPF 40，常规价 $52。"
 SU-US-047,walmart,https://www.walmart.com/ip/181312877,listed,2026-10-26,"Walmart direct PDP opened; template platform enum has no walmart value, so retailer link retained while platform is conservatively set to brand only in this auxiliary table. See self-check."
 SU-US-049,sephora,https://www.sephora.com/product/sunsuede-spf-50-lightweight-sunscreen-blurring-primer-stick-P522181?skuId=2973014,listed,2026-10-26,Direct retailer PDP opened.
 SU-US-050,kohls,https://www.kohls.com/product/prd-7562699/merit-the-uniform-tinted-mineral-sunscreen-broad-spectrum-spf-45.jsp,listed,2026-10-26,"Sephora at Kohl's direct PDP; template has no kohls platform value, stored as sephora."
