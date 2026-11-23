@@ -43,3 +43,25 @@ describe('ChatGPT 数据包（2026-11-23）', () => {
     expect(byId('SH-US-092').inciList).toContain('Polyquaternium-7');
   });
 });
+
+describe('ChatGPT 第二批数据（2026-11-23）', () => {
+  it('SH-US-093—096 凭美容奖项入库（评价数不足 1,000），可推荐', () => {
+    for (const id of ['SH-US-093', 'SH-US-094', 'SH-US-095', 'SH-US-096']) {
+      const p = byId(id);
+      expect(p.inclusionBasisType, id).toBe('beauty_award');
+      expect(p.inclusionPending, id).toBeFalsy();
+      expect(isRecommendable(p), id).toBe(true);
+      expect(p.price!, id).toBeLessThan(10.99);
+    }
+    expect(byId('SH-US-094').claimedBenefits).toEqual(['dandruff', 'sensitive_scalp']);
+  });
+
+  it('SE-US-007 改用成分一致的 Target 75mL：价格和容量同步，打分成分表不变', () => {
+    const p = byId('SE-US-007');
+    expect(isRecommendable(p)).toBe(true);
+    expect(p.price).toBe(11.99);
+    expect(p.sizeMl).toBe(75);
+    expect(p.purchaseLinks.map((l) => l.platform)).toContain('target');
+    expect(p.inciList).toContain('Tocopherol');
+  });
+});

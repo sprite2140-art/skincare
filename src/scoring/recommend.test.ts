@@ -199,7 +199,7 @@ describe('场景 4：跳过城市和所有可跳过的题', () => {
     expect(profile.city).toBeNull();
     expect(marketForCity(null)).toBe('US');
     // 美国洗发水 84 款，儿童 / 婴儿产品 4 款不进推荐
-    expect(ok.length).toBe(88); // 2026-11-23 低价洗发水 8 款
+    expect(ok.length).toBe(92); // 2026-11-23 低价洗发水 8 款 + 第二批奖项入库 4 款
     expect(ok.every((r) => r.product.region === 'US')).toBe(true);
     expect(ok[0].dimensions.need.score).toBeNull();
     expect(recommendReasons(ok[0], profile, false).length).toBeGreaterThan(0);

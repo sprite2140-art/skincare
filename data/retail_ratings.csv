@@ -352,3 +352,8 @@ SH-US-090,target,3.93,1073,1073,ratings,2026-11-23,https://www.target.com/p/-/A-
 SH-US-091,walmart,4.3,,16.1K,ratings,2026-11-23,https://www.walmart.com/ip/247937500,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
 CO-US-060,walmart,4.3,6660,6660,ratings,2026-11-23,https://www.walmart.com/ip/139154944,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
 SH-US-092,walmart,4.6,2412,2412,ratings,2026-11-23,https://www.walmart.com/ip/14099967804,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+SE-US-007,target,4.81,1471,1471,ratings,2026-11-23,https://www.target.com/p/-/A-91980436,Exact count from current retailer embedded statistics; may aggregate product-size family. Formula matched75mL SKU.
+SH-US-093,target,4.38,96,96,ratings,2026-11-23,https://www.target.com/p/-/A-92267969,"Below1000; admission is beauty award, NOT review count. Family/variant aggregation may apply."
+SH-US-094,target,4.48,205,205,ratings,2026-11-23,https://www.target.com/p/-/A-94745683,"Below1000; admission is beauty award, NOT review count. Family/variant aggregation may apply."
+SH-US-095,walmart,4.7,512,512,ratings,2026-11-23,https://www.walmart.com/ip/1965459549,"Below1000; admission is beauty award, NOT review count. Family/variant aggregation may apply."
+SH-US-096,walmart,4.5,751,751,ratings,2026-11-23,https://www.walmart.com/ip/12834917482,"Below1000; admission is beauty award, NOT review count. Family/variant aggregation may apply."

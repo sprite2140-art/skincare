@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-23",
+  "new_rows": 4,
+  "modified_rows": 1,
+  "historical_delivery_repeated": false,
+  "files": [
+    {
+      "file": "README.md",
+      "bytes": 1559,
+      "sha256": "5f5cdd309cabafea3bf64e39edaaabad337624fc9585e657041ee6ae52aef5d5"
+    },
+    {
+      "file": "admission_type_updates.csv",
+      "bytes": 132,
+      "sha256": "64ea4858fbd8d3772d76590d6d7e33e520d2ae30212bdece1df2eb0114d14271"
+    },
+    {
+      "file": "artifact_verification.json",
+      "bytes": 620,
+      "sha256": "036bd59246c8ed174ff381779dcd5063bce185d60f2de979910f62b8a0529e47"
+    },
+    {
+      "file": "coverage_changes.csv",
+      "bytes": 418,
+      "sha256": "efb324703a03cbecaaf21894d0f1703a20b8beefcac89e7f762599a810d8a1e0"
+    },
+    {
+      "file": "products.csv",
+      "bytes": 10570,
+      "sha256": "968842d2997a515f3101826f945dc70a03eb5f1cb837a294f350c459043b9cf4"
+    },
+    {
+      "file": "purchase_links.csv",
+      "bytes": 857,
+      "sha256": "6a9be4ab99a394d8201dcd6a5dcd66924a3e93a273da40c314a86d56c73d9132"
+    },
+    {
+      "file": "remaining_gaps.csv",
+      "bytes": 384,
+      "sha256": "af43bc59e00d1ad011b07a3f92d6d63c95b9f1a2b07d4911069c4199098fb2eb"
+    },
+    {
+      "file": "retail_ratings.csv",
+      "bytes": 1037,
+      "sha256": "35d9a93fd91b814a354b60f46d69dd16b9d2366c8ca79c40942a3712d243614e"
+    },
+    {
+      "file": "self_check.md",
+      "bytes": 8195,
+      "sha256": "fc11d6217cfa314435eaaaa668bc29b569b4d73117f08b8d0ffbba16e534ae6b"
+    },
+    {
+      "file": "source_evidence.json",
+      "bytes": 3006,
+      "sha256": "3a46838a203b2b389e9ff2a2fdd58f211fa3891ecde2bfc70a50f49e9886164a"
+    },
+    {
+      "file": "validation_report.json",
+      "bytes": 550,
+      "sha256": "09b4892366d5ea8e8950f158760ec674bc1e39a8eab4301270b60436f9386d17"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "products_exact_50_columns": true,
+  "only_5_new_or_modified_rows": true,
+  "new_ids_no_collision_main_or_previous_delivery": true,
+  "brand_name_dedup_main_and_prior_delivery": true,
+  "key_actives_literal_inci": true,
+  "subtype_blank": true,
+  "all_new_shampoo_regular_price_at_most_10_99": true,
+  "SE007_9_ingredient_order_match": true,
+  "SE007_scored_inci_unchanged": true,
+  "SE007_price_and_size_aligned_with_purchase_SKU": true,
+  "all_4_award_types_explicit_in_sidecar": true,
+  "remaining_gap_rows": 7,
+  "full_task_complete": false
+}
