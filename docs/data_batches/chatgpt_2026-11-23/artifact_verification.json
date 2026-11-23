@@ -1,0 +1,74 @@
+[
+  {
+    "name": "task1_products.csv",
+    "rows": 1,
+    "columns": 50,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "task1_purchase_links.csv",
+    "rows": 1,
+    "columns": 6,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "task1_retail_ratings.csv",
+    "rows": 1,
+    "columns": 9,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "task2_products.csv",
+    "rows": 18,
+    "columns": 50,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "task2_purchase_links.csv",
+    "rows": 18,
+    "columns": 6,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "task2_retail_ratings.csv",
+    "rows": 20,
+    "columns": 9,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "task3_products.csv",
+    "rows": 7,
+    "columns": 50,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "task3_purchase_links.csv",
+    "rows": 7,
+    "columns": 6,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "task3_retail_ratings.csv",
+    "rows": 0,
+    "columns": 9,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "task1_formula_comparison.csv",
+    "rows": 4,
+    "columns": 10,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "task3_resolution.csv",
+    "rows": 10,
+    "columns": 7,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "task2_coverage.csv",
+    "rows": 21,
+    "columns": 8,
+    "cellRoundTrip": true
+  }
+]

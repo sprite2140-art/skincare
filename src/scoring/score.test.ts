@@ -35,9 +35,9 @@ describe('data/ 真实数据', () => {
   const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
   it('CSV 能正确解析，名称已统一', () => {
-    // 洗发水 94 款（美国 84、日韩中 10），护发素 57 款（2026-10-27 补缺各 20 款，2026-10-29 成人补位 SH-US-081—084）
-    expect(real.products.filter((p) => p.zone !== 'face')).toHaveLength(151);
-    expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(57);
+    // 洗发水 102 款（美国 92、日韩中 10），护发素 60 款（2026-10-27 补缺各 20 款，2026-10-29 成人补位 SH-US-081—084，2026-11-23 低价补缺洗发水 8、护发素 3）
+    expect(real.products.filter((p) => p.zone !== 'face')).toHaveLength(162); // 2026-11-23 低价补缺洗护 11 款
+    expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(60);
     // 保留原有产品 ID
     for (const id of ['SH-US-001', 'SH-US-008', 'SH-JP-001', 'SH-KR-003', 'SH-CN-002']) expect(byId(id)).toBeDefined();
     const us1 = byId('SH-US-001');
@@ -75,7 +75,7 @@ describe('data/ 真实数据', () => {
   });
 
   it('没有价格的产品不参与三分位计算', () => {
-    expect(budgetCaps.shampoo!.sampleSize).toBe(91);
+    expect(budgetCaps.shampoo!.sampleSize).toBe(100); // 2026-11-23 加入低价洗发水 8 款、SH-KR-003 补了价格
   });
 
   it('关闭测试模式时，draft 有效成分不参与需求匹配（只剩资料分类的产品定位）；基础成分无需核对即可使用', () => {
@@ -120,8 +120,9 @@ describe('data/ 真实数据', () => {
     const matched = ranked.filter((r) => r.dimensions.need.score === 100).map((r) => r.product.productId);
     for (const id of ['SH-US-001', 'SH-US-042', 'SH-US-043', 'SH-US-044']) expect(matched).toContain(id);
     expect(ranked[0].dimensions.need.score).toBe(100);
-    // 日韩中版本还没有购买链接，不进入推荐列表（2026-11-03）；成分匹配本身照常
-    for (const id of ['SH-KR-004', 'SH-CN-001']) {
+    // 没有购买链接的地区版本不进入推荐列表（2026-11-03）；成分匹配本身照常。SH-KR-004 已于 2026-11-23 补上链接
+    expect(ranked.some((r) => r.product.productId === 'SH-KR-004')).toBe(true);
+    for (const id of ['SH-CN-001']) {
       expect(ranked.some((r) => r.product.productId === id)).toBe(false);
       expect(scoreProduct(byId(id), profile({ concerns: ['dandruff'] }), testMode).dimensions.need.score).toBe(100);
     }
@@ -146,7 +147,7 @@ describe('data/ 真实数据', () => {
   });
 
   it('没有价格的产品只在"不限"档出现', () => {
-    const kr = byId('SH-KR-003');
+    const kr = byId('SH-CN-001'); // SH-KR-003 已于 2026-11-23 补上价格
     const r = scoreProduct(kr, profile({ budget: 'q2' }), strict);
     expect(r.exclusions.map((e) => e.code)).toEqual(['price_unknown']);
     expect(r.exclusions[0].text.zh).toBe('价格未知，只在预算选"不限"时显示');
@@ -168,13 +169,13 @@ describe('按市场筛选', () => {
     expect(marketForCity(null)).toBe('US');
     const us = filterByMarket(shampoos, 'US', false);
     expect(ids(us.shown).every((id) => id.startsWith('SH-US'))).toBe(true);
-    expect(us.shown).toHaveLength(84);
+    expect(us.shown).toHaveLength(92);
     expect(us.hiddenCount).toBe(10);
     expect(filterByMarket(shampoos, 'JP', false).shown).toHaveLength(4);
   });
 
   it('打开"显示其他地区版本"后显示全部；没有市场时不筛选', () => {
-    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(94);
+    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(102);
     expect(filterByMarket(shampoos, null, false)).toEqual({ shown: shampoos, hiddenCount: 0 });
   });
 

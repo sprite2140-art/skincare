@@ -1,0 +1,43 @@
+{
+  "checked_on": "2026-11-23",
+  "baseline": "sprite2140-art/skincare main raw CSV downloaded this run",
+  "baseline_sha256": {
+    "products.csv": "9040ab353f0fe3891e0d4a851aab71c3665a7f352a1b03ea04d7b50f242038de",
+    "retail_ratings.csv": "feedf019615a29c61e0ed5833c063d5fe36a708641c823234c9bd474ce9d6e98",
+    "todo_hair.csv": "b4b86c8333d8b66873aa2516741e9b69c53c76a3d4a462a3c7999b678f8c39ee",
+    "DATA_SCHEMA.md": "c51903cf13d6fb0a33ffbb9d8f596fab1a79644dd56cb2f681a5aa9fb4d2b84c",
+    "todo_skin.csv": "1f01b00bf2d0fceede5c9c9979dd0da532d8211751459bed806cdd90b9c5a761",
+    "purchase_links.csv": "e9ced59e273e7cc5cbc3df121d062a548bc618d0462fd9ec96479b5b0f445589"
+  },
+  "checks": {
+    "new_id_unique": true,
+    "no_id_collision": true,
+    "brand_name_dedup": true,
+    "new_subtype_blank": true,
+    "key_actives_literal_inci": true,
+    "single_inci_source_per_new_row": true,
+    "update_inci_unchanged": true,
+    "no_new_images_or_unlicensed_media": true,
+    "task1_50_column_template": true,
+    "task2_50_column_template": true,
+    "task3_50_column_template": true,
+    "all_new_have_qualifying_direct_rating_evidence": true,
+    "task1_purchase_links_unique_key": true,
+    "task1_retail_ratings_unique_key": true,
+    "task2_purchase_links_unique_key": true,
+    "task2_retail_ratings_unique_key": true,
+    "task3_purchase_links_unique_key": true,
+    "task3_retail_ratings_unique_key": true,
+    "SE008_23_item_order_under_documented_normalization": true
+  },
+  "technical_checks_pass": true,
+  "task_completion": "partial",
+  "unmet_gap_rows": 9,
+  "unresolved_region_ids": [
+    "SH-KR-002",
+    "SH-CN-001",
+    "SH-CN-002"
+  ],
+  "schema_exception": "task3 purchase_links uses truthful local retailer platform keys absent from current DATA_SCHEMA.md enum; review only until supported. No fake US-platform mapping.",
+  "task3_platform_schema_compatible": false
+}

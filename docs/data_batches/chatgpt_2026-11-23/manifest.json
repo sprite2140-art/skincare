@@ -1,0 +1,111 @@
+{
+  "delivery_date": "2026-11-23",
+  "historical_tables_included": false,
+  "files": [
+    {
+      "file": "README.md",
+      "bytes": 2076,
+      "sha256": "f65cdf9aa28d944546eba6a2dd97ff091a0029884b9792b01c3d9b0f59ae5c89"
+    },
+    {
+      "file": "artifact_verification.json",
+      "bytes": 1283,
+      "sha256": "9a28fbf0a91c3f737bf9df07ca7cd07f1d171ef78654a002938f1795d7807a14"
+    },
+    {
+      "file": "inclusion_evidence.json",
+      "bytes": 11410,
+      "sha256": "82d037bde86b761377f87971fdf28a90fd20a439944c0ea09ddb0d5759c23ce0"
+    },
+    {
+      "file": "self_check.md",
+      "bytes": 777,
+      "sha256": "f62bc4becc2c74f3882b9018859493a2c54f6f83d2f293b9be5a4d6628288dfe"
+    },
+    {
+      "file": "task1_formula_comparison.csv",
+      "bytes": 3194,
+      "sha256": "679cd82a05dcde1a725d7e8b92cc559f8cb114db164221211fec63c999d71064"
+    },
+    {
+      "file": "task1_products.csv",
+      "bytes": 2955,
+      "sha256": "7ecbb129436c77ba9cde82dd7552d45465f76897ab651a56ba1d280e4b1daceb"
+    },
+    {
+      "file": "task1_purchase_links.csv",
+      "bytes": 262,
+      "sha256": "6e9a07ec9861f8b59c81e65421dec7caef6a6004dbba4008c8bc3b0a65390f32"
+    },
+    {
+      "file": "task1_retail_ratings.csv",
+      "bytes": 294,
+      "sha256": "424960706d51ad130b13c7ee9c9ec682fa56a2a0dc47c5bbea58696ad1bfded4"
+    },
+    {
+      "file": "task1_self_check.md",
+      "bytes": 3056,
+      "sha256": "977238bf956d08e652cc163fc758ee4529e7c9225d6c94dd0de1909c0b25e9af"
+    },
+    {
+      "file": "task2_coverage.csv",
+      "bytes": 1237,
+      "sha256": "60802537baa4bae190532e1959bc27437dd6b01793e8421c220ce2bc0d1d8246"
+    },
+    {
+      "file": "task2_held_candidates.csv",
+      "bytes": 1995,
+      "sha256": "e21eec187c01abf9a32912c815260a2122f81fb255226fb4bbc0aa3b946f1aa0"
+    },
+    {
+      "file": "task2_products.csv",
+      "bytes": 28679,
+      "sha256": "6c4002b0735a6e720cccefbcb4f22a8d064e5a310df36634abd705b01a0af2f5"
+    },
+    {
+      "file": "task2_purchase_links.csv",
+      "bytes": 3129,
+      "sha256": "881cea15acf8ce37dfeacb39ab5f20f2667cfbe70c5397e599136763e4052ba9"
+    },
+    {
+      "file": "task2_retail_ratings.csv",
+      "bytes": 4183,
+      "sha256": "4ca924e392bee8d6bf85be846134a9c62cb39c68a915ae420e268c22570065de"
+    },
+    {
+      "file": "task2_self_check.md",
+      "bytes": 3449,
+      "sha256": "e76b4d6a31aef8d88efae5d1815f0d95f2cdd1a59687b88a9fcce99f9447fa54"
+    },
+    {
+      "file": "task3_products.csv",
+      "bytes": 22613,
+      "sha256": "5e6a3826f85a356f59fb1e48906993c964ec8c6851985dce01d470a81bfcbafd"
+    },
+    {
+      "file": "task3_purchase_links.csv",
+      "bytes": 1914,
+      "sha256": "28b50c6f53243d1440b93d8c508319336b7998b78e994b2dac7df7ab0dec479e"
+    },
+    {
+      "file": "task3_resolution.csv",
+      "bytes": 1897,
+      "sha256": "4f162fa8f4387838e38d9155e150bb2b4b4b6edb0dab9ba6474691094cbaec57"
+    },
+    {
+      "file": "task3_retail_ratings.csv",
+      "bytes": 97,
+      "sha256": "e86e592a12137702a34a84b6d7de8894e22d2d32c832804d41ad7ebb2452babf"
+    },
+    {
+      "file": "task3_self_check.md",
+      "bytes": 3111,
+      "sha256": "6612a9e0e6df5b5feb63824170e824820cd6d048bc192e23322216a07fc309b4"
+    },
+    {
+      "file": "validation_report.json",
+      "bytes": 1889,
+      "sha256": "3a592b305a65684434ec15f6286d659998ca19e8551644fd15dced8e9f88854c"
+    }
+  ]
+}

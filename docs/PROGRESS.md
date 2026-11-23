@@ -19,6 +19,14 @@
 
 **下一步**：测试模式已于 10/29 关闭；SU-US-048 已替换（10/29）；10/30–31 按试用反馈修改。
 
+### 2026-11-23 导入 ChatGPT 数据包（SE-US-008 链接、低价补缺 18 款、日韩版本 7 款）
+- 原始交付和自查报告在 docs/data_batches/chatgpt_2026-11-23/。products 按列名合并（交付是 50 列，inclusion_basis_type 新品留空、已有行保留）；购买链接、评分按 product_id + platform 合并。
+- 任务 1：SE-US-008 的 Ulta 在售版本与打分成分表 23 项一致（只差 Water 写法、大小写和一处多余逗号），补 Ulta 购买链接和评分；品牌官网仍是 version_mismatch，不列出。SE-US-005—007 在售版本都少了 Tocopherol（005 的 Cetyl Tranexamate Mesylate 还从 3% 变 2%、006 两项顺序互换），仍然没有可用链接，待作者决定是否按在售版本整行替换。
+- 任务 2：新增 EX-US-027—031、CL-US-047—048、SH-US-085—092、CO-US-058—060，都按评价数入库。EX-US-029 的 Walmart 评价页（/ip/4157）用浏览器核对过，1,605 条。导入时更正：claimed_benefits 的 color_care 改为 color_fade（3 款）；CL-US-048 官方面板把 Sodium Benzotriazolyl Butylphenol Sulfonate 拆成两项，合并；SH-US-092 Polyquaterinum-7 → Polyquaternium-7；key_actives 为空的填 Not separately disclosed。
+- 任务 3：SH-JP-001—004、SH-KR-001、003、004 补 purchase_url 和常规价（KR-001 改用常规价 25,000 韩元、KR-004 改 29,000、JP-004 改 1,430 日元、KR-003 补 16,000）。当地零售商（松本清、Yahoo 购物、Amore Mall、SSG、Kurly）不在 purchase_links.csv 的平台列表里，所以只写进 products.csv 的 purchase_url 和 channels，没有写进购买链接表。SH-KR-002、SH-CN-001、SH-CN-002 只找到套装，仍待补。
+- 低价缺口：洗护 16 → 6 行，护肤 5 → 4 行。护肤最低档上限继续下降（去角质 9.49 → 7.65、洁面 12.99 → 12.57）。EX-US-027、028 只含水杨酸、品牌没有写控油，成分库里水杨酸的 targets 只有 dandruff / scalp_oil / acne，不算面部"出油"。
+- 测试：按新数量更新计数；CosIng 香料功能成分里算加香的上限 50 → 60；新增 src/data/chatgptBatch1123.test.ts。
+
 ### 2026-11-15 导入护肤低价补缺（EX-US-021—026、CL-US-041—046、MO-US-041—046）；恢复 README
 - 11-02 上传在仓库根目录的 9 个 CSV 追加到 data/（产品 18、购买链接 36、评分 21）；inclusion_basis_type 留空，按评分表自动判断（18 款都按评价数入库）。自查报告移到 docs/data_batches/budget_supplement_self_check.md，来源核验 json 和包说明移到 docs/data_batches/budget_supplement_2026-11-02/。
 - 同一次上传覆盖了 README.md，已从上一版恢复，并把"当前阶段"更新为洗护 + 面部护肤、测试模式已关闭。

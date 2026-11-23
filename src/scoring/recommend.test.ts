@@ -199,7 +199,7 @@ describe('场景 4：跳过城市和所有可跳过的题', () => {
     expect(profile.city).toBeNull();
     expect(marketForCity(null)).toBe('US');
     // 美国洗发水 84 款，儿童 / 婴儿产品 4 款不进推荐
-    expect(ok.length).toBe(80);
+    expect(ok.length).toBe(88); // 2026-11-23 低价洗发水 8 款
     expect(ok.every((r) => r.product.region === 'US')).toBe(true);
     expect(ok[0].dimensions.need.score).toBeNull();
     expect(recommendReasons(ok[0], profile, false).length).toBeGreaterThan(0);
@@ -315,8 +315,8 @@ describe('护发素数据', () => {
   const co = real.products.filter((p) => p.category === 'conditioner');
   const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
-  it('57 款，冲洗型；需求标签为资料分类；品牌宣称是产品页概括或原文摘录，带出处', () => {
-    expect(co).toHaveLength(57);
+  it('60 款（含 2026-11-23 低价补缺 3 款），冲洗型；需求标签为资料分类；品牌宣称是产品页概括或原文摘录，带出处', () => {
+    expect(co).toHaveLength(60);
     expect(co.filter((p) => p.claimedBenefits.length > 0).every((p) => p.claimSource === 'data_classification')).toBe(true);
     // 第 1 批扩充（CO-US-031 起）的品牌宣称是英文原文摘录
     expect(byId('CO-US-031').brandClaims).toMatchObject({ status: 'brand_page_quote', targets: ['tangling'] });

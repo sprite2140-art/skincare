@@ -125,7 +125,8 @@ describe('data/ 中导入的 CosIng（2026-10-17）', () => {
     const counted = withFn.filter((n) => tagged(n));
     expect(withFn.length).toBeGreaterThan(100);
     // 2026-11-15 低价补缺 18 款加入后为 43（POND'S 等配方自带致敏原），上限从 40 放宽到 50
-    expect(counted.length).toBeLessThan(50);
+    // 2026-11-23 低价补缺后为 50，上限放宽到 60
+    expect(counted.length).toBeLessThan(60);
   });
 });
 

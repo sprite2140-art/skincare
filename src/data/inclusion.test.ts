@@ -43,7 +43,8 @@ describe('入库依据：评价数 1,000 条以上', () => {
     const ids = real.products.filter((p) => p.inclusionBasisType === 'review_count' && /^(EX|ST)-/.test(p.productId)).map((p) => p.productId);
     expect(ids).toEqual(['EX-US-002', 'EX-US-003', 'EX-US-006', 'EX-US-008', 'EX-US-017', 'EX-US-019',
       'ST-US-001', 'ST-US-002', 'ST-US-003', 'ST-US-004', 'ST-US-005', 'ST-US-011', 'ST-US-012', 'ST-US-015',
-      'EX-US-021', 'EX-US-022', 'EX-US-023', 'EX-US-024', 'EX-US-025', 'EX-US-026']); // 2026-11-15 低价补缺追加在文件末尾
+      'EX-US-021', 'EX-US-022', 'EX-US-023', 'EX-US-024', 'EX-US-025', 'EX-US-026',
+      'EX-US-027', 'EX-US-028', 'EX-US-029', 'EX-US-030', 'EX-US-031']); // 2026-11-23 低价补缺 // 2026-11-15 低价补缺追加在文件末尾
     expect(real.products.filter((p) => /^(EX|ST)-/.test(p.productId) && p.inclusionPending)).toEqual([]);
   });
 

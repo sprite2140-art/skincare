@@ -1,0 +1,278 @@
+[
+  {
+    "product_id": "EX-US-027",
+    "inci_source": "https://www.target.com/p/-/A-15742228",
+    "price_source": "https://www.target.com/p/-/A-15742228",
+    "price": "3.99",
+    "size_ml": "237",
+    "rating_source": "https://www.target.com/p/-/A-15742228",
+    "rating_display": "1022",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "oil"
+    ],
+    "coverage_evidence_url": "https://www.target.com/p/-/A-15742228",
+    "coverage_quote_or_reason": "Salicylic Acid present; ingredient-based oil gap only"
+  },
+  {
+    "product_id": "EX-US-028",
+    "inci_source": "https://dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=69dcb600-ea59-4965-b35f-df46efcb99f8&type=display",
+    "price_source": "https://www.walmart.com/ip/14122691",
+    "price": "4.48",
+    "size_ml": "",
+    "rating_source": "https://www.walmart.com/ip/14122691",
+    "rating_display": "4112",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "oil"
+    ],
+    "coverage_evidence_url": "https://dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=69dcb600-ea59-4965-b35f-df46efcb99f8&type=display",
+    "coverage_quote_or_reason": "Salicylic Acid present; ingredient-based oil gap only"
+  },
+  {
+    "product_id": "EX-US-029",
+    "inci_source": "https://www.target.com/p/-/A-13337711",
+    "price_source": "https://www.target.com/p/-/A-13337711",
+    "price": "7.79",
+    "size_ml": "237",
+    "rating_source": "https://www.walmart.com/ip/4157",
+    "rating_display": "1,590",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "oil"
+    ],
+    "coverage_evidence_url": "https://www.target.com/p/-/A-13337711",
+    "coverage_quote_or_reason": "Salicylic Acid present; ingredient-based oil gap only"
+  },
+  {
+    "product_id": "EX-US-030",
+    "inci_source": "https://www.target.com/p/-/A-76545835",
+    "price_source": "https://www.target.com/p/-/A-76545835",
+    "price": "15.89",
+    "size_ml": "355",
+    "rating_source": "https://www.target.com/p/-/A-76545835",
+    "rating_display": "1061",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "oil"
+    ],
+    "coverage_evidence_url": "https://www.target.com/p/-/A-76545835",
+    "coverage_quote_or_reason": "Salicylic Acid present; ingredient-based oil gap only"
+  },
+  {
+    "product_id": "EX-US-031",
+    "inci_source": "https://www.ulta.com/p/lactic-acid-10-ha-2-high-strength-exfoliating-serum-uneven-texture-pimprod2007103",
+    "price_source": "https://www.ulta.com/p/lactic-acid-10-ha-2-high-strength-exfoliating-serum-uneven-texture-pimprod2007103",
+    "price": "9.2",
+    "size_ml": "30",
+    "rating_source": "https://www.sephora.com/product/the-ordinary-deciem-lactic-acid-10-ha-2-P427413",
+    "rating_display": "1.5K",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "pigmentation"
+    ],
+    "coverage_evidence_url": "https://www.ulta.com/p/lactic-acid-10-ha-2-high-strength-exfoliating-serum-uneven-texture-pimprod2007103",
+    "coverage_quote_or_reason": "Retailer manufacturer description explicitly targets dullness/uneven tone; Lactic Acid also appears in complete INCI."
+  },
+  {
+    "product_id": "CL-US-047",
+    "inci_source": "https://www.target.com/p/-/A-12921121",
+    "price_source": "https://www.target.com/p/-/A-12921121",
+    "price": "8.99",
+    "size_ml": "269",
+    "rating_source": "https://www.target.com/p/-/A-12921121",
+    "rating_display": "6888",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "acne",
+      "oil"
+    ],
+    "coverage_evidence_url": "https://www.target.com/p/-/A-12921121",
+    "coverage_quote_or_reason": "Salicylic Acid present; ingredient-based oil gap only"
+  },
+  {
+    "product_id": "CL-US-048",
+    "inci_source": "https://www.target.com/p/-/A-75561297",
+    "price_source": "https://www.target.com/p/-/A-75561297",
+    "price": "9.99",
+    "size_ml": "269",
+    "rating_source": "https://www.target.com/p/-/A-75561297",
+    "rating_display": "4276",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "acne",
+      "oil"
+    ],
+    "coverage_evidence_url": "https://www.target.com/p/-/A-75561297",
+    "coverage_quote_or_reason": "Salicylic Acid present; ingredient-based oil gap only"
+  },
+  {
+    "product_id": "SH-US-085",
+    "inci_source": "https://www.target.com/p/-/A-89170346",
+    "price_source": "https://www.target.com/p/-/A-89170346",
+    "price": "9.99",
+    "size_ml": "399",
+    "rating_source": "https://www.target.com/p/-/A-89170346",
+    "rating_display": "2830",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "dry_scalp"
+    ],
+    "coverage_evidence_url": "https://www.target.com/p/-/A-89170346",
+    "coverage_quote_or_reason": "13.5 fl oz. Retail copy mentions orchid/aloe but this full 9-ingredient panel does not; do not invent these actives. Sensitive scalp not counted without unambiguous version-specific claim. | Full active + inactive Drug Facts panel from this single Target page; no nutrition-panel merge."
+  },
+  {
+    "product_id": "SH-US-086",
+    "inci_source": "https://www.target.com/p/-/A-94775881",
+    "price_source": "https://www.target.com/p/-/A-94775881",
+    "price": "9.99",
+    "size_ml": "473",
+    "rating_source": "https://www.target.com/p/-/A-94775881",
+    "rating_display": "1444",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "dry_scalp"
+    ],
+    "coverage_evidence_url": "https://www.target.com/p/-/A-94775881",
+    "coverage_quote_or_reason": "helps moisturize hair and hydrate scalp"
+  },
+  {
+    "product_id": "SH-US-087",
+    "inci_source": "https://www.target.com/p/-/A-94410542",
+    "price_source": "https://www.target.com/p/-/A-94410542",
+    "price": "11.99",
+    "size_ml": "399",
+    "rating_source": "https://www.target.com/p/-/A-94410542",
+    "rating_display": "8154",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "dry_scalp"
+    ],
+    "coverage_evidence_url": "https://www.target.com/p/-/A-94410542",
+    "coverage_quote_or_reason": "13.5 fl oz regular shampoo; not 2-in-1. | Full active + inactive Drug Facts panel from this single Target page; no nutrition-panel merge."
+  },
+  {
+    "product_id": "SH-US-088",
+    "inci_source": "https://target.scene7.com/is/image/Target/GUEST_ccd2108e-b05c-4230-b0e6-1c3bb305ab4f",
+    "price_source": "https://www.target.com/p/-/A-83206630",
+    "price": "8.49",
+    "size_ml": "698",
+    "rating_source": "https://www.target.com/p/-/A-83206630",
+    "rating_display": "1172",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "volume",
+      "shine"
+    ],
+    "coverage_evidence_url": "https://target.scene7.com/is/image/Target/GUEST_ccd2108e-b05c-4230-b0e6-1c3bb305ab4f",
+    "coverage_quote_or_reason": "Cleanses fine & thin hair to remove build up for body & shine."
+  },
+  {
+    "product_id": "SH-US-089",
+    "inci_source": "https://www.ulta.com/p/everpure-volume-shampoo-xlsImpprod1170140?sku=2502781",
+    "price_source": "https://www.ulta.com/p/everpure-volume-shampoo-xlsImpprod1170140?sku=2502781",
+    "price": "10.99",
+    "size_ml": "251",
+    "rating_source": "https://www.ulta.com/p/everpure-volume-shampoo-xlsImpprod1170140?sku=2502781",
+    "rating_display": "2335",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "volume",
+      "color_care"
+    ],
+    "coverage_evidence_url": "https://www.ulta.com/p/everpure-volume-shampoo-xlsImpprod1170140?sku=2502781",
+    "coverage_quote_or_reason": "Color protection and boosts body, no weigh down"
+  },
+  {
+    "product_id": "CO-US-058",
+    "inci_source": "https://www.ulta.com/p/everpure-volume-conditioner-xlsImpprod1170136?sku=2502786",
+    "price_source": "https://www.ulta.com/p/everpure-volume-conditioner-xlsImpprod1170136?sku=2502786",
+    "price": "10.99",
+    "size_ml": "251",
+    "rating_source": "https://www.ulta.com/p/everpure-volume-conditioner-xlsImpprod1170136?sku=2502786",
+    "rating_display": "1773",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "volume",
+      "color_care"
+    ],
+    "coverage_evidence_url": "https://www.ulta.com/p/everpure-volume-conditioner-xlsImpprod1170136?sku=2502786",
+    "coverage_quote_or_reason": "Color protection and boosts body, no weigh down"
+  },
+  {
+    "product_id": "CO-US-059",
+    "inci_source": "https://www.target.com/p/-/A-75570645",
+    "price_source": "https://www.target.com/p/-/A-75570645",
+    "price": "8.99",
+    "size_ml": "899",
+    "rating_source": "https://www.target.com/p/-/A-75570645",
+    "rating_display": "10759",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "volume"
+    ],
+    "coverage_evidence_url": "https://www.target.com/p/-/A-75570645",
+    "coverage_quote_or_reason": "30.4 fl oz ordinary retail pump; no multipack division. | One complete Target ingredient list; organic asterisk footnotes removed only."
+  },
+  {
+    "product_id": "SH-US-090",
+    "inci_source": "https://www.target.com/p/-/A-52567229",
+    "price_source": "https://www.target.com/p/-/A-52567229",
+    "price": "11.99",
+    "size_ml": "296",
+    "rating_source": "https://www.target.com/p/-/A-52567229",
+    "rating_display": "1073",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "tone_yellow"
+    ],
+    "coverage_evidence_url": "https://www.target.com/p/-/A-52567229",
+    "coverage_quote_or_reason": "10 fl oz. Purple shampoo counts only toward yellow/brass neutralization, never a blue brunette/orange slot. | One complete Target ingredient list; organic asterisk footnotes removed only."
+  },
+  {
+    "product_id": "SH-US-091",
+    "inci_source": "https://www.garnierusa.com/about-our-brands/fructis/color-shield/color-shield-shampoo",
+    "price_source": "https://www.walmart.com/ip/247937500",
+    "price": "4.47",
+    "size_ml": "370",
+    "rating_source": "https://www.walmart.com/ip/247937500",
+    "rating_display": "16.1K",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "color_care",
+      "shine"
+    ],
+    "coverage_evidence_url": "https://www.garnierusa.com/about-our-brands/fructis/color-shield/color-shield-shampoo",
+    "coverage_quote_or_reason": "keeping hair color looking healthy, fresh, and shiny"
+  },
+  {
+    "product_id": "CO-US-060",
+    "inci_source": "https://www.sallybeauty.com/shop-by-shade/silver-and-gray-hair-shop/shimmer-lights-purple-conditioner-for-blonde-and-silver/SBS-017444.html",
+    "price_source": "https://www.walmart.com/ip/139154944",
+    "price": "14.25",
+    "size_ml": "473",
+    "rating_source": "https://www.walmart.com/ip/139154944",
+    "rating_display": "6660",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "tone_yellow"
+    ],
+    "coverage_evidence_url": "https://www.sallybeauty.com/shop-by-shade/silver-and-gray-hair-shop/shimmer-lights-purple-conditioner-for-blonde-and-silver/SBS-017444.html",
+    "coverage_quote_or_reason": "16 fl oz single bottle; Walmart Marketplace seller eCosmetics. One full Sally INCI chosen; Sally is ingredient source only, not admission platform. No claim of literal cross-retailer INCI equality."
+  },
+  {
+    "product_id": "SH-US-092",
+    "inci_source": "https://jhirmack.com/products/ageless-shampoo",
+    "price_source": "https://www.walmart.com/ip/14099967804",
+    "price": "5.77",
+    "size_ml": "355",
+    "rating_source": "https://www.walmart.com/ip/14099967804",
+    "rating_display": "2412",
+    "checked_on": "2026-11-23",
+    "coverage": [
+      "tone_yellow"
+    ],
+    "coverage_evidence_url": "https://jhirmack.com/products/ageless-shampoo",
+    "coverage_quote_or_reason": "neutralizing brassy, yellow tones"
+  }
+]
