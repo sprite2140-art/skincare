@@ -11,18 +11,19 @@ const real = loadDataFromDisk();
 const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
 describe('没有可用购买链接的产品', () => {
-  it('SE-US-005—008 只有与在售版本不一致的品牌官网链接，标为待补、不可推荐', () => {
+  it('Good Molecules 精华 4 款都有成分一致的零售链接：008 Ulta、007 Target 75mL、005/006 整行换成 Ulta 在售版本（2026-11-24）', () => {
     for (const id of ['SE-US-005', 'SE-US-006', 'SE-US-007', 'SE-US-008']) {
-      expect(byId(id).purchasePending).toBe(true);
-      expect(isRecommendable(byId(id))).toBe(false);
+      expect(byId(id).purchasePending, id).toBeFalsy();
+      expect(isRecommendable(byId(id)), id).toBe(true);
     }
+    expect(byId('SE-US-005').inciList).not.toContain('Tocopherol');
+    expect(byId('SE-US-006').inciList).not.toContain('Tocopherol');
     expect(hasUsablePurchaseLink(byId('SH-US-001'))).toBe(true);
   });
 
-  it('没有链接的只有 SE-US-005—008 和日韩中版本洗发水 10 款', () => {
+  it('没有链接的只有韩国、中国版本洗发水 3 款（2026-11-24）', () => {
     const ids = real.products.filter((p) => p.purchasePending).map((p) => p.productId);
-    expect(ids).toEqual(['SH-JP-001', 'SH-JP-002', 'SH-JP-003', 'SH-JP-004', 'SH-KR-001', 'SH-KR-002', 'SH-KR-003', 'SH-KR-004', 'SH-CN-001', 'SH-CN-002',
-      'SE-US-005', 'SE-US-006', 'SE-US-007', 'SE-US-008']);
+    expect(ids).toEqual(['SH-KR-002', 'SH-CN-001', 'SH-CN-002']);
   });
 
   it('不出现在推荐列表里；数据校验逐款提示', () => {
@@ -30,6 +31,6 @@ describe('没有可用购买链接的产品', () => {
     const data = { index: real.ingredientIndex, exchangeRates: real.exchangeRates, budgetCaps: computeBudgetCaps(real.products, real.exchangeRates) };
     expect(rankProducts(real.products, 'shampoo', profile, data).some((r) => r.product.purchasePending)).toBe(false);
     const issues = validateData(real.ingredients, real.products, real.cities, real.exchangeRates);
-    expect(issues.filter((i) => i.level === 'warning' && i.message.includes('没有可用的购买链接'))).toHaveLength(14);
+    expect(issues.filter((i) => i.level === 'warning' && i.message.includes('没有可用的购买链接'))).toHaveLength(3); // 2026-11-24 SE-US-005—007 都补了零售链接
   });
 });

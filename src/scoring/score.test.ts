@@ -5,7 +5,7 @@ import { validateData } from '../data/validate';
 import type { City, Ingredient, Product } from '../data/types';
 import { concernWeights, ingredientStatuses, rankProducts, scoreProduct, weightedTotal, type ScoringProfile } from './score';
 import { currencyForCountry } from './price';
-import { budgetOptions, computeBudgetCaps, formatMoney, percentile, type BudgetChoice } from './budget';
+import { budgetOptions, computeBudgetCaps, FIXED_Q1_USD, formatMoney, percentile, type BudgetChoice } from './budget';
 import { filterByMarket, inMarket, marketForCity } from './market';
 import { keyActiveTerms, matchesKeyActive } from '../data/keyActives';
 
@@ -35,9 +35,9 @@ describe('data/ 真实数据', () => {
   const byId = (id: string) => real.products.find((p) => p.productId === id)!;
 
   it('CSV 能正确解析，名称已统一', () => {
-    // 洗发水 94 款（美国 84、日韩中 10），护发素 57 款（2026-10-27 补缺各 20 款，2026-10-29 成人补位 SH-US-081—084）
-    expect(real.products.filter((p) => p.zone !== 'face')).toHaveLength(151);
-    expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(57);
+    // 洗发水 102 款（美国 92、日韩中 10），护发素 60 款（2026-10-27 补缺各 20 款，2026-10-29 成人补位 SH-US-081—084，2026-11-23 低价补缺洗发水 8、护发素 3）
+    expect(real.products.filter((p) => p.zone !== 'face')).toHaveLength(166); // 2026-11-23 低价补缺洗护 11 款 + 第二批洗发水 4 款
+    expect(real.products.filter((p) => p.category === 'conditioner')).toHaveLength(60);
     // 保留原有产品 ID
     for (const id of ['SH-US-001', 'SH-US-008', 'SH-JP-001', 'SH-KR-003', 'SH-CN-002']) expect(byId(id)).toBeDefined();
     const us1 = byId('SH-US-001');
@@ -75,7 +75,7 @@ describe('data/ 真实数据', () => {
   });
 
   it('没有价格的产品不参与三分位计算', () => {
-    expect(budgetCaps.shampoo!.sampleSize).toBe(91);
+    expect(budgetCaps.shampoo!.sampleSize).toBe(104); // 2026-11-23 加入低价洗发水 8 款、SH-KR-003 补了价格；第二批再加 4 款
   });
 
   it('关闭测试模式时，draft 有效成分不参与需求匹配（只剩资料分类的产品定位）；基础成分无需核对即可使用', () => {
@@ -120,8 +120,9 @@ describe('data/ 真实数据', () => {
     const matched = ranked.filter((r) => r.dimensions.need.score === 100).map((r) => r.product.productId);
     for (const id of ['SH-US-001', 'SH-US-042', 'SH-US-043', 'SH-US-044']) expect(matched).toContain(id);
     expect(ranked[0].dimensions.need.score).toBe(100);
-    // 日韩中版本还没有购买链接，不进入推荐列表（2026-11-03）；成分匹配本身照常
-    for (const id of ['SH-KR-004', 'SH-CN-001']) {
+    // 没有购买链接的地区版本不进入推荐列表（2026-11-03）；成分匹配本身照常。SH-KR-004 已于 2026-11-23 补上链接
+    expect(ranked.some((r) => r.product.productId === 'SH-KR-004')).toBe(true);
+    for (const id of ['SH-CN-001']) {
       expect(ranked.some((r) => r.product.productId === id)).toBe(false);
       expect(scoreProduct(byId(id), profile({ concerns: ['dandruff'] }), testMode).dimensions.need.score).toBe(100);
     }
@@ -146,7 +147,7 @@ describe('data/ 真实数据', () => {
   });
 
   it('没有价格的产品只在"不限"档出现', () => {
-    const kr = byId('SH-KR-003');
+    const kr = byId('SH-CN-001'); // SH-KR-003 已于 2026-11-23 补上价格
     const r = scoreProduct(kr, profile({ budget: 'q2' }), strict);
     expect(r.exclusions.map((e) => e.code)).toEqual(['price_unknown']);
     expect(r.exclusions[0].text.zh).toBe('价格未知，只在预算选"不限"时显示');
@@ -168,13 +169,13 @@ describe('按市场筛选', () => {
     expect(marketForCity(null)).toBe('US');
     const us = filterByMarket(shampoos, 'US', false);
     expect(ids(us.shown).every((id) => id.startsWith('SH-US'))).toBe(true);
-    expect(us.shown).toHaveLength(84);
+    expect(us.shown).toHaveLength(96); // 2026-11-23 第二批洗发水 4 款
     expect(us.hiddenCount).toBe(10);
     expect(filterByMarket(shampoos, 'JP', false).shown).toHaveLength(4);
   });
 
   it('打开"显示其他地区版本"后显示全部；没有市场时不筛选', () => {
-    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(94);
+    expect(filterByMarket(shampoos, 'US', true).shown).toHaveLength(106);
     expect(filterByMarket(shampoos, null, false)).toEqual({ shown: shampoos, hiddenCount: 0 });
   });
 
@@ -533,7 +534,7 @@ describe('预算（按品类四分位上限，USD）', () => {
     product(id, ['Aqua'], { category, price, currency });
   // 洗发水 USD 价格 10 / 20 / 30 / 40：33% 分位 = 19.9，67% 分位 = 30.1
   const catalog = [item('A', 10), item('B', 20), item('C', 30), item('D', 40)];
-  const caps = computeBudgetCaps(catalog, real.exchangeRates);
+  const caps = computeBudgetCaps(catalog, real.exchangeRates, {});
   const withCaps = { ...data, budgetCaps: caps };
 
   it('分位数用线性插值', () => {
@@ -545,13 +546,13 @@ describe('预算（按品类四分位上限，USD）', () => {
   it('按品类计算四分位界线，其他币种先换算成 USD', () => {
     expect(caps.shampoo).toEqual({ q1: expect.closeTo(17.5, 10), q2: expect.closeTo(25, 10), q3: expect.closeTo(32.5, 10), sampleSize: 4 });
     // 1583.40 JPY = 10 USD，与 10 USD 同价
-    const mixed = computeBudgetCaps([item('J', 1583.4, 'JPY'), item('B', 20), item('C', 30), item('D', 40)], real.exchangeRates);
+    const mixed = computeBudgetCaps([item('J', 1583.4, 'JPY'), item('B', 20), item('C', 30), item('D', 40)], real.exchangeRates, {});
     expect(mixed.shampoo!.q1).toBeCloseTo(17.5, 6);
     // 不同品类分开算；有价格的产品少于 3 个时不提供档位
-    const other = computeBudgetCaps([...catalog, item('X', 5, 'USD', 'conditioner')], real.exchangeRates);
+    const other = computeBudgetCaps([...catalog, item('X', 5, 'USD', 'conditioner')], real.exchangeRates, {});
     expect(other.conditioner).toBeUndefined();
     // 没有价格或币种不在汇率表的产品不参与计算
-    expect(computeBudgetCaps([...catalog, item('E', 999, 'EUR')], real.exchangeRates).shampoo!.sampleSize).toBe(4);
+    expect(computeBudgetCaps([...catalog, item('E', 999, 'EUR')], real.exchangeRates, {}).shampoo!.sampleSize).toBe(4);
   });
 
   it('价格上限：含等于；每档包含更便宜的产品；超过上限的排除；不限不排除', () => {
@@ -605,6 +606,16 @@ describe('预算（按品类四分位上限，USD）', () => {
     expect(formatMoney(1650, 'JPY')).toBe('¥1,700');
     expect(currencyForCountry('JP')).toBe('JPY');
     expect(currencyForCountry('FR')).toBe('USD');
+  });
+
+  it('最低一档用固定上限（2026-11-24），不随产品库变化；第二档不低于最低档', () => {
+    expect(FIXED_Q1_USD.shampoo).toBe(10.95);
+    const fixed = computeBudgetCaps([item('A', 1), item('B', 2), item('C', 3), item('D', 4)], real.exchangeRates);
+    expect(fixed.shampoo!.q1).toBe(10.95);
+    expect(fixed.shampoo!.q2).toBe(10.95);
+    expect(fixed.shampoo!.q3).toBe(10.95);
+    const realCaps = computeBudgetCaps(real.products, real.exchangeRates);
+    for (const [category, cap] of Object.entries(FIXED_Q1_USD)) expect(realCaps[category]!.q1, category).toBe(cap);
   });
 });
 

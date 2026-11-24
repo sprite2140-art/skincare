@@ -1,0 +1,64 @@
+[
+  {
+    "product_id": "SE-US-007",
+    "retailer_url": "https://www.target.com/p/-/A-91980436",
+    "retailer_inci_original": "Aqua/Water/Eau Propanediol Glycerin Sodium Hyaluronate Hydroxyacetophenone Sodium Citrate Citric Acid Ethylhexylglycerin Tocopherol ",
+    "scored_inci": "Aqua/Water/Eau;Propanediol;Glycerin;Sodium Hyaluronate;Hydroxyacetophenone;Sodium Citrate;Citric Acid;Ethylhexylglycerin;Tocopherol",
+    "comparison": "9ingredient names and order match; separators/case normalized only",
+    "price": "11.99",
+    "size_ml": "75",
+    "checked_on": "2026-11-23"
+  },
+  {
+    "product_id": "SH-US-093",
+    "award_source": "https://www.newbeauty.com/awards/2026/hair/sensitive-scalp-shampoo",
+    "award_name": "Best Fragrance-Free Shampoo",
+    "award_year": "2026",
+    "price": "9.99",
+    "price_source": "https://www.target.com/p/-/A-92267969",
+    "size_ml": "488",
+    "full_inci_source": "https://www.target.com/p/-/A-92267969",
+    "claim_quote": "Calming shampoo for dry, delicate, or easily irritated scalps.",
+    "claim_source": "https://www.target.com/p/-/A-92267969",
+    "checked_on": "2026-11-23"
+  },
+  {
+    "product_id": "SH-US-094",
+    "award_source": "https://www.prnewswire.com/news-releases/newsweek-and-brandspark-international-announce-the-18th-annual-2026-best-new-product-awards-winners-spotlighting-the-new-products-that-stand-out-to-americans-302671698.html",
+    "award_name": "Anti-Dandruff Shampoo & Conditioner",
+    "award_year": "2026",
+    "price": "9.99",
+    "price_source": "https://www.target.com/p/-/A-94745683",
+    "size_ml": "400",
+    "full_inci_source": "https://www.target.com/p/-/A-94745683",
+    "claim_quote": "formulated for sensitive scalps",
+    "claim_source": "https://headandshoulders.com/en-us/products/bare-sensitive-scalp-dandruff-shampoo",
+    "checked_on": "2026-11-23"
+  },
+  {
+    "product_id": "SH-US-095",
+    "award_source": "https://www.newbeauty.com/view/beauty-awards-2021-hair-staples",
+    "award_name": "Best Shampoo for Gray Hair",
+    "award_year": "2021",
+    "price": "9.97",
+    "price_source": "https://www.walmart.com/ip/1965459549",
+    "size_ml": "380",
+    "full_inci_source": "https://hairbiology.us/en-us/hair-products/shampoo/silver-shampoo",
+    "claim_quote": "Purple formula brightens and helps correct yellow tones",
+    "claim_source": "https://www.walmart.com/ip/1965459549",
+    "checked_on": "2026-11-23"
+  },
+  {
+    "product_id": "SH-US-096",
+    "award_source": "https://www.oprahdaily.com/beauty/a65616229/oprah-beauty-awards-2025/",
+    "award_name": "Best Purple Shampoo",
+    "award_year": "2025",
+    "price": "4.84",
+    "price_source": "https://www.walmart.com/ip/12834917482",
+    "size_ml": "828",
+    "full_inci_source": "https://www.suave.com/products/bonding-infusion-purple-shampoo",
+    "claim_quote": "neutralizes brassiness by offsetting yellow tones",
+    "claim_source": "https://www.suave.com/products/bonding-infusion-purple-shampoo",
+    "checked_on": "2026-11-23"
+  }
+]

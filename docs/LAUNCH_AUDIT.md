@@ -36,6 +36,17 @@
 | 购买链接没有实际请求过 | 已由作者在外部环境检查（见第 3 节）。被网站拦截、需要手动抽查的 80 个链接导出在 `docs/launch_blocked_links.csv`。 |
 | 中文界面"US 市场" | 已修，改为"美国市场"。地区名统一由 `region.*` 文案给出（美国、日本、韩国、中国），结果页的市场标签、"显示其他地区版本"的说明和产品卡的地区版本说明都用这一套。 |
 
+## 唯一购买渠道链接抽查（2026-11-22）
+
+用作者的 Chrome 逐个打开 `docs/launch_blocked_links.csv` 中 `no_other_link = yes` 的 34 个链接，结果写在该文件的 `spot_check_result`、`checked_on` 两列：
+
+- 32 个正常：商品页能打开，可以加入购物车或可以配送。
+- SU-US-046（Shiseido Urban Environment Oil-Control Sunscreen SPF 40）：Sephora 原商品页 P474390 已下架，跳转到"Sorry, this product is not available"。Sephora 现行商品页 P482739 标题相同、常规价同为 $52，已替换（purchase_links.csv、products.csv）。
+- MO-US-015（Crème de la Mer）：m.cremedelamer.com 跳转到 www，链接改为 www 地址。
+- SE-US-032 的 Lancôme 官网链接：1.7 fl oz 规格显示缺货，其他规格有货；同一产品的 Sephora 链接正常。
+
+其余 46 个被拦截的链接（对应产品另有其他购买渠道）还没有抽查。
+
 ## 1. 推荐结果：问卷组合遍历
 
 脚本 `scripts/launch-audit-sweep.ts`（`npm run launch-audit-sweep`），结果全文在 `docs/launch_audit_sweep.json`。用的是结果页同样的函数，美国市场：

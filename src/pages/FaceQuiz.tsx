@@ -150,7 +150,7 @@ export default function FaceQuiz() {
       );
       break;
     case 'budget': {
-      // 每档按当前流程里出现的品类分别显示金额（各品类自己价格的 25% / 50% / 75% 分位数）
+      // 每档按当前流程里出现的品类分别显示金额（最低档为各品类固定上限，第二、三档为各品类价格的 50% / 75% 分位数）
       const categories = buildFaceSteps(face, { statuses: baseStatuses(base) }).map((s) => s.category);
       const tierLabel = (q: BudgetChoice) =>
         categories.map((c) => {

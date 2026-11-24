@@ -1,0 +1,38 @@
+[
+  {
+    "name": "products.csv",
+    "rows": 5,
+    "columns": 50,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "purchase_links.csv",
+    "rows": 5,
+    "columns": 6,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "retail_ratings.csv",
+    "rows": 5,
+    "columns": 9,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "admission_type_updates.csv",
+    "rows": 4,
+    "columns": 2,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "coverage_changes.csv",
+    "rows": 3,
+    "columns": 10,
+    "cellRoundTrip": true
+  },
+  {
+    "name": "remaining_gaps.csv",
+    "rows": 7,
+    "columns": 7,
+    "cellRoundTrip": true
+  }
+]

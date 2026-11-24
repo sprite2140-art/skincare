@@ -1,0 +1,4 @@
+﻿category,need,budget_tier,cap_usd,requested_candidates,qualified_candidates,candidate_ids,remaining,previous_qualified,new_candidate_ids
+shampoo,scalp:sensitive,q1,10.99,3,2,SH-US-093;SH-US-094,1,0,SH-US-093;SH-US-094
+shampoo,goal:tone_yellow,q1,10.99,3,3,SH-US-092;SH-US-095;SH-US-096,0,1,SH-US-095;SH-US-096
+shampoo,goal:tone_yellow,q2,20.0,3,4,SH-US-090;SH-US-092;SH-US-095;SH-US-096,0,2,SH-US-095;SH-US-096

@@ -1,0 +1,11 @@
+﻿product_id,status,url,regular_price,currency,checked_on,note
+SH-JP-001,link_price_patch,https://www.matsukiyococokara-online.com/store/catalog/product/view/id/4901301446183,1848,JPY,2026-11-23,400 mL pump; JAN4901301446183; tax included
+SH-JP-002,link_price_patch,https://www.matsukiyococokara-online.com/store/catalog/product/view/id/4582521687732,1540,JPY,2026-11-23,440 mL 2025 updated bottle; JAN4582521687732; tax included
+SH-JP-003,link_price_patch,https://www.matsukiyococokara-online.com/store/catalog/product/view/id/4582521686056,1540,JPY,2026-11-23,460 mL pump; JAN4582521686056; tax included
+SH-JP-004,link_price_patch,https://store.shopping.yahoo.co.jp/ehac/4901301455475.html,1430,JPY,2026-11-23,Welcia storefront; 430 mL pump; JAN4901301455475; shown price excludes shipping/reward subtraction; search cache showed1496 but opened PDP shows1430
+SH-KR-001,link_price_patch,https://www.amoremall.com/kr/ko/product/detail?onlineProdCode=110030000001&onlineProdSn=33872,25000,KRW,2026-11-23,"400 mL single; regular25000, promotional18900 not used"
+SH-KR-003,link_price_patch,https://www.ssg.com/item/itemView.ssg?itemId=1000671665033,16000,KRW,2026-11-23,"180 mL single; water-first current formula, not old32.7% rosemary extract formula or400mL; card14880 not used"
+SH-KR-004,link_price_patch,https://www.kurly.com/goods/5082156,29000,KRW,2026-11-23,"200 mL single; regular29000, promotional27000 not used"
+SH-KR-002,unresolved,,,KRW,2026-11-23,Found Kurly500mL shampoo+conditioner bundle; rejected division of bundle price. Single regular-price in-stock retailer page not verified.
+SH-CN-001,unresolved,,,CNY,2026-11-23,Exact Chinese备案2025000158 product search yielded clearance/mixed packs; no verified single regular-price direct PDP.
+SH-CN-002,unresolved,,,CNY,2026-11-23,"Scored version is 80g; found400g+80g bundles, not a verified80g single regular-price PDP."

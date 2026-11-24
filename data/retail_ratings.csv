@@ -145,8 +145,8 @@ SE-US-001,ulta,4.2,6002,6002,reviews,2026-10-24,https://www.ulta.com/shop/skin-c
 SE-US-002,ulta,4.2,2529,2529,reviews,2026-10-24,https://www.ulta.com/shop/skin-care/treatment-serums/face-serums?sort=best_sellers,品类页商品卡评分；不证明SKU及配方版本匹配；评分可取但广告展示不能作畅销入库依据
 SE-US-003,ulta,4.3,965,965,reviews,2026-10-24,https://www.ulta.com/shop/skin-care/treatment-serums/face-serums?sort=best_sellers,品类页商品卡评分；不证明SKU及配方版本匹配；评分可取但广告展示不能作畅销入库依据
 SE-US-004,ulta,4.2,2529,"2,529",Reviews,2026-10-24,https://www.ulta.com/p/alpha-arbutin-2-hyaluronic-acid-hyperpigmentation-pimprod2007108?sku=2551165,零售商商品页总计数；可能跨规格、版本或含同步评价，不代表独立购买人数；评分未读到则留空
-SE-US-005,ulta,4.2,4556,4556,reviews,2026-10-24,https://www.ulta.com/shop/skin-care/treatment-serums/face-serums?sort=best_sellers,品类页商品卡评分；不证明SKU及配方版本匹配；评分可取但广告展示不能作畅销入库依据
-SE-US-006,ulta,4.5,1111,1111,reviews,2026-10-24,https://www.ulta.com/shop/skin-care/treatment-serums/face-serums?sort=best_sellers,品类页商品卡评分；不证明SKU及配方版本匹配；评分可取但广告展示不能作畅销入库依据
+SE-US-005,ulta,4.2,4565,4565,reviews,2026-11-24,https://www.ulta.com/p/discoloration-correcting-serum-pimprod2023928?sku=2582306,在售 1.0 oz 商品页评分；成分表与现行打分版本一致
+SE-US-006,ulta,4.5,1113,1113,reviews,2026-11-24,https://www.ulta.com/p/niacinamide-serum-pimprod2023927?sku=2582309,在售 1.0 oz 商品页评分；成分表与现行打分版本一致
 SE-US-007,ulta,4.7,2199,2199,reviews,2026-10-24,https://www.ulta.com/shop/skin-care/treatment-serums/face-serums?sort=best_sellers,品类页商品卡评分；不证明SKU及配方版本匹配；评分可取但广告展示不能作畅销入库依据
 SE-US-008,amazon,,10479,"10,479",Reviews,2026-10-24,https://www.amazon.com/dp/B09BST7MMP,零售商商品页总计数；可能跨规格、版本或含同步评价，不代表独立购买人数；评分未读到则留空；计数来自页面aria-label，原文Reviews
 SE-US-009,target,4.46,1565,"1,565",,2026-10-24,https://www.target.com/p/-/A-80184048,零售商商品页总计数；可能跨规格、版本或含同步评价，不代表独立购买人数；评分未读到则留空；标题未读到，count_label留空
@@ -331,3 +331,29 @@ MO-US-043,target,4.33,1755,"1,755",reviews,2026-11-02,https://www.target.com/p/-
 MO-US-044,walmart,4.4,3668,"3,668",ratings,2026-11-02,https://www.walmart.com/ip/10801469,Direct PDP observation. Product-size families and syndicated reviews may be pooled. 
 MO-US-045,target,4.38,1676,"1,676",reviews,2026-11-02,https://www.target.com/p/-/A-10993800,Direct PDP observation. Product-size families and syndicated reviews may be pooled. 
 MO-US-046,walmart,4.6,2087,"2,087",ratings,2026-11-02,https://www.walmart.com/ip/787981814,Direct PDP observation. Product-size families and syndicated reviews may be pooled. 
+SE-US-008,ulta,4.5,619,619,Reviews,2026-11-23,https://www.ulta.com/p/gentle-retinol-cream-pimprod2027916?sku=2589110,Current sold formula; for 005–007 this is not proof of scored-formula match.
+EX-US-027,target,4.49,1022,1022,ratings,2026-11-23,https://www.target.com/p/-/A-15742228,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+EX-US-028,walmart,4.7,4112,4112,ratings,2026-11-23,https://www.walmart.com/ip/14122691,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+EX-US-029,target,4.18,600,600,ratings,2026-11-23,https://www.target.com/p/-/A-13337711,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+EX-US-029,walmart,4.5,1590,"1,590",ratings,2026-11-23,https://www.walmart.com/ip/4157,683 written reviews; admission uses 1590 ratings.
+EX-US-030,target,4.39,1061,1061,ratings,2026-11-23,https://www.target.com/p/-/A-76545835,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+EX-US-031,ulta,4.3,686,686,Reviews,2026-11-23,https://www.ulta.com/p/lactic-acid-10-ha-2-high-strength-exfoliating-serum-uneven-texture-pimprod2007103,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+EX-US-031,sephora,,,1.5K,review link (rounded),2026-11-23,https://www.sephora.com/product/the-ordinary-deciem-lactic-acid-10-ha-2-P427413,Displayed rounded count; exact value and stars not inferred.
+CL-US-047,target,4.11,6888,6888,ratings,2026-11-23,https://www.target.com/p/-/A-12921121,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+CL-US-048,target,4.03,4276,4276,ratings,2026-11-23,https://www.target.com/p/-/A-75561297,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+SH-US-085,target,4.64,2830,2830,ratings,2026-11-23,https://www.target.com/p/-/A-89170346,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+SH-US-086,target,4.21,1444,1444,ratings,2026-11-23,https://www.target.com/p/-/A-94775881,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+SH-US-087,target,4.7,8154,8154,ratings,2026-11-23,https://www.target.com/p/-/A-94410542,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+SH-US-088,target,4.45,1172,1172,ratings,2026-11-23,https://www.target.com/p/-/A-83206630,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+SH-US-089,ulta,4.3,2335,2335,Reviews,2026-11-23,https://www.ulta.com/p/everpure-volume-shampoo-xlsImpprod1170140?sku=2502781,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+CO-US-058,ulta,4.3,1773,1773,Reviews,2026-11-23,https://www.ulta.com/p/everpure-volume-conditioner-xlsImpprod1170136?sku=2502786,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+CO-US-059,target,4.72,10759,10759,ratings,2026-11-23,https://www.target.com/p/-/A-75570645,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+SH-US-090,target,3.93,1073,1073,ratings,2026-11-23,https://www.target.com/p/-/A-52567229,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+SH-US-091,walmart,4.3,,16.1K,ratings,2026-11-23,https://www.walmart.com/ip/247937500,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+CO-US-060,walmart,4.3,6660,6660,ratings,2026-11-23,https://www.walmart.com/ip/139154944,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+SH-US-092,walmart,4.6,2412,2412,ratings,2026-11-23,https://www.walmart.com/ip/14099967804,平台商品家族评价可能合并规格；ratings 不等于文字评论；缩写数字不反推精确值。
+SE-US-007,target,4.81,1471,1471,ratings,2026-11-23,https://www.target.com/p/-/A-91980436,Exact count from current retailer embedded statistics; may aggregate product-size family. Formula matched75mL SKU.
+SH-US-093,target,4.38,96,96,ratings,2026-11-23,https://www.target.com/p/-/A-92267969,"Below1000; admission is beauty award, NOT review count. Family/variant aggregation may apply."
+SH-US-094,target,4.48,205,205,ratings,2026-11-23,https://www.target.com/p/-/A-94745683,"Below1000; admission is beauty award, NOT review count. Family/variant aggregation may apply."
+SH-US-095,walmart,4.7,512,512,ratings,2026-11-23,https://www.walmart.com/ip/1965459549,"Below1000; admission is beauty award, NOT review count. Family/variant aggregation may apply."
+SH-US-096,walmart,4.5,751,751,ratings,2026-11-23,https://www.walmart.com/ip/12834917482,"Below1000; admission is beauty award, NOT review count. Family/variant aggregation may apply."
