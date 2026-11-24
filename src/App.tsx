@@ -75,7 +75,8 @@ const PAGE_TITLES: Record<string, Key> = {
   '/profile': 'pageTitle.profile',
   '/about': 'pageTitle.about',
   '/data': 'pageTitle.data',
-  '/qa': 'pageTitle.qa',
+  // 设计自查页只在开发环境存在；生产环境 /qa 是 404，标题也按 404 显示
+  ...(DesignQA ? { '/qa': 'pageTitle.qa' as Key } : {}),
 };
 
 /** 浏览器标题随页面变化；页面语言属性随界面语言变化（读屏软件按它选择发音） */
