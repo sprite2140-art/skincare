@@ -19,6 +19,11 @@
 
 **下一步**：测试模式已于 10/29 关闭；SU-US-048 已替换（10/29）；10/30–31 按试用反馈修改。
 
+### 2026-11-24 按作者决定：Good Molecules 精华整行替换、最低预算档改固定上限
+- SE-US-005、006 整行换成 Ulta 在售 1.0 oz 版本（SKU 2582306、2582309）：成分表、Cetyl Tranexamate Mesylate 浓度（3% → 2%）、来源和购买链接都改为 Ulta 商品页，评分改为商品页数字（4.2 / 4,565 条、4.5 / 1,113 条，按评价数入库）。价格、容量用浏览器核对过（$12 / $6，1.0 oz）。品牌 v1 页面仍是旧版，version_mismatch 保留。现在 4 款 Good Molecules 精华都可推荐，只剩韩国、中国版本洗发水 3 款没有链接。
+- 只含水杨酸、品牌没写控油的去角质不算面部"出油"：与现有成分库一致（水杨酸 targets 为 dandruff / scalp_oil / acne），不改代码。
+- 最低预算档改为每个品类固定上限（FIXED_Q1_USD，取当时 25% 分位数取整到分），以后补低价产品不会再把上限往下压；第二、三档仍按分位数，并保证不低于最低档。缺口表数值不变：洗护 10 行、护肤 4 行。
+
 ### 2026-11-23 导入 ChatGPT 第二批数据（SE-US-007 Target 链接、奖项入库洗发水 4 款）
 - 原始交付在 docs/data_batches/chatgpt_2026-11-23/batch2/。按列名合并；admission_type_updates.csv 一并应用，SH-US-093—096 的 inclusion_basis_type = beauty_award。
 - SE-US-007：Target 75mL（SKU 91980436）在售成分表 9 项与打分成分表一致（含 Tocopherol），补 Target 链接和评分（4.81，1,471 条）；参考价和容量同步改为 $11.99 / 75mL（原 $6 / 30mL），打分成分表不变；品牌官网仍是 version_mismatch。SE-US-005、006 仍找不到一致版本，继续不推荐。

@@ -172,7 +172,7 @@ data/ingredient_explanations.csv 中起草、尚未核对的通俗解释共 141 
 | 2026-10-17 | 154 | Sodium Benzoate | 苯甲酸钠，常见的防腐剂，防止产品开封后长细菌和霉菌。 | Sodium benzoate is a common preservative that keeps bacteria and mould from growing after opening. |   |
 | 2026-10-17 | 148 | Sodium Hydroxide | 氢氧化钠，少量用来调节酸碱度，在配方中会被中和，不是以强碱形式留在产品里。 | Sodium hydroxide is used in small amounts to adjust pH; it is neutralised in the formula rather than left as a strong alkali. |   |
 | 2026-10-17 | 137 | Sodium Chloride | 氯化钠，也就是食盐，在洗发水里主要用来让质地变稠。 | Sodium chloride is table salt; in shampoo it is mainly used to thicken the formula. |   |
-| 2026-10-17 | 135 | Tocopherol | 生育酚，即维生素 E，主要用来防止配方中的油脂氧化变质。 | Tocopherol is vitamin E, mainly used to keep oils in the formula from going rancid. |   |
+| 2026-10-17 | 133 | Tocopherol | 生育酚，即维生素 E，主要用来防止配方中的油脂氧化变质。 | Tocopherol is vitamin E, mainly used to keep oils in the formula from going rancid. |   |
 | 2026-10-17 | 131 | Ethylhexylglycerin | 乙基己基甘油，常和防腐剂一起用，帮助防腐，也有轻微保湿作用。 | Ethylhexylglycerin is used with preservatives to support them and adds mild conditioning. |   |
 | 2026-10-17 | 117 | Caprylyl Glycol | 辛甘醇，保湿调理成分，也常用来辅助防腐。 | Caprylyl glycol conditions and moisturises, and is often used to support preservatives. |   |
 | 2026-10-17 | 103 | Butylene Glycol | 丁二醇，保湿和溶剂成分，常用来溶解植物提取物。 | Butylene glycol is a humectant and solvent often used to carry plant extracts. |   |

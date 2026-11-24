@@ -1,6 +1,8 @@
-// 预算：每个品类按产品库价格（统一换算成 USD）的四分位数给出三个价格上限，界线由数据自动计算。
+// 预算：每个品类给出三个价格上限（统一换算成 USD）。
 //
-// - 三个上限依次为 25% / 50% / 75% 分位数；选项为"$X 以内 / $Y 以内 / $Z 以内 / 不限"，每档包含更便宜的产品，
+// - 最低一档用固定上限 FIXED_Q1_USD（2026-11-24 作者决定：按当时的 25% 分位数取整到分后固定，
+//   不再随产品库变化，否则每补一批低价产品上限就往下掉）；没有列出的品类仍用 25% 分位数。
+// - 第二、三档依次为 50% / 75% 分位数（不低于最低档）；选项为"$X 以内 / $Y 以内 / $Z 以内 / 不限"，每档包含更便宜的产品，
 //   等于上限的产品保留。
 // - 分位数用线性插值（与 Excel PERCENTILE.INC、numpy 默认方法相同）。
 // - 只统计有价格且币种在汇率表中的产品；不足 MIN_PRICED_PRODUCTS 个时该品类不提供价格上限选项。
@@ -30,6 +32,18 @@ export type BudgetCapsByCategory = Partial<Record<string, BudgetCaps>>;
 
 export const MIN_PRICED_PRODUCTS = 3;
 
+/** 最低一档的固定上限（USD，含等于）；2026-11-24 按当时数据的 25% 分位数取整到分 */
+export const FIXED_Q1_USD: Readonly<Record<string, number>> = {
+  shampoo: 10.95,
+  conditioner: 10.99,
+  cleanser: 12.57,
+  sunscreen: 17.74,
+  moisturizer: 13.13,
+  serum: 12.8,
+  exfoliator: 7.65,
+  spot_treatment: 10.2,
+};
+
 /** 线性插值分位数；sorted 须升序且非空，p 取 0–1 */
 export function percentile(sorted: number[], p: number): number {
   const pos = (sorted.length - 1) * p;
@@ -38,7 +52,8 @@ export function percentile(sorted: number[], p: number): number {
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
 }
 
-export function computeBudgetCaps(products: Product[], rates: ExchangeRate[]): BudgetCapsByCategory {
+/** fixedQ1 默认用 FIXED_Q1_USD；测试纯分位数时传 {} */
+export function computeBudgetCaps(products: Product[], rates: ExchangeRate[], fixedQ1: Readonly<Record<string, number>> = FIXED_Q1_USD): BudgetCapsByCategory {
   const byCategory = new Map<string, number[]>();
   for (const p of products) {
     const info = priceInfo(p, rates);
@@ -51,7 +66,9 @@ export function computeBudgetCaps(products: Product[], rates: ExchangeRate[]): B
   for (const [category, prices] of byCategory) {
     if (prices.length < MIN_PRICED_PRODUCTS) continue;
     const sorted = [...prices].sort((a, b) => a - b);
-    caps[category] = { q1: percentile(sorted, 0.25), q2: percentile(sorted, 0.5), q3: percentile(sorted, 0.75), sampleSize: sorted.length };
+    const q1 = fixedQ1[category] ?? percentile(sorted, 0.25);
+    const q2 = Math.max(q1, percentile(sorted, 0.5));
+    caps[category] = { q1, q2, q3: Math.max(q2, percentile(sorted, 0.75)), sampleSize: sorted.length };
   }
   return caps;
 }
